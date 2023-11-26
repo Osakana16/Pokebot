@@ -101,4 +101,8 @@
       <Filter>resource</Filter>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="LICENSE" />
+    <None Include="README.md" />
+  </ItemGroup>
 </Project>

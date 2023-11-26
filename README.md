@@ -1,4 +1,4 @@
-# Pokebot
+﻿# Pokebot
 This is a bot plugin for Counter-Strike(1.6).
 
 Work in progress.
@@ -15,3 +15,7 @@ Combat process is incomplete.
 ## Goals
 - Make bots fight.
 - Make bots team up.
+
+## Based
+- [HPBBot](http://hpb-bot.bots-united.com/)
+- [YaPBot](https://github.com/yapb/yapb)(Copyright © YaPB Project Developers <yapb@jeefo.net>)
