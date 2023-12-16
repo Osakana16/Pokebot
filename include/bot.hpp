@@ -252,7 +252,7 @@ namespace pokebot {
 
 			friend class pokebot::message::MessageDispatcher;
 			std::unordered_map<std::string, Bot> bots{};
-			std::vector<Squad> squads{};
+			std::vector<Squad> squads[2]{};
 			Bot* const Get(const std::string&) noexcept;
 			RadioMessage radio_message{};
 		public:
@@ -282,7 +282,7 @@ namespace pokebot {
 			// Join a bot to a squad with matching policies. 
 			int JoinSquad(const std::string&, Policy Will_Policy);
 			void LeftSquad(const std::string&);
-			std::shared_ptr<game::Client> GetSquadLeader(const int Squad_Index);
+			std::shared_ptr<game::Client> GetSquadLeader(const common::Team, const int Squad_Index);
 
 			bool IsBotLeader(const std::string&, const int) const noexcept;
 

@@ -418,8 +418,10 @@ namespace pokebot {
 		}
 
 		void Manager::OnNewRound() {
-			squads.clear();
-			squads.emplace_back(Squad(STRING(game::game.GetHost()->v.netname), 3, Policy::Player));
+			for (auto& squad : squads) {
+				squad.clear();
+				squad.emplace_back(Squad(STRING(game::game.GetHost()->v.netname), 3, Policy::Player));
+			}
 
 			for (auto& bot : bots) {
 				bot.second.OnNewRound();
@@ -517,57 +519,85 @@ namespace pokebot {
 		}
 
 		int Manager::SetupLonelySquad(const std::string& Candidate_Name) {
-			squads.emplace_back(Squad(Candidate_Name, 1, Policy::Elimination));
-			return squads.size() - 1;
+			int team = (int)bots.at(Candidate_Name).JoinedTeam() - 1;
+			assert(team == 0 || team == 1);
+
+			auto& squad = squads[team];
+			squad.emplace_back(Squad(Candidate_Name, 1, Policy::Elimination));
+			return squad.size() - 1;
 		}
 
 		int Manager::SetupVipSquad(const std::string& Candidate_Name) {
-			squads.emplace_back(Squad(Candidate_Name, 3, Policy::Elimination));
-			return squads.size() - 1;
+			int team = (int)bots.at(Candidate_Name).JoinedTeam() - 1;
+			assert(team == 0 || team == 1);
+
+			auto& squad = squads[team];
+			squad.emplace_back(Squad(Candidate_Name, 3, Policy::Elimination));
+			return squad.size() - 1;
 		}
 
 		int Manager::SetupHelperSquad(const std::string& Candidate_Name) {
-			squads.emplace_back(Squad(Candidate_Name, 3, Policy::Elimination));
-			return squads.size() - 1;
+			int team = (int)bots.at(Candidate_Name).JoinedTeam() - 1;
+			assert(team == 0 || team == 1);
+
+			auto& squad = squads[team];
+			squad.emplace_back(Squad(Candidate_Name, 3, Policy::Elimination));
+			return squad.size() - 1;
 		}
 
 		int Manager::SetupDefenseSquad(const std::string& Candidate_Name) {
-			squads.emplace_back(Squad(Candidate_Name, 3, Policy::Defense));
-			return squads.size() - 1;
+			int team = (int)bots.at(Candidate_Name).JoinedTeam() - 1;
+			assert(team == 0 || team == 1);
+
+			auto& squad = squads[team];
+			squad.emplace_back(Squad(Candidate_Name, 3, Policy::Defense));
+			return squad.size() - 1;
 		}
 
 		int Manager::SetupOffenseSquad(const std::string& Candidate_Name) {
-			squads.emplace_back(Squad(Candidate_Name, 3, Policy::Offense));
-			return squads.size() - 1;
+			int team = (int)bots.at(Candidate_Name).JoinedTeam() - 1;
+			assert(team == 0 || team == 1);
+
+			auto& squad = squads[team];
+			squad.emplace_back(Squad(Candidate_Name, 3, Policy::Offense));
+			return squad.size() - 1;
 		}
 
 		int Manager::SetupPlayerSquad() {
-			squads.emplace_back(Squad(STRING(game::game.GetHost()->v.netname), 5, Policy::Player));
-			return squads.size() - 1;
+			int team = (int)common::GetTeamFromModel(game::game.GetHost()) - 1;
+			assert(team == 0 || team == 1);
+
+			auto& squad = squads[team];
+			squad.emplace_back(Squad(STRING(game::game.GetHost()->v.netname), 5, Policy::Player));
+			return squad.size() - 1;
 		}
 
 		int Manager::JoinSquad(const std::string& Name, Policy Will_Policy) {
-			for (int i = 0; i < squads.size(); i++) {
-				if (squads[i].GetPolicy() == Will_Policy && squads[i].Join(Name)) {
+			for (auto& squad : squads) {
+				for (int i = 0; i < squad.size(); i++) {
+				if (squad[i].GetPolicy() == Will_Policy && squad[i].Join(Name)) {
 					return i;
 				}
+			}
 			}
 			return -1;
 		}
 
-		std::shared_ptr<game::Client> Manager::GetSquadLeader(const int Squad_Index) {
-			return game::game.clients.Get(squads[Squad_Index].LeaderName());
+		std::shared_ptr<game::Client> Manager::GetSquadLeader(const common::Team team, const int Squad_Index) {
+			return game::game.clients.Get(squads[(int)team - 1][Squad_Index].LeaderName());
 		}
 
 		void Manager::LeftSquad(const std::string& Name) {
-			for (int i = 0; i < squads.size(); i++) {
-				if (squads[i].Left(Name))
+			auto& squad = squads[(int)bots.at(Name).JoinedTeam() - 1];
+			for (int i = 0; i < squad.size(); i++) {
+				if (squad[i].Left(Name))
 					break;
 			}
 		}
 
 		bool Manager::IsBotLeader(const std::string& Name, const int Index) const noexcept {
-			return squads[Index].LeaderName() == Name;
+			auto& squad = squads[(int)bots.at(Name).JoinedTeam() - 1];
+			return squad[Index].LeaderName() == Name;
 		}
 
 		float Memory::Evaluate(const int Index) {

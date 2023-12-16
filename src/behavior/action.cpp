@@ -330,7 +330,7 @@ namespace pokebot::bot::behavior {
 
 		follow_squad_leader->Define
 		([](Bot* const self) -> Status {
-			auto leader = manager.GetSquadLeader(self->squad);
+			auto leader = manager.GetSquadLeader(self->JoinedTeam(), self->squad);
 			self->goal_queue.AddGoalQueue(node::world.GetNearest(leader->origin), 5);
 			return Status::Executed;
 		 });
