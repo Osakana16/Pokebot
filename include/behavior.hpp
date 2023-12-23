@@ -2,6 +2,8 @@
 #define BEHAVIOR_PRIVATE namespace
 #define BEHAVIOR_IF(A) [](const Bot* const Self) noexcept { return A; }
 
+#define RETURN_BEHAVIOR_TRUE_OR_FALSE(B,PROCESS) if constexpr (B) return PROCESS; else return !PROCESS
+
 #define BEHAVIOR_CREATE(TYPE,NAME) std::shared_ptr<TYPE> NAME = TYPE::Create(#NAME)
 
 namespace pokebot::bot {
@@ -73,7 +75,7 @@ namespace pokebot::bot {
 		public:
 			using BehaviorNode::BehaviorNode;
 
-			Status Evalute(Bot* const self) override{
+			Status Evalute(Bot* const self) override {
 				for (auto child : children) {
 					switch (child->Evalute(self)) {
 						case Status::Not_Ready:
@@ -133,7 +135,7 @@ namespace pokebot::bot {
 			std::shared_ptr<BehaviorNode> child{};
 			Activator CanActive;
 		public:
-			Status Evalute(Bot* const self) override{
+			Status Evalute(Bot* const self) override {
 				if (CanActive(self)) {
 					return child->Evalute(self);
 				}
@@ -204,23 +206,24 @@ namespace pokebot::bot {
 
 		template<bool b>
 		bool HasEnemy(const Bot* const Self) {
-			if constexpr (b)
-				return Self->IsFighting();
-			else
-				return !Self->IsFighting();
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->IsFighting());
 		}
 
 		template<bool b, node::GoalKind kind>
 		bool IsOnGoal(const Bot* const Self) {
-			return false;
+			bool is_on_a_goal{};
+			auto goals = node::world.GetGoal(kind);
+			for (auto goal = goals.first; goal != goals.second; goal++) {
+				if ((is_on_a_goal = node::world.IsOnNode(Self->Origin(), goal->second))) {
+					break;
+				}
+			}
+			return is_on_a_goal;
 		}
 
 		template<bool b>
 		bool IsBombPlanted(const Bot* const Self) {
-			if constexpr (b)
-				return manager.Is_Bomb_Planted;
-			else
-				return !manager.Is_Bomb_Planted;
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, manager.Is_Bomb_Planted);
 		}
 
 		template<bool b>
@@ -235,46 +238,42 @@ namespace pokebot::bot {
 
 		template<bool b>
 		bool HasBomb(const Bot* const Self) noexcept {
-			if constexpr (b) {
-				return Self->HasWeapon(game::Weapon::C4);
-			} else {
-				return !Self->HasWeapon(game::Weapon::C4);
-			}
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->HasWeapon(game::Weapon::C4));
 		}
 
 		template<bool b>
 		bool IsPlayerMate(const Bot* const Self) noexcept {
-			return Self->JoinedTeam() == common::GetTeamFromModel(game::game.GetHost());
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (Self->JoinedTeam() == common::GetTeamFromModel(game::game.GetHost())));
 		}
 
 		template<bool b>
-		bool IsJumping(const Bot* const) noexcept {
+		bool IsJumping(const Bot* const Self) noexcept {
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, !Self->IsOnFloor());
+		}
+
+		template<bool b>
+		bool IsDucking(const Bot* const Self) noexcept {
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->IsDucking());
+		}
+
+		template<bool b>
+		bool IsSwimming(const Bot* const Self) noexcept {
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->IsSwimming());
+		}
+
+		template<bool b>
+		bool IsBlind(const Bot* const Self) noexcept {
 			return false;
 		}
 
 		template<bool b>
-		bool IsDucking(const Bot* const) noexcept {
-			return false;
+		bool IsUsing(const Bot* const Self) noexcept {
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->IsPressingKey(ActionKey::Use));
 		}
 
 		template<bool b>
-		bool IsSwimming(const Bot* const) noexcept {
-			return false;
-		}
-
-		template<bool b>
-		bool IsBlind(const Bot* const) noexcept {
-			return false;
-		}
-
-		template<bool b>
-		bool IsUsing(const Bot* const) noexcept {
-			return false;
-		}
-
-		template<bool b>
-		bool IsDriving(const Bot* const) noexcept {
-			return false;
+		bool IsDriving(const Bot* const Self) noexcept {
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->IsDriving());
 		}
 
 		template<bool b>

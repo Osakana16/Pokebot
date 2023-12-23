@@ -207,6 +207,11 @@ namespace pokebot {
 			bool HasGoalToHead() const noexcept;
 			bool IsInBuyzone() const noexcept { return client->IsShowingIcon(game::StatusIcon::Buy_Zone); }
 
+			bool IsDucking() const noexcept { return (client->IsDucking()); }
+			bool IsDriving() const noexcept { return (client->IsOnTrain()); }
+			bool IsSwimming() const noexcept { return (client->IsInWater()); }
+			bool IsOnFloor() const noexcept { return (client->IsOnFloor()); }
+
 			auto JoinedTeam() const noexcept { return team; }
 		};
 

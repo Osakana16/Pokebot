@@ -144,6 +144,11 @@ namespace pokebot {
 			bool IsValid() const noexcept { return IsValid(client); }
 			bool IsDead() const noexcept { return IsDead(client); }
 
+			bool IsDucking() const noexcept { return (client->v.flags & FL_DUCKING); }
+			bool IsInWater() const noexcept { return (client->v.flags & FL_INWATER); }
+			bool IsOnFloor() const noexcept { return (client->v.flags & (FL_ONGROUND | FL_PARTIALGROUND)) != 0; }
+			bool IsOnTrain() const noexcept { return (client->v.flags & FL_ONTRAIN); }
+
 			int Index() const noexcept { return Index(client); }
 
 			auto Button() const noexcept { return client->v.button; }
