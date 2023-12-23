@@ -57,7 +57,7 @@ namespace pokebot::bot::behavior {
 
 	template<node::GoalKind kind>
 	bool CanGo(const Bot* const Self) noexcept {
-		return !Self->HasGoalToHead() && IsOnGoal<true, kind>(Self);
+		return !IsOnGoal<true, kind>(Self);
 	}
 
 	template<bool b>
@@ -251,8 +251,8 @@ namespace pokebot::bot::behavior {
 
 		ct_ordinary->Define
 		({
-			Condition::If(CanGo<node::GoalKind::Terrorist_Spawn>, set_goal_ctspawn),
-			Condition::If(CanGo<node::GoalKind::CT_Spawn>, set_goal_tspawn),
+			Condition::If(CanGo<node::GoalKind::Terrorist_Spawn>, set_goal_tspawn),
+			Condition::If(CanGo<node::GoalKind::CT_Spawn>, set_goal_ctspawn),
 			head_and_discard_goal
 		});
 	}
