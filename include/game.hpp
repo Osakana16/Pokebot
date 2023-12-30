@@ -59,6 +59,51 @@ namespace pokebot {
 			Defuser = 33
 		};
 
+		constexpr int Primary_Weapon_Bit = (common::ToBit<int>(Weapon::M3) | common::ToBit<int>(Weapon::XM1014) | common::ToBit<int>(Weapon::MAC10) | common::ToBit<int>(Weapon::TMP) | common::ToBit<int>(Weapon::MP5) | common::ToBit<int>(Weapon::UMP45) | common::ToBit<int>(Weapon::P90) | common::ToBit<int>(Weapon::Famas) | common::ToBit<int>(Weapon::Galil) | common::ToBit<int>(Weapon::AK47) | common::ToBit<int>(Weapon::M4A1) | common::ToBit<int>(Weapon::AUG) | common::ToBit<int>(Weapon::SG552) | common::ToBit<int>(Weapon::SG550) | common::ToBit<int>(Weapon::G3SG1) | common::ToBit<int>(Weapon::Scout) | common::ToBit<int>(Weapon::AWP) | common::ToBit<int>(Weapon::M249));
+		constexpr int Secondary_Weapon_Bit = (common::ToBit<int>(Weapon::P228) | common::ToBit<int>(Weapon::USP) | common::ToBit<int>(Weapon::Deagle) | common::ToBit<int>(Weapon::FiveSeven) | common::ToBit<int>(Weapon::Glock18) | common::ToBit<int>(Weapon::Elite));
+
+		enum class WeaponType {
+			Secondary,
+			Primary,
+			Melee,
+			Grenade,
+			Special
+		};
+
+		constexpr WeaponType Weapon_Type[31]{
+			WeaponType::Special,
+			WeaponType::Secondary,//1
+			WeaponType::Secondary,//2
+			WeaponType::Primary,//3
+			WeaponType::Grenade,//4
+			WeaponType::Primary,//5
+			WeaponType::Special,//6
+			WeaponType::Primary,//7
+			WeaponType::Primary,//8
+			WeaponType::Grenade,//9
+			WeaponType::Secondary,//10
+			WeaponType::Secondary,//11
+			WeaponType::Primary,//12
+			WeaponType::Primary,//13
+			WeaponType::Primary,//14
+			WeaponType::Primary,//15
+			WeaponType::Secondary,//16
+			WeaponType::Secondary,//17
+			WeaponType::Primary,//18
+			WeaponType::Primary,//19
+			WeaponType::Primary,//20
+			WeaponType::Primary,//21
+			WeaponType::Primary,//22
+			WeaponType::Primary,//23
+			WeaponType::Primary,//24
+			WeaponType::Grenade,//25
+			WeaponType::Secondary,//26
+			WeaponType::Primary,//27
+			WeaponType::Primary,//28
+			WeaponType::Melee,//29
+			WeaponType::Primary//30
+		};
+
 		constexpr const char* const Weapon_CVT[30]{
 			"weapon_p228",
 			"weapon_shield",
@@ -176,9 +221,9 @@ namespace pokebot {
 
 		// The status in the game
 		class ClientStatus {
-			std::shared_ptr<Client> client{};
+			const std::shared_ptr<Client> client{};
 		public:
-			ClientStatus(std::shared_ptr<Client>&);
+			ClientStatus(const std::shared_ptr<Client>&);
 
 			common::Team GetTeam() const noexcept;
 			bool CanSeeFriend() const noexcept;

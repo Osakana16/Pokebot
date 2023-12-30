@@ -210,7 +210,7 @@ namespace pokebot {
 			return ClientStatus{ Get(client_name.data()) };
 		}
 
-		ClientStatus::ClientStatus(std::shared_ptr<Client>& target) : client(target) {}
+		ClientStatus::ClientStatus(const std::shared_ptr<Client>& target) : client(target) {}
 
 		common::Team ClientStatus::GetTeam() const noexcept {
 			return client->GetTeam();

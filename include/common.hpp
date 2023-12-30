@@ -72,7 +72,7 @@ namespace pokebot{
 		};
 
 		template<typename ReturnType, typename EnumType>
-		inline ReturnType ToBit(const EnumType E) noexcept {
+		inline constexpr ReturnType ToBit(const EnumType E) noexcept {
 			return 1 << static_cast<ReturnType>(E);
 		}
 
