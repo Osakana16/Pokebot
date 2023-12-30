@@ -1,6 +1,9 @@
 #pragma once
 #define BEHAVIOR_PRIVATE namespace
 #define BEHAVIOR_IF(A) [](const Bot* const Self) noexcept { return A; }
+#define BEHAVIOR_IFELSE(AIF,A_PROCESS,BIF,B_PROCESS) Condition::If(AIF, A_PROCESS), Condition::If(BIF, B_PROCESS)
+#define BEHAVIOR_IFELSE_TEMPLATE(IF,A_PROCESS,B_PROCESS) Condition::If(IF<true>, A_PROCESS), Condition::If(IF<false>, B_PROCESS)
+
 
 #define RETURN_BEHAVIOR_TRUE_OR_FALSE(B,PROCESS) if constexpr (B) return PROCESS; else return !PROCESS
 
@@ -18,7 +21,7 @@ namespace pokebot::bot {
 		void DefineBehavior();
 		void DefineAction();
 		void DefineObjective();
-
+		void DefineCombat() ;
 
 		using BehaviorFunc = std::function<Status(Bot* const)>;
 		using Activator = std::function<bool(const Bot* const)>;
@@ -352,6 +355,7 @@ namespace pokebot::bot {
 		}
 
 
+
 		extern std::shared_ptr<Action> change_primary;
 		extern std::shared_ptr<Action> change_secondary;
 		extern std::shared_ptr<Action> change_melee;
@@ -396,6 +400,10 @@ namespace pokebot::bot {
 		extern std::shared_ptr<Action> left_squad;
 
 		extern std::shared_ptr<After<Status::Enough>> head_and_discard_goal;
+
+		namespace fight {
+			extern std::shared_ptr<Priority> while_spotting_enemy;
+		}
 
 		namespace demolition {
 			extern std::shared_ptr<Priority> objective;

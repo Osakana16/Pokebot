@@ -1,8 +1,5 @@
 #include "behavior.hpp"
 
-#define BEHAVIOR_IFELSE(AIF,A_PROCESS,BIF,B_PROCESS) Condition::If(AIF, A_PROCESS), Condition::If(BIF, B_PROCESS)
-#define BEHAVIOR_IFELSE_TEMPLATE(IF,A_PROCESS,B_PROCESS) Condition::If(IF<true>, A_PROCESS), Condition::If(IF<false>, B_PROCESS)
-
 namespace pokebot::bot::behavior {
 	// - DEmolition Behaviors - 
 	namespace demolition {

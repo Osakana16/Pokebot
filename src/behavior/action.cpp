@@ -79,15 +79,23 @@ namespace pokebot::bot::behavior {
 	void DefineAction() {
 		change_primary->Define(
 			[](Bot* const self) -> Status {
-				game::game.IssueCommand(*game::game.clients.Get(self->Name().data()), "slot1");
-				return Status::Executed;
+				Status result = Status::Not_Ready;
+				if (self->HasPrimaryWeapon()) {
+					game::game.IssueCommand(*game::game.clients.Get(self->Name().data()), "slot1");
+					result = Status::Executed;
+				}
+				return result;
 			}
 		);
 
 		change_secondary->Define(
 			[](Bot* const self) -> Status {
-				game::game.IssueCommand(*game::game.clients.Get(self->Name().data()), "slot2");
-				return Status::Executed;
+				Status result = Status::Not_Ready;
+				if (self->HasPrimaryWeapon()) {
+					game::game.IssueCommand(*game::game.clients.Get(self->Name().data()), "slot2");
+					result = Status::Executed;
+				}
+				return result;
 			}
 		);
 
@@ -140,6 +148,7 @@ namespace pokebot::bot::behavior {
 
 		look_enemy->Define(
 			[](Bot* const self) -> Status {
+				self->LookAtClosestEnemy();
 				return Status::Executed;
 			}
 		);
