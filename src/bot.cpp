@@ -104,6 +104,8 @@ namespace pokebot {
 			look_direction.Clear();
 			ideal_direction.Clear();
 
+			freeze_time.SetTime(g_engfuncs.pfnCVarGetFloat("mp_freezetime") + 1.0f);
+
 			start_action = Message::Buy;
 			buy_wait_timer.SetTime(1.0f);
 
@@ -111,9 +113,10 @@ namespace pokebot {
 		}
 
 		void Bot::NormalUpdate() noexcept {
-			if (client->IsDead())
+			if (client->IsDead()) {
 				return;
-
+			}
+				
 			if (manager.Is_Bomb_Planted) {
 				need_to_update = true;
 			}
@@ -131,10 +134,16 @@ namespace pokebot {
 				}
 				need_to_update = false;
 			}
-
-			BehaviorUpdate();
-			CombatUpdate();
-
+			
+			if (!freeze_time.IsRunning()) {
+				// Do not do anything when freezing.
+				// Due to game engine specifications or bugs, 
+				// if we execute a heavy process immediately after the start of a round, 
+				// the game will freeze.
+				
+				BehaviorUpdate();
+			} 
+			
 			if (next_dest_node != node::Invalid_NodeID) {
 				if (move_speed > 0.0) {
 					PressKey(ActionKey::Run);
@@ -152,10 +161,20 @@ namespace pokebot {
 			return result;
 		}
 
-		void Bot::CombatUpdate() noexcept {
-			constexpr int MATE = 0, ENEMY = 1;
+		void Bot::CheckAround() {
+			if (!look_direction.view.has_value()) {
+				look_direction.view = node::world.GetOrigin(next_dest_node);
+			}
+
+			if (!look_direction.movement.has_value()) {
+				look_direction.movement = node::world.GetOrigin(next_dest_node);
+			}
+
+			TurnViewAngle();
+			TurnMovementAngle();
+			look_direction.Clear();
 			auto status = game::game.clients.GetClientStatus(client->Name());
-			std::vector<const edict_t*> entities[2]{};
+			entities->clear();
 			for (auto& target : status.GetEntitiesInView()) {
 				switch (common::GetTeamFromModel(target)) {
 					case common::Team::T:
@@ -172,26 +191,8 @@ namespace pokebot {
 			}
 
 			if (!entities[ENEMY].empty()) {
-				const auto Enemy_Distances = std::move(SortedDistances(Origin(), entities[ENEMY]));
-				const auto& Nearest_Enemy = entities[ENEMY][Enemy_Distances.begin()->second];
-
-				look_direction.view = Nearest_Enemy->v.origin;
+				danger_time.SetTime(5.0);
 			}
-			
-		}
-
-		void Bot::CheckAround() {
-			if (!look_direction.view.has_value()) {
-				look_direction.view = node::world.GetOrigin(next_dest_node);
-			}
-
-			if (!look_direction.movement.has_value()) {
-				look_direction.movement = node::world.GetOrigin(next_dest_node);
-			}
-
-			TurnViewAngle();
-			TurnMovementAngle();
-			look_direction.Clear();
 #if 0
 			for (const auto& other : game::game.clients.GetAll()) {
 				if (other.second == client)
@@ -274,12 +275,19 @@ namespace pokebot {
 			}
 		}
 
+		void Bot::LookAtClosestEnemy() {
+			const auto Enemy_Distances = std::move(SortedDistances(Origin(), entities[ENEMY]));
+			const auto& Nearest_Enemy = entities[ENEMY][Enemy_Distances.begin()->second];
+			look_direction.view = Nearest_Enemy->v.origin;
+		}
+
 		bool Bot::IsLookingAt(const Vector& Dest) const noexcept {
 			return (common::Distance2D(Dest, client->v_angle) <= 1.0f);
 		}
 
-		bool Bot::IsFighting() const noexcept {
-			return false;
+		bool Bot::CanSeeEnemy() const noexcept {
+			const game::ClientStatus status{client};
+			return status.CanSeeEnemy();
 		}
 
 		bool Bot::HasGoalToHead() const noexcept {

@@ -130,6 +130,7 @@ namespace pokebot {
 			Timer update_timer{},
 				allow_listen_radio_timer{};
 
+			Timer freeze_time{};
 			Timer buy_wait_timer{};
 
 			Memory memory{};
@@ -153,11 +154,15 @@ namespace pokebot {
 			
 			void SelectionUpdate() noexcept;
 			void NormalUpdate() noexcept;
-			void CombatUpdate() noexcept;
 			void BuyUpdate() noexcept;
 			void CheckAround();
 
 			void TurnViewAngle(), TurnMovementAngle();
+
+			Timer danger_time{};
+
+			static constexpr int MATE = 0, ENEMY = 1;
+			std::vector<const edict_t*> entities[2]{};
 		public:
 			int squad = -1;
 			Mood mood{};
@@ -177,12 +182,15 @@ namespace pokebot {
 				void Clear() noexcept { view = movement = std::nullopt; }
 			} look_direction{}, ideal_direction{};
 
+
 			Bot(std::shared_ptr<game::Client>, const common::Team, const common::Model) POKEBOT_DEBUG_NOEXCEPT;
 
 			void OnNewRound() POKEBOT_DEBUG_NOEXCEPT;
 			void Run() noexcept;
 
 			void SelectWeapon(const game::Weapon);
+
+			void LookAtClosestEnemy();
 
 			void OnRadioRecieved(const std::string& Sender_Name, const std::string& Radio_Sentence) noexcept;
 
@@ -200,10 +208,11 @@ namespace pokebot {
 
 			bool IsLookingAt(const Vector& Dest) const noexcept;
 		
+			bool HasPrimaryWeapon() const noexcept { return bool(client->Edict()->v.weapons & game::Primary_Weapon_Bit); }
+			bool HasSecondaryWeapon() const noexcept { return bool(client->Edict()->v.weapons & game::Secondary_Weapon_Bit); }
 			bool HasWeapon(const game::Weapon Weapon_ID) const noexcept { return bool(client->Edict()->v.weapons & common::ToBit<int>(Weapon_ID)); }
 			bool IsCurrentWeapon(const game::Weapon Weapon_ID) const noexcept { return (current_weapon == Weapon_ID); }
 
-			bool IsFighting() const noexcept;
 			bool HasGoalToHead() const noexcept;
 			bool IsInBuyzone() const noexcept { return client->IsShowingIcon(game::StatusIcon::Buy_Zone); }
 
@@ -211,6 +220,9 @@ namespace pokebot {
 			bool IsDriving() const noexcept { return (client->IsOnTrain()); }
 			bool IsSwimming() const noexcept { return (client->IsInWater()); }
 			bool IsOnFloor() const noexcept { return (client->IsOnFloor()); }
+
+			bool IsFighting() const noexcept { return danger_time.IsRunning(); }
+			bool CanSeeEnemy() const noexcept;
 
 			auto JoinedTeam() const noexcept { return team; }
 		};
