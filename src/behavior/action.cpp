@@ -165,45 +165,48 @@ namespace pokebot::bot::behavior {
 			}
 		);
 
-		use->Define(
-			[](Bot* const self) -> Status {
-				self->PressKey(bot::ActionKey::Use);
+		auto BotPressesKey = [](Bot* const self, const bot::ActionKey Key) noexcept -> Status {
+			if (!self->IsPressingKey(Key)) {
+				self->PressKey(Key);
 				return Status::Executed;
+			} else {
+				return Status::Enough;
+			}
+		};
+
+		use->Define(
+			[BotPressesKey](Bot* const self) -> Status {
+				return BotPressesKey(self, bot::ActionKey::Use);
 			}
 		);
 
 		fire->Define(
-			[](Bot* const self) -> Status {
-				self->PressKey(bot::ActionKey::Attack);
-				return Status::Executed;
+			[BotPressesKey](Bot* const self) -> Status {
+				return BotPressesKey(self, bot::ActionKey::Attack);
 			}
 		);
 
 		jump->Define(
-			[](Bot* const self) -> Status {
-				self->PressKey(bot::ActionKey::Jump);
-				return Status::Executed;
+			[BotPressesKey](Bot* const self) -> Status {
+				return BotPressesKey(self, bot::ActionKey::Jump);
 			}
 		);
 
 		duck->Define(
-			[](Bot* const self) -> Status {
-				self->PressKey(bot::ActionKey::Duck);
-				return Status::Executed;
+			[BotPressesKey](Bot* const self) -> Status {
+				return BotPressesKey(self, bot::ActionKey::Duck);
 			}
 		);
 
 		walk->Define(
-			[](Bot* const self) -> Status {
-				self->PressKey(bot::ActionKey::Shift);
-				return Status::Executed;
+			[BotPressesKey](Bot* const self) -> Status {
+				return BotPressesKey(self, bot::ActionKey::Shift);
 			}
 		);
 
 		change_silencer->Define(
-			[](Bot* const self) -> Status {
-				self->PressKey(bot::ActionKey::Attack2);
-				return Status::Executed;
+			[BotPressesKey](Bot* const self) -> Status {
+				return BotPressesKey(self, bot::ActionKey::Attack2);
 			}
 		);
 
