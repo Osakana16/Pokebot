@@ -6,6 +6,7 @@ namespace pokebot::bot {
 		std::shared_ptr<Priority> combat = Priority::Create();
 		std::shared_ptr<Priority> mission = Priority::Create();
 		std::shared_ptr<Priority> root = Priority::Create();
+		std::shared_ptr<Action> breakpoint = Action::Create("breakpoint");
 
 		namespace {
 			std::shared_ptr<Priority> be_squad_leader = Priority::Create();
@@ -146,6 +147,11 @@ namespace pokebot::bot {
 			DefineCombat();
 			DefineAction();
 			DefineObjective();
+
+			breakpoint->Define
+			([](Bot* const) noexcept -> Status {
+				return Status::Executed;
+			});
 		}
 	}
 

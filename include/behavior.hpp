@@ -354,8 +354,6 @@ namespace pokebot::bot {
 			return false;
 		}
 
-
-
 		extern std::shared_ptr<Action> change_primary;
 		extern std::shared_ptr<Action> change_secondary;
 		extern std::shared_ptr<Action> change_melee;
@@ -398,6 +396,8 @@ namespace pokebot::bot {
 		extern std::shared_ptr<Action> join_offense_squad;
 		extern std::shared_ptr<Action> join_defense_squad;
 		extern std::shared_ptr<Action> left_squad;
+
+		extern std::shared_ptr<Action> breakpoint;
 
 		extern std::shared_ptr<After<Status::Enough>> head_and_discard_goal;
 
