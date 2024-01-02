@@ -91,7 +91,7 @@ namespace pokebot::bot::behavior {
 		change_secondary->Define(
 			[](Bot* const self) -> Status {
 				Status result = Status::Not_Ready;
-				if (self->HasPrimaryWeapon()) {
+				if (self->HasSecondaryWeapon()) {
 					game::game.IssueCommand(*game::game.clients.Get(self->Name().data()), "slot2");
 					result = Status::Executed;
 				}

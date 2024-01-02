@@ -266,7 +266,7 @@ namespace pokebot::bot {
 
 		template<bool b>
 		bool IsBlind(const Bot* const Self) noexcept {
-			return false;
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, true);
 		}
 
 		template<bool b>

@@ -15,19 +15,8 @@ namespace pokebot::bot::behavior {
 	}
 
 	namespace {
-		template<bool b>
-		bool HasPrimaryWeapon(const bot::Bot* const Self) noexcept {
-			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->HasPrimaryWeapon());
-		}
-
-		template<bool b>
-		bool HasSecondaryWeapon(const bot::Bot* const Self) noexcept {
-			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->HasSecondaryWeapon());
-		}
-
-		template<bool b>
 		bool HasGuns(const bot::Bot* const Self) noexcept {
-			return HasPrimaryWeapon<b>(Self) || HasSecondaryWeapon<b>(Self);
+			return Self->HasPrimaryWeapon() || Self->HasSecondaryWeapon();
 		}
 
 		template<bool b>
@@ -37,7 +26,11 @@ namespace pokebot::bot::behavior {
 
 		template<bool b>
 		bool HasCrisis(const bot::Bot* const Self) noexcept {
-			return HasGuns<b>(Self) || IsBlind<b>(Self);
+			if constexpr (b) {
+				return !HasGuns(Self);
+			} else {
+				return HasGuns(Self);
+			}
 		}
 	}
 
