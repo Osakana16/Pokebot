@@ -281,6 +281,12 @@ namespace pokebot {
 			look_direction.view = Nearest_Enemy->v.origin;
 		}
 
+		bool Bot::IsLookingAtEnemy() const noexcept {
+			const auto Enemy_Distances = std::move(SortedDistances(Origin(), entities[ENEMY]));
+			const auto& Nearest_Enemy = entities[ENEMY][Enemy_Distances.begin()->second];
+			return IsLookingAt(Nearest_Enemy->v.origin);
+		}
+
 		bool Bot::IsLookingAt(const Vector& Dest) const noexcept {
 			return (common::Distance2D(Dest, client->v_angle) <= 1.0f);
 		}

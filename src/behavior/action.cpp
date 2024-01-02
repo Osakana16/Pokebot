@@ -148,8 +148,12 @@ namespace pokebot::bot::behavior {
 
 		look_enemy->Define(
 			[](Bot* const self) -> Status {
-				self->LookAtClosestEnemy();
-				return Status::Executed;
+				if (!self->IsLookingAtEnemy()){
+					self->LookAtClosestEnemy();
+					return Status::Executed;
+				} else {
+					return Status::Enough;
+				}
 			}
 		);
 
@@ -171,7 +175,7 @@ namespace pokebot::bot::behavior {
 				return Status::Executed;
 			} else {
 				return Status::Enough;
-			}
+			} 
 		};
 
 		use->Define(

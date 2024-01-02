@@ -191,6 +191,7 @@ namespace pokebot {
 			void SelectWeapon(const game::Weapon);
 
 			void LookAtClosestEnemy();
+			bool IsLookingAtEnemy() const noexcept;
 
 			void OnRadioRecieved(const std::string& Sender_Name, const std::string& Radio_Sentence) noexcept;
 
