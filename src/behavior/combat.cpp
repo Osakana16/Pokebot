@@ -12,6 +12,11 @@ namespace pokebot::bot::behavior {
 		std::shared_ptr<Sequence> try_to_find = Sequence::Create();
 
 		std::shared_ptr<Sequence> flee = Sequence::Create();
+		
+		std::shared_ptr<Priority> decide_firing = Priority::Create();
+
+		std::shared_ptr<Priority> one_tap_fire = Priority::Create();
+		std::shared_ptr<Priority> full_burst_fire = Priority::Create();
 	}
 
 	namespace {
@@ -32,6 +37,11 @@ namespace pokebot::bot::behavior {
 				return HasGuns(Self);
 			}
 		}
+
+		template<bool b>
+		bool IsEnemyFar(const bot::Bot* const Self) noexcept {
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->IsEnemyFar());
+		}
 	}
 
 	void DefineCombat() {
@@ -45,7 +55,7 @@ namespace pokebot::bot::behavior {
 		({
 			look_enemy,
 			fight::pick_best_weapon,
-			fire
+			fight::decide_firing
 		});
 
 		fight::try_to_lose_sight->Define
@@ -62,6 +72,24 @@ namespace pokebot::bot::behavior {
 		({
 			change_primary,
 			change_secondary
+		});
+
+		fight::decide_firing->Define
+		({
+			Condition::If(IsEnemyFar<true>, fight::one_tap_fire),
+			Condition::If(IsEnemyFar<false>, fight::full_burst_fire)
+		});
+
+		fight::one_tap_fire->Define
+		({
+			wait(1, .0f),
+			fire
+		});
+
+		fight::full_burst_fire->Define
+		({
+			wait(0, 0.1f),
+			fire
 		});
 	}
 }

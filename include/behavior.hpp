@@ -397,8 +397,9 @@ namespace pokebot::bot {
 		extern std::shared_ptr<Action> join_defense_squad;
 		extern std::shared_ptr<Action> left_squad;
 
-		extern std::shared_ptr<Action> breakpoint;
+		std::shared_ptr<Action> wait(std::uint32_t, float);
 
+		extern std::shared_ptr<Action> breakpoint;
 		extern std::shared_ptr<After<Status::Enough>> head_and_discard_goal;
 
 		namespace fight {

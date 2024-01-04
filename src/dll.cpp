@@ -267,7 +267,7 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
             pokebot::node::world.Draw();
 
         if (pokebot::game::game.GetHost() != nullptr) {
-            const_cast<edict_t*>(pokebot::game::game.GetHost())->v.health = 100;
+            const_cast<edict_t*>(pokebot::game::game.GetHost())->v.health = 255;
         }
 #if 0
         {

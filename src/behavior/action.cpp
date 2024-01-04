@@ -395,4 +395,54 @@ namespace pokebot::bot::behavior {
 			return Status::Executed;
 		 });
 	}
+
+	std::shared_ptr<Action> wait(std::uint32_t sec, float revision) {
+		static std::unordered_map<std::uint32_t, std::shared_ptr<Action>> waits{};
+		std::shared_ptr<Action>& wait = waits[sec];
+
+		if (wait == nullptr) {
+			wait = Action::Create(std::format("wait for {}", sec));
+			wait->Define([sec, revision](Bot* const self) -> Status {
+				class Timer final {
+				public:
+					enum class Status {
+						Not_Running,
+						Running,
+						Finished
+					} RunningStatus() const noexcept {
+						if (time <= 0.0f) {
+							return Status::Not_Running;
+						} else if (time >= gpGlobals->time) {
+							return Status::Running;
+						} else {
+							return Status::Finished;
+						}
+					}
+
+					void SetTime(const float time_) noexcept {
+						time = time_ + gpGlobals->time;
+					}
+				private:
+					float time{};
+				};
+				static std::unordered_map<std::string, Timer> timers{};
+				auto& timer = timers[self->Name().data()];
+
+				switch (timer.RunningStatus()) {
+					case Timer::Status::Not_Running:
+						timer.SetTime(sec + revision);
+						[[fallthrough]];
+						return Status::Not_Ready;
+					case Timer::Status::Running:
+						return Status::Executed;
+					case Timer::Status::Finished:
+						timer.SetTime(-99999.0);
+						return Status::Enough;
+					default:
+						assert(0);
+				}
+			});
+		}
+		return wait;
+	}
 }
