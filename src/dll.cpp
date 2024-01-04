@@ -265,10 +265,6 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
 
         if (draw_node)
             pokebot::node::world.Draw();
-
-        if (pokebot::game::game.GetHost() != nullptr) {
-            const_cast<edict_t*>(pokebot::game::game.GetHost())->v.health = 255;
-        }
 #if 0
         {
             auto host = pokebot::game::game.GetHost();
@@ -309,7 +305,7 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
             // check if this client is the listen server client
             if (strcmp(Address, "loopback") == 0) {
                 // save the edict of the listen server client...
-                pokebot::game::game.SetHost(entity);
+                pokebot::game::game.host.SetHost(entity);
                 is_game_completely_initialized = true;
             }
         }
@@ -352,9 +348,6 @@ C_DLLEXPORT int GetEntityAPI2_Post(DLL_FUNCTIONS* pFunctionTable, int* interface
 
 namespace pokebot::plugin {
     void Pokebot::OnUpdate() noexcept {
-        if (game::is_enabled_auto_waypoint && pokebot::game::game.HasHost()) {
-            pokebot::node::world.Add(pokebot::game::game.GetHost()->v.origin, pokebot::node::GoalKind::None);
-        }
         pokebot::game::game.Update();
         pokebot::bot::manager.Update();
     }

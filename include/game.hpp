@@ -303,16 +303,27 @@ namespace pokebot {
 			}
 		};
 
+		class Host {
+			edict_t* host{};
+		public:
+			const edict_t* AsEdict() const noexcept { return host; }
+			bool IsHostValid() const noexcept;
+			void SetHost(edict_t* const target) noexcept;
+			const char* const HostName() const noexcept;
+			const Vector& Origin() const noexcept;
+			void Update();
+		};
+
 		inline class Game {
 			database::Database database{};
 			std::vector<Hostage> hostages{};
 
 			std::vector<std::string> bot_args{};
-			const edict_t* Host_Client{};
 			MapFlags map_flags{};
 			uint32_t round{};
 			bool is_newround{};
 		public:
+			Host host{};
 			ClientManager clients{};
 
 			size_t GetHostageNumber() const noexcept {
@@ -346,18 +357,6 @@ namespace pokebot {
 
 			inline bool IsBotCmd() const noexcept {
 				return !bot_args.empty();
-			}
-
-			inline void SetHost(const edict_t* Host) noexcept {
-				Host_Client = Host;
-			}
-
-			const edict_t* GetHost() const noexcept {
-				return Host_Client;
-			}
-
-			bool HasHost() const noexcept {
-				return GetHost() != nullptr;
 			}
 
 			auto CurrentRonud() const noexcept {

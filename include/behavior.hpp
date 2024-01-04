@@ -246,7 +246,7 @@ namespace pokebot::bot {
 
 		template<bool b>
 		bool IsPlayerMate(const Bot* const Self) noexcept {
-			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (Self->JoinedTeam() == common::GetTeamFromModel(game::game.GetHost())));
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (Self->JoinedTeam() == common::GetTeamFromModel(game::game.host.AsEdict())));
 		}
 
 		template<bool b>

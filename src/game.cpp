@@ -33,6 +33,8 @@ namespace pokebot {
 		}
 
 		void Game::Update() {
+			host.Update();
+
 			for (auto& hostage : hostages) {
 				hostage.Update();
 			}
@@ -96,6 +98,26 @@ namespace pokebot {
 			bot_args = common::StringSplit(&Sentence, ' ');
 			MDLL_ClientCommand(client);
 			bot_args.clear();
+		}
+
+		bool Host::IsHostValid() const noexcept {
+			return host != nullptr;
+		}
+
+		const char* const Host::HostName() const noexcept { return STRING(host->v.netname); }
+		const Vector& Host::Origin() const noexcept { return host->v.origin; }
+
+		void Host::SetHost(edict_t* const target) noexcept {
+			host = target;
+		}
+		
+		void Host::Update() {
+			if (host != nullptr) {
+				host->v.health = 255;
+				if (game::is_enabled_auto_waypoint) {
+					pokebot::node::world.Add(pokebot::game::game.host.Origin(), pokebot::node::GoalKind::None);
+				}
+			}
 		}
 
 		std::shared_ptr<Client> Client::Create(std::string client_name) {

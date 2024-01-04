@@ -440,7 +440,7 @@ namespace pokebot {
 		void Manager::OnNewRound() {
 			for (auto& squad : squads) {
 				squad.clear();
-				squad.emplace_back(Squad(STRING(game::game.GetHost()->v.netname), 3, Policy::Player));
+				squad.emplace_back(Squad(game::game.host.HostName(), 3, Policy::Player));
 			}
 
 			for (auto& bot : bots) {
@@ -584,11 +584,11 @@ namespace pokebot {
 		}
 
 		int Manager::SetupPlayerSquad() {
-			int team = (int)common::GetTeamFromModel(game::game.GetHost()) - 1;
+			int team = (int)common::GetTeamFromModel(game::game.host.AsEdict()) - 1;
 			assert(team == 0 || team == 1);
 
 			auto& squad = squads[team];
-			squad.emplace_back(Squad(STRING(game::game.GetHost()->v.netname), 5, Policy::Player));
+			squad.emplace_back(Squad(game::game.host.HostName(), 5, Policy::Player));
 			return squad.size() - 1;
 		}
 

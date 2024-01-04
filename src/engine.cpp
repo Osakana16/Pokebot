@@ -83,7 +83,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
     meta_engfuncs.pfnMessageBegin = [](int msg_dest, int msg_type, const float* pOrigin, edict_t* edict) {
         using namespace pokebot;
         is_bot = (edict != nullptr && pokebot::bot::manager.IsExist(STRING(edict->v.netname)));
-        is_host = (edict == game::game.GetHost());
+        is_host = (edict == game::game.host.AsEdict());
 
         engine_target_edict = edict;
         current_message = msg_type;

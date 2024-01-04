@@ -79,18 +79,18 @@ namespace pokebot::node {
 	}
 
 	void Pathmachine::Draw() {
-		auto host = const_cast<edict_t*>(game::game.GetHost());
+		auto host = const_cast<edict_t*>(game::game.host.AsEdict());
 		float nearest_distance = std::numeric_limits<float>::max();
 		for (int i = 0; i < nodes.size(); i++) {
 			auto& target_node = GetNode(i);
-			float distance = (target_node->Origin() - game::game.GetHost()->v.origin).Length();
+			float distance = (target_node->Origin() - host->v.origin).Length();
 			if (distance < 512.0f && ((entity::IsVisible(host, target_node->Origin()) && entity::InViewCone(host, target_node->Origin()) || !game::Client::IsDead(host) || distance < 128.0f))) {
 				if (distance < nearest_distance) {
 					nearest_distance = distance;
 				}
 
 				if (target_node->time + 0.8f < gpGlobals->time) {
-					pokebot::common::Draw(const_cast<edict_t*>(game::game.GetHost()), target_node->Origin() - Vector(0, 0, 60), target_node->Origin() + Vector(0, 0, 60), 10 + 1, 0, common::Color{ .r = 255, .g = 255, .b = 255 }, 250, 0, 10);
+					pokebot::common::Draw(host, target_node->Origin() - Vector(0, 0, 60), target_node->Origin() + Vector(0, 0, 60), 10 + 1, 0, common::Color{ .r = 255, .g = 255, .b = 255 }, 250, 0, 10);
 					target_node->time = gpGlobals->time;
 				}
 			}
