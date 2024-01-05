@@ -98,9 +98,21 @@ namespace pokebot::node {
 	}
 
 	void Pathmachine::AddBasic() {
+		auto MoveOriginOnGround = [](Vector* const origin) noexcept {
+			common::Tracer tracer{};
+			tracer.MoveStart(*origin);
+			tracer.MoveDest(Vector(origin->x, origin->y, -9999));
+			tracer.TraceHull(common::Tracer::Monsters::Ignore, common::Tracer::HullType::Human, nullptr);
+			if (tracer.IsHit() && std::string(STRING(tracer.pHit->v.classname)) == "worldspawn") {
+				origin->z = tracer.vecEndPos.z;
+			}
+		};
+
 		edict_t* entity = nullptr;
 		while ((entity = common::FindEntityByClassname(entity, "info_player_start")) != nullptr) {
-			NodeID point_id = Add(entity->v.origin, GoalKind::CT_Spawn);
+			Vector origin = entity->v.origin;
+			MoveOriginOnGround(&origin);
+			NodeID point_id = Add(origin, GoalKind::CT_Spawn);
 			auto point = GetNode(point_id);
 			if (point != nullptr) {
 				point->AddFlag(NodeFlag::Goal);
@@ -109,7 +121,9 @@ namespace pokebot::node {
 
 		// GOAL #2 - Terrorist Spawn points.
 		while ((entity = common::FindEntityByClassname(entity, "info_player_deathmatch")) != nullptr) {
-			NodeID point_id = Add(entity->v.origin, GoalKind::Terrorist_Spawn);
+			Vector origin = entity->v.origin;
+			MoveOriginOnGround(&origin);
+			NodeID point_id = Add(origin, GoalKind::Terrorist_Spawn);
 			auto point = GetNode(point_id);
 			if (point != nullptr) {
 				point->AddFlag(NodeFlag::Goal);
@@ -118,7 +132,9 @@ namespace pokebot::node {
 
 		// GOAL #3 - Hostage rescue zone
 		while ((entity = common::FindEntityByClassname(entity, "func_hostage_rescue")) != nullptr) {
-			NodeID point_id = Add(common::VecBModelOrigin(entity), GoalKind::Rescue_Zone);
+			Vector origin = common::VecBModelOrigin(entity);
+			MoveOriginOnGround(&origin);
+			NodeID point_id = Add(origin, GoalKind::Rescue_Zone);
 			auto point = GetNode(point_id);
 			if (point != nullptr) {
 				point->AddFlag(NodeFlag::Goal);
@@ -127,7 +143,9 @@ namespace pokebot::node {
 
 		// rescue zone can also be an entity of info_hostage_rescue
 		while ((entity = common::FindEntityByClassname(entity, "info_hostage_rescue")) != nullptr) {
-			NodeID point_id = Add(common::VecBModelOrigin(entity), GoalKind::Rescue_Zone);
+			Vector origin = common::VecBModelOrigin(entity);
+			MoveOriginOnGround(&origin);
+			NodeID point_id = Add(origin, GoalKind::Rescue_Zone);
 			auto point = GetNode(point_id);
 			if (point != nullptr) {
 				point->AddFlag(NodeFlag::Goal);
@@ -137,7 +155,9 @@ namespace pokebot::node {
 		// GOAL #4 - Bombspot zone
 		// Bomb spot
 		while ((entity = common::FindEntityByClassname(entity, "func_bomb_target")) != nullptr) {
-			NodeID point_id = Add(common::VecBModelOrigin(entity), GoalKind::Bombspot);
+			Vector origin = common::VecBModelOrigin(entity);
+			MoveOriginOnGround(&origin);
+			NodeID point_id = Add(origin, GoalKind::Bombspot);
 			auto point = GetNode(point_id);
 			if (point != nullptr) {
 				point->AddFlag(NodeFlag::Goal);
@@ -145,7 +165,9 @@ namespace pokebot::node {
 		}
 
 		while ((entity = common::FindEntityByClassname(entity, "info_bomb_target")) != nullptr) {
-			NodeID point_id = Add(common::VecBModelOrigin(entity), GoalKind::Bombspot);
+			Vector origin = common::VecBModelOrigin(entity);
+			MoveOriginOnGround(&origin);
+			NodeID point_id = Add(origin, GoalKind::Bombspot);
 			auto point = GetNode(point_id);
 			if (point != nullptr) {
 				point->AddFlag(NodeFlag::Goal);
@@ -154,7 +176,9 @@ namespace pokebot::node {
 
 		// GOAL  #6 - VIP (this is the 'starting' position) (EVY)
 		while ((entity = common::FindEntityByClassname(entity, "info_vip_start")) != nullptr) {
-			NodeID point_id = Add(common::VecBModelOrigin(entity), GoalKind::CT_Spawn);
+			Vector origin = common::VecBModelOrigin(entity);
+			MoveOriginOnGround(&origin);
+			NodeID point_id = Add(origin, GoalKind::CT_Spawn);
 			auto point = GetNode(point_id);
 			if (point != nullptr) {
 				point->AddFlag(NodeFlag::Goal);
@@ -163,7 +187,9 @@ namespace pokebot::node {
 
 		// GOAL  #7 - VIP safety (this is the 'rescue' position) (EVY)
 		while ((entity = common::FindEntityByClassname(entity, "func_vip_safetyzone")) != nullptr) {
-			NodeID point_id = Add(common::VecBModelOrigin(entity), GoalKind::Vip_Safety);
+			Vector origin = common::VecBModelOrigin(entity);
+			MoveOriginOnGround(&origin);
+			NodeID point_id = Add(origin, GoalKind::Vip_Safety);
 			auto point = GetNode(point_id);
 			if (point != nullptr) {
 				point->AddFlag(NodeFlag::Goal);
@@ -172,7 +198,9 @@ namespace pokebot::node {
 
 		// GOAL  #8 - Escape zone for es_ (EVY)
 		while ((entity = common::FindEntityByClassname(entity, "func_escapezone")) != nullptr) {
-			NodeID point_id = Add(common::VecBModelOrigin(entity), GoalKind::Esacpe_Zone);
+			Vector origin = common::VecBModelOrigin(entity);
+			MoveOriginOnGround(&origin);
+			NodeID point_id = Add(origin, GoalKind::Esacpe_Zone);
 			auto point = GetNode(point_id);
 			if (point != nullptr) {
 				point->AddFlag(NodeFlag::Goal);
@@ -181,7 +209,9 @@ namespace pokebot::node {
 
 		// GOAL  #9 - Escape zone for es_ (EVY)
 		while ((entity = common::FindEntityByClassname(entity, "hostage_entity")) != nullptr) {
-			NodeID point_id = Add(entity->v.origin, GoalKind::None);
+			Vector origin = entity->v.origin;
+			MoveOriginOnGround(&origin);
+			NodeID point_id = Add(origin, GoalKind::None);
 		}
 	}
 
