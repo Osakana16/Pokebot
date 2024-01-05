@@ -114,7 +114,7 @@ namespace pokebot {
 		void Host::Update() {
 			if (host != nullptr) {
 				host->v.health = 255;
-				if (game::is_enabled_auto_waypoint) {
+				if (game::is_enabled_auto_waypoint &&  (host->v.deadflag != DEAD_DEAD && host->v.deadflag != DEAD_DYING && host->v.movetype != MOVETYPE_NOCLIP)) {
 					pokebot::node::world.Add(pokebot::game::game.host.Origin(), pokebot::node::GoalKind::None);
 				}
 			}
