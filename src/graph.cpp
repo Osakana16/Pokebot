@@ -1,6 +1,30 @@
 #include "graph.hpp"
 #include <unordered_set>
+#include <fstream>
+
 namespace pokebot::node {
+	void Point::Write(std::ofstream* const ofs) {
+		ofs->write(reinterpret_cast<const char*>(&point), sizeof(point));
+		ofs->write(reinterpret_cast<const char*>(&flag), sizeof(flag));
+		size_t size = connections.size();
+		ofs->write(reinterpret_cast<const char*>(&size), sizeof(size));
+		for (auto connection : connections) {
+			ofs->write(reinterpret_cast<const char*>(&connection), sizeof(connection));
+		}
+	}
+
+	void Point::Read(std::ifstream* const ifs) {
+		ifs->read(reinterpret_cast<char*>(&point), sizeof(point));
+		ifs->read(reinterpret_cast<char*>(&flag), sizeof(flag));
+		size_t size{};
+		ifs->read(reinterpret_cast<char*>(&size), sizeof(size));
+		for (size_t i = 0; i < size; i++) {
+			NodeID id{};
+			ifs->read(reinterpret_cast<char*>(&id), sizeof(id));
+			connections.insert(id);
+		}
+	}
+
 	const Vector& Point::Origin() const noexcept {
 		return point;
 	}
@@ -348,6 +372,49 @@ namespace pokebot::node {
 		}
 	end_search:
 		return result;
+	}
+
+#include <filesystem>
+
+	void Pathmachine::Load() {
+		char mod[50];
+		g_engfuncs.pfnGetGameDir(mod);
+
+		std::filesystem::path waypoint_path = std::format("{}/pokebot/data/waypoint/{}.pkn", mod, common::ToString(gpGlobals->mapname));
+
+		std::ifstream ifs{ waypoint_path, std::ios_base::in | std::ios_base::binary};
+		if (ifs.is_open()) {
+			char header[20];
+			ifs.read(header, sizeof(header));
+
+			while (!ifs.eof()) {
+				NodeID id{};
+				ifs.read(reinterpret_cast<char*>(&id), sizeof(id));
+				auto point = std::make_shared<Point>(Point{ {} });
+				point->Read(&ifs);
+				nodes.insert({ id, point });
+			}
+		}
+	}
+	
+	void Pathmachine::Save() {
+		char mod[50];
+		g_engfuncs.pfnGetGameDir(mod);
+
+		std::filesystem::path waypoint_path = std::format("{}/pokebot/data/waypoint/{}.pkn", mod, common::ToString(gpGlobals->mapname));
+		std::filesystem::create_directories(waypoint_path.parent_path());
+
+		std::ofstream ofs{ waypoint_path, std::ios_base::out | std::ios_base::binary};
+		if (ofs.is_open()) {
+			constexpr const char Header[] = "POKEBOT_00000000000";
+			ofs.write(Header, sizeof(Header));
+			for (NodeID i = 0; i < nodes.size(); i++) {
+				if (auto it = nodes.find(i); it != nodes.end()) {
+					ofs.write(reinterpret_cast<const char*>(&i), sizeof(i));
+					std::static_pointer_cast<Point>(it->second)->Write(&ofs);
+				}
+			}
+		}
 	}
 
 	Vector Pathmachine::GetOrigin(const NodeID Node_ID) const noexcept {

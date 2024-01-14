@@ -30,6 +30,7 @@ namespace pokebot {
 			round++;
 			bot::manager.OnNewRound();
 			node::world.OnNewRound();
+			pokebot::node::world.Save();
 		}
 
 		void Game::Update() {

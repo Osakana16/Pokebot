@@ -260,6 +260,7 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
         using namespace pokebot;
         if (is_game_completely_initialized) {
         //    pokebot::node::world.OnNewRound();
+            pokebot::node::world.Load();
             is_game_completely_initialized = false;
         }
 

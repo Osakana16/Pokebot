@@ -11,6 +11,10 @@ namespace pokebot{
 		using Dec = float;
 		using Time = Dec;
 
+		inline std::string ToString(int i) noexcept {
+			return STRING(i);
+		}
+
 		constexpr auto Third_Party_Bot_Flag = 1 << 27;
 
 		enum class Team {

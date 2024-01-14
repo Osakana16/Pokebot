@@ -96,6 +96,7 @@ namespace pokebot::node {
 
 		Vector point{};
 	public:
+		void Write(std::ofstream* const), Read(std::ifstream* const);
 		const Vector& Origin() const noexcept final;
 		std::pair<float, float> Length() const noexcept final;
 
@@ -106,11 +107,6 @@ namespace pokebot::node {
 		bool AddFlag(const NodeFlag) noexcept final;
 	};
 
-	class Mesh final : public Node {
-
-	public:
-
-	};
 
 	enum class GoalKind {
 		None,
@@ -156,6 +152,9 @@ namespace pokebot::node {
 			FindPath(PathWalk* const, const NodeID, const NodeID);
 
 		decltype(static_cast<const decltype(goals)>(goals).equal_range(GoalKind::None)) GetGoal(const GoalKind kind) const noexcept;
+
+		void Load();
+		void Save();
 	public:
 		void Draw();
 	} world;
