@@ -2,6 +2,16 @@
 
 namespace pokebot {
 	namespace game {
+		ConVar::ConVar(const char* name, const char* initval, Var type, bool regMissing, const char* regVal) {
+			game.AddCvar(name, initval, "", false, 0.0f, 0.0f, type, regMissing, regVal, this);
+		}
+		
+		ConVar::ConVar(const char* name, const char* initval, const char* info, bool bounded, float min, float max, Var type, bool regMissing, const char* regVal) {
+			game.AddCvar(name, initval, info, bounded, min, max, type, regMissing, regVal, this);
+		}
+
+		ConVar poke_freeze{ "pk_freeze", "0" };
+
 		Hostage Hostage::AttachHostage(const edict_t* Hostage_Entity) noexcept {
 			assert(Hostage_Entity != nullptr);
 			Hostage hostage{};
@@ -24,6 +34,52 @@ namespace pokebot {
 
 			if (owner->GetTeam() == common::Team::T || common::Distance(owner->origin, entity->v.origin) >= 500)
 				owner = nullptr;
+		}
+
+		void Game::AddCvar(const char *name, const char *value, const char *info, bool bounded, float min, float max, Var varType, bool missingAction, const char *regval, ConVar *self) {
+			ConVarReg reg{
+				.reg = {
+					.name = name,
+					.string = value,
+					.flags = FCVAR_EXTDLL
+				},
+				.info = info,
+				.init = value,
+				.regval = regval,
+				.self = self,
+				.initial = (float)std::atof(value),
+				.min = min,
+				.max = max,
+				.missing = missingAction,
+				.bounded = bounded,				
+				.type = varType
+			};
+
+			switch (varType) {
+				case Var::ReadOnly:
+					reg.reg.flags |= FCVAR_SPONLY | FCVAR_PRINTABLEONLY;
+					[[fallthrough]];
+				case Var::Normal:
+					reg.reg.flags |= FCVAR_SERVER;
+					break;
+				case Var::Password:
+					reg.reg.flags |= FCVAR_PROTECTED;
+					break;
+			}
+			convars.push_back(reg);
+		}
+
+		void Game::RegisterCvars() {
+			for (auto& var : convars) {
+				ConVar &self = *var.self;
+				cvar_t &reg = var.reg;
+				self.ptr = g_engfuncs.pfnCVarGetPointer (reg.name);
+
+				if (!self.ptr) {
+					g_engfuncs.pfnCVarRegister (&var.reg);
+					self.ptr = g_engfuncs.pfnCVarGetPointer (reg.name);
+				}
+			}
 		}
 
 		void Game::OnNewRound() noexcept {
@@ -88,6 +144,8 @@ namespace pokebot {
 					}
 				}
 			}
+
+			RegisterCvars();
 		}
 
 		bool Game::IsCurrentMode(const MapFlags Game_Mode) const noexcept {
