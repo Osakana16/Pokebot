@@ -33,6 +33,7 @@ namespace pokebot {
 					CarryAmmo,
 					Clip,
 					Random,
+					Primary,		// Except secondary weapons
 					Secondary,
 					Submachinegun,
 					Shotgun,
@@ -49,8 +50,8 @@ namespace pokebot {
 			* @param filter The filter for the weapon list.
 			*/
 			void FilterWeaponByPrice(const Filter* filter, std::vector<const database::WeaponData*>* result) noexcept {
+				assert(!result->empty());
 				std::vector<const database::WeaponData*> datas = std::move(*result);
-
 				for (auto data : datas) {
 					if (data->price > filter->value.i)
 						continue;
@@ -64,11 +65,8 @@ namespace pokebot {
 			* @param filter The filter for the weapon list.
 			*/
 			void FilterWeaponByDamage(const Filter* filter, std::vector<const database::WeaponData*>* result) noexcept {
-				std::vector<const database::WeaponData*> datas{};
-				for (int i = 0; i < 32; i++) {
-
-				}
-
+				assert(!result->empty());
+				std::vector<const database::WeaponData*> datas = std::move(*result);
 				for (auto data : datas) {
 					if (data->damage > filter->value.i)
 						continue;
@@ -82,7 +80,28 @@ namespace pokebot {
 			* @param filter The filter for the weapon list.
 			*/
 			void FilterWeaponBySpeed(const Filter* filter, std::vector<const database::WeaponData*>* result) noexcept {
+				assert(!result->empty());
+				std::vector<const database::WeaponData*> datas = std::move(*result);
+				for (auto data : datas) {
+					if (data->movement_decay > filter->value.i)
+						continue;
 
+					result->push_back(data);
+				}
+			}
+
+			/**
+			* Narrow down weapon candidates by primary.
+			* @param filter The filter for the weapon list.
+			*/
+			void FilterWeaponByPrimary(const Filter* filter, std::vector<const database::WeaponData*>* result) noexcept {
+				assert(!result->empty());
+				std::vector<const database::WeaponData*> datas = std::move(*result);
+				for (auto& data : datas) {
+					if (data->label.contains("primary")) {
+						result->push_back(data);
+					}
+				}
 			}
 
 			/**
@@ -104,6 +123,7 @@ namespace pokebot {
 			* @param filter The filter for the weapon list.
 			*/
 			void FilterWeaponByShotgun(const Filter* filter, std::vector<const database::WeaponData*>* result) noexcept {
+				assert(!result->empty());
 				std::vector<const database::WeaponData*> datas = std::move(*result);
 				for (auto& data : datas) {
 					if (data->label.contains("shotgun")) {
@@ -160,14 +180,35 @@ namespace pokebot {
 			*/
 			void FilterWeaponByReload(const Filter* filter, std::vector<const database::WeaponData*>* result) noexcept {
 				assert(!result->empty());
+				std::vector<const database::WeaponData*> datas = std::move(*result);
+				for (auto data : datas) {
+					if (data->movement_decay > filter->value.i)
+						continue;
+
+					result->push_back(data);
+				}
 			}
 
 			void FilterWeaponByCarryingAmmo(const Filter* filter, std::vector<const database::WeaponData*>* result) noexcept {
 				assert(!result->empty());
+				std::vector<const database::WeaponData*> datas = std::move(*result);
+				for (auto data : datas) {
+					if (database::database.GetCartridge(data->cartridge)->max > filter->value.i)
+						continue;
+
+					result->push_back(data);
+				}
 			}
 
 			void FilterWeaponByClip(const Filter* filter, std::vector<const database::WeaponData*>* result) {
 				assert(!result->empty()); 
+				std::vector<const database::WeaponData*> datas = std::move(*result);
+				for (auto data : datas) {
+					if (database::database.GetCartridge(data->cartridge)->per > filter->value.i)
+						continue;
+
+					result->push_back(data);
+				}
 			}
 
 			void FilterWeaponByRandom(const Filter* filter, std::vector<const database::WeaponData*>* result) {
@@ -183,7 +224,7 @@ namespace pokebot {
 				}
 			}
 
-			void(Buy::* FilterBuys[12])(const Filter* filter, std::vector<const database::WeaponData*>* result) {
+			void(Buy::* FilterBuys[13])(const Filter* filter, std::vector<const database::WeaponData*>* result) {
 				&Buy::FilterWeaponByPrice,
 				&Buy::FilterWeaponByDamage,
 				&Buy::FilterWeaponBySpeed,
@@ -191,6 +232,7 @@ namespace pokebot {
 				&Buy::FilterWeaponByCarryingAmmo,
 				&Buy::FilterWeaponByClip,
 				&Buy::FilterWeaponByRandom,
+				&Buy::FilterWeaponByPrimary,
 				&Buy::FilterWeaponBySecondary,
 				&Buy::FilterWeaponByShotgun,
 				&Buy::FilterWeaponBySubmachinegun,
@@ -233,7 +275,7 @@ namespace pokebot {
 					node->money.second = Money + rewards[win_state] + (300 * 32) + (150 * 4) + (1000 * 4);
 					buy.BuyWeapon(&node->data[0],
 						{
-							Buy::Filter{.kind = Buy::Filter::Kind::Rifle, .is_lower = false, .value = {.i = 0 } },
+							Buy::Filter{.kind = Buy::Filter::Kind::Primary, .is_lower = false, .value = {.i = 0 } },
 							Buy::Filter{.kind = Buy::Filter::Kind::Random, .is_lower = false, .value = {.i = 0 } },
 						});
 
