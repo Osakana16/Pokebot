@@ -337,8 +337,8 @@ namespace pokebot {
 				},
 				{ 
 					"#Regroup_team", 
-					[] {
-						
+					[&] {
+						goal_queue.AddGoalQueue(node::world.GetNearest(game::game.clients.Get(Sender_Name)->origin));
 					} 
 				},
 				{ 
