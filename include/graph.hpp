@@ -49,6 +49,10 @@ namespace pokebot::node {
 			return *cursor;
 		}
 
+		NodeID Destination() const noexcept {
+			return nodes.back();
+		}
+
 		bool Next() noexcept {
 			cursor++;
 			return !IsEnd();
@@ -107,7 +111,6 @@ namespace pokebot::node {
 		bool AddFlag(const NodeFlag) noexcept final;
 	};
 
-
 	enum class GoalKind {
 		None,
 		Terrorist_Spawn,
@@ -118,14 +121,14 @@ namespace pokebot::node {
 		Vip_Safety,
 		C4
 	};
+	constexpr auto All_Goal_List = { GoalKind::Terrorist_Spawn, GoalKind::CT_Spawn, GoalKind::Bombspot, GoalKind::Rescue_Zone, GoalKind::Esacpe_Zone, GoalKind::Vip_Safety };
 
-	inline class Pathmachine {
+	inline class Graph {
 		friend class FGreater;
 
 		std::unordered_map<NodeID, std::shared_ptr<Node>> nodes{};
 		std::unordered_multimap<GoalKind, NodeID> goals{};
 		std::vector<NodeID> points_tree[Tree_Size][Tree_Size][Tree_Size]{};
-
 
 		void AddBasic(); 
 		std::shared_ptr<Node> GetNode(NodeID point_id);
@@ -133,6 +136,8 @@ namespace pokebot::node {
 		std::vector<Route> routes{};
 
 		void Remove(NodeID point_id);
+		bool Load();
+		bool Save();
 	public:
 		void OnMapLoaded();
 		void OnNewRound();
@@ -143,6 +148,7 @@ namespace pokebot::node {
 
 		NodeID TryToConnect(const NodeID Node_ID);
 
+		bool IsSameGoal(const NodeID, const GoalKind) const noexcept;
 		bool IsOnNode(const Vector& Position, const NodeID) const noexcept;
 		NodeID GetID(const Vector& Position) const noexcept;
 		Vector GetOrigin(const NodeID Node_ID) const noexcept;
@@ -153,8 +159,8 @@ namespace pokebot::node {
 
 		decltype(static_cast<const decltype(goals)>(goals).equal_range(GoalKind::None)) GetGoal(const GoalKind kind) const noexcept;
 
-		void Load();
-		void Save();
+		bool IsPossibleToReachInTime() const noexcept;
+
 	public:
 		void Draw();
 	} world;

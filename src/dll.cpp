@@ -259,8 +259,7 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
     func_table.pfnStartFrame = []() -> void {
         using namespace pokebot;
         if (is_game_completely_initialized) {
-        //    pokebot::node::world.OnNewRound();
-            pokebot::node::world.Load();
+            pokebot::node::world.OnNewRound();
             is_game_completely_initialized = false;
         }
 
