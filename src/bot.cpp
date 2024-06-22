@@ -174,7 +174,9 @@ namespace pokebot {
 			TurnMovementAngle();
 			look_direction.Clear();
 			auto status = game::game.clients.GetClientStatus(client->Name());
-			entities->clear();
+			for (auto& entity : entities) {
+				entity.clear();
+			}
 			for (auto& target : status.GetEntitiesInView()) {
 				switch (common::GetTeamFromModel(target)) {
 					case common::Team::T:
