@@ -169,6 +169,9 @@ namespace pokebot {
 
 		};
 
+		extern ConVar poke_freeze;
+		extern ConVar poke_fight;
+
 		struct ConVarReg {
 			cvar_t reg;
 			std::string info;

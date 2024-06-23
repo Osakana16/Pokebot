@@ -104,6 +104,7 @@ namespace pokebot {
 			look_direction.Clear();
 			ideal_direction.Clear();
 
+			danger_time.SetTime(0);
 			freeze_time.SetTime(g_engfuncs.pfnCVarGetFloat("mp_freezetime") + 1.0f);
 
 			start_action = Message::Buy;
@@ -142,6 +143,7 @@ namespace pokebot {
 				// the game will freeze.
 				
 				BehaviorUpdate();
+				CheckAround();
 			} 
 			
 			if (next_dest_node != node::Invalid_NodeID) {
@@ -149,7 +151,6 @@ namespace pokebot {
 					PressKey(ActionKey::Run);
 				}
 			}
-			CheckAround();
 		}
 
 		template<typename Array>
@@ -186,6 +187,10 @@ namespace pokebot {
 					default:
 						break;
 				}
+			}
+			
+			if (!game::poke_fight) {
+				entities[ENEMY].clear();
 			}
 			
 			if (!entities[MATE].empty()) {
