@@ -444,6 +444,15 @@ namespace pokebot {
 			Radios.at(Radio_Sentence)();
 		}
 
+		
+		void Bot::OnBombPlanted() noexcept {
+			switch (JoinedTeam()) {
+				case common::Team::CT:
+					goal_queue.Clear();
+					break;
+			}
+		}
+
 		void Manager::OnNewRound() {
 			for (auto& squad : squads) {
 				squad.clear();
@@ -453,6 +462,7 @@ namespace pokebot {
 			for (auto& bot : bots) {
 				bot.second.OnNewRound();
 			}
+			is_bomb_planted = false;
 		}
 
 		bool Manager::IsExist(const std::string& Bot_Name) const noexcept {
@@ -510,6 +520,7 @@ namespace pokebot {
 			if (bots.empty())
 				return;
 
+			if (!is_bomb_planted) {
 			bool is_bomb_found{};
 			edict_t* c4{};
 			while ((c4 = common::FindEntityByClassname(c4, "grenade")) != nullptr) {
@@ -520,6 +531,10 @@ namespace pokebot {
 				}
 			}
 			is_bomb_planted = is_bomb_found;
+				if (is_bomb_planted) {
+					OnBombPlanted();
+				}
+			}
 
 			for (auto& bot : bots) {
 				bot.second.Run();
@@ -542,6 +557,13 @@ namespace pokebot {
 		void Manager::Remove(const std::string& Bot_Name) noexcept {
 			if (auto bot_iterator = bots.find(Bot_Name); bot_iterator != bots.end()) {
 				bots.erase(Bot_Name);
+			}
+		}
+
+		
+		void Manager::OnBombPlanted() noexcept {
+			for (auto& bot : bots) {
+				bot.second.OnBombPlanted();
 			}
 		}
 

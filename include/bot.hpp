@@ -196,6 +196,8 @@ namespace pokebot {
 
 			void OnRadioRecieved(const std::string& Sender_Name, const std::string& Radio_Sentence) noexcept;
 
+			void OnBombPlanted() noexcept;
+
 			// -- Setters --
 
 			void SetGoal(const node::NodeID) noexcept;
@@ -290,6 +292,8 @@ namespace pokebot {
 			void OnChatRecieved(const std::string&) noexcept;
 			void OnTeamChatRecieved(const std::string&) noexcept;
 			void OnRadioRecieved(const std::string& Sender_Name, const std::string& Radio_Sentence) noexcept;
+
+			void OnBombPlanted() noexcept;
 
 			int SetupLonelySquad(const std::string&);
 			int SetupVipSquad(const std::string&);
