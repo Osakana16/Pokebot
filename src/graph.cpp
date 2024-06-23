@@ -399,14 +399,33 @@ namespace pokebot::node {
 		if (ifs.is_open()) {
 			char header[20];
 			ifs.read(header, sizeof(header));
-
-			while (!ifs.eof()) {
-				NodeID id{};
-				ifs.read(reinterpret_cast<char*>(&id), sizeof(id));
-				auto point = std::make_shared<Point>(Point{ {} });
-				point->Read(&ifs);
-				nodes.insert({ id, point });
-				points_tree[PointAsIndex(point->Origin().z)][PointAsIndex(point->Origin().y)][PointAsIndex(point->Origin().x)].push_back(id);
+			
+			// - Nodes -
+			{
+				size_t number_of_nodes{};
+				ifs.read(reinterpret_cast<char*>(&number_of_nodes), sizeof(number_of_nodes));
+				
+				for (size_t i = 0; i < number_of_nodes; i++) {
+					NodeID id{};
+					ifs.read(reinterpret_cast<char*>(&id), sizeof(id));
+					auto point = std::make_shared<Point>(Point{ {} });
+					point->Read(&ifs);
+					nodes.insert({ id, point });
+					points_tree[PointAsIndex(point->Origin().z)][PointAsIndex(point->Origin().y)][PointAsIndex(point->Origin().x)].push_back(id);
+				}
+			}
+						
+			// - Goals -
+			{
+				size_t number_of_goals{};
+				ifs.read(reinterpret_cast<char*>(&number_of_goals), sizeof(number_of_goals));
+				
+				std::pair<GoalKind, NodeID> goal{};
+				for (size_t i = 0; i < number_of_goals; i++) {
+					ifs.read(reinterpret_cast<char*>(&goal.second), sizeof(goal.second));
+					ifs.read(reinterpret_cast<char*>(&goal.first), sizeof(goal.first));
+					goals.insert(goal);
+				}
 			}
 			return true;
 		}
@@ -424,11 +443,27 @@ namespace pokebot::node {
 		if (ofs.is_open()) {
 			constexpr const char Header[20] = "POKEBOT_00000000000";
 			ofs.write(Header, sizeof(Header));
-			for (NodeID i = 0; i < nodes.size(); i++) {
-				// Save nodes.
-				if (auto it = nodes.find(i); it != nodes.end()) {
-					ofs.write(reinterpret_cast<const char*>(&i), sizeof(i));
-					std::static_pointer_cast<Point>(it->second)->Write(&ofs);
+
+			// - Nodes -
+			{
+				const size_t Number_Of_Nodes = nodes.size();
+				ofs.write(reinterpret_cast<const char*>(&Number_Of_Nodes), sizeof(Number_Of_Nodes));
+				for (auto& node : nodes) {
+					ofs.write(reinterpret_cast<const char*>(&node.first), sizeof(node.first));
+					std::static_pointer_cast<Point>(node.second)->Write(&ofs);
+				}
+			}
+
+			// - Goals -
+			{
+				const size_t Number_Of_Goals = goals.size();
+				ofs.write(reinterpret_cast<const char*>(&Number_Of_Goals), sizeof(Number_Of_Goals));
+				for (auto goal_kind : All_Goal_List) {
+					auto goals = GetGoal(goal_kind);
+					for (auto goal = goals.first; goal != goals.second; goal++) {
+						ofs.write(reinterpret_cast<const char*>(&goal->second), sizeof(goal->second));
+						ofs.write(reinterpret_cast<const char*>(&goal->first), sizeof(goal->first));
+					}
 				}
 			}
 			return true;
