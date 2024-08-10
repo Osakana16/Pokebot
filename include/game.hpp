@@ -171,6 +171,7 @@ namespace pokebot {
 
 		extern ConVar poke_freeze;
 		extern ConVar poke_fight;
+		extern ConVar poke_buy;
 
 		struct ConVarReg {
 			cvar_t reg;
