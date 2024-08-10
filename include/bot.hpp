@@ -268,8 +268,7 @@ namespace pokebot {
 		};
 
 		inline class Manager {
-			Vector c4_origin{};
-			bool is_bomb_planted{};
+			std::optional<Vector> c4_origin{};
 
 			friend class pokebot::message::MessageDispatcher;
 			std::unordered_map<std::string, Bot> bots{};
@@ -319,8 +318,7 @@ namespace pokebot {
 
 			// --
 
-			const bool& Is_Bomb_Planted = is_bomb_planted;
-			const Vector& C4_Origin = c4_origin;
+			const std::optional<Vector>& C4Origin() const noexcept { return c4_origin; }
 		} manager{};
 	}
 }

@@ -462,7 +462,7 @@ namespace pokebot {
 			for (auto& bot : bots) {
 				bot.second.OnNewRound();
 			}
-			is_bomb_planted = false;
+			c4_origin = std::nullopt;
 		}
 
 		bool Manager::IsExist(const std::string& Bot_Name) const noexcept {
@@ -520,18 +520,15 @@ namespace pokebot {
 			if (bots.empty())
 				return;
 
-			if (!is_bomb_planted) {
-			bool is_bomb_found{};
+			if (!c4_origin.has_value()) {
 			edict_t* c4{};
 			while ((c4 = common::FindEntityByClassname(c4, "grenade")) != nullptr) {
 				if (std::string(STRING(c4->v.model)) == "models/w_c4.mdl") {
-					is_bomb_found = true;
 					c4_origin = c4->v.origin;
 					break;
 				}
 			}
-			is_bomb_planted = is_bomb_found;
-				if (is_bomb_planted) {
+				if (c4_origin.has_value()) {
 					OnBombPlanted();
 				}
 			}
