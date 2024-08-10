@@ -5,7 +5,7 @@
 #define BEHAVIOR_IFELSE_TEMPLATE(IF,A_PROCESS,B_PROCESS) Condition::If(IF<true>, A_PROCESS), Condition::If(IF<false>, B_PROCESS)
 
 
-#define RETURN_BEHAVIOR_TRUE_OR_FALSE(B,PROCESS) if constexpr (B) return PROCESS; else return !PROCESS
+#define RETURN_BEHAVIOR_TRUE_OR_FALSE(B,PROCESS) if constexpr (B) return (PROCESS); else return !(PROCESS)
 
 #define BEHAVIOR_CREATE(TYPE,NAME) std::shared_ptr<TYPE> NAME = TYPE::Create(#NAME)
 
@@ -15,7 +15,8 @@ namespace pokebot::bot {
 			Not_Ready,	// Cannot start the behavior because of the invalid parameter.
 			Executed,	// 
 			Enough,		// Need not to execute the behavior.
-			Failed		// A part of behavior process is executed but failed.
+			Failed,		// A part of behavior process is executed but failed.
+			Completed	// All behaviors are executed successfully. This should be used by Priority, Sequence, Random.
 		};
 
 		void DefineBehavior();
@@ -27,6 +28,7 @@ namespace pokebot::bot {
 		using Activator = std::function<bool(const Bot* const)>;
 
 		class BehaviorNode {
+		protected:
 			std::string_view name{};
 		public:
 			BehaviorNode(std::string_view self_name) : name(self_name) {}
@@ -44,15 +46,17 @@ namespace pokebot::bot {
 
 		class Sequence : public BehaviorNode {
 			std::vector<std::shared_ptr<BehaviorNode>> children;
+			Status completed_result{};
 		public:
 			Status Evalute(Bot* const self) override {
+				// SERVER_PRINT(std::format("{}\n", name).c_str());
 				for (auto child : children) {
 					switch (child->Evalute(self)) {
 						case Status::Not_Ready:
 							return Status::Not_Ready;
 					}
 				}
-				return Status::Executed;
+				return completed_result;
 			}
 
 			using BehaviorNode::BehaviorNode;
@@ -62,12 +66,14 @@ namespace pokebot::bot {
 				children = behaviors;
 			}
 
-			static std::shared_ptr<Sequence> Create() {
-				return std::make_shared<Sequence>("Sequence");
+			static std::shared_ptr<Sequence> Create(const char* const Name, Status completed_result) {
+				auto node = std::make_shared<Sequence>(Name);
+				node->completed_result = completed_result;
+				return node;
 			}
 
 			static std::shared_ptr<Sequence> Create(std::initializer_list<std::shared_ptr<BehaviorNode>> behaviors) {
-				auto result = Create();
+				auto result = Create("Sequence", Status::Executed);
 				result->Define(behaviors);
 				return result;
 			}
@@ -75,10 +81,12 @@ namespace pokebot::bot {
 
 		class Priority : public BehaviorNode {
 			std::vector<std::shared_ptr<BehaviorNode>> children;
+			Status completed_result{};
 		public:
 			using BehaviorNode::BehaviorNode;
 
 			Status Evalute(Bot* const self) override {
+				// SERVER_PRINT(std::format("{}\n", name).c_str());
 				for (auto child : children) {
 					switch (child->Evalute(self)) {
 						case Status::Not_Ready:
@@ -88,7 +96,7 @@ namespace pokebot::bot {
 					}
 					break;
 				}
-				return Status::Executed;
+				return completed_result;
 			}
 
 			void Define(std::initializer_list<std::shared_ptr<BehaviorNode>> behaviors) {
@@ -96,12 +104,14 @@ namespace pokebot::bot {
 				children = behaviors;
 			}
 
-			static std::shared_ptr<Priority> Create() {
-				return std::make_shared<Priority>("Priority");
+			static std::shared_ptr<Priority> Create(const char* const Name, Status completed_result) {
+				auto node = std::make_shared<Priority>(Name);
+				node->completed_result = completed_result;
+				return node;
 			}
 
 			static std::shared_ptr<Priority> Create(std::initializer_list<std::shared_ptr<BehaviorNode>> behaviors) {
-				auto result = Create();
+				auto result = Create("Priority", Status::Executed);
 				result->Define(behaviors);
 				return result;
 			}
@@ -109,13 +119,15 @@ namespace pokebot::bot {
 
 		class Random : public BehaviorNode {
 			std::vector<std::shared_ptr<BehaviorNode>> children;
+			Status completed_result{};
 		public:
 			using BehaviorNode::BehaviorNode;
 
 			Status Evalute(Bot* const self) override{
+				// SERVER_PRINT(std::format("{}\n", name).c_str());
 				static auto index = common::Random<int>(0, children.size() - 1);
 				for (int i = index; children[i]->Evalute(self) == Status::Failed; i = index);
-				return Status::Executed;
+				return completed_result;
 			}
 
 			void Define(std::initializer_list<std::shared_ptr<BehaviorNode>> behaviors) {
@@ -123,12 +135,14 @@ namespace pokebot::bot {
 				children = behaviors;
 			}
 
-			static std::shared_ptr<Random> Create() {
-				return std::make_shared<Random>("Random");
+			static std::shared_ptr<Random> Create(const char* const Name, Status completed_result) {
+				auto node = std::make_shared<Random>(Name);
+				node->completed_result = completed_result;
+				return node;
 			}
 
 			static std::shared_ptr<Random> Create(std::initializer_list<std::shared_ptr<BehaviorNode>> behaviors) {
-				auto result = Create();
+				auto result = Create("Random", Status::Executed);
 				result->Define(behaviors);
 				return result;
 			}
@@ -137,19 +151,19 @@ namespace pokebot::bot {
 		class Condition : public BehaviorNode {
 			std::shared_ptr<BehaviorNode> child{};
 			Activator CanActive;
+			Status completed_result{};
 		public:
 			Status Evalute(Bot* const self) override {
 				if (CanActive(self)) {
 					return child->Evalute(self);
 				}
-				return Status::Not_Ready;
+				return completed_result;
 			}
 
-			Condition(Activator activator, std::shared_ptr<BehaviorNode> behavior) : BehaviorNode("If"), CanActive(activator), child(behavior) {}
+			Condition(Activator activator, Status result, std::shared_ptr<BehaviorNode> behavior) : BehaviorNode("If"), CanActive(activator), child(behavior), completed_result(result) {}
 
-			static std::shared_ptr<Condition> If(Activator activator, std::shared_ptr<BehaviorNode> behavior) {
-				return std::make_shared<Condition>(activator, behavior); 
-			}
+			static std::shared_ptr<Condition> If(Activator activator, std::shared_ptr<BehaviorNode> behavior) { return std::make_shared<Condition>(activator, Status::Not_Ready, behavior);  }
+			static std::shared_ptr<Condition> If(Activator activator, Status result, std::shared_ptr<BehaviorNode> behavior) { return std::make_shared<Condition>(activator, result, behavior);  }
 		};
 
 		class Action : public BehaviorNode {
@@ -158,6 +172,7 @@ namespace pokebot::bot {
 			using BehaviorNode::BehaviorNode;
 
 			Status Evalute(Bot* const self) noexcept override {
+				// SERVER_PRINT(std::format("{}\n", name).c_str());
 				return action(self);
 			}
 			
@@ -212,21 +227,9 @@ namespace pokebot::bot {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->IsFighting());
 		}
 
-		template<bool b, node::GoalKind kind>
-		bool IsOnGoal(const Bot* const Self) {
-			bool is_on_a_goal{};
-			auto goals = node::world.GetGoal(kind);
-			for (auto goal = goals.first; goal != goals.second; goal++) {
-				if ((is_on_a_goal = node::world.IsOnNode(Self->Origin(), goal->second))) {
-					break;
-				}
-			}
-			return is_on_a_goal;
-		}
-
 		template<bool b>
 		bool IsBombPlanted(const Bot* const Self) {
-			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, manager.Is_Bomb_Planted);
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, manager.C4Origin().has_value());
 		}
 
 		template<bool b>
@@ -236,7 +239,7 @@ namespace pokebot::bot {
 
 		template<bool b>
 		bool IsOnBomb(const Bot* const Self) noexcept {
-			return false;
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (common::Distance(Self->Origin(), *manager.C4Origin()) <= 50.0f));
 		}
 
 		template<bool b>
@@ -306,6 +309,11 @@ namespace pokebot::bot {
 			} else {
 				return Self->squad == -1;
 			}
+		}
+
+		template<game::MapFlags flag>
+		bool IsCurrentMode(const Bot* const Self) noexcept {
+			return game::game.IsCurrentMode(flag);
 		}
 
 		template<bool b>

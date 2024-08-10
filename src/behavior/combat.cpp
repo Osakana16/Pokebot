@@ -2,21 +2,21 @@
 
 namespace pokebot::bot::behavior {
 	namespace fight {
-		std::shared_ptr<Priority> while_spotting_enemy = Priority::Create();
-		std::shared_ptr<Sequence> beat_enemies = Sequence::Create();
-		std::shared_ptr<Sequence> try_to_lose_sight = Sequence::Create();		// Try to lose the sight from the enemy
+		std::shared_ptr<Priority> while_spotting_enemy = Priority::Create("fight::while_spotting_enemy", Status::Executed);
+		std::shared_ptr<Sequence> beat_enemies = Sequence::Create("fight::beat_enemies", Status::Executed);
+		std::shared_ptr<Sequence> try_to_lose_sight = Sequence::Create("fight::try_to_lose_sight", Status::Executed);		// Try to lose the sight from the enemy
 
-		std::shared_ptr<Priority> pick_best_weapon = Priority::Create();
+		std::shared_ptr<Priority> pick_best_weapon = Priority::Create("fight::pick_best_weapon", Status::Executed);
 
-		std::shared_ptr<Priority> while_losing_enemy = Priority::Create();
-		std::shared_ptr<Sequence> try_to_find = Sequence::Create();
+		std::shared_ptr<Priority> while_losing_enemy = Priority::Create("fight::while_losing_enemy", Status::Executed);
+		std::shared_ptr<Sequence> try_to_find = Sequence::Create("fight::try_to_find", Status::Executed);
 
-		std::shared_ptr<Sequence> flee = Sequence::Create();
+		std::shared_ptr<Sequence> flee = Sequence::Create("fight::flee", Status::Executed);
 		
-		std::shared_ptr<Priority> decide_firing = Priority::Create();
+		std::shared_ptr<Priority> decide_firing = Priority::Create("fight::decide_firing", Status::Executed);
 
-		std::shared_ptr<Priority> one_tap_fire = Priority::Create();
-		std::shared_ptr<Priority> full_burst_fire = Priority::Create();
+		std::shared_ptr<Priority> one_tap_fire = Priority::Create("fight::one_tap_fire", Status::Executed);
+		std::shared_ptr<Priority> full_burst_fire = Priority::Create("fight::full_burst_fire", Status::Executed);
 	}
 
 	namespace {
@@ -32,9 +32,9 @@ namespace pokebot::bot::behavior {
 		template<bool b>
 		bool HasCrisis(const bot::Bot* const Self) noexcept {
 			if constexpr (b) {
-				return !HasGuns(Self);
+				return !Self->IsGoodCondition();
 			} else {
-				return HasGuns(Self);
+				return Self->IsGoodCondition();
 			}
 		}
 
@@ -60,7 +60,8 @@ namespace pokebot::bot::behavior {
 
 		fight::try_to_lose_sight->Define
 		({
-
+			set_goal_ctspawn,
+			head_and_discard_goal
 		});
 
 		fight::while_losing_enemy->Define

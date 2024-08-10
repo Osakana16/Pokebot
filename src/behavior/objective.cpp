@@ -3,59 +3,46 @@
 namespace pokebot::bot::behavior {
 	// - DEmolition Behaviors - 
 	namespace demolition {
-		std::shared_ptr<Priority> objective = Priority::Create();
-		BEHAVIOR_PRIVATE {
-			std::shared_ptr<Sequence> t_plant = Sequence::Create();
-			std::shared_ptr<Sequence> t_defusing = Sequence::Create();
-			std::shared_ptr<Sequence> ct_planted = Sequence::Create();
-			std::shared_ptr<Sequence> ct_defusing = Sequence::Create();
-			std::shared_ptr<Sequence> blow = Sequence::Create();
-		}
+		std::shared_ptr<Priority> objective = Priority::Create("demolition::objective", Status::Executed);
+		std::shared_ptr<Priority> t_plant = Priority::Create("demolition::t_plant", Status::Executed);
+		std::shared_ptr<Priority> t_defusing = Priority::Create("demolition::t_defusing", Status::Executed);
+		std::shared_ptr<Priority> ct_planted = Priority::Create("demolition::ct_planted", Status::Executed);
+		std::shared_ptr<Priority> ct_defusing = Priority::Create("demolition::ct_defusing", Status::Executed);
+		std::shared_ptr<Priority> blow = Priority::Create("demolition::blow", Status::Executed);
 	}
 
 	// - Rescue Behaviors -
 	namespace rescue {
-		std::shared_ptr<Priority> objective = Priority::Create();
-		BEHAVIOR_PRIVATE {
-			std::shared_ptr<Sequence> ct_try = Sequence::Create();
-			std::shared_ptr<Sequence> ct_leave = Sequence::Create();
-			std::shared_ptr<Sequence> lead_hostage = Sequence::Create();
-		}
+		std::shared_ptr<Priority> objective = Priority::Create("rescue::objective", Status::Executed);
+		std::shared_ptr<Sequence> ct_try = Sequence::Create("rescue::ct_try", Status::Executed);
+		std::shared_ptr<Sequence> ct_leave = Sequence::Create("rescue::ct_leave", Status::Executed);
+		std::shared_ptr<Sequence> lead_hostage = Sequence::Create("rescue::lead_hostage", Status::Executed);
 	}
 
 	// - ASsasination Behaviors -
 	namespace assist {
-		std::shared_ptr<Priority> objective = Priority::Create();
-		BEHAVIOR_PRIVATE {
-			std::shared_ptr<Sequence> ct_cover = Sequence::Create();
-			std::shared_ptr<Sequence> ct_take_point = Sequence::Create();
-			std::shared_ptr<Sequence> ct_vip_escape = Sequence::Create();
-		}
+		std::shared_ptr<Priority> objective = Priority::Create("assist::objective", Status::Executed);
+		std::shared_ptr<Sequence> ct_cover = Sequence::Create("assist::ct_cover", Status::Executed);
+		std::shared_ptr<Sequence> ct_take_point = Sequence::Create("assist::ct_take_point", Status::Executed);
+		std::shared_ptr<Sequence> ct_vip_escape = Sequence::Create("assist::ct_vip_escape", Status::Executed);
 	}
 	
 	// - EScape Behaviors -
 	namespace escape {
-		std::shared_ptr<Priority> objective = Priority::Create();
-		BEHAVIOR_PRIVATE {
-			std::shared_ptr<Sequence> t_get_primary = Sequence::Create();
-			std::shared_ptr<Sequence> t_take_point = Sequence::Create();
-		}
+		std::shared_ptr<Priority> objective = Priority::Create("escape::objective", Status::Executed);
+		std::shared_ptr<Sequence> t_get_primary = Sequence::Create("escape::t_get_primary", Status::Executed);
+		std::shared_ptr<Sequence> t_take_point = Sequence::Create("escape::t_take_point", Status::Executed);
 	}
 
 	namespace coop {
-		std::shared_ptr<Sequence> objective = Sequence::Create();
+		std::shared_ptr<Sequence> objective = Sequence::Create("coop::t_take_point", Status::Executed);
 	}
 
 	namespace elimination {
-		std::shared_ptr<Priority> objective = Priority::Create();
+		std::shared_ptr<Priority> objective = Priority::Create("elimination::objective", Status::Executed);
 	}
-	std::shared_ptr<Sequence> t_ordinary = Sequence::Create();
-	std::shared_ptr<Sequence> ct_ordinary = Sequence::Create();
-
-	template<node::GoalKind kind>
-	bool CanGo(const Bot* const Self) noexcept {
-		return !IsOnGoal<true, kind>(Self);
-	}
+	std::shared_ptr<Sequence> t_ordinary = Sequence::Create("elimination::t_ordinary", Status::Executed);
+	std::shared_ptr<Sequence> ct_ordinary = Sequence::Create("elimination::ct_ordinary", Status::Executed);
 
 	template<bool b>
 	bool IsEnoughToRescueHostage(const Bot* const Self) noexcept {
@@ -140,9 +127,13 @@ namespace pokebot::bot::behavior {
 		demolition::t_plant->Define
 		({
 			set_goal_bombspot,
-			head_and_discard_goal,
-			change_c4,
-			fire
+			After<Status::Enough>::With(
+				head_and_discard_goal, Priority::Create(
+				{
+					change_c4,
+					fire					
+				})
+			)
 		});
 
 		demolition::t_defusing->Define
@@ -152,8 +143,7 @@ namespace pokebot::bot::behavior {
 
 		demolition::ct_defusing->Define
 		({
-			look_c4,
-			use
+			After<Status::Enough>::With(look_c4, use)
 		});
 
 		demolition::ct_planted->Define
@@ -241,15 +231,25 @@ namespace pokebot::bot::behavior {
 
 		t_ordinary->Define
 		({
-			Condition::If(CanGo<node::GoalKind::Terrorist_Spawn>, set_goal_ctspawn),
-			Condition::If(CanGo<node::GoalKind::CT_Spawn>, set_goal_tspawn),
+			Priority::Create
+			(
+				{
+					set_goal_tspawn,
+					set_goal_ctspawn
+				}
+			),
 			head_and_discard_goal
 		});
 
 		ct_ordinary->Define
 		({
-			Condition::If(CanGo<node::GoalKind::Terrorist_Spawn>, set_goal_tspawn),
-			Condition::If(CanGo<node::GoalKind::CT_Spawn>, set_goal_ctspawn),
+			Priority::Create
+			(
+				{
+					set_goal_tspawn,
+					set_goal_ctspawn
+				}
+			),
 			head_and_discard_goal
 		});
 	}

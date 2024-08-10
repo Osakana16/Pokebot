@@ -2,15 +2,15 @@
 
 namespace pokebot::bot {
 	namespace behavior {
-		std::shared_ptr<Priority> team = Priority::Create();
-		std::shared_ptr<Priority> combat = Priority::Create();
-		std::shared_ptr<Priority> mission = Priority::Create();
-		std::shared_ptr<Priority> root = Priority::Create();
+		std::shared_ptr<Priority> team = Priority::Create("behavior::team", Status::Completed);
+		std::shared_ptr<Priority> combat = Priority::Create("behavior::combat", Status::Completed);
+		std::shared_ptr<Priority> mission = Priority::Create("behavior::mission", Status::Completed);
+		std::shared_ptr<Priority> root = Priority::Create("root", Status::Completed);
 		std::shared_ptr<Action> breakpoint = Action::Create("breakpoint");
 
 		namespace {
-			std::shared_ptr<Priority> be_squad_leader = Priority::Create();
-			std::shared_ptr<Priority> join_squad = Priority::Create();
+			std::shared_ptr<Priority> be_squad_leader = Priority::Create("be_squad_leader", Status::Executed);
+			std::shared_ptr<Priority> join_squad = Priority::Create("join_squad", Status::Executed);
 
 			template<bool b>
 			bool IsSeeingEnemy(const Bot* const Self) noexcept {
@@ -81,7 +81,7 @@ namespace pokebot::bot {
 		void DefineBehavior() {
 			root->Define
 			({
-				Condition::If(IsJoinedSquad<false>, team),
+				Condition::If(Always<false>, team),
 				Condition::If(HasEnemy<true>, combat),
 				Condition::If(Always<true>, mission)
 			 });
@@ -99,31 +99,23 @@ namespace pokebot::bot {
 			mission->Define
 			({
 				Condition::If(
-					IsFollower<true>,
+					Always<false>,
 					coop::objective
 				),
 				Condition::If(
-					[](const Bot* const self) {
-						return game::game.IsCurrentMode(game::MapFlags::Demolition);
-					},
+					IsCurrentMode<game::MapFlags::Demolition>,
 					demolition::objective
 				),
 				Condition::If(
-					[](const Bot* const self) {
-						return game::game.IsCurrentMode(game::MapFlags::HostageRescue);
-					},
+					IsCurrentMode<game::MapFlags::HostageRescue>,
 					rescue::objective
 				),
 				Condition::If(
-					[](const Bot* const self) {
-						return game::game.IsCurrentMode(game::MapFlags::Assassination);
-					},
+					IsCurrentMode<game::MapFlags::Assassination>,
 					assist::objective
 				),
 				Condition::If(
-					[](const Bot* const self) {
-						return game::game.IsCurrentMode(game::MapFlags::Escape);
-					},
+					IsCurrentMode<game::MapFlags::Escape>,
 					escape::objective
 				),
 				elimination::objective
