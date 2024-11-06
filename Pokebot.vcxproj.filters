@@ -89,6 +89,9 @@
     <ClCompile Include="src\behavior\combat.cpp">
       <Filter>src\behavior</Filter>
     </ClCompile>
+    <ClCompile Include="src\pokebot.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="res\README.txt">

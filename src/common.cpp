@@ -1,13 +1,13 @@
 #include <sstream>
-
-extern int Beam_Sprite;
+#include "plugin.hpp"
 
 namespace pokebot::common {
 	AngleVector PositionVector::ToAngleVector(const Vector& Origin) const noexcept {
 		float vecout[3]{};
 		Vector angle = *this - Origin;
 		VEC_TO_ANGLES(angle, vecout);
-		return AngleVector(vecout);
+		auto result = AngleVector(vecout);
+		return result;
 	}
 
 
@@ -44,7 +44,7 @@ namespace pokebot::common {
 		WRITE_COORD(start.x);
 		WRITE_COORD(start.y);
 		WRITE_COORD(start.z);
-		WRITE_SHORT(Beam_Sprite);
+		WRITE_SHORT(pokebot::plugin::pokebot_plugin.BeamSprite());
 		WRITE_BYTE(0); // framestart
 		WRITE_BYTE(10); // framerate
 		WRITE_BYTE(life); // life in 0.1's

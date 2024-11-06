@@ -14,10 +14,6 @@ meta_globals_t* gpMetaGlobals;
 
 DLL_FUNCTIONS func_table;
 DLL_FUNCTIONS gFunctionTable_Post;
-bool draw_node = false;
-int Beam_Sprite;
-
-edict_t* pWorldEntity;
 
 META_FUNCTIONS gMetaFunctionTable{
     nullptr, // pfnGetEntityAPI()
@@ -111,118 +107,7 @@ C_DLLEXPORT int Meta_Attach(PLUG_LOADTIME now, META_FUNCTIONS* pFunctionTable, m
 
     pokebot::bot::behavior::DefineBehavior();
 
-    static auto GetArgs = []() {
-        static std::vector<std::string> args{};
-        for (int i = 1; ; i++) {
-            auto arg = CMD_ARGV(i);
-            if (arg == nullptr || strlen(arg) <= 0) {
-                break;
-            }
-            args.push_back(arg);
-        }
-        return std::move(args);
-    };
-
-    REG_SVR_COMMAND(
-        "pk_add",
-        [] {
-            auto args = GetArgs();
-
-            std::string name = "FirstBot";
-            pokebot::common::Team team = (pokebot::common::Team)(int)pokebot::common::Random<int>(1, 2);
-            pokebot::common::Model model = (pokebot::common::Model)(int)pokebot::common::Random<int>(1, 4);
-            if (args.size() >= 1) {
-                name = args[0];
-            }
-
-            if (args.size() >= 2) {
-                if (args[1] == "1" || args[1] == "T" || args[1] == "t") {
-                    team = pokebot::common::Team::T;
-                } else if (args[1] == "2" || args[1] == "CT" || args[1] == "ct") {
-                    team = pokebot::common::Team::CT;
-                }
-            }
-
-            if (args.size() >= 3) {
-                model = static_cast<decltype(model)>(std::strtol(args[2].c_str(), nullptr, 0) % 4);
-            }
-            pokebot::plugin::pokebot_plugin.AddBot(name, team, model);
-        }
-    );
-
-    REG_SVR_COMMAND(
-        "pk_add_ct",
-        [] {
-            auto args = GetArgs();
-
-            std::string name = "FirstBot";
-            pokebot::common::Team team = pokebot::common::Team::CT;
-            pokebot::common::Model model = (pokebot::common::Model)(int)pokebot::common::Random<int>(1, 4);
-            if (args.size() >= 1) {
-                name = args[0];
-            }
-
-            if (args.size() >= 2) {
-                model = static_cast<decltype(model)>(std::strtol(args[1].c_str(), nullptr, 0) % 4);
-            }
-            pokebot::plugin::pokebot_plugin.AddBot(name, team, model);
-        }
-    );
-
-    REG_SVR_COMMAND(
-        "pk_add_t",
-        [] {
-            auto args = GetArgs();
-
-            std::string name = "FirstBot";
-            pokebot::common::Team team = pokebot::common::Team::T;
-            pokebot::common::Model model = (pokebot::common::Model)(int)pokebot::common::Random<int>(1, 4);
-            if (args.size() >= 1) {
-                name = args[0];
-            }
-
-            if (args.size() >= 2) {
-                model = static_cast<decltype(model)>(std::strtol(args[1].c_str(), nullptr, 0) % 4);
-            }
-            pokebot::plugin::pokebot_plugin.AddBot(name, team, model);
-        }
-    );
-
-    REG_SVR_COMMAND(
-        "pk_auto_waypoint",
-        [] {
-            pokebot::game::is_enabled_auto_waypoint = !pokebot::game::is_enabled_auto_waypoint;        
-        }
-    );
-
-    REG_SVR_COMMAND(
-        "pk_draw_waypoint",
-        [] {
-            draw_node = !draw_node;
-        }
-    );
-
-    REG_SVR_COMMAND(
-        "pk_kill",
-        [] {
-            auto args = GetArgs();  
-            using namespace pokebot;
-            MDLL_ClientKill(*game::game.clients.Get(args[0]));
-        }
-    );
-
-    REG_SVR_COMMAND(
-        "pk_kill_t",
-        [] {
-                    
-        }
-    );
-
-    REG_SVR_COMMAND(
-        "pk_kill_ct",
-        [] {
-        }
-    );
+    pokebot::plugin::pokebot_plugin.RegisterCommand();
 
     // print a message to notify about plugin attaching
     LOG_CONSOLE(PLID, "%s: plugin attaching", Plugin_info.name);
@@ -263,20 +148,9 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
             is_game_completely_initialized = false;
         }
 
-        if (draw_node)
-            pokebot::node::world.Draw();
-#if 0
-        {
-            auto host = pokebot::game::game.GetHost();
-            if (host != nullptr) {
-                TraceResult tr{};
-                TRACE_HULL(host->v.origin, host->v.origin + Vector(50, 0, 0), IGNORE_MONSTERS::ignore_monsters, HULL_TYPE::point_hull, nullptr, &tr);
-                if (tr.flFraction < 1.0 && tr.pHit != nullptr) {
-                    SERVER_PRINT(std::format("{}\n", STRING(tr.pHit->v.classname)).c_str());
-                }
-            }
+        if (pokebot::game::game.host.AsEdict() != nullptr) {
+            // DEBUG_PRINTF("weaponanim={}\n", pokebot::game::game.host.AsEdict()->v.weaponanim);
         }
-#endif
 
         pokebot::plugin::pokebot_plugin.OnUpdate();
         RETURN_META(MRES_IGNORED);
@@ -289,14 +163,9 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
     };
 
     func_table.pfnSpawn = [](edict_t* entity) -> int {
-        std::string classname = STRING(entity->v.classname);
-        if (entity->v.rendermode == kRenderTransTexture) {
-            entity->v.flags &= ~FL_WORLDBRUSH; // clear the FL_WORLDBRUSH flag out of transparent ents
-        }
-        if (classname == "worldspawn") {
-            pWorldEntity = entity;
-            Beam_Sprite = PRECACHE_MODEL("sprites/laserbeam.spr");
-        }
+        pokebot::plugin::pokebot_plugin.AppendSpawnedEntity(entity);
+		pokebot::plugin::pokebot_plugin.OnEntitySpawned();
+
         RETURN_META_VALUE(MRES_IGNORED, 0);
     };
 
@@ -306,6 +175,7 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
             if (strcmp(Address, "loopback") == 0) {
                 // save the edict of the listen server client...
                 pokebot::game::game.host.SetHost(entity);
+                pokebot::game::game.clients.Register(entity);
                 is_game_completely_initialized = true;
             }
         }
@@ -313,7 +183,8 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
     };
 
     func_table.pfnClientDisconnect = [](edict_t* entity) -> void {
-        pokebot::bot::manager.Remove(STRING(entity->v.netname));
+        pokebot::plugin::pokebot_plugin.AppendDisconnectedClient(entity);
+        pokebot::plugin::pokebot_plugin.OnClientDisconnect();
         RETURN_META(MRES_IGNORED);
     };
 
@@ -324,6 +195,7 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
     func_table.pfnServerActivate = [](edict_t* edictList, int edictCount, int) -> void {
         pokebot::node::world.Clear();
         pokebot::game::game.Init(edictList, edictCount);
+        RETURN_META(MRES_IGNORED);
     };
 
     func_table.pfnClientCommand = [](edict_t*) -> void {
@@ -344,15 +216,4 @@ C_DLLEXPORT int GetEntityAPI2_Post(DLL_FUNCTIONS* pFunctionTable, int* interface
     };
     memcpy(pFunctionTable, &gFunctionTable_Post, sizeof(DLL_FUNCTIONS));
     return (TRUE);
-}
-
-namespace pokebot::plugin {
-    void Pokebot::OnUpdate() noexcept {
-        pokebot::game::game.Update();
-        pokebot::bot::manager.Update();
-    }
-
-    void Pokebot::AddBot(const std::string& Bot_Name, const common::Team Selected_Team, const common::Model Selected_Model) POKEBOT_DEBUG_NOEXCEPT {
-        pokebot::bot::manager.Insert(Bot_Name, Selected_Team, Selected_Model);
-    }
 }
