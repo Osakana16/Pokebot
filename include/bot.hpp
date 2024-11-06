@@ -186,7 +186,7 @@ namespace pokebot {
 			Bot(std::shared_ptr<game::Client>, const common::Team, const common::Model) POKEBOT_DEBUG_NOEXCEPT;
 
 			void OnNewRound() POKEBOT_DEBUG_NOEXCEPT;
-			void Run() noexcept;
+			void Run() POKEBOT_DEBUG_NOEXCEPT;
 
 			void SelectWeapon(const game::Weapon);
 

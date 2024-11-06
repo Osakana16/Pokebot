@@ -12,7 +12,7 @@ namespace pokebot {
 			return static_cast<ActionKey>(static_cast<int>(ak1) ^ static_cast<int>(ak2));
 		}
 
-		void Bot::Run() noexcept {
+		void Bot::Run() POKEBOT_DEBUG_NOEXCEPT {
 			const static std::unordered_map<Message, std::function<void(Bot&)>> Update_Funcs{
 				{ Message::Team_Select, &Bot::SelectionUpdate },
 				{ Message::Model_Select, &Bot::SelectionUpdate },
@@ -20,11 +20,13 @@ namespace pokebot {
 				{ Message::Normal, &Bot::NormalUpdate }
 			};
 
+			if (*client == nullptr)
+				return; 
 			client->Edict()->v.flags |= pokebot::common::Third_Party_Bot_Flag;
 			auto update = Update_Funcs.at(start_action);
 			update(*this);
-
 			frame_interval = gpGlobals->time - last_command_time;
+
 			const std::uint8_t Msec_Value = ComputeMsec();
 			last_command_time = gpGlobals->time;
 			g_engfuncs.pfnRunPlayerMove(*client,
