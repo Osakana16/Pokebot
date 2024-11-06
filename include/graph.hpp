@@ -117,7 +117,7 @@ namespace pokebot::node {
 		CT_Spawn,
 		Bombspot,
 		Rescue_Zone,
-		Esacpe_Zone,
+		Escape_Zone,
 		Vip_Safety,
 		C4
 	};

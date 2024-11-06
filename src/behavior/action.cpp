@@ -271,7 +271,7 @@ namespace pokebot::bot::behavior {
 
 		set_goal_escapezone->Define(
 			[](Bot* const self) -> Status {
-				return SetGoal<node::GoalKind::Esacpe_Zone>(self);
+				return SetGoal<node::GoalKind::Escape_Zone>(self);
 			}
 		);
 
