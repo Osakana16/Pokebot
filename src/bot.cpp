@@ -51,37 +51,25 @@ namespace pokebot {
 				return (angle > destination ? std::clamp(angle, destination, angle) : std::clamp(angle, angle, destination));
 			};
 
-			auto CalculateNextAngle = [](const float dest, const float angle) {
-				auto next = dest - angle;
-				if (next < -180.0f)
-					next = -180.0f;
-				else if (next > 180.0f)
-					next = 180.0f;
-				return next;
+			auto CalculateNextAngle = [](const float dest, const float angle) noexcept {
+				return std::clamp(dest - angle, -180.0f, 180.0f);
 			};
-
-			if (common::Distance2D(destination, client->v_angle) <= 1.0f) {
-				return;
-			}
-			destination.x *= -1;
 
 			constexpr float Base_Frame = 30.0f;
 			constexpr float Sensitivity = 1.0f;
 			const common::AngleVector Next_Angle = { 
 				CalculateNextAngle(destination.x, client->v_angle.x) / (Base_Frame - Sensitivity),
 				CalculateNextAngle(destination.y, client->v_angle.y) / (Base_Frame - Sensitivity),
-				CalculateNextAngle(destination.z, client->v_angle.z) / (Base_Frame - Sensitivity)
+				0.0
 			};
 
-			client->v_angle.x += Next_Angle.x;
+			client->v_angle.x = destination.x;
 			client->v_angle.y += Next_Angle.y;
-			client->v_angle.z += Next_Angle.z;
-			client->v_angle.x = AngleClamp(client->v_angle.x, destination.x);
 			client->v_angle.y = AngleClamp(client->v_angle.y, destination.y);
-			client->v_angle.z = AngleClamp(client->v_angle.z, destination.z);
 #else
 			client->v_angle = destination;
 #endif
+			client->v_angle.z = 0.0f;
 			client->angles.x = client->v_angle.x;
 			client->angles.y = client->v_angle.y;
 			client->v_angle.x = -client->v_angle.x;
@@ -285,25 +273,39 @@ namespace pokebot {
 		}
 
 		void Bot::LookAtClosestEnemy() {
+			if (entities[ENEMY].empty()) {
+				return;
+			}
 			const auto Enemy_Distances = std::move(SortedDistances(Origin(), entities[ENEMY]));
 			const auto& Nearest_Enemy = entities[ENEMY][Enemy_Distances.begin()->second];
-			look_direction.view = Nearest_Enemy->v.origin;
+			look_direction.view = Nearest_Enemy->v.origin - Vector(20.0f, 0, 0) + manager.GetCompensation(Name().data());
 		}
 
 		bool Bot::IsLookingAtEnemy() const noexcept {
+			if (entities[ENEMY].empty()) {
+				return false;
+			}
+
 			const auto Enemy_Distances = std::move(SortedDistances(Origin(), entities[ENEMY]));
 			const auto& Nearest_Enemy = entities[ENEMY][Enemy_Distances.begin()->second];
-			return IsLookingAt(Nearest_Enemy->v.origin);
+			return IsLookingAt(Nearest_Enemy->v.origin, 1.0f);
 		}
 
 		bool Bot::IsEnemyFar() const noexcept {
+			if (entities[ENEMY].empty()) {
+				return false;
+			}
 			const auto Enemy_Distances = std::move(SortedDistances(Origin(), entities[ENEMY]));
 			const auto& Nearest_Enemy = entities[ENEMY][Enemy_Distances.begin()->second];
 			return common::Distance(Origin(), Nearest_Enemy->v.origin) > 1000.0f;
 		}
 
-		bool Bot::IsLookingAt(const Vector& Dest) const noexcept {
-			return (common::Distance2D(Dest, client->v_angle) <= 1.0f);
+		bool Bot::IsLookingAt(const Vector& Dest, const float Range) const noexcept {
+			float vecout[3]{};
+			Vector angle = Dest - Origin();
+			VEC_TO_ANGLES(angle, vecout);
+			vecout[0] = -vecout[0];
+			return (common::Distance2D(Vector(vecout), client->v_angle) <= Range);
 		}
 
 		bool Bot::CanSeeEnemy() const noexcept {
@@ -514,8 +516,25 @@ namespace pokebot {
 			radio_message.message = Radio_Sentence;
 		}
 
-		void Manager::Insert(const std::string& Bot_Name, const common::Team team, const common::Model model) POKEBOT_DEBUG_NOEXCEPT {
-			bots.insert({ Bot_Name, Bot(game::game.clients.Create(Bot_Name), team, model) });
+		void Manager::Insert(std::string bot_name, const common::Team team, const common::Model model, const bot::Difficult Assigned_Diffcult) POKEBOT_DEBUG_NOEXCEPT {
+			auto bot_client = game::game.clients.Create(bot_name);
+			bot_name = bot_client->Name();
+			bots.insert({ bot_name, Bot(bot_client, team, model) });
+			auto result = balancer.insert({ bot_name, BotBalancer{.gap = {} } });
+			assert(result.second);
+
+			switch (Assigned_Diffcult) {
+				case bot::Difficult::Easy:
+					result.first->second.gap.z = -10.0f;
+					break;
+				case bot::Difficult::Normal:
+					result.first->second.gap.z = -5.0f;
+					break;
+				case bot::Difficult::Hard:
+					break;
+				default:
+					assert(false);
+			}
 		}
 
 		void Manager::Update() noexcept {
@@ -556,6 +575,7 @@ namespace pokebot {
 		void Manager::Remove(const std::string& Bot_Name) noexcept {
 			if (auto bot_iterator = bots.find(Bot_Name); bot_iterator != bots.end()) {
 				bots.erase(Bot_Name);
+				balancer.erase(Bot_Name);
 			}
 		}
 

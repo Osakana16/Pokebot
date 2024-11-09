@@ -210,7 +210,7 @@ namespace pokebot {
 			Vector Origin() const noexcept;
 			float Health() const noexcept;
 
-			bool IsLookingAt(const Vector& Dest) const noexcept;
+			bool IsLookingAt(const Vector& Dest, const float Range) const noexcept;
 		
 			bool HasPrimaryWeapon() const noexcept { return bool(client->Edict()->v.weapons & game::Primary_Weapon_Bit); }
 			bool HasSecondaryWeapon() const noexcept { return bool(client->Edict()->v.weapons & game::Secondary_Weapon_Bit); }
@@ -228,7 +228,10 @@ namespace pokebot {
 			bool IsFighting() const noexcept { return danger_time.IsRunning(); }
 			bool CanSeeEnemy() const noexcept;
 
-			auto JoinedTeam() const noexcept { return team; }
+		enum class Difficult {
+			Easy,
+			Normal,
+			Hard
 		};
 
 		enum class Policy {
@@ -257,14 +260,14 @@ namespace pokebot {
 			Squad(const std::string& Leader_Name, const size_t Number_Limit, const Policy Initial_Policy);
 		};
 
-		struct BotInformation final {
-
-		};
-
 		struct RadioMessage {
 			common::Team team;
 			std::string sender;
 			std::string message;
+		};
+
+		struct BotBalancer final {
+			Vector gap{};
 		};
 
 		inline class Manager {
@@ -272,13 +275,16 @@ namespace pokebot {
 
 			friend class pokebot::message::MessageDispatcher;
 			std::unordered_map<std::string, Bot> bots{};
+			std::unordered_map<std::string, BotBalancer> balancer{};
+
 			std::vector<Squad> squads[2]{};
 			Bot* const Get(const std::string&) noexcept;
 			RadioMessage radio_message{};
 		public:
 			void OnNewRound();
+			const Vector& GetCompensation(const std::string& Bot_Name) { return balancer[Bot_Name].gap; }
 
-			void Insert(const std::string& Bot_Name, const common::Team, const common::Model) POKEBOT_DEBUG_NOEXCEPT;
+			void Insert(std::string bot_name, const common::Team, const common::Model, const bot::Difficult) POKEBOT_DEBUG_NOEXCEPT;
 			void Kick(const std::string& Bot_Name) noexcept;
 			void Remove(const std::string& Bot_Name) noexcept;
 			void Update() noexcept;

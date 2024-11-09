@@ -307,7 +307,7 @@ namespace pokebot{
 		template<XYZ V>
 		std::optional<V> Normalize(const V& Source) noexcept {
 			V result{};
-			float flLen = Length();
+			float flLen = Length(Source);
 			if (flLen == 0) return std::nullopt;
 			flLen = 1 / flLen;
 			result.x = Source.x * flLen;
