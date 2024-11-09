@@ -30,13 +30,13 @@ namespace pokebot {
 			const std::uint8_t Msec_Value = ComputeMsec();
 			last_command_time = gpGlobals->time;
 			g_engfuncs.pfnRunPlayerMove(*client,
-				movement_angle,
-				move_speed,
-				strafe_speed,
-				0.0f,
-				client->Button(),
-				client->Impulse(),
-				Msec_Value);
+					movement_angle,
+					move_speed,
+					strafe_speed,
+					0.0f,
+					client->Button(),
+					client->Impulse(),
+					Msec_Value);
 
 			static_cast<edict_t*>(*client)->v.button = 0;
 			move_speed = 0;
@@ -57,7 +57,7 @@ namespace pokebot {
 
 			constexpr float Base_Frame = 30.0f;
 			constexpr float Sensitivity = 1.0f;
-			const common::AngleVector Next_Angle = { 
+			const common::AngleVector Next_Angle = {
 				CalculateNextAngle(destination.x, client->v_angle.x) / (Base_Frame - Sensitivity),
 				CalculateNextAngle(destination.y, client->v_angle.y) / (Base_Frame - Sensitivity),
 				0.0
@@ -90,7 +90,7 @@ namespace pokebot {
 
 			goal_node = node::Invalid_NodeID;
 			next_dest_node = node::Invalid_NodeID;
-	
+
 			look_direction.Clear();
 			ideal_direction.Clear();
 
@@ -100,6 +100,31 @@ namespace pokebot {
 			start_action = Message::Buy;
 			buy_wait_timer.SetTime(1.0f);
 
+			if (game::game.IsCurrentMode(game::MapFlags::Demolition)) {
+				auto goal = node::world.GetGoal(node::GoalKind::Bombspot);
+				for (auto it = goal.first; it != goal.second; it++) {
+					objective_goal_node = it->second;
+					break;
+				}
+			} else if (game::game.IsCurrentMode(game::MapFlags::HostageRescue)) {
+				auto goal = node::world.GetGoal(node::GoalKind::Rescue_Zone);
+				for (auto it = goal.first; it != goal.second; it++) {
+					objective_goal_node = it->second;
+					break;
+				}
+			} else if (game::game.IsCurrentMode(game::MapFlags::Assassination)) {
+				auto goal = node::world.GetGoal(node::GoalKind::Vip_Safety);
+				for (auto it = goal.first; it != goal.second; it++) {
+					objective_goal_node = it->second;
+					break;
+				}
+			} else if (game::game.IsCurrentMode(game::MapFlags::Escape)) {
+				auto goal = node::world.GetGoal(node::GoalKind::Escape_Zone);
+				for (auto it = goal.first; it != goal.second; it++) {
+					objective_goal_node = it->second;
+					break;
+				}
+			}
 			// mapdata::BSP().LoadWorldMap();
 		}
 
@@ -107,8 +132,11 @@ namespace pokebot {
 			if (client->IsDead()) {
 				return;
 			}
+			
+			const int current_weapon_integer = static_cast<int>(current_weapon);
+			assert(current_weapon_integer >= static_cast<int>(game::Weapon::None) &&  current_weapon_integer <= static_cast<int>(game::Weapon::P90));  
 				
-			if (manager.Is_Bomb_Planted) {
+			if (manager.C4Origin().has_value()) {
 				need_to_update = true;
 			}
 
@@ -134,7 +162,9 @@ namespace pokebot {
 				
 				BehaviorUpdate();
 				CheckAround();
-			} 
+			} else {
+				SelectWeapon(game::Weapon::Knife);
+			}
 			
 			if (next_dest_node != node::Invalid_NodeID) {
 				if (move_speed > 0.0) {
@@ -178,7 +208,7 @@ namespace pokebot {
 						break;
 				}
 			}
-			
+
 			if (!game::poke_fight) {
 				entities[ENEMY].clear();
 			}
@@ -267,9 +297,17 @@ namespace pokebot {
 
 		void Bot::SelectWeapon(const game::Weapon Target_Weapon) {
 			if (HasWeapon(Target_Weapon)) {
-				// current_weapon = Target_Weapon;
+				current_weapon = Target_Weapon;
 				game::game.IssueCommand(*client, std::format("{}", game::Weapon_CVT[static_cast<int>(Target_Weapon) - 1]));
 			}
+		}
+
+		void Bot::SelectPrimaryWeapon() {
+			SelectWeapon(static_cast<game::Weapon>(std::log2(client->Edict()->v.weapons & game::Primary_Weapon_Bit)));
+		}
+
+		void Bot::SelectSecondaryWeapon() {
+			SelectWeapon(static_cast<game::Weapon>(std::log2(client->Edict()->v.weapons & game::Secondary_Weapon_Bit)));
 		}
 
 		void Bot::LookAtClosestEnemy() {
@@ -319,6 +357,10 @@ namespace pokebot {
 
 		Vector Bot::Origin() const noexcept {
 			return client->origin;
+		}
+
+		float Bot::Health() const noexcept {
+			return client->Health;
 		}
 
 		uint8_t Bot::ComputeMsec() noexcept {
@@ -468,7 +510,7 @@ namespace pokebot {
 			}
 			c4_origin = std::nullopt;
 		}
-
+		
 		bool Manager::IsExist(const std::string& Bot_Name) const noexcept {
 			auto it = bots.find(Bot_Name);
 			return (it != bots.end());
@@ -499,7 +541,7 @@ namespace pokebot {
 
 		void Manager::OnJoinedTeam(const std::string&) noexcept {
 
-			}
+		}
 
 		void Manager::OnChatRecieved(const std::string&) noexcept {
 
@@ -507,7 +549,7 @@ namespace pokebot {
 
 		void Manager::OnTeamChatRecieved(const std::string&) noexcept{
 
-			}
+		}
 
 		void Manager::OnRadioRecieved(const std::string& Sender_Name, const std::string& Radio_Sentence) noexcept {
 			// TODO: Get Sender's team
@@ -542,13 +584,13 @@ namespace pokebot {
 				return;
 
 			if (!c4_origin.has_value()) {
-			edict_t* c4{};
-			while ((c4 = common::FindEntityByClassname(c4, "grenade")) != nullptr) {
-				if (std::string(STRING(c4->v.model)) == "models/w_c4.mdl") {
-					c4_origin = c4->v.origin;
-					break;
+				edict_t* c4{};
+				while ((c4 = common::FindEntityByClassname(c4, "grenade")) != nullptr) {
+					if (std::string(STRING(c4->v.model)) == "models/w_c4.mdl") {
+						c4_origin = c4->v.origin;
+						break;
+					}
 				}
-			}
 				if (c4_origin.has_value()) {
 					OnBombPlanted();
 				}

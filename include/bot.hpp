@@ -97,10 +97,7 @@ namespace pokebot {
 			}
 
 			bool AddGoalQueue(const node::NodeID ID, const int Priority) noexcept {
-				assert(ID >= 0);
-				if (ID == node::Invalid_NodeID)
-					return false;
-
+				assert(ID != node::Invalid_NodeID);
 				return queue.insert(Element{ .ID = ID, .Priority = Priority }).second;
 			}
 
@@ -163,7 +160,11 @@ namespace pokebot {
 
 			static constexpr int MATE = 0, ENEMY = 1;
 			std::vector<const edict_t*> entities[2]{};
+
+			node::NodeID objective_goal_node{};	// The goal node for objective of current team.
 		public:
+			inline const node::NodeID& Objective_Goal_Node() const noexcept { return objective_goal_node; }
+
 			int squad = -1;
 			Mood mood{};
 			Timer behavior_wait_timer{};
@@ -188,11 +189,13 @@ namespace pokebot {
 			void OnNewRound() POKEBOT_DEBUG_NOEXCEPT;
 			void Run() POKEBOT_DEBUG_NOEXCEPT;
 
-			void SelectWeapon(const game::Weapon);
+			void SelectWeapon(const game::Weapon), SelectPrimaryWeapon(), SelectSecondaryWeapon();
 
 			void LookAtClosestEnemy();
 			bool IsLookingAtEnemy() const noexcept;
 			bool IsEnemyFar() const noexcept;
+
+			inline bool IsGoodCondition() const noexcept { return Health() >= 50; }
 
 			void OnRadioRecieved(const std::string& Sender_Name, const std::string& Radio_Sentence) noexcept;
 
@@ -203,6 +206,7 @@ namespace pokebot {
 			void SetGoal(const node::NodeID) noexcept;
 			void PressKey(ActionKey);
 			bool IsPressingKey(const ActionKey) const noexcept;
+			bool IsFollowing() const noexcept { return false; }
 
 			// -- Getters --
 
@@ -239,6 +243,17 @@ namespace pokebot {
 			bool IsClimbingLadder() const noexcept { return client->IsClimblingLadder(); }
 			bool IsReloading() const noexcept { return client->IsReloading(); }
 			bool IsPlantingBomb() const noexcept { return false; }
+			bool IsChangingWeapon() const noexcept { return false; }
+			bool IsFalling() const noexcept { return false; }
+			bool Jumped() const noexcept { return false; }
+			bool IsJumping() const noexcept { return false; }
+			bool IsLeadingHostages() const noexcept { return false; }
+			bool IsLookingThroughScope() const noexcept { return false; }
+			bool IsLookingThroughCamera() const noexcept { return false; }
+			bool IsChangingSilencer() const noexcept { return false; }
+			bool IsEnabledFlashlight() const noexcept { return false; }
+			bool IsEnabledNightvision() const noexcept { return false; }
+		};
 
 		enum class Difficult {
 			Easy,
