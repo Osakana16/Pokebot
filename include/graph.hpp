@@ -121,7 +121,7 @@ namespace pokebot::node {
 		Vip_Safety,
 		C4
 	};
-	constexpr auto All_Goal_List = { GoalKind::Terrorist_Spawn, GoalKind::CT_Spawn, GoalKind::Bombspot, GoalKind::Rescue_Zone, GoalKind::Esacpe_Zone, GoalKind::Vip_Safety };
+	constexpr auto All_Goal_List = { GoalKind::Terrorist_Spawn, GoalKind::CT_Spawn, GoalKind::Bombspot, GoalKind::Rescue_Zone, GoalKind::Escape_Zone, GoalKind::Vip_Safety };
 
 	inline class Graph {
 		friend class FGreater;

@@ -235,7 +235,7 @@ namespace pokebot::node {
 		while ((entity = common::FindEntityByClassname(entity, "func_escapezone")) != nullptr) {
 			Vector origin = common::VecBModelOrigin(entity);
 			MoveOriginOnGround(&origin);
-			NodeID point_id = Add(origin, GoalKind::Esacpe_Zone);
+			NodeID point_id = Add(origin, GoalKind::Escape_Zone);
 			auto point = GetNode(point_id);
 			if (point != nullptr) {
 				point->AddFlag(NodeFlag::Goal);

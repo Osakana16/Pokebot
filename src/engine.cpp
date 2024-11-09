@@ -96,7 +96,6 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
             {
                 GET_USER_MSG_ID(PLID, "VGUIMenu", nullptr), []() {
                     if (is_host) {
-                        pokebot::game::game.clients.Register(const_cast<edict_t*>(engine_target_edict), false);
                     }
                 }
             },
