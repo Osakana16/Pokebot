@@ -215,18 +215,30 @@ namespace pokebot {
 			bool HasPrimaryWeapon() const noexcept { return bool(client->Edict()->v.weapons & game::Primary_Weapon_Bit); }
 			bool HasSecondaryWeapon() const noexcept { return bool(client->Edict()->v.weapons & game::Secondary_Weapon_Bit); }
 			bool HasWeapon(const game::Weapon Weapon_ID) const noexcept { return bool(client->Edict()->v.weapons & common::ToBit<int>(Weapon_ID)); }
-			bool IsCurrentWeapon(const game::Weapon Weapon_ID) const noexcept { return (current_weapon == Weapon_ID); }
+			bool IsCurrentWeapon(const game::Weapon Weapon_ID) const noexcept { return (current_weapon == Weapon_ID);  }
 
 			bool HasGoalToHead() const noexcept;
-			bool IsInBuyzone() const noexcept { return client->IsShowingIcon(game::StatusIcon::Buy_Zone); }
+			bool IsInBuyzone() const noexcept { return client->IsInBuyzone(); }
 
-			bool IsDucking() const noexcept { return (client->IsDucking()); }
-			bool IsDriving() const noexcept { return (client->IsOnTrain()); }
-			bool IsSwimming() const noexcept { return (client->IsInWater()); }
-			bool IsOnFloor() const noexcept { return (client->IsOnFloor()); }
+			bool IsInBombTargetZone() const noexcept;
 
 			bool IsFighting() const noexcept { return danger_time.IsRunning(); }
 			bool CanSeeEnemy() const noexcept;
+			bool CanSeeEntity() const noexcept;
+
+			auto JoinedTeam() const noexcept { return team; }
+			float GetSecondLeftToCompleteReloading() const noexcept;
+
+			/* - Client Wrapper - */
+
+			bool IsDucking() const noexcept { return (client->IsDucking()); }
+			bool IsDriving() const noexcept { return (client->IsOnTrain()); }
+			bool IsInWater() const noexcept { return (client->IsInWater()); }
+			bool IsSwimming() const noexcept { return (client->IsInWater()); }
+			bool IsOnFloor() const noexcept { return (client->IsOnFloor()); }
+			bool IsClimbingLadder() const noexcept { return client->IsClimblingLadder(); }
+			bool IsReloading() const noexcept { return client->IsReloading(); }
+			bool IsPlantingBomb() const noexcept { return false; }
 
 		enum class Difficult {
 			Easy,

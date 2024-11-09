@@ -8,7 +8,7 @@ namespace pokebot {
 				return;
 			}
 
-			if (client->IsShowingIcon(game::StatusIcon::Buy_Zone) && !buy_wait_timer.IsRunning()) {
+			if (client->IsInBuyzone() && !buy_wait_timer.IsRunning()) {
 				auto ai = buy::BuyAI(this->client->Money);
 				auto node = ai.GetPattern(0, 0);
 				for (auto data : node->data) {

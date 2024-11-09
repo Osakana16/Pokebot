@@ -149,6 +149,47 @@ namespace pokebot {
 			RegisterCvars();
 		}
 
+		size_t Game::GetHostageNumber() const noexcept {
+			return hostages.size();
+		}
+
+		bool Game::IsHostageUsed(const int Index) const noexcept {
+			return hostages[Index].IsUsed();
+		}
+
+		bool Game::IsHostageOwnedBy(const int Index, const std::string_view& Owner_Name) {
+			return hostages[Index].IsOwnedBy(Owner_Name);
+		}
+
+		const edict_t* const Game::GetClosedHostage(const Vector& Origin, const float Base_Distance) {
+			for (auto& hostage : hostages) {
+				if (common::Distance(hostage.Origin(), Origin) <= Base_Distance) {
+					return hostage;
+				}
+			}
+
+		}
+
+		const std::string& Game::GetBotArg(const size_t Index) const noexcept {
+			return bot_args[Index];
+		}
+
+		size_t Game::GetBotArgCount() const noexcept {
+			return bot_args.size();
+		}
+
+		bool Game::IsBotCmd() const noexcept {
+			return !bot_args.empty();
+		}
+
+		size_t Game::GetLives(const common::Team) const noexcept {
+			return 0;
+		}
+
+		uint32_t Game::CurrentRonud() const noexcept {
+			return round;
+		}
+		
 		bool Game::IsCurrentMode(const MapFlags Game_Mode) const noexcept {
 			return bool(map_flags & Game_Mode);
 		}
@@ -183,12 +224,13 @@ namespace pokebot {
 		std::shared_ptr<Client> Client::Create(std::string client_name) {
 			DEBUG_PRINTF("{}\n", __FUNCTION__);
 			if (client_name.empty())
-				return std::make_shared<Client>(nullptr, false);
+				return nullptr;
 
 			auto client = (*g_engfuncs.pfnCreateFakeClient)(client_name.c_str());
 			if (client == nullptr)
-				return std::make_shared<Client>(nullptr, false);
+				return nullptr;
 
+			client_name = STRING(client->v.netname);
 			if (client->pvPrivateData != nullptr)
 				FREE_PRIVATE(client);
 
@@ -201,6 +243,7 @@ namespace pokebot {
 			client_key
 				.SetValue("model", "")
 				.SetValue("rate", "3500.000000")
+				.SetValue("hud_fastswitch", "1")
 				.SetValue("cl_updaterate", "20")
 				.SetValue("tracker", "0")
 				.SetValue("cl_dlmax", "128")
@@ -212,28 +255,30 @@ namespace pokebot {
 
 			char ptr[128]{};            // allocate space for message from ClientConnect
 			if (!MDLL_ClientConnect(client, client_name.c_str(), "127.0.0.1", ptr))
-				return std::make_shared<Client>(nullptr, false);
+				return nullptr;
 
 			MDLL_ClientPutInServer(client);
 			client->v.flags |= pokebot::common::Third_Party_Bot_Flag;
-			return std::make_shared<Client>(client, true);
+			return std::make_shared<FakeClient>(client);
 		}
 
-		std::shared_ptr<Client> Client::Attach(edict_t* edict, const bool Is_Bot) {
-			return std::make_shared<Client>(edict, Is_Bot);
+		std::shared_ptr<Client> Client::Attach(edict_t* edict) {
+			return std::make_shared<Client>(edict);
 		}
 
 
-		std::shared_ptr<Client> Client::Attach(const int Index, const bool Is_Bot) {
-			return std::make_shared<Client>(INDEXENT(Index), Is_Bot);
+		std::shared_ptr<Client> Client::Attach(const int Index) {
+			return std::make_shared<Client>(INDEXENT(Index));
 		}
 
 		std::shared_ptr<Client> ClientManager::Create(std::string client_name) {
-			return clients.insert({ client_name, Client::Create(client_name) }).first->second;
+			auto client = Client::Create(client_name);
+			client_name = client->Name();
+			return clients.insert({ client_name, client }).first->second;
 		}
 
-		std::shared_ptr<Client> ClientManager::Register(edict_t* edict, bool is_bot) {
-			return clients.insert({ STRING(edict->v.netname), Client::Attach(edict, is_bot) }).first->second;
+		std::shared_ptr<Client> ClientManager::Register(edict_t* edict) {
+			return clients.insert({ STRING(edict->v.netname), Client::Attach(edict) }).first->second;
 		}
 
 		void ClientManager::OnDeath(const std::string_view Client_Name) noexcept {

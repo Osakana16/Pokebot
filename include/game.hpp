@@ -61,6 +61,9 @@ namespace pokebot {
 
 		constexpr int Primary_Weapon_Bit = (common::ToBit<int>(Weapon::M3) | common::ToBit<int>(Weapon::XM1014) | common::ToBit<int>(Weapon::MAC10) | common::ToBit<int>(Weapon::TMP) | common::ToBit<int>(Weapon::MP5) | common::ToBit<int>(Weapon::UMP45) | common::ToBit<int>(Weapon::P90) | common::ToBit<int>(Weapon::Famas) | common::ToBit<int>(Weapon::Galil) | common::ToBit<int>(Weapon::AK47) | common::ToBit<int>(Weapon::M4A1) | common::ToBit<int>(Weapon::AUG) | common::ToBit<int>(Weapon::SG552) | common::ToBit<int>(Weapon::SG550) | common::ToBit<int>(Weapon::G3SG1) | common::ToBit<int>(Weapon::Scout) | common::ToBit<int>(Weapon::AWP) | common::ToBit<int>(Weapon::M249));
 		constexpr int Secondary_Weapon_Bit = (common::ToBit<int>(Weapon::P228) | common::ToBit<int>(Weapon::USP) | common::ToBit<int>(Weapon::Deagle) | common::ToBit<int>(Weapon::FiveSeven) | common::ToBit<int>(Weapon::Glock18) | common::ToBit<int>(Weapon::Elite));
+		constexpr int Melee_Bit = (common::ToBit<int>(Weapon::Knife));
+		constexpr int Grenade_Bit = (common::ToBit<int>(Weapon::HEGrenade) | common::ToBit<int>(Weapon::Flashbang) | common::ToBit<int>(Weapon::Smoke));
+		constexpr int C4_Bit = (common::ToBit<int>(Weapon::C4));
 
 		enum class WeaponType {
 			Secondary,
@@ -185,11 +188,10 @@ namespace pokebot {
 			Var type;
 		};
 
-		class Client final {
+		class Client {
 			friend class ClientManager;
 
 			edict_t* client{};
-			bool is_bot{};
 			int& button;
 
 			common::Team team{};
@@ -208,7 +210,7 @@ namespace pokebot {
 			static bool IsValid(const edict_t* const Target) noexcept { return (Target != nullptr && !Target->free); }
 			static int Index(const edict_t* const Target) noexcept { return ENTINDEX(const_cast<edict_t*>(Target)); }
 		public:
-			Client(edict_t* e, bool is_bot_) noexcept :
+			Client(edict_t* e) noexcept :
 				client(e),
 				origin(client->v.origin),
 				angles(client->v.angles),
@@ -221,26 +223,14 @@ namespace pokebot {
 				view_ofs(client->v.view_ofs),
 				Health(client->v.health),
 				Max_Health(client->v.max_health),
-				Speed(client->v.speed) {
-				is_bot = is_bot_;
-			}
+				Speed(client->v.speed) {}
 
 			static std::shared_ptr<Client> Create(std::string client_name);
-			static std::shared_ptr<Client> Attach(edict_t*, const bool Is_Bot),
-				Attach(const int, const bool Is_Bot);
+			static std::shared_ptr<Client> Attach(edict_t*), Attach(const int);
 
 			edict_t* Edict() noexcept { return client; }
 			operator edict_t* () noexcept { return Edict(); }
 			operator const edict_t* () const noexcept { return client; }
-
-			bool IsBot() const noexcept { return is_bot; }
-			bool IsValid() const noexcept { return IsValid(client); }
-			bool IsDead() const noexcept { return IsDead(client); }
-
-			bool IsDucking() const noexcept { return (client->v.flags & FL_DUCKING); }
-			bool IsInWater() const noexcept { return (client->v.flags & FL_INWATER); }
-			bool IsOnFloor() const noexcept { return (client->v.flags & (FL_ONGROUND | FL_PARTIALGROUND)) != 0; }
-			bool IsOnTrain() const noexcept { return (client->v.flags & FL_ONTRAIN); }
 
 			int Index() const noexcept { return Index(client); }
 
@@ -250,7 +240,26 @@ namespace pokebot {
 			std::string_view Name() const noexcept { return STRING(client->v.netname); }
 			void PressKey(const int Key) noexcept { client->v.button |= Key; }
 			common::Team GetTeam() const noexcept { return common::GetTeamFromModel(client); }
-			bool IsShowingIcon(const StatusIcon icon) const noexcept { return bool(status_icon & icon); }
+
+			virtual bool IsBot() const noexcept { return false; }
+			bool IsValid() const noexcept { return IsValid(client); }
+			bool IsDead() const noexcept { return IsDead(client); }
+
+			bool IsInBuyzone() const noexcept { return bool(status_icon & StatusIcon::Buy_Zone); }
+			bool IsInEscapezone() const noexcept { return bool(status_icon & StatusIcon::Escape_Zone); }
+			bool IsInRescuezone() const noexcept { return bool(status_icon & StatusIcon::Rescue_Zone); }
+			bool IsInVipSafety() const noexcept { return bool(status_icon & StatusIcon::Vip_Safety); }
+			bool HasDefuser() const noexcept { return bool(status_icon & StatusIcon::Defuser); }
+
+			bool IsDucking() const noexcept { return (client->v.flags & FL_DUCKING); }
+			bool IsInWater() const noexcept { return (client->v.flags & FL_INWATER); }
+			bool IsOnFloor() const noexcept { return (client->v.flags & (FL_ONGROUND | FL_PARTIALGROUND)) != 0; }
+			bool IsOnTrain() const noexcept { return (client->v.flags & FL_ONTRAIN); }
+			bool IsFiring() const noexcept { return (client->v.button & IN_ATTACK); }
+			bool IsReadyToThrowGrenade() const noexcept { return IsFiring() && bool(client->v.weapons & Grenade_Bit); }
+			bool IsPlantingBomb() const noexcept { return IsFiring() && bool(client->v.weapons & C4_Bit); }
+			bool IsClimblingLadder() const noexcept { return (client->v.movetype & MOVETYPE_FLY); }
+			bool IsReloading() const noexcept { return (client->v.animtime); }
 
 			const float& Health;
 			const float& Max_Health;
@@ -265,6 +274,12 @@ namespace pokebot {
 			Vector& v_angle;
 			float& ideal_yaw;
 			float& idealpitch;
+		};
+
+		class FakeClient final : public Client {
+		public:
+			using Client::Client;
+			bool IsBot() const noexcept final { return true; }
 		};
 
 		// The status in the game
@@ -284,16 +299,20 @@ namespace pokebot {
 		public:
 			ClientStatus GetClientStatus(std::string_view client_name);
 			std::shared_ptr<Client> Create(std::string client_name);
-			std::shared_ptr<Client> Register(edict_t*, bool is_bot);
-			auto& GetAll() {
+			std::shared_ptr<Client> Register(edict_t*);
+			auto& GetAll() const noexcept {
 				return clients;
 			}
 
-			std::shared_ptr<Client> Get(const std::string& Name) noexcept {
+			std::shared_ptr<Client> Get(const std::string& Name) const noexcept {
 				if (auto it = clients.find(Name); it != clients.end())
 					return it->second;
 
 				return nullptr;
+			}
+
+			auto& Get(std::function<bool(const std::pair<std::string, std::shared_ptr<Client>>&)> condition) const noexcept {
+				return std::find_if(clients.cbegin(), clients.cend(), condition);
 			}
 
 			void OnDeath(const std::string_view Client_Name) noexcept;
@@ -376,43 +395,18 @@ namespace pokebot {
 			Host host{};
 			ClientManager clients{};
 
-			size_t GetHostageNumber() const noexcept {
-				return hostages.size();
-			}
 
-			bool IsHostageUsed(const int Index) const noexcept {
-				return hostages[Index].IsUsed();
-			}
+			size_t GetHostageNumber() const noexcept;
+			bool IsHostageUsed(const int Index) const noexcept;
+			bool IsHostageOwnedBy(const int Index, const std::string_view& Owner_Name);
+			const edict_t* const GetClosedHostage(const Vector& Origin, const float Base_Distance);
 
-			bool IsHostageOwnedBy(const int Index, const std::string_view& Owner_Name) {
-				return hostages[Index].IsOwnedBy(Owner_Name);
-			}
+			const std::string& GetBotArg(const size_t Index) const noexcept;
+			size_t GetBotArgCount() const noexcept;
+			bool IsBotCmd() const noexcept;
 
-			const edict_t* const GetClosedHostage(const Vector& Origin, const float Base_Distance) {
-				for (auto& hostage : hostages) {
-					if (common::Distance(hostage.Origin(), Origin) <= Base_Distance) {
-						return hostage;
-					}
-				}
-
-			}
-
-			inline const std::string& GetBotArg(const size_t Index) const noexcept {
-				return bot_args[Index];
-			}
-
-			inline size_t GetBotArgCount() const noexcept {
-				return bot_args.size();
-			}
-
-			inline bool IsBotCmd() const noexcept {
-				return !bot_args.empty();
-			}
-
-			auto CurrentRonud() const noexcept {
-				return round;
-			}
-
+			size_t GetLives(const common::Team) const noexcept;	// Get the number of lives of the team.
+			uint32_t CurrentRonud() const noexcept;
 			bool IsCurrentMode(const MapFlags) const noexcept;
 			void IssueCommand(edict_t* client, const std::string& Sentence) noexcept;
 

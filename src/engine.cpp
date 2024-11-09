@@ -107,7 +107,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                     }
 
                     if (is_host) {
-                        pokebot::game::game.clients.Register(const_cast<edict_t*>(engine_target_edict), false);
+                        pokebot::game::game.clients.Register(const_cast<edict_t*>(engine_target_edict));
                     }
 
                     if (args.size() >= 4) {
