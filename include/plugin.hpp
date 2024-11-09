@@ -11,10 +11,9 @@ namespace pokebot::plugin {
 
 		int beam_sprite{};
 		edict_t* pWorldEntity{};
-		edict_t* disconnected_client{}, *spawned_entity{};
+		edict_t *spawned_entity{};
 	public:
 		int BeamSprite() const noexcept { return beam_sprite; }
-		void AppendDisconnectedClient(edict_t* client) noexcept { disconnected_client = client; }
 		void AppendSpawnedEntity(edict_t* entity) noexcept { spawned_entity = entity; }
 
 		void RegisterCommand() noexcept;
@@ -25,6 +24,6 @@ namespace pokebot::plugin {
 		
 		void OnEntitySpawned();
 		void OnClientConnect();
-		void OnClientDisconnect();
+		void OnClientDisconnect(const edict_t* const disconnected_client);
 	} pokebot_plugin{};
 }

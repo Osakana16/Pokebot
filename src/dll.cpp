@@ -173,18 +173,20 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
         if (gpGlobals->deathmatch) {
             // check if this client is the listen server client
             if (strcmp(Address, "loopback") == 0) {
+                SERVER_PRINT(std::format("POKEBOT: The host is connected.\n", STRING(entity->v.netname)).c_str());
                 // save the edict of the listen server client...
                 pokebot::game::game.host.SetHost(entity);
                 pokebot::game::game.clients.Register(entity);
                 is_game_completely_initialized = true;
             }
+            SERVER_PRINT(std::format("POKEBOT: {} is connected.\n", STRING(entity->v.netname)).c_str());
         }
         RETURN_META_VALUE(MRES_IGNORED, 0);
     };
 
     func_table.pfnClientDisconnect = [](edict_t* entity) -> void {
-        pokebot::plugin::pokebot_plugin.AppendDisconnectedClient(entity);
-        pokebot::plugin::pokebot_plugin.OnClientDisconnect();
+        SERVER_PRINT(std::format("POKEBOT: {} is disconnected.\n", STRING(entity->v.netname)).c_str());
+        pokebot::plugin::pokebot_plugin.OnClientDisconnect(entity);
         RETURN_META(MRES_IGNORED);
     };
 

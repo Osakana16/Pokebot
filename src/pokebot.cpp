@@ -158,7 +158,7 @@ namespace pokebot::plugin {
 
     }
 
-    void Pokebot::OnClientDisconnect() {
+    void Pokebot::OnClientDisconnect(const edict_t* const disconnected_client) {
         pokebot::bot::manager.Remove(STRING(disconnected_client->v.netname));
     }
 }
