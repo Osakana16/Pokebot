@@ -4,7 +4,7 @@ namespace pokebot::bot::behavior {
 	namespace {
 		template<node::GoalKind kind>
 		Status SetGoal(Bot *const self) noexcept {
-			if (node::world.IsOnNode(self->Origin(), self->goal_node))
+			if (node::world.IsOnNode(self->Origin(), self->goal_node) && node::world.IsSameGoal(self->goal_node, kind))
 				return Status::Enough;
 
 			node::NodeID id = node::Invalid_NodeID;

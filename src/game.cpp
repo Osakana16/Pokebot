@@ -23,8 +23,12 @@ namespace pokebot {
 		}
 
 		bool Hostage::RecoginzeOwner(std::shared_ptr<Client>& client) noexcept {
-			if (common::Distance(client->origin, entity->v.origin) <= 75 && client->GetTeam() == common::Team::CT) {
-				owner = client;
+			if (common::Distance(client->origin, entity->v.origin) < 83.0f && client->GetTeam() == common::Team::CT) {
+				if (owner == client) {
+					owner = nullptr;
+				} else {
+					owner = client;
+				}
 				return true;
 			}
 			return false;
@@ -34,7 +38,8 @@ namespace pokebot {
 			if (owner == nullptr)
 				return;
 
-			if (owner->GetTeam() == common::Team::T || common::Distance(owner->origin, entity->v.origin) >= 500)
+			const bool Is_Owner_Terrorist = owner->GetTeam() == common::Team::T;
+			if (IsReleased() || owner->GetTeam() == common::Team::T || common::Distance(owner->origin, entity->v.origin) > 200.0f)
 				owner = nullptr;
 		}
 
@@ -87,6 +92,7 @@ namespace pokebot {
 		void Game::OnNewRound() noexcept {
 			round++;
 			bot::manager.OnNewRound();
+			clients.OnNewRound();
 			node::world.OnNewRound();
 		}
 
@@ -108,9 +114,15 @@ namespace pokebot {
 					produced_sound = Sound{ .origin = client.second->origin, .volume = 50 };
 					// Recoginze the player as a owner.
 					for (auto& hostage : hostages) {
-						if (hostage.RecoginzeOwner(client.second))
+						if (hostage.RecoginzeOwner(client.second)) {
 							break;
+						}
 					}
+				}
+
+				if (bool(static_cast<edict_t*>(*client.second)->v.flags & pokebot::common::Third_Party_Bot_Flag)) {
+					static_cast<edict_t*>(*client.second)->v.flags |= pokebot::common::Third_Party_Bot_Flag;
+					static_cast<edict_t*>(*client.second)->v.button = 0;
 				}
 			}
 		}
@@ -167,7 +179,7 @@ namespace pokebot {
 					return hostage;
 				}
 			}
-
+			return nullptr;
 		}
 
 		const std::string& Game::GetBotArg(const size_t Index) const noexcept {
@@ -194,11 +206,24 @@ namespace pokebot {
 			return bool(map_flags & Game_Mode);
 		}
 
+		MapFlags Game::GetMapFlag() const noexcept {
+			return map_flags;
+		}
+
 		void Game::IssueCommand(edict_t* client, const std::string& Sentence) noexcept {
 			bot_args.clear();
 			bot_args = common::StringSplit(&Sentence, ' ');
 			MDLL_ClientCommand(client);
 			bot_args.clear();
+		}
+
+		bool Client::HasHostages() const noexcept {
+			for (int i = 0; i < game::game.GetHostageNumber(); i++) {
+				if (game::game.IsHostageOwnedBy(i, Name())) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		bool Host::IsHostValid() const noexcept {
@@ -271,6 +296,14 @@ namespace pokebot {
 			return std::make_shared<Client>(INDEXENT(Index));
 		}
 
+		void ClientManager::OnNewRound() {
+			if (vip != nullptr) vip->is_vip = false;
+			vip = nullptr;
+			for (auto& client : clients) {
+				client.second->is_nvg_on = false;
+			}
+		}
+
 		std::shared_ptr<Client> ClientManager::Create(std::string client_name) {
 			auto client = Client::Create(client_name);
 			client_name = client->Name();
@@ -331,6 +364,17 @@ namespace pokebot {
 
 		void ClientManager::OnStatusIconShown(const std::string_view Client_Name, const StatusIcon Icon) noexcept {
 			Get(Client_Name.data())->status_icon |= Icon;
+		}
+
+		void ClientManager::OnVIPChanged(const std::string_view Client_Name) noexcept {
+			auto&& candidate = Get(Client_Name.data());
+			assert(vip == candidate || vip == nullptr);
+			vip = candidate;
+			vip->is_vip = true;
+		}
+
+		void ClientManager::OnDefuseKitEquiped(const std::string_view Client_Name) noexcept {
+			Get(Client_Name.data())->item |= Item::Defuse_Kit;
 		}
 
 		ClientStatus ClientManager::GetClientStatus(std::string_view client_name) {

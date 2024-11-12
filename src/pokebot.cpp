@@ -132,8 +132,8 @@ namespace pokebot::plugin {
     }
 
     void Pokebot::OnUpdate() noexcept {
-        pokebot::game::game.Update();
         pokebot::bot::manager.Update();
+        pokebot::game::game.Update();
         
         if (draw_node)
             pokebot::node::world.Draw();

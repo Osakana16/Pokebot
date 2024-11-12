@@ -3,7 +3,6 @@
 namespace pokebot::bot::behavior {
 	// - DEmolition Behaviors - 
 	namespace demolition {
-		std::shared_ptr<Priority> objective = Priority::Create("demolition::objective", Status::Executed);
 		std::shared_ptr<Priority> t_plant = Priority::Create("demolition::t_plant", Status::Executed);
 		std::shared_ptr<Priority> t_defusing = Priority::Create("demolition::t_defusing", Status::Executed);
 		std::shared_ptr<Priority> ct_planted = Priority::Create("demolition::ct_planted", Status::Executed);
@@ -13,7 +12,6 @@ namespace pokebot::bot::behavior {
 
 	// - Rescue Behaviors -
 	namespace rescue {
-		std::shared_ptr<Priority> objective = Priority::Create("rescue::objective", Status::Executed);
 		std::shared_ptr<Sequence> ct_try = Sequence::Create("rescue::ct_try", Status::Executed);
 		std::shared_ptr<Sequence> ct_leave = Sequence::Create("rescue::ct_leave", Status::Executed);
 		std::shared_ptr<Sequence> lead_hostage = Sequence::Create("rescue::lead_hostage", Status::Executed);
@@ -21,7 +19,6 @@ namespace pokebot::bot::behavior {
 
 	// - ASsasination Behaviors -
 	namespace assist {
-		std::shared_ptr<Priority> objective = Priority::Create("assist::objective", Status::Executed);
 		std::shared_ptr<Sequence> ct_cover = Sequence::Create("assist::ct_cover", Status::Executed);
 		std::shared_ptr<Sequence> ct_take_point = Sequence::Create("assist::ct_take_point", Status::Executed);
 		std::shared_ptr<Sequence> ct_vip_escape = Sequence::Create("assist::ct_vip_escape", Status::Executed);
@@ -29,18 +26,10 @@ namespace pokebot::bot::behavior {
 	
 	// - EScape Behaviors -
 	namespace escape {
-		std::shared_ptr<Priority> objective = Priority::Create("escape::objective", Status::Executed);
 		std::shared_ptr<Sequence> t_get_primary = Sequence::Create("escape::t_get_primary", Status::Executed);
 		std::shared_ptr<Sequence> t_take_point = Sequence::Create("escape::t_take_point", Status::Executed);
 	}
 
-	namespace coop {
-		std::shared_ptr<Sequence> objective = Sequence::Create("coop::t_take_point", Status::Executed);
-	}
-
-	namespace elimination {
-		std::shared_ptr<Priority> objective = Priority::Create("elimination::objective", Status::Executed);
-	}
 	std::shared_ptr<Sequence> t_ordinary = Sequence::Create("elimination::t_ordinary", Status::Executed);
 	std::shared_ptr<Sequence> ct_ordinary = Sequence::Create("elimination::ct_ordinary", Status::Executed);
 
@@ -55,75 +44,12 @@ namespace pokebot::bot::behavior {
 			return true;
 		}
 	}
+	
+	bool CanUseHostage(const Bot* const Self) noexcept {
+		return game::game.GetClosedHostage(Self->Origin(), 83.0f) != nullptr;
+	}
 
 	void DefineObjective() {
-		demolition::objective->Define
-		({
-			BEHAVIOR_IFELSE
-			(
-				Is<common::Team::T>,
-				Priority::Create
-				({
-			 		BEHAVIOR_IFELSE_TEMPLATE
-					(
-						IsBombPlanted,
-						t_ordinary,
-						// Plant the bomb
-						Priority::Create
-						({
-					 		BEHAVIOR_IFELSE_TEMPLATE
-							(
-								HasBomb,
-								demolition::t_plant,
-								t_ordinary
-							)
-						})
-					)
-				}),
-				Is<common::Team::CT>,
-				Priority::Create
-				({
-			 		BEHAVIOR_IFELSE_TEMPLATE
-					(
-						IsBombPlanted,
-		 				Priority::Create
-						({
-							BEHAVIOR_IFELSE_TEMPLATE
-							(
-								IsOnBomb,
-								demolition::ct_defusing,
-								demolition::ct_planted
-							)
-						}),
-						ct_ordinary
-					)
-				})
-			)
-		});
-
-		assist::objective->Define
-		({
-			set_goal_vipsafety,
-			head_and_discard_goal
-		 });
-
-		coop::objective->Define
-		({
-			follow_squad_leader,
-			head_and_discard_goal
-		});
-
-		elimination::objective->Define
-		({
-			BEHAVIOR_IFELSE
-			(
-				Is<common::Team::T>,
-				t_ordinary,
-		 		Is<common::Team::CT>,
-				ct_ordinary
-			)
-		});
-
 		demolition::t_plant->Define
 		({
 			set_goal_bombspot,
@@ -131,7 +57,7 @@ namespace pokebot::bot::behavior {
 				head_and_discard_goal, Priority::Create(
 				{
 					change_c4,
-					fire					
+					fire
 				})
 			)
 		});
@@ -152,17 +78,6 @@ namespace pokebot::bot::behavior {
 			head_and_discard_goal
 		});
 
-		rescue::objective->Define
-		({
-			BEHAVIOR_IFELSE_TEMPLATE
-			(
-				IsEnoughToRescueHostage,
-				rescue::ct_leave,
-				rescue::ct_try
-			)
-		 });
-
-
 		rescue::ct_leave->Define
 		({
 			set_goal_rescuezone,
@@ -173,7 +88,7 @@ namespace pokebot::bot::behavior {
 		({
 			set_goal_hostage,
 			head_and_discard_goal,
-			rescue::lead_hostage
+			Condition::If(CanUseHostage, rescue::lead_hostage)
 		 });
 
 		assist::ct_cover->Define
@@ -189,26 +104,8 @@ namespace pokebot::bot::behavior {
 
 		assist::ct_vip_escape->Define
 		({
-			Condition::If
-			(
-				IsHelper<false>,
-				Sequence::Create
-				({
-					create_vip_squad
-				})
-			),
 			set_goal_vipsafety,
 			head_and_discard_goal
-		 });
-
-		escape::objective->Define
-		({
-			BEHAVIOR_IFELSE_TEMPLATE
-			(
-				IsTimeEarly,
-				escape::t_get_primary,
-				escape::t_take_point
-			)
 		 });
 
 		escape::t_get_primary->Define

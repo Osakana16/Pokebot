@@ -199,6 +199,7 @@ namespace pokebot {
 			StatusIcon status_icon{};
 			Item item{};
 			bool is_nvg_on{};
+			bool is_vip{};
 
 			struct {
 				int clip{};
@@ -245,6 +246,7 @@ namespace pokebot {
 			bool IsValid() const noexcept { return IsValid(client); }
 			bool IsDead() const noexcept { return IsDead(client); }
 
+			bool IsVIP() const noexcept { return is_vip; }
 			bool IsInBuyzone() const noexcept { return bool(status_icon & StatusIcon::Buy_Zone); }
 			bool IsInEscapezone() const noexcept { return bool(status_icon & StatusIcon::Escape_Zone); }
 			bool IsInRescuezone() const noexcept { return bool(status_icon & StatusIcon::Rescue_Zone); }
@@ -260,6 +262,7 @@ namespace pokebot {
 			bool IsPlantingBomb() const noexcept { return IsFiring() && bool(client->v.weapons & C4_Bit); }
 			bool IsClimblingLadder() const noexcept { return (client->v.movetype & MOVETYPE_FLY); }
 			bool IsReloading() const noexcept { return (client->v.animtime); }
+			bool HasHostages() const noexcept;
 
 			const float& Health;
 			const float& Max_Health;
@@ -295,8 +298,10 @@ namespace pokebot {
 		};
 
 		class ClientManager {
+			std::shared_ptr<Client> vip{};
 			std::unordered_map<std::string, std::shared_ptr<Client>> clients{};
 		public:
+			void OnNewRound();
 			ClientStatus GetClientStatus(std::string_view client_name);
 			std::shared_ptr<Client> Create(std::string client_name);
 			std::shared_ptr<Client> Register(edict_t*);
@@ -315,6 +320,8 @@ namespace pokebot {
 				return std::find_if(clients.cbegin(), clients.cend(), condition);
 			}
 
+			void OnVIPChanged(const std::string_view Client_Name) noexcept;
+			void OnDefuseKitEquiped(const std::string_view Client_Name) noexcept;
 			void OnDeath(const std::string_view Client_Name) noexcept;
 			void OnDamageTaken(const std::string_view Client_Name, const edict_t* Inflictor, const int Health, const int Armor, const int Bit) noexcept;
 			void OnMoneyChanged(const std::string_view Client_Name, const int) noexcept;
@@ -346,6 +353,8 @@ namespace pokebot {
 			Hostage(const Hostage&);
 			Hostage& operator=(const Hostage&) = delete;
 
+			common::Time time{};
+
 			const edict_t* entity;
 			std::shared_ptr<Client> owner;
 		public:
@@ -356,7 +365,7 @@ namespace pokebot {
 			bool RecoginzeOwner(std::shared_ptr<Client>&) noexcept;
 
 			bool IsUsed() const noexcept { return owner != nullptr; }
-			const bool IsOwnedBy(const std::string_view& Name) const noexcept { return (owner != nullptr && owner->Name() == Name); }
+			bool IsOwnedBy(const std::string_view& Name) const noexcept { return (IsUsed() && owner->Name() == Name); }
 	 		bool IsReleased() const noexcept { return (entity->v.effects & EF_NODRAW); }
 			static Hostage AttachHostage(const edict_t*) noexcept;
 			const Vector& Origin() const noexcept {
@@ -395,7 +404,6 @@ namespace pokebot {
 			Host host{};
 			ClientManager clients{};
 
-
 			size_t GetHostageNumber() const noexcept;
 			bool IsHostageUsed(const int Index) const noexcept;
 			bool IsHostageOwnedBy(const int Index, const std::string_view& Owner_Name);
@@ -408,6 +416,7 @@ namespace pokebot {
 			size_t GetLives(const common::Team) const noexcept;	// Get the number of lives of the team.
 			uint32_t CurrentRonud() const noexcept;
 			bool IsCurrentMode(const MapFlags) const noexcept;
+			MapFlags GetMapFlag() const noexcept;
 			void IssueCommand(edict_t* client, const std::string& Sentence) noexcept;
 
 			void Init(edict_t* entities, int max);

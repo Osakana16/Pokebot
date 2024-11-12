@@ -81,6 +81,11 @@ namespace pokebot {
 			Shift = 1 << 16
 		};
 
+		enum class State {
+			Accomplishment,
+			Crisis
+		};
+
 		class GoalQueue {
 			struct Element final {
 				pokebot::node::NodeID ID = node::Invalid_NodeID;
@@ -143,10 +148,6 @@ namespace pokebot {
 
 			std::unordered_set<const game::Client*> target{};
 
-
-			void DecideBehavior();
-			void BehaviorUpdate() noexcept;
-
 			std::uint8_t ComputeMsec() noexcept;
 			
 			void SelectionUpdate() noexcept;
@@ -162,6 +163,9 @@ namespace pokebot {
 			std::vector<const edict_t*> entities[2]{};
 
 			node::NodeID objective_goal_node{};	// The goal node for objective of current team.
+
+			State state = State::Accomplishment;
+			void AccomplishMission() noexcept, Combat() noexcept;
 		public:
 			inline const node::NodeID& Objective_Goal_Node() const noexcept { return objective_goal_node; }
 

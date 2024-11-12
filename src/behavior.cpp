@@ -2,16 +2,9 @@
 
 namespace pokebot::bot {
 	namespace behavior {
-		std::shared_ptr<Priority> team = Priority::Create("behavior::team", Status::Completed);
-		std::shared_ptr<Priority> combat = Priority::Create("behavior::combat", Status::Completed);
-		std::shared_ptr<Priority> mission = Priority::Create("behavior::mission", Status::Completed);
-		std::shared_ptr<Priority> root = Priority::Create("root", Status::Completed);
 		std::shared_ptr<Action> breakpoint = Action::Create("breakpoint");
 
 		namespace {
-			std::shared_ptr<Priority> be_squad_leader = Priority::Create("be_squad_leader", Status::Executed);
-			std::shared_ptr<Priority> join_squad = Priority::Create("join_squad", Status::Executed);
-
 			template<bool b>
 			bool IsSeeingEnemy(const Bot* const Self) noexcept {
 				RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->CanSeeEnemy());
@@ -79,63 +72,6 @@ namespace pokebot::bot {
 		}
 
 		void DefineBehavior() {
-			root->Define
-			({
-				Condition::If(Always<false>, team),
-				Condition::If(HasEnemy<true>, combat),
-				Condition::If(Always<true>, mission)
-			 });
-
-			team->Define
-			({
-				Condition::If(BEHAVIOR_IF(IsFeelingLikeBravely<true>(Self) && IsEnoughSquadEstablished<false>(Self)), be_squad_leader),
-			 });
-
-			combat->Define
-			({
-				Condition::If(IsSeeingEnemy<true>, fight::while_spotting_enemy)
-			 });
-
-			mission->Define
-			({
-				Condition::If(
-					Always<false>,
-					coop::objective
-				),
-				Condition::If(
-					IsCurrentMode<game::MapFlags::Demolition>,
-					demolition::objective
-				),
-				Condition::If(
-					IsCurrentMode<game::MapFlags::HostageRescue>,
-					rescue::objective
-				),
-				Condition::If(
-					IsCurrentMode<game::MapFlags::Assassination>,
-					assist::objective
-				),
-				Condition::If(
-					IsCurrentMode<game::MapFlags::Escape>,
-					escape::objective
-				),
-				elimination::objective
-			 });
-
-			be_squad_leader->Define
-			({
-				Condition::If(IsVip<true>, create_vip_squad),
-				Condition::If(IsFeelingLikeCooperation<false>, create_lonely_squad),
-				Condition::If(IsFeelingLikeBravely<true>, create_offense_squad),
-				create_defense_squad
-			 });
-
-			join_squad->Define
-			({
-				Condition::If(IsPlayerMate<true>, join_player_squad),
-				Condition::If(IsVipSquadEnoughJoined<false>, join_vip_squad),
-				Condition::If(IsFeelingLikeBravely<true>, join_offense_squad)
-			 });
-
 			DefineCombat();
 			DefineAction();
 			DefineObjective();
@@ -145,13 +81,5 @@ namespace pokebot::bot {
 				return Status::Executed;
 			});
 		}
-	}
-
-	void Bot::BehaviorUpdate() noexcept {
-		behavior::root->Evalute(this);
-	}
-
-	void Bot::DecideBehavior() {
-
 	}
 }

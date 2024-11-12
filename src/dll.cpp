@@ -176,7 +176,8 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
                 SERVER_PRINT(std::format("POKEBOT: The host is connected.\n", STRING(entity->v.netname)).c_str());
                 // save the edict of the listen server client...
                 pokebot::game::game.host.SetHost(entity);
-                pokebot::game::game.clients.Register(entity);
+                // REMOVED: We cannot get the player's name at this timing.
+                // pokebot::game::game.clients.Register(entity);
                 is_game_completely_initialized = true;
             }
             SERVER_PRINT(std::format("POKEBOT: {} is connected.\n", STRING(entity->v.netname)).c_str());

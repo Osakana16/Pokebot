@@ -414,28 +414,34 @@ namespace pokebot::bot {
 			extern std::shared_ptr<Priority> while_spotting_enemy;
 		}
 
+		// - DEmolition Behaviors - 
 		namespace demolition {
-			extern std::shared_ptr<Priority> objective;
+			extern std::shared_ptr<Priority> t_plant;
+			extern std::shared_ptr<Priority> t_defusing;
+			extern std::shared_ptr<Priority> ct_planted;
+			extern std::shared_ptr<Priority> ct_defusing;
+			extern std::shared_ptr<Priority> blow;
 		}
 
+		// - Rescue Behaviors -
 		namespace rescue {
-			extern std::shared_ptr<Priority> objective;
+			extern std::shared_ptr<Sequence> ct_try;
+			extern std::shared_ptr<Sequence> ct_leave;
+			extern std::shared_ptr<Sequence> lead_hostage;
 		}
 
+		// - ASsasination Behaviors -
 		namespace assist {
-			extern std::shared_ptr<Priority> objective;
+			extern std::shared_ptr<Sequence> ct_cover;
+			extern std::shared_ptr<Sequence> ct_take_point;
+			extern std::shared_ptr<Sequence> ct_vip_escape;
 		}
-
+	
+		// - EScape Behaviors -
 		namespace escape {
-			extern std::shared_ptr<Priority> objective;
+			extern std::shared_ptr<Sequence> t_get_primary;
+			extern std::shared_ptr<Sequence> t_take_point;
 		}
 
-		namespace coop {
-			extern std::shared_ptr<Sequence> objective;
-		}
-
-		namespace elimination {
-			extern std::shared_ptr<Priority> objective;
-		}
 	}
 }

@@ -390,6 +390,7 @@ namespace pokebot::node {
 #include <filesystem>
 
 	bool Graph::Load() {
+#if 0
 		char mod[50];
 		g_engfuncs.pfnGetGameDir(mod);
 
@@ -429,10 +430,12 @@ namespace pokebot::node {
 			}
 			return true;
 		}
+#endif
 		return false;
 	}
 	
 	bool Graph::Save() {
+#if 0
 		char mod[50];
 		g_engfuncs.pfnGetGameDir(mod);
 
@@ -468,6 +471,7 @@ namespace pokebot::node {
 			}
 			return true;
 		}
+#endif
 		return false;
 	}
 

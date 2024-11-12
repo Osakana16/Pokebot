@@ -1,3 +1,7 @@
+#include "behavior.hpp"
+
+#include <thread>
+
 namespace pokebot {
 	namespace bot {
 		ActionKey operator|(ActionKey ak1, ActionKey ak2) noexcept {
@@ -22,13 +26,14 @@ namespace pokebot {
 
 			if (*client == nullptr)
 				return; 
-			client->Edict()->v.flags |= pokebot::common::Third_Party_Bot_Flag;
+
 			auto update = Update_Funcs.at(start_action);
 			update(*this);
 			frame_interval = gpGlobals->time - last_command_time;
 
 			const std::uint8_t Msec_Value = ComputeMsec();
 			last_command_time = gpGlobals->time;
+
 			g_engfuncs.pfnRunPlayerMove(*client,
 					movement_angle,
 					move_speed,
@@ -38,7 +43,6 @@ namespace pokebot {
 					client->Impulse(),
 					Msec_Value);
 
-			static_cast<edict_t*>(*client)->v.button = 0;
 			move_speed = 0;
 		}
 
@@ -160,17 +164,118 @@ namespace pokebot {
 				// if we execute a heavy process immediately after the start of a round, 
 				// the game will freeze.
 				
-				BehaviorUpdate();
+				switch (state) {
+					case State::Accomplishment:
+						AccomplishMission();
+						break;
+					case State::Crisis:
+						Combat();
+						break;
+				}
 				CheckAround();
 			} else {
 				SelectWeapon(game::Weapon::Knife);
 			}
 			
 			if (next_dest_node != node::Invalid_NodeID) {
-				if (move_speed > 0.0) {
-					PressKey(ActionKey::Run);
-				}
+				PressKey(ActionKey::Run);
 			}
+		}
+
+		void Bot::AccomplishMission() noexcept {
+			static const auto Do_Nothing_If_Mode_Is_Not_Applicable = std::make_pair<game::MapFlags, std::function<void()>>(static_cast<game::MapFlags>(0), [this] { /* Do nothing. */ });
+			auto AccomplishMissionT = [this] {
+				static std::unordered_map<game::MapFlags, std::function<void()>> modes{
+					Do_Nothing_If_Mode_Is_Not_Applicable,
+					{
+						game::MapFlags::Demolition,
+						[this] {
+							if (HasWeapon(game::Weapon::C4)) {
+								behavior::demolition::t_plant->Evalute(this);
+							} else {
+								// 
+							}
+						}
+					},
+					{
+						game::MapFlags::HostageRescue,
+						[this] {
+							
+						}
+					},
+					{
+						game::MapFlags::Assassination,
+						[this] {
+							
+						}
+					},
+					{
+						game::MapFlags::Escape,
+						[this] {
+							behavior::escape::t_take_point->Evalute(this);
+						}
+					},
+				};
+				auto current_mode = game::game.GetMapFlag();
+				for (auto supported_mode : modes) {
+					modes[current_mode & supported_mode.first]();
+				}
+			};
+
+			auto AccomplishMissionCT = [this] {
+				static std::unordered_map<game::MapFlags, std::function<void()>> modes{
+					Do_Nothing_If_Mode_Is_Not_Applicable,
+					{
+						game::MapFlags::Demolition,
+						[this] {
+							if (manager.C4Origin() != std::nullopt) {
+								(common::Distance(Origin(), *manager.C4Origin()) <= 50.0f ? behavior::demolition::ct_defusing : behavior::demolition::ct_planted)->Evalute(this);
+								
+							} else {
+
+							}
+						}
+					},
+					{
+						game::MapFlags::HostageRescue,
+						[this] {
+							if (!client->HasHostages()) {
+								behavior::rescue::ct_try->Evalute(this);
+							} else {
+								behavior::rescue::ct_leave->Evalute(this);
+							}
+						}
+					},
+					{
+						game::MapFlags::Assassination,
+						[this] {
+							if (client->IsVIP()) {
+								behavior::assist::ct_vip_escape->Evalute(this);
+							} else {
+
+							}
+						}
+					},
+					{
+						game::MapFlags::Escape,
+						[this] {
+							
+						}
+					}
+				};
+
+				auto current_mode = game::game.GetMapFlag();
+				for (auto supported_mode : modes) {
+					modes[current_mode & supported_mode.first]();
+				}
+			};
+
+			static std::function<void()> accomplishment_mode[] = { AccomplishMissionT, AccomplishMissionCT };
+			accomplishment_mode[static_cast<int>(JoinedTeam()) - 1]();
+		}
+
+		void Bot::Combat() noexcept {
+
 		}
 
 		template<typename Array>

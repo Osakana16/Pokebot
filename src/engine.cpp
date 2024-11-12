@@ -100,6 +100,12 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                 }
             },
             {
+                GET_USER_MSG_ID(PLID, "BotVoice", nullptr), []() {
+                    if (is_host) {
+                    }
+                }
+            },
+            {
                 GET_USER_MSG_ID(PLID, "ShowMenu", nullptr), []() noexcept {
                     if (!is_bot) {
                         return;
@@ -152,7 +158,12 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         { "UNASSIGNED", common::Team::Spector },
                         { "SPECTATOR", common::Team::Spector }
                     };
-                    game::game.clients.OnTeamAssigned(STRING(engine_target_edict->v.netname), Menu_Cache.at(std::get<std::string>(args[1])));
+
+                    if (Menu_Cache.at(std::get<std::string>(args[1])) == common::Team::Spector) {
+                        game::game.clients.Register(const_cast<edict_t*>(engine_target_edict));
+                    } else {
+                        game::game.clients.OnTeamAssigned(STRING(engine_target_edict->v.netname), Menu_Cache.at(std::get<std::string>(args[1])));
+                    }
                 }
             },
             {
@@ -168,7 +179,21 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                     if (args.size() < 2)
                         return;
 
+                    enum ScoreStatus : int {
+                        Nothing = 0,
+                        Dead = 1 << 0,
+                        Bomb = 1 << 1,
+                        VIP = 1 << 2,
+                        Defuse_Kit = 1 << 3
+                    };
 
+                    if (bool(std::get<int>(args[1]) & ScoreStatus::VIP)) {
+                        pokebot::game::game.clients.OnVIPChanged(STRING(INDEXENT(std::get<int>(args[0]))->v.netname));
+                    } else if ((std::get<int>(args[1]) & ScoreStatus::Dead)) {
+
+                    } else if ((std::get<int>(args[1]) & ScoreStatus::Defuse_Kit)) {
+
+                    }
                 }
             },
             {
