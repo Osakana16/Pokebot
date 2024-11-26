@@ -37,7 +37,8 @@ namespace pokebot::node {
 		return static_cast<size_t>(Pos / Split_Size) + 16;
 	}
 
-	NodeID Graph::TryToConnect(const NodeID Node_ID) {
+#if !USE_NAVMESH
+	NodeID WaypointGraph::TryToConnect(const NodeID Node_ID) {
 		auto& new_point = nodes.at(Node_ID);			
 		for (auto closed_point_id : nodes) {
 			auto& closed_point = nodes.at(closed_point_id.first);
@@ -57,7 +58,7 @@ namespace pokebot::node {
 		return Node_ID;
 	}
 
-	void Graph::Clear() {
+	void WaypointGraph::Clear() {
 		nodes.clear();
 		for (int z = 0; z < Tree_Size; z++) {
 			for (int y = 0; y < Tree_Size; y++) {
@@ -68,18 +69,18 @@ namespace pokebot::node {
 		}
 	}
 
-	void Graph::Remove(NodeID point_id) {
+	void WaypointGraph::Remove(NodeID point_id) {
 		nodes.erase(point_id);
 	}
 
-	std::shared_ptr<Node> Graph::GetNode(NodeID point_id) {
+	std::shared_ptr<Point> WaypointGraph::GetNode(NodeID point_id) {
 		if (auto point_iterator = nodes.find(point_id); point_iterator != nodes.end())
 			return point_iterator->second;
 		else
 			return nullptr;
 	}
 
-	NodeID Graph::Add(const Vector& Position, const GoalKind Kind) {
+	NodeID WaypointGraph::Add(const Vector& Position, const GoalKind Kind) {
 		NodeID current_node_id = GetNearest(Position);
 		if (current_node_id == Invalid_NodeID) {
 			const size_t X = PointAsIndex(Position.x),
@@ -97,9 +98,8 @@ namespace pokebot::node {
 		TryToConnect(current_node_id);
 		return Invalid_NodeID;
 	}
-
-	
-	bool Graph::IsSameGoal(const NodeID Node_ID, const GoalKind Goal_Kind) const noexcept {
+		
+	bool WaypointGraph::IsSameGoal(const NodeID Node_ID, const GoalKind Goal_Kind) const noexcept {
 		auto goals = GetGoal(node::GoalKind::Bombspot);
 		for (auto goal = goals.first; goal != goals.second; goal++) {
 			if (Node_ID == goal->second) {
@@ -109,11 +109,11 @@ namespace pokebot::node {
 		return false;
 	}
 
-	bool Graph::IsOnNode(const Vector& Position, const NodeID Target_Node_ID) const noexcept {
+	bool WaypointGraph::IsOnNode(const Vector& Position, const NodeID Target_Node_ID) const noexcept {
 		return (GetNearest(Position) == Target_Node_ID);
 	}
 
-	void Graph::Draw() {
+	void WaypointGraph::Draw() {
 		auto host = const_cast<edict_t*>(game::game.host.AsEdict());
 		float nearest_distance = std::numeric_limits<float>::max();
 		for (int i = 0; i < nodes.size(); i++) {
@@ -132,7 +132,7 @@ namespace pokebot::node {
 		}
 	}
 
-	void Graph::AddBasic() {
+	void WaypointGraph::AddBasic() {
 		auto MoveOriginOnGround = [](Vector* const origin) noexcept {
 			common::Tracer tracer{};
 			tracer.MoveStart(*origin);
@@ -250,29 +250,29 @@ namespace pokebot::node {
 		}
 	}
 
-	void Graph::OnMapLoaded() {
+	void WaypointGraph::OnMapLoaded() {
 		Clear();
 	}
 
-	void Graph::OnNewRound() {
+	void WaypointGraph::OnNewRound() {
 		if (!Load()) {
 			AddBasic();
 		}
 		Save();
 	}
-
-	void Graph::Remove(const Vector& Position) {
+	
+	void WaypointGraph::Remove(const Vector& Position) {
 		if (auto point_id = GetNearest(Position); point_id != Invalid_NodeID) {
 			Remove(point_id);
 		}
 	}
 
-	void Graph::FindPath(PathWalk* const walk_routes, const Vector& Start, const Vector& Goal) {
+	void WaypointGraph::FindPath(PathWalk<NodeID>* const walk_routes, const Vector& Start, const Vector& Goal) {
 		FindPath(walk_routes, GetNearest(Start), GetNearest(Goal));
 	}
 
 
-	void Graph::FindPath(PathWalk* const walk_routes, const NodeID start_node_id, const NodeID end_node_id) {
+	void WaypointGraph::FindPath(PathWalk<NodeID>* const walk_routes, const NodeID start_node_id, const NodeID end_node_id) {
 		routes.clear();
 		class FGreater {
 		public:
@@ -343,15 +343,14 @@ namespace pokebot::node {
 				}
 			}
 		}
-		return;
 	}
 
 
-	decltype(static_cast<const decltype(Graph::goals)>(Graph::goals).equal_range(GoalKind::None)) Graph::GetGoal(const GoalKind kind) const noexcept {
+	decltype(static_cast<const decltype(WaypointGraph::goals)>(WaypointGraph::goals).equal_range(GoalKind::None)) WaypointGraph::GetGoal(const GoalKind kind) const noexcept {
 		return goals.equal_range(kind);
 	}
 
-	NodeID Graph::GetNearest(const Vector& Destination) const noexcept {
+	NodeID WaypointGraph::GetNearest(const Vector& Destination) const noexcept {
 		NodeID result = Invalid_NodeID;
 		const size_t X = PointAsIndex(Destination.x),
 			Y = PointAsIndex(Destination.y),
@@ -389,7 +388,7 @@ namespace pokebot::node {
 
 #include <filesystem>
 
-	bool Graph::Load() {
+	bool WaypointGraph::Load() {
 #if 0
 		char mod[50];
 		g_engfuncs.pfnGetGameDir(mod);
@@ -434,7 +433,7 @@ namespace pokebot::node {
 		return false;
 	}
 	
-	bool Graph::Save() {
+	bool WaypointGraph::Save() {
 #if 0
 		char mod[50];
 		g_engfuncs.pfnGetGameDir(mod);
@@ -475,7 +474,7 @@ namespace pokebot::node {
 		return false;
 	}
 
-	Vector Graph::GetOrigin(const NodeID Node_ID) const noexcept {
+	Vector WaypointGraph::GetOrigin(const NodeID Node_ID) const noexcept {
 		return (Node_ID != Invalid_NodeID ? nodes.at(Node_ID)->Origin() : Vector(9999, 9999, 9999));
 	}
 
@@ -492,4 +491,151 @@ namespace pokebot::node {
 		this->flag |= flag;
 		return true;
 	}
+#else
+	navmesh::NavArea* CZBotGraph::GetNearest(const Vector& Destination) const noexcept {
+		return navigation_map.GetNavArea(&Destination);
+	}
+
+	void CZBotGraph::FindPath(PathWalk<std::uint32_t>* const walk_routes, const Vector& Source, const Vector& Destination) {
+		auto source = navigation_map.GetNavArea(&Source);
+		auto destination = navigation_map.GetNavArea(&Destination);
+		auto start_node_id = source->m_id;
+		auto end_node_id = destination->m_id;
+
+		routes.clear();
+		class FGreater {
+		public:
+			bool operator ()(const NodeID a_id, const NodeID b_id) {
+				return czworld.routes.at(a_id).f > czworld.routes.at(b_id).f;
+			}
+		};
+		routes.resize(navmesh::NavArea::m_nextID);
+		if (navigation_map.GetNavAreaByID(end_node_id) == nullptr) {
+			return;
+		}
+
+		// Self Node-ID/Parent Node-ID
+		std::unordered_map<NodeID, NodeID> found_path{ { start_node_id, Invalid_NodeID } };
+
+		NodeID last_opened_node_id{};
+		std::unordered_set<NodeID> closed_list{};
+		std::priority_queue<
+			NodeID,
+			std::vector<NodeID>,
+			FGreater
+		> route_queue{};
+		route_queue.push(start_node_id);
+
+		routes[start_node_id].state = RouteState::Open;
+		routes[start_node_id].f = common::Distance(source->m_center, destination->m_center);
+		routes[start_node_id].g = common::Distance(source->m_center, destination->m_center);
+		while (!route_queue.empty()) {
+			NodeID current_node_id = route_queue.top();
+			route_queue.pop();
+			if (current_node_id == end_node_id) {
+				do {
+					walk_routes->PushFront(current_node_id);
+					current_node_id = routes[current_node_id].parent;
+				} while (current_node_id != start_node_id);
+				walk_routes->PushFront(current_node_id);
+				return;
+			}
+
+			auto current_route = &routes[current_node_id];
+			if (current_route->state != RouteState::Open) {
+				continue;
+			}
+
+			current_route->state = RouteState::Closed;
+			for (auto& direction : navigation_map.GetNavAreaByID(current_node_id)->m_connect) {
+				for (auto& connection : direction) {
+					auto near_route = &routes.at(connection.area->m_id);
+					auto current_node = navigation_map.GetNavAreaByID(current_node_id);
+					auto near_node = navigation_map.GetNavAreaByID(connection.area->m_id);
+
+					float h = common::Distance(source->m_center, current_node->m_center) + common::Distance(current_node->m_center, destination->m_center);
+					float g = current_route->g + std::abs(near_route->f - h);
+					float f = g + h;
+					if (near_route->state == RouteState::New || near_route->f > f) {
+						near_route->parent = current_node_id;
+						near_route->state = RouteState::Open;
+
+						near_route->f = f;
+						near_route->g = g;
+
+						route_queue.push(connection.area->m_id);
+					}
+				}
+			}
+		}
+	}
+
+	void CZBotGraph::OnMapLoaded() {
+        if (!navigation_map.Load(std::format("cstrike/maps/{}.nav", STRING(gpGlobals->mapname)))) {
+            if (!navigation_map.Load(std::format("czero/maps/{}.nav", STRING(gpGlobals->mapname)))) {
+                SERVER_PRINT("Navmesh: Failed to load the nav file.\n");
+            } else {
+                SERVER_PRINT("Navmesh: Loaded the nav file from czero.\n");
+            }
+        } else {        
+            SERVER_PRINT("Navmesh: Loaded the nav file from cstrike.\n");
+        }
+
+		auto addGoal = [this](const GoalKind kind, const char* class_name, Vector(*originFunction)(edict_t*)) {
+			edict_t* entity = nullptr;
+			while ((entity = common::FindEntityByClassname(entity, class_name)) != nullptr) {
+				Vector origin = originFunction(entity);
+				goals.insert({ kind, GetNearest(origin)->m_id });
+			}
+		};
+
+		auto returnOrigin = [](edict_t* entity) { return entity->v.origin; };
+		auto returnModelOrigin = [](edict_t* entity) { return common::VecBModelOrigin(entity); };
+
+		goals.clear();
+		addGoal(GoalKind::CT_Spawn, "info_player_start", returnOrigin);				// CT Spawn
+		addGoal(GoalKind::Terrorist_Spawn, "info_player_deathmatch", returnOrigin);	// Terrorist Spawn
+		addGoal(GoalKind::Rescue_Zone, "func_hostage_rescue", returnModelOrigin);
+		addGoal(GoalKind::Rescue_Zone, "info_hostage_rescue", returnModelOrigin);
+		addGoal(GoalKind::Bombspot, "func_bomb_target", returnModelOrigin);
+		addGoal(GoalKind::Bombspot, "info_bomb_target", returnModelOrigin);
+		addGoal(GoalKind::Vip_Safety, "info_vip_start", returnModelOrigin);
+		addGoal(GoalKind::Vip_Safety, "func_vip_safetyzone", returnModelOrigin);
+		addGoal(GoalKind::Escape_Zone, "func_escapezone", returnModelOrigin);
+	}
+
+	void CZBotGraph::OnNewRound() {
+
+	}
+
+	bool CZBotGraph::IsSameGoal(const NodeID Node_ID, const GoalKind Goal_Kind) const noexcept {
+		auto goals = GetGoal(node::GoalKind::Bombspot);
+		for (auto goal = goals.first; goal != goals.second; goal++) {
+			if (Node_ID == goal->second) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool CZBotGraph::IsOnNode(const Vector& Position, const NodeID Target_Node_ID) const noexcept {
+		auto area = GetNearest(Position);
+		return (area && area->m_id == Target_Node_ID);
+	}
+
+	decltype(static_cast<const decltype(CZBotGraph::goals)>(CZBotGraph::goals).equal_range(GoalKind::None)) CZBotGraph::GetGoal(const GoalKind kind) const noexcept {
+		return goals.equal_range(kind);
+	}
+
+
+	Vector CZBotGraph::GetOrigin(const NodeID Node_ID) const noexcept {
+		return (Node_ID != Invalid_NodeID ? navigation_map.GetNavAreaByID(Node_ID)->m_center : Vector(9999, 9999, 9999));
+	}
+
+	
+	bool CZBotGraph::HasFlag(const NodeID id, NavmeshFlag flag) const noexcept {
+		auto area = navigation_map.GetNavAreaByID(id);
+		return area != nullptr && bool(area->m_attributeFlags & static_cast<navmesh::NavAttributeType>(flag));
+	}
+#endif
 }

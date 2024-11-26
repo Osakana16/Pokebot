@@ -72,15 +72,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Goldsrc|Win32'">
     <IncludePath>$(ProjectDir)metamod;$(ProjectDir)HLSDK\Multiplayer\cl_dll;$(ProjectDir)HLSDK\Multiplayer\common;$(ProjectDir)HLSDK\Multiplayer\dlls;$(ProjectDir)HLSDK\Multiplayer\engine;$(ProjectDir)HLSDK\Multiplayer\game_shared;$(ProjectDir)HLSDK\Multiplayer\pm_shared;$(ProjectDir)HLSDK\Multiplayer\utils;$(ProjectDir)HLSDK\Multiplayer\utils\common;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)lib\navmesh;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Source|Win32'">
     <IncludePath>$(ProjectDir)metamod-source\core;$(ProjectDir)metamod-source\core\sourcehook;$(ProjectDir)hl2sdk-sdk2013\common;$(ProjectDir)hl2sdk-sdk2013\public;$(ProjectDir)hl2sdk-sdk2013\public\engine;$(ProjectDir)hl2sdk-sdk2013\public\game\server;$(ProjectDir)hl2sdk-sdk2013\public\tier0;$(ProjectDir)hl2sdk-sdk2013\public\tier1;$(ProjectDir)hl2sdk-sdk2013\public\vstdlib;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)lib\navmesh;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Goldsrc|Win32'">
     <IncludePath>$(ProjectDir)metamod;$(ProjectDir)HLSDK\Multiplayer\cl_dll;$(ProjectDir)HLSDK\Multiplayer\common;$(ProjectDir)HLSDK\Multiplayer\dlls;$(ProjectDir)HLSDK\Multiplayer\engine;$(ProjectDir)HLSDK\Multiplayer\game_shared;$(ProjectDir)HLSDK\Multiplayer\pm_shared;$(ProjectDir)HLSDK\Multiplayer\utils;$(ProjectDir)HLSDK\Multiplayer\utils\common;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)lib\navmesh;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Source|Win32'">
     <IncludePath>$(ProjectDir)metamod;$(ProjectDir)HLSDK\Multiplayer\cl_dll;$(ProjectDir)HLSDK\Multiplayer\common;$(ProjectDir)HLSDK\Multiplayer\dlls;$(ProjectDir)HLSDK\Multiplayer\engine;$(ProjectDir)HLSDK\Multiplayer\game_shared;$(ProjectDir)HLSDK\Multiplayer\pm_shared;$(ProjectDir)HLSDK\Multiplayer\utils;$(ProjectDir)HLSDK\Multiplayer\utils\common;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)lib\navmesh;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Goldsrc|Win32'">
     <ClCompile>
@@ -106,7 +110,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>./pokebot.def</ModuleDefinitionFile>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CZNavmesh-Lib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(TargetPath)" "D:\SteamLibrary\steamapps\common\Half-Life\cstrike\addons\pokebot\$(TargetFileName)"</Command>
@@ -135,7 +139,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>./pokebot.def</ModuleDefinitionFile>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CZNavmesh-Lib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(TargetPath)" "D:\Program Files\Steam\steamapps\common\Half-Life\cstrike\addons\pokebot\$(TargetFileName)"</Command>
@@ -168,7 +172,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>./pokebot.def</ModuleDefinitionFile>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CZNavmesh-Lib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(TargetPath)" "D:\Program Files\Steam\steamapps\common\Half-Life\cstrike\addons\pokebot\$(TargetFileName)"</Command>
@@ -201,7 +205,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>./pokebot.def</ModuleDefinitionFile>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CZNavmesh-Lib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(TargetPath)" "D:\Program Files\Steam\steamapps\common\Half-Life\cstrike\addons\pokebot\$(TargetFileName)"</Command>

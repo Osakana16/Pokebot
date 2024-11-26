@@ -175,8 +175,11 @@ namespace pokebot {
 
 			bool need_to_update{};
 			GoalQueue goal_queue{};
-
-			node::PathWalk routes{};
+#if !USE_NAVMESH
+			node::PathWalk<node::NodeID> routes{};
+#else
+			node::PathWalk<std::uint32_t> routes{};
+#endif
 			pokebot::node::NodeID goal_node{};
 			pokebot::node::NodeID next_dest_node{};
 

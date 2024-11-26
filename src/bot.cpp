@@ -104,30 +104,25 @@ namespace pokebot {
 			start_action = Message::Buy;
 			buy_wait_timer.SetTime(1.0f);
 
+			auto selectGoal = [](node::GoalKind kind) -> node::NodeID {
+#if !USE_NAVMESH
+				auto goal = node::world.GetGoal(kind);
+#else
+				auto goal = node::czworld.GetGoal(kind);
+#endif
+				for (auto it = goal.first; it != goal.second; it++) {
+					return it->second;
+				}
+			};
+
 			if (game::game.IsCurrentMode(game::MapFlags::Demolition)) {
-				auto goal = node::world.GetGoal(node::GoalKind::Bombspot);
-				for (auto it = goal.first; it != goal.second; it++) {
-					objective_goal_node = it->second;
-					break;
-				}
+				objective_goal_node = selectGoal(node::GoalKind::Bombspot);
 			} else if (game::game.IsCurrentMode(game::MapFlags::HostageRescue)) {
-				auto goal = node::world.GetGoal(node::GoalKind::Rescue_Zone);
-				for (auto it = goal.first; it != goal.second; it++) {
-					objective_goal_node = it->second;
-					break;
-				}
+				objective_goal_node = selectGoal(node::GoalKind::Rescue_Zone);
 			} else if (game::game.IsCurrentMode(game::MapFlags::Assassination)) {
-				auto goal = node::world.GetGoal(node::GoalKind::Vip_Safety);
-				for (auto it = goal.first; it != goal.second; it++) {
-					objective_goal_node = it->second;
-					break;
-				}
+				objective_goal_node = selectGoal(node::GoalKind::Vip_Safety);
 			} else if (game::game.IsCurrentMode(game::MapFlags::Escape)) {
-				auto goal = node::world.GetGoal(node::GoalKind::Escape_Zone);
-				for (auto it = goal.first; it != goal.second; it++) {
-					objective_goal_node = it->second;
-					break;
-				}
+				objective_goal_node = selectGoal(node::GoalKind::Escape_Zone);
 			}
 			// mapdata::BSP().LoadWorldMap();
 		}
@@ -177,6 +172,13 @@ namespace pokebot {
 				SelectWeapon(game::Weapon::Knife);
 			}
 			
+			for (auto& vector : { Vector(0.0f, 0.0f, 0.0f), Vector(50.0f, 0.0f, 0.0f), Vector(-50.0f, 0.0f, 0.0f), Vector(0.0f, 50.0f, 0.0f), Vector(0.0f, -50.0f, 0.0f) }) {
+				if (auto area = node::czworld.GetNearest(Origin() + vector); area != nullptr && node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Jump)) {
+					PressKey(ActionKey::Jump);
+					break;
+				}
+			}
+
 			if (next_dest_node != node::Invalid_NodeID) {
 				PressKey(ActionKey::Run);
 			}
@@ -289,11 +291,19 @@ namespace pokebot {
 
 		void Bot::CheckAround() {
 			if (!look_direction.view.has_value()) {
+#if !USE_NAVMESH
 				look_direction.view = node::world.GetOrigin(next_dest_node);
+#else
+				look_direction.view = node::czworld.GetOrigin(next_dest_node);
+#endif
 			}
 
 			if (!look_direction.movement.has_value()) {
+#if !USE_NAVMESH
 				look_direction.movement = node::world.GetOrigin(next_dest_node);
+#else
+				look_direction.movement = node::czworld.GetOrigin(next_dest_node);
+#endif
 			}
 
 			TurnViewAngle();
@@ -363,7 +373,9 @@ namespace pokebot {
 
 			}
 			if (bool(pressable_key & ActionKey::Jump)) {
-
+				if (!client->IsOnFloor()) {
+					return;
+				}
 			}
 			if (bool(pressable_key & ActionKey::Duck)) {
 
@@ -496,7 +508,11 @@ namespace pokebot {
 				{ 
 					"#Regroup_team", 
 					[&] {
+#if !USE_NAVMESH
 						goal_queue.AddGoalQueue(node::world.GetNearest(game::game.clients.Get(Sender_Name)->origin));
+#else
+						goal_queue.AddGoalQueue(node::czworld.GetNearest(game::game.clients.Get(Sender_Name)->origin)->m_id);
+#endif
 					} 
 				},
 				{ 

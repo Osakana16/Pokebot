@@ -144,7 +144,11 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
     func_table.pfnStartFrame = []() -> void {
         using namespace pokebot;
         if (is_game_completely_initialized) {
+#if !USE_NAVMESH
             pokebot::node::world.OnNewRound();
+#else
+            pokebot::node::czworld.OnNewRound();
+#endif
             is_game_completely_initialized = false;
         }
 
@@ -157,7 +161,6 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
     };
 
     func_table.pfnGameInit = []() -> void {
-        pokebot::node::world.OnMapLoaded();
         // pokebot::ParseWeaponJson();
         RETURN_META(MRES_IGNORED);
     };
@@ -179,6 +182,11 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
                 // REMOVED: We cannot get the player's name at this timing.
                 // pokebot::game::game.clients.Register(entity);
                 is_game_completely_initialized = true;
+#if !USE_NAVMESH
+                pokebot::node::world.OnMapLoaded();
+#else
+                pokebot::node::czworld.OnMapLoaded();
+#endif
             }
             SERVER_PRINT(std::format("POKEBOT: {} is connected.\n", STRING(entity->v.netname)).c_str());
         }
@@ -196,7 +204,9 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
     };
 
     func_table.pfnServerActivate = [](edict_t* edictList, int edictCount, int) -> void {
+#if !USE_NAVMESH
         pokebot::node::world.Clear();
+#endif
         pokebot::game::game.Init(edictList, edictCount);
         RETURN_META(MRES_IGNORED);
     };

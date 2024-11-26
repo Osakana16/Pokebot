@@ -4,6 +4,7 @@ namespace pokebot::bot::behavior {
 	namespace {
 		template<node::GoalKind kind>
 		Status SetGoal(Bot *const self) noexcept {
+#if !USE_NAVMESH
 			if (node::world.IsOnNode(self->Origin(), self->goal_node) && node::world.IsSameGoal(self->goal_node, kind))
 				return Status::Enough;
 
@@ -18,6 +19,22 @@ namespace pokebot::bot::behavior {
 				return Status::Executed;
 			} else
 				return Status::Enough;
+#else
+			if (node::czworld.IsOnNode(self->Origin(), self->goal_node) && node::czworld.IsSameGoal(self->goal_node, kind))
+				return Status::Enough;
+
+			node::NodeID id = node::Invalid_NodeID;
+			auto goals = node::czworld.GetGoal(kind);
+			for (auto goal = goals.first; goal != goals.second; goal++) {
+				id = goal->second;
+				break;
+			}
+			
+			if (id != node::Invalid_NodeID && !node::czworld.IsOnNode(self->Origin(), id) && self->goal_queue.AddGoalQueue(id, 1)) {
+				return Status::Executed;
+			} else
+				return Status::Enough;
+#endif
 		}
 	}
 
@@ -226,6 +243,7 @@ namespace pokebot::bot::behavior {
 
 		set_goal_c4->Define(
 			[](Bot* const self) -> Status {
+#if !USE_NAVMESH
 				node::NodeID id = node::world.GetNearest(*manager.C4Origin());
 				if (node::world.IsOnNode(self->Origin(), id))
 					return Status::Enough;
@@ -234,11 +252,22 @@ namespace pokebot::bot::behavior {
 					return Status::Executed;
 				} else
 					return Status::Failed;
+#else
+				node::NodeID id = node::czworld.GetNearest(*manager.C4Origin())->m_id;
+				if (node::czworld.IsOnNode(self->Origin(), id))
+					return Status::Enough;
+
+				if (id != node::Invalid_NodeID && !node::czworld.IsOnNode(self->Origin(), id) && self->goal_queue.AddGoalQueue(id, 1)) {
+					return Status::Executed;
+				} else
+					return Status::Failed;
+#endif
 			}
 		);
 
 		set_goal_hostage->Define(
 			[](Bot* const self) -> Status {
+#if !USE_NAVMESH
 				edict_t* entity{};
 				float min_distance = std::numeric_limits<float>::max();
 				node::NodeID id = node::Invalid_NodeID;
@@ -254,6 +283,23 @@ namespace pokebot::bot::behavior {
 					return Status::Executed;
 				} else
 					return Status::Failed;
+#else
+				edict_t* entity{};
+				float min_distance = std::numeric_limits<float>::max();
+				node::NodeID id = node::Invalid_NodeID;
+				while ((entity = common::FindEntityByClassname(entity, "hostage_entity")) != nullptr) {
+					if (float distance = common::Distance(self->Origin(), entity->v.origin);  id == node::Invalid_NodeID || min_distance > distance) {
+						min_distance = distance;
+						id = node::czworld.GetNearest(entity->v.origin)->m_id;
+					}
+				}
+
+				if (id != node::Invalid_NodeID) {
+					self->goal_queue.AddGoalQueue(id, 1);
+					return Status::Executed;
+				} else
+					return Status::Failed;
+#endif
 			}
 		);
 
@@ -295,6 +341,7 @@ namespace pokebot::bot::behavior {
 
 		head_to_goal->Define(
 			[](Bot* const self) -> Status {
+#if !USE_NAVMESH
 				const auto Current_Node_ID = node::world.GetNearest(self->Origin());
 				if (self->goal_node == node::Invalid_NodeID && self->goal_queue.IsEmpty()) {
 					if (!self->IsFollowing() && self->Objective_Goal_Node() == Current_Node_ID) {
@@ -342,6 +389,59 @@ namespace pokebot::bot::behavior {
 					self->PressKey(ActionKey::Run);
 				}
 				return Status::Executed;
+#else
+				const auto Area = node::czworld.GetNearest(self->Origin());
+				if (Area == nullptr) {
+					return Status::Not_Ready;
+				}
+				const auto Current_Node_ID = Area->m_id;
+				if (self->goal_node == node::Invalid_NodeID && self->goal_queue.IsEmpty()) {
+					if (!self->IsFollowing() && self->Objective_Goal_Node() == Current_Node_ID) {
+						return Status::Enough;
+					} else
+						return Status::Not_Ready;
+				}
+				
+				if (Current_Node_ID != node::Invalid_NodeID && self->goal_node == Current_Node_ID) {
+					return Status::Enough;
+				} else if (node::czworld.IsOnNode(self->Origin(), self->goal_node)) {
+					return Status::Enough;
+				}
+
+				if (!self->goal_queue.IsEmpty()) {
+					self->goal_node = self->goal_queue.Get();
+				}
+
+				if (self->routes.Empty() || self->routes.IsEnd()) {
+					// Find path.
+
+					const auto Goal_Node_ID = self->goal_node;
+					if (Current_Node_ID == Goal_Node_ID) {
+						return Status::Executed;
+					} else if (Current_Node_ID == node::Invalid_NodeID) {
+						return Status::Failed;
+					}
+
+					node::czworld.FindPath(&self->routes, self->Origin(), node::czworld.GetOrigin(Goal_Node_ID));
+					if (self->routes.Empty() || self->routes.Destination() != self->goal_node) {
+						return Status::Failed;
+					}
+				}
+
+				if (self->next_dest_node == node::Invalid_NodeID) {
+					self->next_dest_node = self->routes.Current();
+				} else if (node::czworld.IsOnNode(self->Origin(), self->next_dest_node)) {
+					if (!self->routes.IsEnd()) {
+						if (self->routes.Next())
+							self->next_dest_node = self->routes.Current();
+					} else {
+						// self->goal_queue.Pop();
+					}
+				} else {
+					self->PressKey(ActionKey::Run);
+				}
+				return Status::Executed;
+#endif
 			}
 		);
 
@@ -360,9 +460,15 @@ namespace pokebot::bot::behavior {
 
 		follow_squad_leader->Define
 		([](Bot* const self) -> Status {
+#if !USE_NAVMESH
 			auto leader = manager.GetSquadLeader(self->JoinedTeam(), self->squad);
 			self->goal_queue.AddGoalQueue(node::world.GetNearest(leader->origin), 5);
 			return Status::Executed;
+#else
+			auto leader = manager.GetSquadLeader(self->JoinedTeam(), self->squad);
+			self->goal_queue.AddGoalQueue(node::czworld.GetNearest(leader->origin)->m_id, 5);
+			return Status::Executed;
+#endif
 		 });
 
 		create_lonely_squad->Define
