@@ -573,19 +573,23 @@ namespace pokebot::node {
 	void CZBotGraph::OnMapLoaded() {
         if (!navigation_map.Load(std::format("cstrike/maps/{}.nav", STRING(gpGlobals->mapname)))) {
             if (!navigation_map.Load(std::format("czero/maps/{}.nav", STRING(gpGlobals->mapname)))) {
-                SERVER_PRINT("Navmesh: Failed to load the nav file.\n");
+                SERVER_PRINT("[POKEBOT]Failed to load the nav file.\n");
+				return;
             } else {
-                SERVER_PRINT("Navmesh: Loaded the nav file from czero.\n");
+                SERVER_PRINT("[POKEBOT]Loaded the nav file from czero.\n");
             }
         } else {        
-            SERVER_PRINT("Navmesh: Loaded the nav file from cstrike.\n");
+            SERVER_PRINT("[POKEBOT]Loaded the nav file from cstrike.\n");
         }
 
 		auto addGoal = [this](const GoalKind kind, const char* class_name, Vector(*originFunction)(edict_t*)) {
 			edict_t* entity = nullptr;
 			while ((entity = common::FindEntityByClassname(entity, class_name)) != nullptr) {
 				Vector origin = originFunction(entity);
-				goals.insert({ kind, GetNearest(origin)->m_id });
+				auto area = GetNearest(origin);
+				if (area != nullptr) {
+					goals.insert({ kind, area->m_id });
+				}
 			}
 		};
 

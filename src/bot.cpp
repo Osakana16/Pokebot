@@ -171,14 +171,13 @@ namespace pokebot {
 			} else {
 				SelectWeapon(game::Weapon::Knife);
 			}
-			
+
 			for (auto& vector : { Vector(0.0f, 0.0f, 0.0f), Vector(50.0f, 0.0f, 0.0f), Vector(-50.0f, 0.0f, 0.0f), Vector(0.0f, 50.0f, 0.0f), Vector(0.0f, -50.0f, 0.0f) }) {
 				if (auto area = node::czworld.GetNearest(Origin() + vector); area != nullptr && node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Jump)) {
 					PressKey(ActionKey::Jump);
 					break;
 				}
 			}
-
 			if (next_dest_node != node::Invalid_NodeID) {
 				PressKey(ActionKey::Run);
 			}

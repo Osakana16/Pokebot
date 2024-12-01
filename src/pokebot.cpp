@@ -146,7 +146,7 @@ namespace pokebot::plugin {
         REG_SVR_COMMAND(
             "pk_kill_ct",
             [] {
-        }
+            }
         );
 
         REG_SVR_COMMAND(
