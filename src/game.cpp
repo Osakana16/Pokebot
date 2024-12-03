@@ -100,7 +100,7 @@ namespace pokebot {
 #endif
 		}
 
-		void Game::Update() {
+		void Game::PreUpdate() {
 			host.Update();
 
 			for (auto& hostage : hostages) {
@@ -123,9 +123,12 @@ namespace pokebot {
 						}
 					}
 				}
+			}
+		}
 
+		void Game::PostUpdate() {
+			for (auto client : clients.GetAll()) {
 				if (bool(static_cast<edict_t*>(*client.second)->v.flags & pokebot::common::Third_Party_Bot_Flag)) {
-					static_cast<edict_t*>(*client.second)->v.flags |= pokebot::common::Third_Party_Bot_Flag;
 					static_cast<edict_t*>(*client.second)->v.button = 0;
 				}
 			}

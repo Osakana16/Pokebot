@@ -43,6 +43,7 @@ namespace pokebot {
 					client->Impulse(),
 					Msec_Value);
 
+			client->Edict()->v.flags |= pokebot::common::Third_Party_Bot_Flag;
 			move_speed = 0;
 		}
 
@@ -191,10 +192,13 @@ namespace pokebot {
 					{
 						game::MapFlags::Demolition,
 						[this] {
-							if (HasWeapon(game::Weapon::C4)) {
-								behavior::demolition::t_plant->Evalute(this);
+							if (manager.C4Origin().has_value()) {
+								behavior::demolition::t_planted_wary->Evalute(this);
 							} else {
-								// 
+								if (HasWeapon(game::Weapon::C4)) {
+									behavior::demolition::t_plant->Evalute(this);
+								} else {
+								}
 							}
 						}
 					},

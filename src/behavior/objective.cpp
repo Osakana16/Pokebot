@@ -4,6 +4,8 @@ namespace pokebot::bot::behavior {
 	// - DEmolition Behaviors - 
 	namespace demolition {
 		std::shared_ptr<Priority> t_plant = Priority::Create("demolition::t_plant", Status::Executed);
+		std::shared_ptr<Priority> t_planted_wary = Priority::Create("demolition::t_planted_wary", Status::Executed);
+		std::shared_ptr<Priority> t_planted_camp = Priority::Create("demolition::t_planted_camp", Status::Executed);
 		std::shared_ptr<Priority> t_defusing = Priority::Create("demolition::t_defusing", Status::Executed);
 		std::shared_ptr<Priority> ct_planted = Priority::Create("demolition::ct_planted", Status::Executed);
 		std::shared_ptr<Priority> ct_defusing = Priority::Create("demolition::ct_defusing", Status::Executed);
@@ -49,17 +51,41 @@ namespace pokebot::bot::behavior {
 		return game::game.GetClosedHostage(Self->Origin(), 83.0f) != nullptr;
 	}
 
+	template<bool b>
+	bool IsFarFromC4(const Bot* const Self) noexcept {
+		assert(bot::manager.C4Origin().has_value());
+		if constexpr (b) {
+			return common::Distance(Self->Origin(), *bot::manager.C4Origin()) > 100.0f;
+		} else {
+			return common::Distance(Self->Origin(), *bot::manager.C4Origin()) <= 100.0f;
+		}
+	}
+
 	void DefineObjective() {
 		demolition::t_plant->Define
 		({
 			set_goal_bombspot,
+			find_goal,
 			After<Status::Enough>::With(
-				head_and_discard_goal, Priority::Create(
+				head_to_goal, Priority::Create(
 				{
 					change_c4,
 					fire
 				})
 			)
+		});
+
+		demolition::t_planted_wary->Define
+		({
+			Condition::If(IsFarFromC4<true>, set_goal_c4),
+			Condition::If(IsFarFromC4<false>, set_goal_from_c4_within_range),
+			find_goal,
+			head_to_goal
+		});
+
+		demolition::t_planted_camp->Define
+		({
+
 		});
 
 		demolition::t_defusing->Define
@@ -75,19 +101,22 @@ namespace pokebot::bot::behavior {
 		demolition::ct_planted->Define
 		({
 			set_goal_c4,
-			head_and_discard_goal
+			find_goal,
+			head_to_goal
 		});
 
 		rescue::ct_leave->Define
 		({
 			set_goal_rescuezone,
-			head_and_discard_goal
+			find_goal,
+			head_to_goal
 		 });
 
 		rescue::ct_try->Define
 		({
 			set_goal_hostage,
-			head_and_discard_goal,
+			find_goal,
+			head_to_goal,
 			Condition::If(CanUseHostage, rescue::lead_hostage)
 		 });
 
@@ -99,25 +128,29 @@ namespace pokebot::bot::behavior {
 		assist::ct_take_point->Define
 		({
 			set_goal_vipsafety,
+			find_goal,
 			head_to_goal
 		 });
 
 		assist::ct_vip_escape->Define
 		({
 			set_goal_vipsafety,
-			head_and_discard_goal
+			find_goal,
+			head_to_goal
 		 });
 
 		escape::t_get_primary->Define
 		({
 			set_goal_weapon,
-			head_and_discard_goal
+			find_goal,
+			head_to_goal
 		 });
 
 		escape::t_take_point->Define
 		({
 			set_goal_escapezone,
-			head_and_discard_goal	 
+			find_goal,
+			head_to_goal	 
 		 });
 
 		rescue::lead_hostage->Define
@@ -135,7 +168,7 @@ namespace pokebot::bot::behavior {
 					set_goal_ctspawn
 				}
 			),
-			head_and_discard_goal
+			head_to_goal
 		});
 
 		ct_ordinary->Define
@@ -147,7 +180,7 @@ namespace pokebot::bot::behavior {
 					set_goal_ctspawn
 				}
 			),
-			head_and_discard_goal
+			head_to_goal
 		});
 	}
 }

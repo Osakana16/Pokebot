@@ -19,6 +19,11 @@ typename function_traits<R(Args...)>::function_type to_function_pointer(std::fun
     return *func.target<typename function_traits<R(Args...)>::function_type>();
 }
 
+class Command {
+public:
+    inline Command(const std::string_view& Command_Name, std::function<void()> command_function) noexcept { REG_SVR_COMMAND(Command_Name.data(), command_function.target<void()>()); }
+};
+
 namespace pokebot::plugin {
     void Pokebot::RegisterCommand() noexcept {
         static auto GetArgs = []() {
@@ -33,9 +38,34 @@ namespace pokebot::plugin {
             return std::move(args);
         };
 
-        REG_SVR_COMMAND(
-            "pk_add",
-            [] {
+        REG_SVR_COMMAND("pk_distance_bombsite", [] {
+            edict_t* bombsites[2]{};
+
+            edict_t* edict{};
+            while ((edict = common::FindEntityByClassname(edict, "info_bomb_target")) != nullptr) {
+                if (bombsites[0] == nullptr) {
+                    bombsites[0] = edict;
+                } else {
+                    bombsites[1] = edict;
+                }
+                SERVER_PRINT(std::format("[POKEBOT]info_bomb_target: {}\n", common::Distance(game::game.host.Origin(), common::VecBModelOrigin(edict))).c_str());
+            }
+
+            while ((edict = common::FindEntityByClassname(edict, "func_bomb_target")) != nullptr) {
+                if (bombsites[0] == nullptr) {
+                    bombsites[0] = edict;
+                } else {
+                    bombsites[1] = edict;
+                }
+                SERVER_PRINT(std::format("[POKEBOT]func_bomb_target: {}\n", common::Distance(game::game.host.Origin(), common::VecBModelOrigin(edict))).c_str());
+            }
+
+            if (bombsites[1] != nullptr && bombsites[0] != nullptr) {
+                SERVER_PRINT(std::format("[POKEBOT]distance: {}\n", common::Distance(common::VecBModelOrigin(bombsites[0]), common::VecBModelOrigin(bombsites[1]))).c_str());
+            }
+        });
+
+        REG_SVR_COMMAND("pk_add", [] {
             auto args = GetArgs();
 
             std::string name = "FirstBot";
@@ -62,12 +92,9 @@ namespace pokebot::plugin {
                 difficult = static_cast<decltype(difficult)>(std::strtol(args[3].c_str(), nullptr, 0) % 4);
             }
             pokebot::plugin::pokebot_plugin.AddBot(name, team, model, difficult);
-        }
-        );
+        });
 
-        REG_SVR_COMMAND(
-            "pk_add_ct",
-            [] {
+        REG_SVR_COMMAND("pk_add_ct", [] {
             auto args = GetArgs();
 
             std::string name = "FirstBot";
@@ -86,12 +113,9 @@ namespace pokebot::plugin {
                 difficult = static_cast<decltype(difficult)>(std::strtol(args[2].c_str(), nullptr, 0) % 3);
             }
             pokebot::plugin::pokebot_plugin.AddBot(name, team, model, difficult);
-        }
-        );
+        });
 
-        REG_SVR_COMMAND(
-            "pk_add_t",
-            [] {
+        REG_SVR_COMMAND("pk_add_t", [] {
             auto args = GetArgs();
 
             std::string name = "FirstBot";
@@ -110,74 +134,59 @@ namespace pokebot::plugin {
                 difficult = static_cast<decltype(difficult)>(std::strtol(args[2].c_str(), nullptr, 0) % 3);
             }
             pokebot::plugin::pokebot_plugin.AddBot(name, team, model, difficult);
-        }
-        );
+        });
 
-        REG_SVR_COMMAND(
-            "pk_auto_waypoint",
-            [] {
+        REG_SVR_COMMAND("pk_auto_waypoint", [] {
             pokebot::game::is_enabled_auto_waypoint = !pokebot::game::is_enabled_auto_waypoint;
-        }
-        );
+        });
 
-        REG_SVR_COMMAND(
-            "pk_draw_waypoint",
-            [] {
+        REG_SVR_COMMAND("pk_draw_waypoint", [] {
             draw_node = !draw_node;
-        }
-        );
+        });
 
-        REG_SVR_COMMAND(
-            "pk_kill",
-            [] {
+        REG_SVR_COMMAND("pk_kill", [] {
             auto args = GetArgs();
             using namespace pokebot;
             MDLL_ClientKill(*game::game.clients.Get(args[0]));
-        }
-        );
+        });
 
-        REG_SVR_COMMAND(
-            "pk_kill_t",
-            [] {
+        REG_SVR_COMMAND("pk_kill_t",[] {
 
-        }
-        );
+        });
 
-        REG_SVR_COMMAND(
-            "pk_kill_ct",
-            [] {
-            }
-        );
+        REG_SVR_COMMAND("pk_kill_ct", [] {
 
-        REG_SVR_COMMAND(
-            "pk_navload",
-            [] {
+        });
+
+        REG_SVR_COMMAND("pk_navload", [] {
                 pokebot::node::czworld.OnMapLoaded();
+        });
+
+        REG_SVR_COMMAND("pk_what_my_node", [] {
+            if (auto area = pokebot::node::czworld.GetNearest(game::game.host.Origin()); area != nullptr) {
+                SERVER_PRINT(std::format("My ID:{}\n", area->m_id).c_str());
+            } else {
+                SERVER_PRINT(std::format("My id is not found.\n").c_str());
             }
-        );
+        });
 
-        // to_function_pointer(nullptr);
+        REG_SVR_COMMAND("pk_findpath", [] {
+            edict_t* entity{};
+            Vector origin{};
+		    while ((entity = common::FindEntityByClassname(entity, "func_bomb_target")) != nullptr) {
+			    origin = common::VecBModelOrigin(entity);
+                break;
+		    }
 
-        REG_SVR_COMMAND
-        (
-            "pk_findpath",
-            [] {
-                edict_t* entity{};
-                Vector origin{};
-		        while ((entity = common::FindEntityByClassname(entity, "func_bomb_target")) != nullptr) {
-			        origin = common::VecBModelOrigin(entity);
-                    break;
-		        }
-
-                node::PathWalk<std::uint32_t> routes{};
-                pokebot::node::czworld.FindPath(&routes, pokebot::game::game.host.Origin(), origin);
-            }
-        );
+            node::PathWalk<std::uint32_t> routes{};
+            pokebot::node::czworld.FindPath(&routes, pokebot::game::game.host.Origin(), origin);
+        });
     }
 
     void Pokebot::OnUpdate() noexcept {
+        pokebot::game::game.PreUpdate();
         pokebot::bot::manager.Update();
-        pokebot::game::game.Update();
+        pokebot::game::game.PostUpdate();
         
         if (draw_node) {
 #if !USE_NAVMESH

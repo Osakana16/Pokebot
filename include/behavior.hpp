@@ -382,6 +382,7 @@ namespace pokebot::bot {
 		extern std::shared_ptr<Action> change_silencer;
 		extern std::shared_ptr<Action> adjust_scope;
 		extern std::shared_ptr<Action> set_goal_c4;
+		extern std::shared_ptr<Action> set_goal_from_c4_within_range;
 		extern std::shared_ptr<Action> set_goal_bombspot;
 		extern std::shared_ptr<Action> set_goal_hostage;
 		extern std::shared_ptr<Action> set_goal_rescuezone;
@@ -390,8 +391,8 @@ namespace pokebot::bot {
 		extern std::shared_ptr<Action> set_goal_tspawn;
 		extern std::shared_ptr<Action> set_goal_ctspawn;
 		extern std::shared_ptr<Action> set_goal_weapon;
+		extern std::shared_ptr<Action> find_goal;
 		extern std::shared_ptr<Action> head_to_goal;
-		extern std::shared_ptr<Action> discard_latest_goal;
 
 		extern std::shared_ptr<Action> follow_squad_leader;
 
@@ -408,7 +409,6 @@ namespace pokebot::bot {
 		std::shared_ptr<Action> wait(std::uint32_t, float);
 
 		extern std::shared_ptr<Action> breakpoint;
-		extern std::shared_ptr<After<Status::Enough>> head_and_discard_goal;
 
 		namespace fight {
 			extern std::shared_ptr<Priority> while_spotting_enemy;
@@ -416,11 +416,13 @@ namespace pokebot::bot {
 
 		// - DEmolition Behaviors - 
 		namespace demolition {
-			extern std::shared_ptr<Priority> t_plant;
-			extern std::shared_ptr<Priority> t_defusing;
-			extern std::shared_ptr<Priority> ct_planted;
-			extern std::shared_ptr<Priority> ct_defusing;
-			extern std::shared_ptr<Priority> blow;
+			extern std::shared_ptr<Priority> t_plant;			// The terrorist plant the bomb.
+			extern std::shared_ptr<Priority> t_planted_wary;	// Terrorists make the rounds to defend the bomb.
+			extern std::shared_ptr<Priority> t_planted_camp;	// Terrorirts camp around c4 to defend the bomb.
+			extern std::shared_ptr<Priority> t_defusing;		// 
+			extern std::shared_ptr<Priority> ct_planted;		// 
+			extern std::shared_ptr<Priority> ct_defusing;		// 
+			extern std::shared_ptr<Priority> blow;				// 
 		}
 
 		// - Rescue Behaviors -

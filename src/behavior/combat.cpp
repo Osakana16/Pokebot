@@ -61,7 +61,7 @@ namespace pokebot::bot::behavior {
 		fight::try_to_lose_sight->Define
 		({
 			set_goal_ctspawn,
-			head_and_discard_goal
+			head_to_goal
 		});
 
 		fight::while_losing_enemy->Define

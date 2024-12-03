@@ -420,7 +420,8 @@ namespace pokebot {
 			void IssueCommand(edict_t* client, const std::string& Sentence) noexcept;
 
 			void Init(edict_t* entities, int max);
-			void Update();
+			void PreUpdate();
+			void PostUpdate();
 
 			void AddCvar(const char *name, const char *value, const char *info, bool bounded, float min, float max, Var varType, bool missingAction, const char *regval, ConVar *self);
 			void RegisterCvars();
