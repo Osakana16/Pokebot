@@ -132,7 +132,11 @@ namespace pokebot {
 			Timer update_timer{},
 				allow_listen_radio_timer{};
 
-			Timer freeze_time{};
+			// This variable is used to prevent freezing the whole game.
+			Timer spawn_cooldown_time{};
+
+
+			Timer freeze_time{};			// Make the bot to do nothing except buying while round freeze.
 			Timer buy_wait_timer{};
 
 			Memory memory{};

@@ -33,7 +33,6 @@ namespace pokebot {
 
 			const std::uint8_t Msec_Value = ComputeMsec();
 			last_command_time = gpGlobals->time;
-
 			g_engfuncs.pfnRunPlayerMove(*client,
 					movement_angle,
 					move_speed,
@@ -101,6 +100,7 @@ namespace pokebot {
 
 			danger_time.SetTime(0);
 			freeze_time.SetTime(g_engfuncs.pfnCVarGetFloat("mp_freezetime") + 1.0f);
+			spawn_cooldown_time.SetTime(1.0f);
 
 			start_action = Message::Buy;
 			buy_wait_timer.SetTime(1.0f);
@@ -129,6 +129,7 @@ namespace pokebot {
 		}
 
 		void Bot::NormalUpdate() noexcept {
+			assert(JoinedTeam() != common::Team::Spector && JoinedTeam() != common::Team::Random);
 			if (client->IsDead()) {
 				return;
 			}
@@ -153,8 +154,8 @@ namespace pokebot {
 				}
 				need_to_update = false;
 			}
-			
-			if (!freeze_time.IsRunning()) {
+
+			if (!freeze_time.IsRunning() && !spawn_cooldown_time.IsRunning()) {
 				// Do not do anything when freezing.
 				// Due to game engine specifications or bugs, 
 				// if we execute a heavy process immediately after the start of a round, 
@@ -398,17 +399,20 @@ namespace pokebot {
 			switch (start_action) {
 				case Message::Team_Select:
 				{
+					// assert(JoinedTeam() != common::Team::T && JoinedTeam()  != common::Team::CT);
 					value = static_cast<int>(team);
 					break;
 				}
 				case Message::Model_Select:
 				{
+					assert(JoinedTeam() != common::Team::Spector && JoinedTeam() != common::Team::Random);
 					start_action = Message::Buy;
 					value = static_cast<int>(model);
 					break;
 				}
 				default:
 				{
+					assert(false);
 					return;
 				}
 			}
