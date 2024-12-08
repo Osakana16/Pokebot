@@ -35,15 +35,6 @@ namespace pokebot {
 			int parent{};
 		};
 
-		class Memory final {
-			std::vector<Event> memories{};
-			float Evaluate(const int);
-			bool Save();
-		public:
-			void Memorize(const Vector&, EventType, float);
-			void Clear();
-		};
-
 		enum class Message {
 			Normal,
 			Buy,
@@ -113,9 +104,36 @@ namespace pokebot {
 			void Clear() noexcept { queue.clear(); }
 		};
 
+		template<int min, int max>
+		class PersonalityItem {
+			int value{};
+		public:
+			inline PersonalityItem& operator=(const auto& v) noexcept { value = std::clamp(v, min, max); return *this; }
+			operator int() const noexcept { return value; }
+			PersonalityItem() : PersonalityItem(0) {}
+			PersonalityItem(const auto& v) { operator=(v); }
+		};
+
 		struct Mood {
-			int brave = 100;
-			int coop;
+			PersonalityItem<0, 100> brave{};
+			PersonalityItem<0, 100> coop{};
+		};
+
+		struct TroopsStrategy {
+			node::NodeID objective_goal_node{};
+			enum class Strategy {
+				Accomplishment
+			} strategy;
+		};
+
+		class Troops final {
+			TroopsStrategy strategy;
+			TroopsStrategy old_strategy;
+		public:
+			void DecideStrategy(Bot* leader);
+			void Command(std::ranges::input_range auto&& all);
+			void SetNewStrategy(const TroopsStrategy&);
+			bool HasGoalBeenDevised(const node::NodeID) const noexcept;
 		};
 
 		class Bot {
@@ -139,7 +157,6 @@ namespace pokebot {
 			Timer freeze_time{};			// Make the bot to do nothing except buying while round freeze.
 			Timer buy_wait_timer{};
 
-			Memory memory{};
 			Message start_action{};
 
 			common::Team team{};
@@ -166,13 +183,13 @@ namespace pokebot {
 			static constexpr int MATE = 0, ENEMY = 1;
 			std::vector<const edict_t*> entities[2]{};
 
-			node::NodeID objective_goal_node{};	// The goal node for objective of current team.
-
 			State state = State::Accomplishment;
 			void AccomplishMission() noexcept, Combat() noexcept;
 		public:
-			inline const node::NodeID& Objective_Goal_Node() const noexcept { return objective_goal_node; }
+			void ReceiveCommand(const TroopsStrategy&);
+			void DecideStrategy(Troops* const);
 
+			Mood personality{};
 			Mood mood{};
 			Timer behavior_wait_timer{};
 
@@ -292,6 +309,8 @@ namespace pokebot {
 		inline class Manager {
 			std::optional<Vector> c4_origin{};
 
+			Troops troops[2]{};
+
 			friend class pokebot::message::MessageDispatcher;
 			std::unordered_map<std::string, Bot> bots{};
 			std::unordered_map<std::string, BotBalancer> balancer{};
@@ -317,30 +336,6 @@ namespace pokebot {
 			void OnRadioRecieved(const std::string& Sender_Name, const std::string& Radio_Sentence) noexcept;
 
 			void OnBombPlanted() noexcept;
-
-			int SetupLonelySquad(const std::string&);
-			int SetupVipSquad(const std::string&);
-			int SetupHelperSquad(const std::string&);
-			int SetupDefenseSquad(const std::string&);
-			int SetupOffenseSquad(const std::string&);
-			int SetupPlayerSquad();
-
-			// Join a bot to a squad with matching policies. 
-			int JoinSquad(const std::string&, Policy Will_Policy);
-			void LeftSquad(const std::string&);
-			std::shared_ptr<game::Client> GetSquadLeader(const common::Team, const int Squad_Index);
-
-			bool IsBotLeader(const std::string&, const int) const noexcept;
-
-			Policy SquadPolicy(const int) const noexcept;
-
-			// -- Getters --
-
-			void GetManagingNames(std::forward_list<std::string>* names);
-			Vector GetOrigin(const std::string& Bot_Name) const noexcept;
-			float GetHealth(const std::string& Bot_Name) const noexcept;
-
-			// --
 
 			const std::optional<Vector>& C4Origin() const noexcept { return c4_origin; }
 		} manager{};

@@ -69,6 +69,7 @@ namespace pokebot::bot::behavior {
 	BEHAVIOR_CREATE(Action, walk);
 	BEHAVIOR_CREATE(Action, change_silencer);
 	BEHAVIOR_CREATE(Action, adjust_scope);
+	BEHAVIOR_CREATE(Action, set_goal_team_objective);
 	BEHAVIOR_CREATE(Action, set_goal_c4);
 	BEHAVIOR_CREATE(Action, set_goal_from_c4_within_range);
 	BEHAVIOR_CREATE(Action, set_goal_hostage);
@@ -189,14 +190,17 @@ namespace pokebot::bot::behavior {
 
 		change_silencer->Define([BotPressesKey](Bot* const self) -> Status {
 			return BotPressesKey(self, bot::ActionKey::Attack2);
-		}
-		);
+		});
 
 		adjust_scope->Define([](Bot* const self) -> Status {
 			self->PressKey(bot::ActionKey::Attack2);
 			return Status::Executed;
-		}
-		);
+		});
+
+		set_goal_team_objective->Define([](Bot* const self) -> Status {
+			return Status::Executed;
+
+		});
 
 		set_goal_c4->Define([](Bot* const self) -> Status {
 #if !USE_NAVMESH

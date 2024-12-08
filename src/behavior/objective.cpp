@@ -61,10 +61,19 @@ namespace pokebot::bot::behavior {
 		}
 	}
 
+	template<bool b>
+	bool ShouldFollowTeamObjective(const Bot* const Self) noexcept {
+		if constexpr (b) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	void DefineObjective() {
 		demolition::t_plant->Define
 		({
-			set_goal_bombspot,
+			Condition::If(ShouldFollowTeamObjective<false>, set_goal_c4),
 			find_goal,
 			After<Status::Enough>::With(
 				head_to_goal, Priority::Create(

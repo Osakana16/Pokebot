@@ -633,7 +633,11 @@ namespace pokebot::node {
 
 
 	Vector CZBotGraph::GetOrigin(const NodeID Node_ID) const noexcept {
-		return (Node_ID != Invalid_NodeID ? navigation_map.GetNavAreaByID(Node_ID)->m_center : Vector(9999, 9999, 9999));
+		if (auto area = navigation_map.GetNavAreaByID(Node_ID); area != nullptr) {
+			return area->m_center;
+		} else {
+			return Vector(9999, 9999, 9999);
+		}
 	}
 
 	

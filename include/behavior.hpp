@@ -341,6 +341,7 @@ namespace pokebot::bot {
 		extern std::shared_ptr<Action> walk;
 		extern std::shared_ptr<Action> change_silencer;
 		extern std::shared_ptr<Action> adjust_scope;
+		extern std::shared_ptr<Action> set_goal_team_objective;
 		extern std::shared_ptr<Action> set_goal_c4;
 		extern std::shared_ptr<Action> set_goal_from_c4_within_range;
 		extern std::shared_ptr<Action> set_goal_bombspot;
