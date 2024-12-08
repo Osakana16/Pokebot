@@ -90,7 +90,6 @@ namespace pokebot {
 			goal_queue.Clear();
 			routes.Clear();
 
-			squad = -1;
 
 			goal_node = node::Invalid_NodeID;
 			next_dest_node = node::Invalid_NodeID;
@@ -628,11 +627,6 @@ namespace pokebot {
 		}
 
 		void Manager::OnNewRound() {
-			for (auto& squad : squads) {
-				squad.clear();
-				squad.emplace_back(Squad(game::game.host.HostName(), 3, Policy::Player));
-			}
-
 			for (auto& bot : bots) {
 				bot.second.OnNewRound();
 			}
@@ -748,94 +742,11 @@ namespace pokebot {
 				balancer.erase(Bot_Name);
 			}
 		}
-
 		
 		void Manager::OnBombPlanted() noexcept {
 			for (auto& bot : bots) {
 				bot.second.OnBombPlanted();
 			}
-		}
-
-		int Manager::SetupLonelySquad(const std::string& Candidate_Name) {
-			int team = (int)bots.at(Candidate_Name).JoinedTeam() - 1;
-			assert(team == 0 || team == 1);
-
-			auto& squad = squads[team];
-			squad.emplace_back(Squad(Candidate_Name, 1, Policy::Elimination));
-			return squad.size() - 1;
-		}
-
-		int Manager::SetupVipSquad(const std::string& Candidate_Name) {
-			int team = (int)bots.at(Candidate_Name).JoinedTeam() - 1;
-			assert(team == 0 || team == 1);
-
-			auto& squad = squads[team];
-			squad.emplace_back(Squad(Candidate_Name, 3, Policy::Elimination));
-			return squad.size() - 1;
-		}
-
-		int Manager::SetupHelperSquad(const std::string& Candidate_Name) {
-			int team = (int)bots.at(Candidate_Name).JoinedTeam() - 1;
-			assert(team == 0 || team == 1);
-
-			auto& squad = squads[team];
-			squad.emplace_back(Squad(Candidate_Name, 3, Policy::Elimination));
-			return squad.size() - 1;
-		}
-
-		int Manager::SetupDefenseSquad(const std::string& Candidate_Name) {
-			int team = (int)bots.at(Candidate_Name).JoinedTeam() - 1;
-			assert(team == 0 || team == 1);
-
-			auto& squad = squads[team];
-			squad.emplace_back(Squad(Candidate_Name, 3, Policy::Defense));
-			return squad.size() - 1;
-		}
-
-		int Manager::SetupOffenseSquad(const std::string& Candidate_Name) {
-			int team = (int)bots.at(Candidate_Name).JoinedTeam() - 1;
-			assert(team == 0 || team == 1);
-
-			auto& squad = squads[team];
-			squad.emplace_back(Squad(Candidate_Name, 3, Policy::Offense));
-			return squad.size() - 1;
-		}
-
-		int Manager::SetupPlayerSquad() {
-			int team = (int)common::GetTeamFromModel(game::game.host.AsEdict()) - 1;
-			assert(team == 0 || team == 1);
-
-			auto& squad = squads[team];
-			squad.emplace_back(Squad(game::game.host.HostName(), 5, Policy::Player));
-			return squad.size() - 1;
-		}
-
-		int Manager::JoinSquad(const std::string& Name, Policy Will_Policy) {
-			for (auto& squad : squads) {
-				for (int i = 0; i < squad.size(); i++) {
-				if (squad[i].GetPolicy() == Will_Policy && squad[i].Join(Name)) {
-					return i;
-				}
-			}
-			}
-			return -1;
-		}
-
-		std::shared_ptr<game::Client> Manager::GetSquadLeader(const common::Team team, const int Squad_Index) {
-			return game::game.clients.Get(squads[(int)team - 1][Squad_Index].LeaderName());
-		}
-
-		void Manager::LeftSquad(const std::string& Name) {
-			auto& squad = squads[(int)bots.at(Name).JoinedTeam() - 1];
-			for (int i = 0; i < squad.size(); i++) {
-				if (squad[i].Left(Name))
-					break;
-			}
-		}
-
-		bool Manager::IsBotLeader(const std::string& Name, const int Index) const noexcept {
-			auto& squad = squads[(int)bots.at(Name).JoinedTeam() - 1];
-			return squad[Index].LeaderName() == Name;
 		}
 
 		float Memory::Evaluate(const int Index) {
@@ -870,22 +781,6 @@ namespace pokebot {
 			model = Select_Model;
 
 			OnNewRound();
-		}
-
-		Squad::Squad(const std::string& Leader_Name, const size_t Number_Limit, const Policy Initial_Policy) : leader_name(Leader_Name), limit(Number_Limit), policy(Initial_Policy) {
-			members.insert(Leader_Name);
-		}
-
-		bool Squad::Join(const std::string& Member_Name) {
-			if (members.size() >= limit || members.find(Member_Name) != members.end()) {
-				return false;
-			}
-			members.insert(Member_Name);
-			return true;
-		}
-
-		bool Squad::Left(const std::string& Member_Name) {
-			return members.erase(Member_Name) > 0;
 		}
 	}
 }

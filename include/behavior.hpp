@@ -297,41 +297,14 @@ namespace pokebot::bot {
 			return false;
 		}
 
-		template<bool b>
-		bool NeedToJoinSquad(const Bot* const) noexcept {
-			return false;
-		}
-
-		template<bool b>
-		bool IsJoinedSquad(const Bot* const Self) noexcept {
-			if constexpr (b) {
-				return Self->squad != -1;
-			} else {
-				return Self->squad == -1;
-			}
-		}
-
 		template<game::MapFlags flag>
 		bool IsCurrentMode(const Bot* const Self) noexcept {
 			return game::game.IsCurrentMode(flag);
 		}
 
 		template<bool b>
-		bool IsSquadLeader(const Bot* const Self) noexcept {
-			if constexpr (b)
-				return manager.IsBotLeader(Self->Name().data(), Self->squad);
-			else
-				return !manager.IsBotLeader(Self->Name().data(), Self->squad);
-		}
-
-		template<bool b>
 		bool IsHelper(const Bot* const) noexcept {
 			return false;
-		}
-
-		template<bool b>
-		bool IsFollower(const Bot* const Self) noexcept {
-			return !IsSquadLeader<true>(Self);
 		}
 
 		template<bool b>
@@ -346,19 +319,6 @@ namespace pokebot::bot {
 
 		template<bool b>
 		bool IsVip(const Bot* const Self) {
-			return false;
-		}
-
-		template<bool b>
-		bool IsEnoughSquadEstablished(const Bot* const Self) {
-			if constexpr (b)	
-				return false;
-			else
-				return true;
-		}
-
-		template<bool b>
-		bool IsVipSquadEnoughJoined(const Bot* const Self) {
 			return false;
 		}
 
@@ -393,18 +353,6 @@ namespace pokebot::bot {
 		extern std::shared_ptr<Action> set_goal_weapon;
 		extern std::shared_ptr<Action> find_goal;
 		extern std::shared_ptr<Action> head_to_goal;
-
-		extern std::shared_ptr<Action> follow_squad_leader;
-
-		extern std::shared_ptr<Action> create_lonely_squad;
-		extern std::shared_ptr<Action> create_offense_squad;
-		extern std::shared_ptr<Action> create_defense_squad;
-		extern std::shared_ptr<Action> create_vip_squad;
-		extern std::shared_ptr<Action> join_vip_squad;
-		extern std::shared_ptr<Action> join_player_squad;
-		extern std::shared_ptr<Action> join_offense_squad;
-		extern std::shared_ptr<Action> join_defense_squad;
-		extern std::shared_ptr<Action> left_squad;
 
 		std::shared_ptr<Action> wait(std::uint32_t, float);
 

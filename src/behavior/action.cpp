@@ -82,18 +82,6 @@ namespace pokebot::bot::behavior {
 	BEHAVIOR_CREATE(Action, find_goal);
 	BEHAVIOR_CREATE(Action, head_to_goal);
 
-	BEHAVIOR_CREATE(Action, create_lonely_squad);
-	BEHAVIOR_CREATE(Action, create_offense_squad);
-	BEHAVIOR_CREATE(Action, create_defense_squad);
-	BEHAVIOR_CREATE(Action, create_vip_squad);
-	BEHAVIOR_CREATE(Action, be_squad_leader);
-	BEHAVIOR_CREATE(Action, follow_squad_leader);
-	BEHAVIOR_CREATE(Action, join_vip_squad);
-	BEHAVIOR_CREATE(Action, join_player_squad);
-	BEHAVIOR_CREATE(Action, join_offense_squad);
-	BEHAVIOR_CREATE(Action, join_defense_squad);
-	BEHAVIOR_CREATE(Action, left_squad);
-	
 	void DefineAction() {
 		auto changeIfNotSelected = [](Bot* const self, const game::Weapon Target_Weapon) noexcept -> Status {
 			if (!self->IsCurrentWeapon(Target_Weapon)) {
@@ -432,63 +420,6 @@ namespace pokebot::bot::behavior {
 			return Status::Enough;
 #endif
 		});
-
-		follow_squad_leader->Define
-		([](Bot* const self) -> Status {
-#if !USE_NAVMESH
-			auto leader = manager.GetSquadLeader(self->JoinedTeam(), self->squad);
-			self->goal_queue.AddGoalQueue(node::world.GetNearest(leader->origin), 5);
-			return Status::Executed;
-#else
-			auto leader = manager.GetSquadLeader(self->JoinedTeam(), self->squad);
-			self->goal_queue.AddGoalQueue(node::czworld.GetNearest(leader->origin)->m_id, 5);
-			return Status::Executed;
-#endif
-		 });
-
-		create_lonely_squad->Define
-		([](Bot* const self) -> Status {
-			self->squad = bot::manager.SetupLonelySquad(self->Name().data());
-			return Status::Executed;
-		 });
-
-		create_offense_squad->Define
-		([](Bot* const self) -> Status {
-			self->squad = bot::manager.SetupOffenseSquad(self->Name().data());
-			return Status::Executed;
-		 });
-
-		create_defense_squad->Define
-		([](Bot* const self) -> Status {
-			self->squad = bot::manager.SetupDefenseSquad(self->Name().data());
-			return Status::Executed;
-		 });
-
-		create_vip_squad->Define
-		([](Bot* const self) -> Status {
-			self->squad = bot::manager.SetupVipSquad(self->Name().data());
-			return Status::Executed;
-		 });
-
-		join_player_squad->Define
-		([](Bot* const self) -> Status {
-			self->squad = bot::manager.JoinSquad(self->Name().data(), Policy::Player);
-
-			return Status::Executed;
-		 });
-
-		join_defense_squad->Define
-		([](Bot* const self) -> Status {
-			self->squad = bot::manager.JoinSquad(self->Name().data(), Policy::Defense);
-			return Status::Executed;
-		 });
-
-		left_squad->Define
-		([](Bot* const self) -> Status {
-			self->squad = -1;
-			bot::manager.LeftSquad(self->Name().data());
-			return Status::Executed;
-		 });
 	}
 
 	std::shared_ptr<Action> wait(std::uint32_t sec, float revision) {

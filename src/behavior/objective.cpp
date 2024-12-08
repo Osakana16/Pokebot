@@ -122,7 +122,7 @@ namespace pokebot::bot::behavior {
 
 		assist::ct_cover->Define
 		({
-			Condition::If(IsHelper<false>, join_vip_squad)
+
 		 });
 
 		assist::ct_take_point->Define

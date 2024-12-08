@@ -173,7 +173,6 @@ namespace pokebot {
 		public:
 			inline const node::NodeID& Objective_Goal_Node() const noexcept { return objective_goal_node; }
 
-			int squad = -1;
 			Mood mood{};
 			Timer behavior_wait_timer{};
 
@@ -280,24 +279,6 @@ namespace pokebot {
 			Player
 		};
 
-		class Squad {
-			Policy policy{};
-
-			std::string leader_name{};
-			std::unordered_set<std::string> members{};
-			size_t limit{};
-		public:
-			const std::string& LeaderName() const noexcept { return leader_name; }
-			const Policy GetPolicy() const noexcept { return policy; }
-
-			bool Join(const std::string&);
-			bool Left(const std::string&);
-
-			void Update();
-
-			Squad(const std::string& Leader_Name, const size_t Number_Limit, const Policy Initial_Policy);
-		};
-
 		struct RadioMessage {
 			common::Team team;
 			std::string sender;
@@ -315,7 +296,6 @@ namespace pokebot {
 			std::unordered_map<std::string, Bot> bots{};
 			std::unordered_map<std::string, BotBalancer> balancer{};
 
-			std::vector<Squad> squads[2]{};
 			Bot* const Get(const std::string&) noexcept;
 			RadioMessage radio_message{};
 		public:
