@@ -496,7 +496,8 @@ namespace pokebot::node {
 		return navigation_map.GetNavArea(&Destination);
 	}
 
-	void CZBotGraph::FindPath(PathWalk<std::uint32_t>* const walk_routes, const Vector& Source, const Vector& Destination) {
+	void CZBotGraph::FindPath(PathWalk<std::uint32_t>* const walk_routes, const Vector& Source, const Vector& Destination, const common::Team Joined_Team) {
+		const int Joined_Team_Index = static_cast<int>(Joined_Team) - 1;
 		auto source = navigation_map.GetNavArea(&Source);
 		auto destination = navigation_map.GetNavArea(&Destination);
 		auto start_node_id = source->m_id;
@@ -532,8 +533,14 @@ namespace pokebot::node {
 		while (!route_queue.empty()) {
 			NodeID current_node_id = route_queue.top();
 			route_queue.pop();
+
 			if (current_node_id == end_node_id) {
 				do {
+					if (auto it = danger[Joined_Team_Index].number_of_reference.find(current_node_id); it != danger[Joined_Team_Index].number_of_reference.end()) {
+						it->second++;
+					} else {
+						danger[Joined_Team_Index].number_of_reference[current_node_id] = 1;
+					}
 					walk_routes->PushFront(current_node_id);
 					current_node_id = routes[current_node_id].parent;
 				} while (current_node_id != start_node_id);
@@ -553,8 +560,18 @@ namespace pokebot::node {
 					auto current_node = navigation_map.GetNavAreaByID(current_node_id);
 					auto near_node = navigation_map.GetNavAreaByID(connection.area->m_id);
 
+					float base_cost{};
+#if 1
+					if (bool(current_node->m_attributeFlags & navmesh::NavAttributeType::NAV_JUMP)) {
+						base_cost += 1000.0f;
+					}
+					if (bool(current_node->m_attributeFlags & navmesh::NavAttributeType::NAV_CROUCH)) {
+						base_cost += 500.0f;
+					}
+					base_cost += 2000.0f * danger[Joined_Team_Index].number_of_reference[current_node_id];
+#endif
 					float h = common::Distance(source->m_center, current_node->m_center) + common::Distance(current_node->m_center, destination->m_center);
-					float g = current_route->g + std::abs(near_route->f - h);
+					float g = current_route->g + std::abs(near_route->f - h) + base_cost;
 					float f = g + h;
 					if (near_route->state == RouteState::New || near_route->f > f) {
 						near_route->parent = current_node_id;

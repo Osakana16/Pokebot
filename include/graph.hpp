@@ -174,9 +174,14 @@ namespace pokebot::node {
 		No_Jump = navmesh::NavAttributeType::NAV_NO_JUMP
 	};
 
+	struct Danger final {
+		std::unordered_map<NodeID, std::uint32_t> number_of_reference{};
+	};
+
 	// Compatibility with ZBot navmesh.
 	inline class CZBotGraph {
 		std::unordered_multimap<GoalKind, NodeID> goals{};
+		Danger danger[2]{};
 	public:
 		bool IsSameGoal(const NodeID, const GoalKind) const noexcept;
 		bool IsOnNode(const Vector& Position, const NodeID) const noexcept;
@@ -193,7 +198,7 @@ namespace pokebot::node {
 		
 		decltype(static_cast<const decltype(goals)>(goals).equal_range(GoalKind::None)) GetGoal(const GoalKind kind) const noexcept;
 
-		void FindPath(PathWalk<std::uint32_t>* const, const Vector&, const Vector&);
+		void FindPath(PathWalk<std::uint32_t>* const, const Vector&, const Vector&, const common::Team);
 		
 		bool HasFlag(const NodeID, NavmeshFlag) const noexcept;
 	} czworld;

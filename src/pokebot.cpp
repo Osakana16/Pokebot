@@ -169,18 +169,6 @@ namespace pokebot::plugin {
                 SERVER_PRINT(std::format("My id is not found.\n").c_str());
             }
         });
-
-        REG_SVR_COMMAND("pk_findpath", [] {
-            edict_t* entity{};
-            Vector origin{};
-		    while ((entity = common::FindEntityByClassname(entity, "func_bomb_target")) != nullptr) {
-			    origin = common::VecBModelOrigin(entity);
-                break;
-		    }
-
-            node::PathWalk<std::uint32_t> routes{};
-            pokebot::node::czworld.FindPath(&routes, pokebot::game::game.host.Origin(), origin);
-        });
     }
 
     void Pokebot::OnUpdate() noexcept {

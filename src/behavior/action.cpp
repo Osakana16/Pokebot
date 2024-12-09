@@ -329,7 +329,7 @@ namespace pokebot::bot::behavior {
 				}
 				// Find path.
 				if (const auto Goal_Node_ID = self->goal_node; Goal_Node_ID != node::Invalid_NodeID) {
-					node::czworld.FindPath(&self->routes, self->Origin(), node::czworld.GetOrigin(Goal_Node_ID));
+					node::czworld.FindPath(&self->routes, self->Origin(), node::czworld.GetOrigin(Goal_Node_ID), self->JoinedTeam());
 					if (self->routes.Empty() || self->routes.Destination() != self->goal_node) {
 						return Status::Failed;
 					} else {
