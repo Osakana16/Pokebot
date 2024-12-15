@@ -73,7 +73,7 @@ namespace pokebot::bot::behavior {
 	void DefineObjective() {
 		demolition::t_plant->Define
 		({
-			Condition::If(ShouldFollowTeamObjective<false>, set_goal_c4),
+			Condition::If(ShouldFollowTeamObjective<false>, set_goal_bombspot),
 			find_goal,
 			After<Status::Enough>::With(
 				head_to_goal, Priority::Create(

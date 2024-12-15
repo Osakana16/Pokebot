@@ -106,7 +106,7 @@ namespace pokebot {
 			for (auto& hostage : hostages) {
 				hostage.Update();
 			}
-
+			
 			for (auto client : clients.GetAll()) {
 				Sound produced_sound{};
 				if (bool(client.second->Button() & IN_ATTACK)) {

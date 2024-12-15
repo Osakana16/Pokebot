@@ -40,6 +40,7 @@ namespace pokebot {
 			Buy,
 			Team_Select,
 			Model_Select,
+			Selection_Completed
 		};
 
 		class Timer final {
@@ -120,7 +121,7 @@ namespace pokebot {
 		};
 
 		struct TroopsStrategy {
-			node::NodeID objective_goal_node{};
+			node::NodeID objective_goal_node = node::Invalid_NodeID;
 			enum class Strategy {
 				Accomplishment
 			} strategy;
@@ -134,6 +135,7 @@ namespace pokebot {
 			void Command(std::ranges::input_range auto&& all);
 			void SetNewStrategy(const TroopsStrategy&);
 			bool HasGoalBeenDevised(const node::NodeID) const noexcept;
+			bool NeedToDevise() const noexcept;
 		};
 
 		class Bot {
@@ -174,6 +176,7 @@ namespace pokebot {
 			void SelectionUpdate() noexcept;
 			void NormalUpdate() noexcept;
 			void BuyUpdate() noexcept;
+			void OnSelectionCompleted() noexcept;
 			void CheckAround();
 
 			void TurnViewAngle(), TurnMovementAngle();
@@ -336,6 +339,7 @@ namespace pokebot {
 			void OnRadioRecieved(const std::string& Sender_Name, const std::string& Radio_Sentence) noexcept;
 
 			void OnBombPlanted() noexcept;
+			void OnBotJoinedCompletely(Bot* const) noexcept;
 
 			const std::optional<Vector>& C4Origin() const noexcept { return c4_origin; }
 		} manager{};

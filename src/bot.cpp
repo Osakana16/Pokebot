@@ -21,7 +21,8 @@ namespace pokebot {
 				{ Message::Team_Select, &Bot::SelectionUpdate },
 				{ Message::Model_Select, &Bot::SelectionUpdate },
 				{ Message::Buy, &Bot::BuyUpdate },
-				{ Message::Normal, &Bot::NormalUpdate }
+				{ Message::Normal, &Bot::NormalUpdate },
+				{ Message::Selection_Completed, &Bot::OnSelectionCompleted }
 			};
 
 			if (*client == nullptr)
@@ -161,6 +162,11 @@ namespace pokebot {
 			if (next_dest_node != node::Invalid_NodeID) {
 				PressKey(ActionKey::Run);
 			}
+		}
+
+		void Bot::OnSelectionCompleted() noexcept {
+			manager.OnBotJoinedCompletely(this);
+			start_action = Message::Buy;
 		}
 
 		void Bot::AccomplishMission() noexcept {
@@ -384,7 +390,7 @@ namespace pokebot {
 				case Message::Model_Select:
 				{
 					assert(JoinedTeam() != common::Team::Spector && JoinedTeam() != common::Team::Random);
-					start_action = Message::Buy;
+					start_action = Message::Selection_Completed;
 					value = static_cast<int>(model);
 					break;
 				}
@@ -739,6 +745,18 @@ namespace pokebot {
 			}
 		}
 
+		void Manager::OnBotJoinedCompletely(Bot* const completed_guy) noexcept {
+			assert(completed_guy->JoinedTeam() == common::Team::T || completed_guy->JoinedTeam() == common::Team::CT);
+			const int Team_Index = static_cast<int>(completed_guy->JoinedTeam()) - 1;
+			if (auto& troop = troops[Team_Index]; troop.NeedToDevise()) {
+				troop.DecideStrategy(completed_guy);
+				if (auto& my_team = (bots | std::views::filter([completed_guy](const std::pair<std::string, Bot>& target) -> bool { return completed_guy->JoinedTeam() == common::Team::T; })); !my_team.empty()) {
+					troop.DecideStrategy(&my_team.front().second);
+					troop.Command(my_team);
+				}
+			}
+		}
+
 		Bot::Bot(std::shared_ptr<game::Client> assigned_client, const common::Team Join_Team, const common::Model Select_Model) POKEBOT_DEBUG_NOEXCEPT :
 			client(assigned_client)
 		{
@@ -788,6 +806,10 @@ namespace pokebot {
 		bool Troops::HasGoalBeenDevised(const node::NodeID target_objective_node) const noexcept {
 			return old_strategy.objective_goal_node == target_objective_node;
 			// return common::Distance(node::czworld.GetOrigin(old_strategy.objective_goal_node), node::czworld.GetOrigin(target_objective_node)) <= 500.0f;
+		}
+		
+		bool Troops::NeedToDevise() const noexcept {
+			return strategy.objective_goal_node == node::Invalid_NodeID;
 		}
 		
 		void Troops::DecideStrategy(Bot* leader) {
