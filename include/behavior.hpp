@@ -8,15 +8,14 @@
 #define RETURN_BEHAVIOR_TRUE_OR_FALSE(B,PROCESS) if constexpr (B) return (PROCESS); else return !(PROCESS)
 
 #define BEHAVIOR_CREATE(TYPE,NAME) std::shared_ptr<TYPE> NAME = TYPE::Create(#NAME)
+#define BEHAVIOR_CREATE_INLINE(TYPE,NAME) inline std::shared_ptr<TYPE> NAME = TYPE::Create(#NAME)
 
 namespace pokebot::bot {
 	namespace behavior {
 		enum class Status {
-			Not_Ready,	// Cannot start the behavior because of the invalid parameter.
-			Executed,	// 
-			Enough,		// Need not to execute the behavior.
-			Failed,		// A part of behavior process is executed but failed.
-			Completed	// All behaviors are executed successfully. This should be used by Priority, Sequence, Random.
+			Failed,
+			Success,
+			Running
 		};
 
 		void DefineBehavior();
@@ -46,18 +45,8 @@ namespace pokebot::bot {
 
 		class Sequence : public BehaviorNode {
 			std::vector<std::shared_ptr<BehaviorNode>> children;
-			Status completed_result{};
 		public:
-			Status Evalute(Bot* const self) override {
-				// SERVER_PRINT(std::format("{}\n", name).c_str());
-				for (auto child : children) {
-					switch (child->Evalute(self)) {
-						case Status::Not_Ready:
-							return Status::Not_Ready;
-					}
-				}
-				return completed_result;
-			}
+			Status Evalute(Bot* const self) override;
 
 			using BehaviorNode::BehaviorNode;
 
@@ -66,14 +55,13 @@ namespace pokebot::bot {
 				children = behaviors;
 			}
 
-			static std::shared_ptr<Sequence> Create(const char* const Name, Status completed_result) {
+			static std::shared_ptr<Sequence> Create(const char* const Name) {
 				auto node = std::make_shared<Sequence>(Name);
-				node->completed_result = completed_result;
 				return node;
 			}
 
 			static std::shared_ptr<Sequence> Create(std::initializer_list<std::shared_ptr<BehaviorNode>> behaviors) {
-				auto result = Create("Sequence", Status::Executed);
+				auto result = Create("Sequence");
 				result->Define(behaviors);
 				return result;
 			}
@@ -81,68 +69,23 @@ namespace pokebot::bot {
 
 		class Priority : public BehaviorNode {
 			std::vector<std::shared_ptr<BehaviorNode>> children;
-			Status completed_result{};
 		public:
 			using BehaviorNode::BehaviorNode;
 
-			Status Evalute(Bot* const self) override {
-				// SERVER_PRINT(std::format("{}\n", name).c_str());
-				for (auto child : children) {
-					switch (child->Evalute(self)) {
-						case Status::Not_Ready:
-						case Status::Failed:
-						case Status::Enough:
-							continue;
-					}
-					break;
-				}
-				return completed_result;
-			}
+			Status Evalute(Bot* const self) override;
 
 			void Define(std::initializer_list<std::shared_ptr<BehaviorNode>> behaviors) {
 				assert(children.empty());
 				children = behaviors;
 			}
 
-			static std::shared_ptr<Priority> Create(const char* const Name, Status completed_result) {
+			static std::shared_ptr<Priority> Create(const char* const Name) {
 				auto node = std::make_shared<Priority>(Name);
-				node->completed_result = completed_result;
 				return node;
 			}
 
 			static std::shared_ptr<Priority> Create(std::initializer_list<std::shared_ptr<BehaviorNode>> behaviors) {
-				auto result = Create("Priority", Status::Executed);
-				result->Define(behaviors);
-				return result;
-			}
-		};
-
-		class Random : public BehaviorNode {
-			std::vector<std::shared_ptr<BehaviorNode>> children;
-			Status completed_result{};
-		public:
-			using BehaviorNode::BehaviorNode;
-
-			Status Evalute(Bot* const self) override{
-				// SERVER_PRINT(std::format("{}\n", name).c_str());
-				static auto index = common::Random<int>(0, children.size() - 1);
-				for (int i = index; children[i]->Evalute(self) == Status::Failed; i = index);
-				return completed_result;
-			}
-
-			void Define(std::initializer_list<std::shared_ptr<BehaviorNode>> behaviors) {
-				assert(children.empty());
-				children = behaviors;
-			}
-
-			static std::shared_ptr<Random> Create(const char* const Name, Status completed_result) {
-				auto node = std::make_shared<Random>(Name);
-				node->completed_result = completed_result;
-				return node;
-			}
-
-			static std::shared_ptr<Random> Create(std::initializer_list<std::shared_ptr<BehaviorNode>> behaviors) {
-				auto result = Create("Random", Status::Executed);
+				auto result = Create("Priority");
 				result->Define(behaviors);
 				return result;
 			}
@@ -151,19 +94,17 @@ namespace pokebot::bot {
 		class Condition : public BehaviorNode {
 			std::shared_ptr<BehaviorNode> child{};
 			Activator CanActive;
-			Status completed_result{};
 		public:
 			Status Evalute(Bot* const self) override {
 				if (CanActive(self)) {
 					return child->Evalute(self);
 				}
-				return completed_result;
+				return Status::Failed;
 			}
 
-			Condition(Activator activator, Status result, std::shared_ptr<BehaviorNode> behavior) : BehaviorNode("If"), CanActive(activator), child(behavior), completed_result(result) {}
+			Condition(Activator activator, std::shared_ptr<BehaviorNode> behavior) : BehaviorNode("If"), CanActive(activator), child(behavior){}
 
-			static std::shared_ptr<Condition> If(Activator activator, std::shared_ptr<BehaviorNode> behavior) { return std::make_shared<Condition>(activator, Status::Not_Ready, behavior);  }
-			static std::shared_ptr<Condition> If(Activator activator, Status result, std::shared_ptr<BehaviorNode> behavior) { return std::make_shared<Condition>(activator, result, behavior);  }
+			static std::shared_ptr<Condition> If(Activator activator, std::shared_ptr<BehaviorNode> behavior) { return std::make_shared<Condition>(activator, behavior);  }
 		};
 
 		class Action : public BehaviorNode {
@@ -335,7 +276,7 @@ namespace pokebot::bot {
 		extern std::shared_ptr<Action> look_door;
 		extern std::shared_ptr<Action> look_button;
 		extern std::shared_ptr<Action> use;
-		extern std::shared_ptr<Action> fire;
+		extern std::shared_ptr<Action> tap_fire;
 		extern std::shared_ptr<Action> jump;
 		extern std::shared_ptr<Action> duck;
 		extern std::shared_ptr<Action> walk;
@@ -354,10 +295,9 @@ namespace pokebot::bot {
 		extern std::shared_ptr<Action> set_goal_weapon;
 		extern std::shared_ptr<Action> find_goal;
 		extern std::shared_ptr<Action> head_to_goal;
+		BEHAVIOR_CREATE_INLINE(Action, rapid_fire);
 
 		std::shared_ptr<Action> wait(std::uint32_t, float);
-
-		extern std::shared_ptr<Action> breakpoint;
 
 		namespace fight {
 			extern std::shared_ptr<Priority> while_spotting_enemy;

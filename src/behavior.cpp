@@ -4,6 +4,32 @@ namespace pokebot::bot {
 	namespace behavior {
 		std::shared_ptr<Action> breakpoint = Action::Create("breakpoint");
 
+		Status Sequence::Evalute(Bot* const self) {
+			// SERVER_PRINT(std::format("{}\n", name).c_str());
+			for (auto child : children) {
+				switch (child->Evalute(self)) {
+					case Status::Running:
+						return Status::Running;
+					case Status::Failed:
+						return Status::Failed;
+				}
+			}
+			return Status::Success;
+		}
+
+		Status Priority::Evalute(Bot* const self) {
+			// SERVER_PRINT(std::format("{}\n", name).c_str());
+			for (auto child : children) {
+				switch (child->Evalute(self)) {
+					case Status::Running:
+						return Status::Running;
+					case Status::Success:
+						return Status::Success;
+				}
+			}
+			return Status::Failed;
+		}
+
 		namespace {
 			template<bool b>
 			bool IsSeeingEnemy(const Bot* const Self) noexcept {
@@ -75,11 +101,6 @@ namespace pokebot::bot {
 			DefineCombat();
 			DefineAction();
 			DefineObjective();
-
-			breakpoint->Define
-			([](Bot* const) noexcept -> Status {
-				return Status::Executed;
-			});
 		}
 	}
 }

@@ -22,7 +22,7 @@ namespace pokebot::bot::behavior {
 				return Status::Enough;
 #else
 			if (node::czworld.IsOnNode(self->Origin(), self->goal_node) && node::czworld.IsSameGoal(self->goal_node, kind))
-				return Status::Enough;
+				return Status::Success;
 
 			node::NodeID id = node::Invalid_NodeID;
 			auto goals = node::czworld.GetGoal(kind);
@@ -32,9 +32,9 @@ namespace pokebot::bot::behavior {
 			}
 			
 			if (id != node::Invalid_NodeID && !node::czworld.IsOnNode(self->Origin(), id) && self->goal_queue.AddGoalQueue(id, 1)) {
-				return Status::Executed;
+				return Status::Success;
 			} else
-				return Status::Enough;
+				return Status::Failed;
 #endif
 		}
 	}
@@ -42,10 +42,10 @@ namespace pokebot::bot::behavior {
 	auto LookAt = [](Bot* const self, const Vector& Dest, const float Range) noexcept -> Status {
 		if (self->IsLookingAt(Dest, Range)) {
 			self->look_direction.view = Dest;
-			return Status::Enough;
+			return Status::Failed;
 		} else {
 			self->look_direction.view = Dest;
-			return Status::Executed;
+			return Status::Success;
 		}
 	};
 
@@ -63,7 +63,7 @@ namespace pokebot::bot::behavior {
 	BEHAVIOR_CREATE(Action, look_button);
 	BEHAVIOR_CREATE(Action, move_forward);
 	BEHAVIOR_CREATE(Action, use);
-	BEHAVIOR_CREATE(Action, fire);
+	BEHAVIOR_CREATE(Action, tap_fire);
 	BEHAVIOR_CREATE(Action, jump);
 	BEHAVIOR_CREATE(Action, duck);
 	BEHAVIOR_CREATE(Action, walk);
@@ -82,32 +82,43 @@ namespace pokebot::bot::behavior {
 	BEHAVIOR_CREATE(Action, set_goal_weapon);
 	BEHAVIOR_CREATE(Action, find_goal);
 	BEHAVIOR_CREATE(Action, head_to_goal);
+	
+	template<ActionKey key>
+	Status BotPressesKey(Bot* const self) {
+		if (!self->IsPressingKey(key)) {
+			self->PressKey(key);
+			return Status::Success;
+		} else {
+			return Status::Failed;
+		}
+	}
 
 	void DefineAction() {
 		auto changeIfNotSelected = [](Bot* const self, const game::Weapon Target_Weapon) noexcept -> Status {
 			if (!self->IsCurrentWeapon(Target_Weapon)) {
 				self->SelectWeapon(Target_Weapon);
-				return Status::Executed;
-			} else
-				return Status::Enough;
+				return Status::Success;
+			} else {
+				return Status::Failed;
+			}
 		};
 
 		change_primary->Define([](Bot* const self) -> Status {
-			Status result = Status::Not_Ready;
 			if (self->HasPrimaryWeapon()) {
 				self->SelectPrimaryWeapon();
-				result = Status::Executed;
+				return Status::Success;
+			} else {
+				return Status::Failed;
 			}
-			return result;
 		});
 
 		change_secondary->Define([](Bot* const self) -> Status {
-			Status result = Status::Not_Ready;
 			if (self->HasSecondaryWeapon()) {
 				self->SelectSecondaryWeapon();
-				result = Status::Executed;
+				return Status::Success;
+			} else {
+				return Status::Failed;
 			}
-			return result;
 		});
 
 		change_melee->Define([changeIfNotSelected](Bot* const self) -> Status {
@@ -135,71 +146,48 @@ namespace pokebot::bot::behavior {
 		});
 
 		look_hostage->Define([](Bot* const self) -> Status {
-			return Status::Executed;
+			return Status::Failed;
 		});
 
 		look_enemy->Define([](Bot* const self) -> Status {
 			if (!self->IsLookingAtEnemy()) {
 				self->LookAtClosestEnemy();
-				return Status::Executed;
+				return Status::Success;
 			} else {
-				return Status::Enough;
+				return Status::Failed;
 			}
 		});
 
 		look_door->Define([](Bot* const self) -> Status {
-			return Status::Executed;
+			return Status::Failed;
 		});
 
 		look_button->Define([](Bot* const self) -> Status {
-			return Status::Executed;
+			return Status::Failed;
 		});
 
-		auto BotPressesKey = [](Bot* const self, const bot::ActionKey Key) noexcept -> Status {
-			if (!self->IsPressingKey(Key)) {
-				self->PressKey(Key);
-				return Status::Executed;
-			} else {
-				return Status::Enough;
-			}
-		};
-
-		move_forward->Define([BotPressesKey](Bot* const self) -> Status {
-			return BotPressesKey(self, bot::ActionKey::Run);
-		});
-
-		use->Define([BotPressesKey](Bot* const self) -> Status {
-			return BotPressesKey(self, bot::ActionKey::Use);
-		});
-
-		fire->Define([BotPressesKey](Bot* const self) -> Status {
-			return BotPressesKey(self, bot::ActionKey::Attack);
-		});
-
-		jump->Define([BotPressesKey](Bot* const self) -> Status {
-			return BotPressesKey(self, bot::ActionKey::Jump);
-		});
-
-		duck->Define([BotPressesKey](Bot* const self) -> Status {
-			return BotPressesKey(self, bot::ActionKey::Duck);
-		});
-
-		walk->Define([BotPressesKey](Bot* const self) -> Status {
-			return BotPressesKey(self, bot::ActionKey::Shift);
-		});
-
-		change_silencer->Define([BotPressesKey](Bot* const self) -> Status {
-			return BotPressesKey(self, bot::ActionKey::Attack2);
-		});
-
-		adjust_scope->Define([](Bot* const self) -> Status {
-			self->PressKey(bot::ActionKey::Attack2);
-			return Status::Executed;
-		});
+		move_forward->Define(BotPressesKey<bot::ActionKey::Run>);
+		use->Define(BotPressesKey<bot::ActionKey::Use>);
+		tap_fire->Define(BotPressesKey<bot::ActionKey::Attack>);
+		jump->Define(BotPressesKey<bot::ActionKey::Jump>);
+		duck->Define(BotPressesKey<bot::ActionKey::Duck>);
+		walk->Define(BotPressesKey<bot::ActionKey::Shift>);
+		change_silencer->Define(BotPressesKey<bot::ActionKey::Attack2>);
+		adjust_scope->Define(BotPressesKey<bot::ActionKey::Attack2>);
 
 		set_goal_team_objective->Define([](Bot* const self) -> Status {
-			return Status::Executed;
+			return Status::Success;
 
+		});
+
+		rapid_fire->Define([](Bot* const self) -> Status {
+			if (self->IsPressingKey(ActionKey::Attack)) {
+				self->PressKey(ActionKey::Attack);
+				return Status::Running;
+			} else {
+				self->PressKey(ActionKey::Attack);
+				return Status::Success;
+			}
 		});
 
 		set_goal_c4->Define([](Bot* const self) -> Status {
@@ -215,10 +203,10 @@ namespace pokebot::bot::behavior {
 #else
 			node::NodeID id = node::czworld.GetNearest(*manager.C4Origin())->m_id;
 			if (node::czworld.IsOnNode(self->Origin(), id))
-				return Status::Enough;
+				return Status::Failed;
 
 			if (id != node::Invalid_NodeID && !node::czworld.IsOnNode(self->Origin(), id) && self->goal_queue.AddGoalQueue(id, 1)) {
-				return Status::Executed;
+				return Status::Success;
 			} else
 				return Status::Failed;
 #endif
@@ -248,7 +236,7 @@ namespace pokebot::bot::behavior {
 				auto id_result = results.front().get();
 				if (id_result != node::Invalid_NodeID) {
 					if (self->goal_queue.AddGoalQueue(id_result, 1)) {
-						return Status::Executed;
+						return Status::Success;
 					}
 				}
 				results.pop();
@@ -286,7 +274,7 @@ namespace pokebot::bot::behavior {
 
 			if (id != node::Invalid_NodeID) {
 				self->goal_queue.AddGoalQueue(id, 1);
-				return Status::Executed;
+				return Status::Success;
 			} else
 				return Status::Failed;
 #endif
@@ -325,7 +313,7 @@ namespace pokebot::bot::behavior {
 
 				if (auto area = node::czworld.GetNearest(self->Origin()); area != nullptr && area->m_id == self->goal_node) {
 					// If the bot is on the goal node, he need not to find new path.
-					return Status::Enough; 
+					return Status::Failed; 
 				}
 				// Find path.
 				if (const auto Goal_Node_ID = self->goal_node; Goal_Node_ID != node::Invalid_NodeID) {
@@ -333,11 +321,11 @@ namespace pokebot::bot::behavior {
 					if (self->routes.Empty() || self->routes.Destination() != self->goal_node) {
 						return Status::Failed;
 					} else {
-						return Status::Executed;
+						return Status::Success;
 					}
 				}
 			}
-			return Status::Enough;
+			return Status::Failed;
 		});
 
 		head_to_goal->Define([](Bot* const self) -> Status {
@@ -395,7 +383,7 @@ namespace pokebot::bot::behavior {
 			if (!self->routes.Empty() && !self->routes.IsEnd()) {
 				const auto Area = node::czworld.GetNearest(self->Origin());
 				if (Area == nullptr) {
-					return Status::Not_Ready;
+					return Status::Running;
 				}
 
 				// - Check -
@@ -405,7 +393,7 @@ namespace pokebot::bot::behavior {
 					self->goal_queue.Clear();
 					self->routes.Clear();
 					self->goal_node = node::Invalid_NodeID;
-					return Status::Enough;
+					return Status::Success;
 				}
 
 				if (self->next_dest_node == node::Invalid_NodeID) {
@@ -419,9 +407,9 @@ namespace pokebot::bot::behavior {
 				} else {
 					self->PressKey(ActionKey::Run);
 				}
-				return Status::Executed;
+				return Status::Running;
 			}
-			return Status::Enough;
+			return Status::Failed;
 #endif
 		});
 	}
@@ -462,12 +450,12 @@ namespace pokebot::bot::behavior {
 					case Timer::Status::Not_Running:
 						timer.SetTime(sec + revision);
 						[[fallthrough]];
-						return Status::Not_Ready;
+						return Status::Failed;
 					case Timer::Status::Running:
-						return Status::Executed;
+						return Status::Running;
 					case Timer::Status::Finished:
 						timer.SetTime(-99999.0);
-						return Status::Enough;
+						return Status::Success;
 					default:
 						assert(0);
 				}

@@ -2,21 +2,21 @@
 
 namespace pokebot::bot::behavior {
 	namespace fight {
-		std::shared_ptr<Priority> while_spotting_enemy = Priority::Create("fight::while_spotting_enemy", Status::Executed);
-		std::shared_ptr<Sequence> beat_enemies = Sequence::Create("fight::beat_enemies", Status::Executed);
-		std::shared_ptr<Sequence> try_to_lose_sight = Sequence::Create("fight::try_to_lose_sight", Status::Executed);		// Try to lose the sight from the enemy
+		std::shared_ptr<Priority> while_spotting_enemy = Priority::Create("fight::while_spotting_enemy");
+		std::shared_ptr<Sequence> beat_enemies = Sequence::Create("fight::beat_enemies");
+		std::shared_ptr<Sequence> try_to_lose_sight = Sequence::Create("fight::try_to_lose_sight");		// Try to lose the sight from the enemy
 
-		std::shared_ptr<Priority> pick_best_weapon = Priority::Create("fight::pick_best_weapon", Status::Executed);
+		std::shared_ptr<Priority> pick_best_weapon = Priority::Create("fight::pick_best_weapon");
 
-		std::shared_ptr<Priority> while_losing_enemy = Priority::Create("fight::while_losing_enemy", Status::Executed);
-		std::shared_ptr<Sequence> try_to_find = Sequence::Create("fight::try_to_find", Status::Executed);
+		std::shared_ptr<Priority> while_losing_enemy = Priority::Create("fight::while_losing_enemy");
+		std::shared_ptr<Sequence> try_to_find = Sequence::Create("fight::try_to_find");
 
-		std::shared_ptr<Sequence> flee = Sequence::Create("fight::flee", Status::Executed);
+		std::shared_ptr<Sequence> flee = Sequence::Create("fight::flee");
 		
-		std::shared_ptr<Priority> decide_firing = Priority::Create("fight::decide_firing", Status::Executed);
+		std::shared_ptr<Priority> decide_firing = Priority::Create("fight::decide_firing");
 
-		std::shared_ptr<Priority> one_tap_fire = Priority::Create("fight::one_tap_fire", Status::Executed);
-		std::shared_ptr<Priority> full_burst_fire = Priority::Create("fight::full_burst_fire", Status::Executed);
+		std::shared_ptr<Priority> one_tap_fire = Priority::Create("fight::one_tap_fire");
+		std::shared_ptr<Priority> full_burst_fire = Priority::Create("fight::full_burst_fire");
 	}
 
 	namespace {
@@ -84,13 +84,13 @@ namespace pokebot::bot::behavior {
 		fight::one_tap_fire->Define
 		({
 			wait(1, .0f),
-			fire
+			tap_fire
 		});
 
 		fight::full_burst_fire->Define
 		({
 			wait(0, 0.1f),
-			fire
+			tap_fire
 		});
 	}
 }
