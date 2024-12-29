@@ -70,7 +70,6 @@ namespace pokebot::bot::behavior {
 	BEHAVIOR_CREATE(Action, change_silencer);
 	BEHAVIOR_CREATE(Action, adjust_scope);
 	BEHAVIOR_CREATE(Action, set_goal_team_objective);
-	BEHAVIOR_CREATE(Action, set_goal_c4);
 	BEHAVIOR_CREATE(Action, set_goal_from_c4_within_range);
 	BEHAVIOR_CREATE(Action, set_goal_hostage);
 	BEHAVIOR_CREATE(Action, set_goal_bombspot);
@@ -177,7 +176,6 @@ namespace pokebot::bot::behavior {
 
 		set_goal_team_objective->Define([](Bot* const self) -> Status {
 			return Status::Success;
-
 		});
 
 		rapid_fire->Define([](Bot* const self) -> Status {
@@ -190,7 +188,7 @@ namespace pokebot::bot::behavior {
 			}
 		});
 
-		set_goal_c4->Define([](Bot* const self) -> Status {
+		set_goal_c4_node->Define([](Bot* const self) -> Status {
 #if !USE_NAVMESH
 			node::NodeID id = node::world.GetNearest(*manager.C4Origin());
 			if (node::world.IsOnNode(self->Origin(), id))
@@ -210,6 +208,26 @@ namespace pokebot::bot::behavior {
 			} else
 				return Status::Failed;
 #endif
+		});
+
+		move_vector->Define([](Bot* const self) -> Status {
+			if (!self->goal_vector.has_value())
+				return Status::Failed;
+
+			if (common::Distance(self->Origin(), *self->goal_vector) <= 75.0f) {
+				self->look_direction.view = *self->goal_vector;
+				self->look_direction.movement = *self->goal_vector;
+				self->PressKey(ActionKey::Run);
+			}
+			return Status::Success;
+		});
+
+		set_goal_c4_vector->Define([](Bot* const self) -> Status {
+			if (!manager.C4Origin().has_value() || self->goal_vector.has_value())
+				return Status::Failed;
+
+			self->goal_vector = *manager.C4Origin();
+			return Status::Success;
 		});
 
 		set_goal_from_c4_within_range->Define([](Bot* const self) -> Status {

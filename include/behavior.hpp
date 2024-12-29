@@ -283,7 +283,6 @@ namespace pokebot::bot {
 		extern std::shared_ptr<Action> change_silencer;
 		extern std::shared_ptr<Action> adjust_scope;
 		extern std::shared_ptr<Action> set_goal_team_objective;
-		extern std::shared_ptr<Action> set_goal_c4;
 		extern std::shared_ptr<Action> set_goal_from_c4_within_range;
 		extern std::shared_ptr<Action> set_goal_bombspot;
 		extern std::shared_ptr<Action> set_goal_hostage;
@@ -295,7 +294,10 @@ namespace pokebot::bot {
 		extern std::shared_ptr<Action> set_goal_weapon;
 		extern std::shared_ptr<Action> find_goal;
 		extern std::shared_ptr<Action> head_to_goal;
+		BEHAVIOR_CREATE_INLINE(Action, set_goal_c4_node);
+		BEHAVIOR_CREATE_INLINE(Action, set_goal_c4_vector);
 		BEHAVIOR_CREATE_INLINE(Action, rapid_fire);
+		BEHAVIOR_CREATE_INLINE(Action, move_vector);
 
 		std::shared_ptr<Action> wait(std::uint32_t, float);
 

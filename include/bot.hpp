@@ -203,6 +203,7 @@ namespace pokebot {
 #else
 			node::PathWalk<std::uint32_t> routes{};
 #endif
+			std::optional<Vector> goal_vector{};
 			pokebot::node::NodeID goal_node{};
 			pokebot::node::NodeID next_dest_node{};
 

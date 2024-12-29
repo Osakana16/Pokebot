@@ -82,7 +82,7 @@ namespace pokebot::bot::behavior {
 
 		demolition::t_planted_wary->Define
 		({
-			Condition::If(IsFarFromC4<true>, set_goal_c4),
+			Condition::If(IsFarFromC4<true>, set_goal_c4_node),
 			Condition::If(IsFarFromC4<false>, set_goal_from_c4_within_range),
 			find_goal,
 			head_to_goal
@@ -106,9 +106,11 @@ namespace pokebot::bot::behavior {
 
 		demolition::ct_planted->Define
 		({
-			set_goal_c4,
+			set_goal_c4_node,
 			find_goal,
-			head_to_goal
+			head_to_goal,
+			set_goal_c4_vector,
+			move_vector
 		});
 
 		rescue::ct_leave->Define
