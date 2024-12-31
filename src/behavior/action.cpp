@@ -175,7 +175,15 @@ namespace pokebot::bot::behavior {
 		adjust_scope->Define(BotPressesKey<bot::ActionKey::Attack2>);
 
 		set_goal_team_objective->Define([](Bot* const self) -> Status {
-			return Status::Success;
+			assert(manager.GetGoalNode(self->JoinedTeam(), self->JoinedPlatoon()) != node::Invalid_NodeID);
+			node::NodeID id = manager.GetGoalNode(self->JoinedTeam(), self->JoinedPlatoon());
+			if (node::czworld.IsOnNode(self->Origin(), id))
+				return Status::Failed;
+
+			if (id != node::Invalid_NodeID && !node::czworld.IsOnNode(self->Origin(), id) && self->goal_queue.AddGoalQueue(id, 1)) {
+				return Status::Success;
+			} else
+				return Status::Failed;
 		});
 
 		rapid_fire->Define([](Bot* const self) -> Status {
@@ -228,6 +236,38 @@ namespace pokebot::bot::behavior {
 
 			self->goal_vector = *manager.C4Origin();
 			return Status::Success;
+		});
+
+		set_goal_from_team_objective_within_range->Define([](Bot* const self) -> Status {
+			auto findCircleLine = [self](const Vector& Origin, const float Distance) noexcept -> node::NodeID {
+				node::NodeID id = node::Invalid_NodeID;
+				for (const auto& Line : { Vector(Distance, .0f, .0f), Vector(-Distance, .0f, .0f), Vector(.0f, Distance, .0f), Vector(.0f, -Distance, .0f) }) {
+					auto area = node::czworld.GetNearest(node::czworld.GetOrigin(bot::manager.GetGoalNode(self->JoinedTeam(), self->JoinedPlatoon())) + Line);
+					if (area == nullptr)
+						continue;
+
+					id = area->m_id;
+					if (id != node::Invalid_NodeID && !node::czworld.IsOnNode(Origin, id))
+						return id;
+				}
+				return node::Invalid_NodeID;
+			};
+
+			std::queue<std::future<node::NodeID>> results{};
+			results.push(std::async(std::launch::async, findCircleLine, self->Origin(), 2000.0f));
+			results.push(std::async(std::launch::async, findCircleLine, self->Origin(), 1500.0f));
+			results.push(std::async(std::launch::async, findCircleLine, self->Origin(), 2500.0f));
+
+			while (!results.empty()) {
+				auto id_result = results.front().get();
+				if (id_result != node::Invalid_NodeID) {
+					if (self->goal_queue.AddGoalQueue(id_result, 1)) {
+						return Status::Success;
+					}
+				}
+				results.pop();
+			}
+			return Status::Failed;
 		});
 
 		set_goal_from_c4_within_range->Define([](Bot* const self) -> Status {

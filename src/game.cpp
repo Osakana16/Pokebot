@@ -98,6 +98,15 @@ namespace pokebot {
 #else
 			node::czworld.OnNewRound();
 #endif
+
+			auto getNumber = [this](const char* class_name) -> size_t {
+				size_t number{};
+				edict_t* entity = nullptr;
+				while ((entity = common::FindEntityByClassname(entity, class_name)) != nullptr) {
+					number++;
+				}
+				return number;
+			};
 		}
 
 		void Game::PreUpdate() {

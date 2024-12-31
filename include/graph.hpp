@@ -183,6 +183,8 @@ namespace pokebot::node {
 		std::unordered_multimap<GoalKind, NodeID> goals{};
 		Danger danger[2]{};
 	public:
+		size_t GetNumberOfGoals(GoalKind) const noexcept;
+
 		bool IsSameGoal(const NodeID, const GoalKind) const noexcept;
 		bool IsOnNode(const Vector& Position, const NodeID) const noexcept;
 		Vector GetOrigin(const NodeID Node_ID) const noexcept;

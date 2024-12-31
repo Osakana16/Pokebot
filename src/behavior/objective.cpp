@@ -1,17 +1,6 @@
 #include "behavior.hpp"
 
 namespace pokebot::bot::behavior {
-	// - DEmolition Behaviors - 
-	namespace demolition {
-		std::shared_ptr<Priority> t_plant = Priority::Create("demolition::t_plant");
-		std::shared_ptr<Priority> t_planted_wary = Priority::Create("demolition::t_planted_wary");
-		std::shared_ptr<Priority> t_planted_camp = Priority::Create("demolition::t_planted_camp");
-		std::shared_ptr<Priority> t_defusing = Priority::Create("demolition::t_defusing");
-		std::shared_ptr<Priority> ct_planted = Priority::Create("demolition::ct_planted");
-		std::shared_ptr<Priority> ct_defusing = Priority::Create("demolition::ct_defusing");
-		std::shared_ptr<Priority> blow = Priority::Create("demolition::blow");
-	}
-
 	// - Rescue Behaviors -
 	namespace rescue {
 		std::shared_ptr<Sequence> ct_try = Sequence::Create("rescue::ct_try");
@@ -62,6 +51,17 @@ namespace pokebot::bot::behavior {
 	}
 
 	template<bool b>
+	bool IsFarFromMainGoal(const Bot* const Self) noexcept {
+		auto id = manager.GetGoalNode(Self->JoinedTeam(), Self->JoinedPlatoon());
+		auto origin = node::czworld.GetOrigin(id);
+		if constexpr (b) {
+			return common::Distance(Self->Origin(), origin) > 100.0f;
+		} else {
+			return common::Distance(Self->Origin(), origin) <= 100.0f;
+		}
+	}
+
+	template<bool b>
 	bool ShouldFollowTeamObjective(const Bot* const Self) noexcept {
 		if constexpr (b) {
 			return true;
@@ -94,6 +94,24 @@ namespace pokebot::bot::behavior {
 		});
 
 		demolition::t_defusing->Define
+		({
+
+		});
+
+		demolition::ct_defend->Define
+		({
+			demolition::ct_defend_wary
+		});
+		
+		demolition::ct_defend_wary->Define
+		({
+			Condition::If(IsFarFromMainGoal<true>, set_goal_team_objective),
+			Condition::If(IsFarFromMainGoal<false>, set_goal_from_team_objective_within_range),
+			find_goal,
+			head_to_goal
+		});
+
+		demolition::ct_defend_camp->Define
 		({
 
 		});

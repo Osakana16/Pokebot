@@ -563,10 +563,10 @@ namespace pokebot::node {
 					float base_cost{};
 #if 1
 					if (bool(current_node->m_attributeFlags & navmesh::NavAttributeType::NAV_JUMP)) {
-						base_cost += 1000.0f;
+						base_cost += 3000.0f;
 					}
 					if (bool(current_node->m_attributeFlags & navmesh::NavAttributeType::NAV_CROUCH)) {
-						base_cost += 500.0f;
+						base_cost += 3000.0f;
 					}
 					base_cost += 2000.0f * danger[Joined_Team_Index].number_of_reference[current_node_id];
 #endif
@@ -629,8 +629,18 @@ namespace pokebot::node {
 
 	}
 
+	
+	size_t CZBotGraph::GetNumberOfGoals(const GoalKind Kind) const noexcept {
+		size_t number{};
+		auto goals = GetGoal(Kind);
+		for (auto goal = goals.first; goal != goals.second; goal++) {
+			number++;
+		}
+		return number;
+	}
+
 	bool CZBotGraph::IsSameGoal(const NodeID Node_ID, const GoalKind Goal_Kind) const noexcept {
-		auto goals = GetGoal(node::GoalKind::Bombspot);
+		auto goals = GetGoal(Goal_Kind);
 		for (auto goal = goals.first; goal != goals.second; goal++) {
 			if (Node_ID == goal->second) {
 				return true;

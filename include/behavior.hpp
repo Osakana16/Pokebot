@@ -298,7 +298,7 @@ namespace pokebot::bot {
 		BEHAVIOR_CREATE_INLINE(Action, set_goal_c4_vector);
 		BEHAVIOR_CREATE_INLINE(Action, rapid_fire);
 		BEHAVIOR_CREATE_INLINE(Action, move_vector);
-
+		BEHAVIOR_CREATE_INLINE(Action, set_goal_from_team_objective_within_range);
 		std::shared_ptr<Action> wait(std::uint32_t, float);
 
 		namespace fight {
@@ -307,13 +307,16 @@ namespace pokebot::bot {
 
 		// - DEmolition Behaviors - 
 		namespace demolition {
-			extern std::shared_ptr<Priority> t_plant;			// The terrorist plant the bomb.
-			extern std::shared_ptr<Priority> t_planted_wary;	// Terrorists make the rounds to defend the bomb.
-			extern std::shared_ptr<Priority> t_planted_camp;	// Terrorirts camp around c4 to defend the bomb.
-			extern std::shared_ptr<Priority> t_defusing;		// 
-			extern std::shared_ptr<Priority> ct_planted;		// 
-			extern std::shared_ptr<Priority> ct_defusing;		// 
-			extern std::shared_ptr<Priority> blow;				// 
+			BEHAVIOR_CREATE_INLINE(Priority, t_plant);			// The terrorist plant the bomb.
+			BEHAVIOR_CREATE_INLINE(Priority, t_planted_wary);	// Terrorists make the rounds to defend the bomb.
+			BEHAVIOR_CREATE_INLINE(Priority, t_planted_camp);	// Terrorirts camp around c4 to defend the bomb.
+			BEHAVIOR_CREATE_INLINE(Priority, t_defusing);
+			
+			BEHAVIOR_CREATE_INLINE(Priority, ct_defend);
+			BEHAVIOR_CREATE_INLINE(Priority, ct_defend_wary);
+			BEHAVIOR_CREATE_INLINE(Priority, ct_defend_camp);
+			BEHAVIOR_CREATE_INLINE(Priority, ct_planted);
+			BEHAVIOR_CREATE_INLINE(Priority, ct_defusing);
 		}
 
 		// - Rescue Behaviors -

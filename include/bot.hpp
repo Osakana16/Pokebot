@@ -123,23 +123,59 @@ namespace pokebot {
 		struct TroopsStrategy {
 			node::NodeID objective_goal_node = node::Invalid_NodeID;
 			enum class Strategy {
-				Accomplishment
+				/*- Demolition -*/
+				Plant_C4_Specific_Bombsite,		// Plant the bomb on the specific bomb site.
+				Defend_Bombsite_Concentrative,	// Defend the specific bombsite
+				Defend_Bombsite_Divided,		// Divide the team and defend the bomb.
+				/*- Hostage Rescue -*/
+				Prevent_Hostages,
+				Prevent_Rescuezones,
+				Rush_And_Rescue,
+				/*- Assasination -*/
+				Prevent_Safety,
+				Rush_Safety,
+				/*- Escape -*/
+				Rush_Escapezone,
+				Prevent_Escapezone,
 			} strategy;
 		};
 
 		class Troops final {
 			TroopsStrategy strategy;
 			TroopsStrategy old_strategy;
+			std::function<bool(const std::pair<std::string, Bot>& target)> leader_condition;
+			std::function<bool(const std::pair<std::string, Bot>& target)> condition;
+
+			common::Team team{};
+			Troops* parent{};
+			std::vector<Troops> platoons{};
 		public:
-			void DecideStrategy(Bot* leader);
-			void Command(std::ranges::input_range auto&& all);
+			common::Team Team() { return team; }
+			Troops(decltype(condition) target_condition, decltype(leader_condition) target_leader_condition, decltype(team) target_team) : condition(target_condition), leader_condition(target_leader_condition), team(target_team) {}
+			bool IsRoot() const noexcept { return parent == nullptr; }
+			int CreatePlatoon(decltype(condition) target_condition, decltype(condition) target_leader_condition);
+			bool DeletePlatoon(const int Index);
+
+			void DecideStrategy(std::unordered_map<std::string, Bot>* bots);
+			void Command(std::unordered_map<std::string, Bot>* bots);
 			void SetNewStrategy(const TroopsStrategy&);
 			bool HasGoalBeenDevised(const node::NodeID) const noexcept;
+			bool HasGoalBeenDevisedByOtherPlatoon(const node::NodeID) const noexcept;
 			bool NeedToDevise() const noexcept;
+
+			node::NodeID GetGoalNode() const noexcept { return strategy.objective_goal_node; }
+			
+			Troops& operator[](const int index) { return platoons[index]; }
+			const Troops& at(const int index) const { return platoons[index]; }
+
+			auto begin() { return platoons.begin(); }
+			auto end() { return platoons.end(); }
+			auto GetPlatoonSize() { return platoons.size(); }
 		};
 
 		class Bot {
 			friend class Manager;
+			friend class Troops;
 
 			std::shared_ptr<game::Client> client{};
 			pokebot::common::Time 
@@ -160,7 +196,8 @@ namespace pokebot {
 			Timer buy_wait_timer{};
 
 			Message start_action{};
-
+			
+			int platoon = -1;
 			common::Team team{};
 			common::Model model{};
 
@@ -188,9 +225,9 @@ namespace pokebot {
 
 			State state = State::Accomplishment;
 			void AccomplishMission() noexcept, Combat() noexcept;
+			std::string name{};
 		public:
 			void ReceiveCommand(const TroopsStrategy&);
-			void DecideStrategy(Troops* const);
 
 			Mood personality{};
 			Mood mood{};
@@ -261,7 +298,8 @@ namespace pokebot {
 			bool CanSeeEnemy() const noexcept;
 			bool CanSeeEntity() const noexcept;
 
-			auto JoinedTeam() const noexcept { return team; }
+			int JoinedPlatoon() const noexcept;
+			common::Team JoinedTeam() const noexcept;
 			float GetSecondLeftToCompleteReloading() const noexcept;
 
 			/* - Client Wrapper - */
@@ -313,8 +351,7 @@ namespace pokebot {
 		inline class Manager {
 			std::optional<Vector> c4_origin{};
 
-			Troops troops[2]{};
-
+			Troops troops[2];
 			friend class pokebot::message::MessageDispatcher;
 			std::unordered_map<std::string, Bot> bots{};
 			std::unordered_map<std::string, BotBalancer> balancer{};
@@ -322,6 +359,7 @@ namespace pokebot {
 			Bot* const Get(const std::string&) noexcept;
 			RadioMessage radio_message{};
 		public:
+			Manager();
 			void OnNewRound();
 			const Vector& GetCompensation(const std::string& Bot_Name) { return balancer[Bot_Name].gap; }
 
@@ -341,6 +379,14 @@ namespace pokebot {
 
 			void OnBombPlanted() noexcept;
 			void OnBotJoinedCompletely(Bot* const) noexcept;
+
+			/**
+			* @brief Get goal ID from a troop or platoon.
+			* @param Target_Team the team of troop.
+			* @param Index The platoon index.
+			* @return If Index is less than 0, returns troops.
+			*/
+			node::NodeID GetGoalNode(const common::Team Target_Team, const int Index) const noexcept;
 
 			const std::optional<Vector>& C4Origin() const noexcept { return c4_origin; }
 		} manager{};
