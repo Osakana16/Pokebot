@@ -40,13 +40,9 @@ namespace pokebot::bot::behavior {
 	}
 
 	auto LookAt = [](Bot* const self, const Vector& Dest, const float Range) noexcept -> Status {
-		if (self->IsLookingAt(Dest, Range)) {
-			self->look_direction.view = Dest;
-			return Status::Failed;
-		} else {
-			self->look_direction.view = Dest;
-			return Status::Success;
-		}
+		self->look_direction.view = Dest;
+		self->look_direction.movement = Dest;
+		return Status::Success;
 	};
 
 	BEHAVIOR_CREATE(Action, change_primary);

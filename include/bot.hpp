@@ -206,8 +206,6 @@ namespace pokebot {
 			common::AngleVector movement_angle{};
 			float move_speed{}, strafe_speed{};
 
-			std::unordered_set<const game::Client*> target{};
-
 			std::uint8_t ComputeMsec() noexcept;
 			
 			void SelectionUpdate() noexcept;
@@ -295,7 +293,7 @@ namespace pokebot {
 			bool IsInBombTargetZone() const noexcept;
 
 			bool IsFighting() const noexcept { return danger_time.IsRunning(); }
-			bool CanSeeEnemy() const noexcept;
+			std::shared_ptr<game::Client> GetEnemyWithinView() const noexcept;
 			bool CanSeeEntity() const noexcept;
 
 			int JoinedPlatoon() const noexcept;

@@ -47,8 +47,7 @@ namespace pokebot::bot::behavior {
 	void DefineCombat() {
 		fight::while_spotting_enemy->Define
 		({
-			Condition::If(HasCrisis<false>, fight::beat_enemies),
-			Condition::If(HasCrisis<true>, fight::try_to_lose_sight)
+			fight::beat_enemies
 		});
 
 		fight::beat_enemies->Define

@@ -47,40 +47,62 @@ namespace pokebot {
 			move_speed = 0;
 		}
 
-#define ENABLE_NEW_TURN_ANGLE 0
+#define ENABLE_NEW_TURN_ANGLE 1
 
 		void Bot::TurnViewAngle() {
 			auto destination = look_direction.view->ToAngleVector(Origin());
+			if (destination.x > 180.0f) {
+				destination.x -= 360.0f;
+			}
 #if ENABLE_NEW_TURN_ANGLE
-			auto AngleClamp = [](const float angle, const float destination) {
-				return (angle > destination ? std::clamp(angle, destination, angle) : std::clamp(angle, angle, destination));
-			};
-
-			auto CalculateNextAngle = [](const float dest, const float angle) noexcept {
-				return std::clamp(dest - angle, -180.0f, 180.0f);
-			};
-
-			constexpr float Base_Frame = 30.0f;
-			constexpr float Sensitivity = 1.0f;
-			const common::AngleVector Next_Angle = {
-				CalculateNextAngle(destination.x, client->v_angle.x) / (Base_Frame - Sensitivity),
-				CalculateNextAngle(destination.y, client->v_angle.y) / (Base_Frame - Sensitivity),
-				0.0
-			};
-
+			
 			client->v_angle.x = destination.x;
-			client->v_angle.y += Next_Angle.y;
-			client->v_angle.y = AngleClamp(client->v_angle.y, destination.y);
+
+			if (std::abs(destination.y - client->v_angle.y) <= 1.0f) {
+				client->v_angle.y = destination.y;
+			} else {
+				auto AngleClamp = [](const float angle, const float destination) {
+					return (angle > destination ? std::clamp(angle, destination, angle) : std::clamp(angle, angle, destination));
+				};
+
+				auto CalculateNextAngle = [](const float dest, const float angle) noexcept {
+					return std::clamp(dest - angle, -180.0f, 180.0f);
+				};
+
+				constexpr float Base_Frame = 30.0f;
+				constexpr float Sensitivity = 1.0f;
+				const common::AngleVector Next_Angle = {
+					CalculateNextAngle(destination.x, client->v_angle.x) / (Base_Frame - Sensitivity),
+					CalculateNextAngle(destination.y, client->v_angle.y) / (Base_Frame - Sensitivity),
+					0.0
+				};
+
+				client->v_angle.y += Next_Angle.y;
+				client->v_angle.y = AngleClamp(client->v_angle.y, destination.y);
+			}
+
 #else
 			client->v_angle = destination;
 #endif
 			client->v_angle.z = 0.0f;
-			client->angles.x = client->v_angle.x;
+			client->angles.x = client->v_angle.x / 3;
 			client->angles.y = client->v_angle.y;
 			client->v_angle.x = -client->v_angle.x;
 			client->angles.z = 0;
 			client->ideal_yaw = client->v_angle.y;
+			if (client->ideal_yaw > 180.0f) {
+				client->ideal_yaw -= 360.0f;
+			} else if (client->ideal_yaw < -180.0f) {
+				client->ideal_yaw += 360.0f;
+			}
+
 			client->idealpitch = client->v_angle.x;
+			if (client->idealpitch > 180.0f) {
+				client->idealpitch -= 360.0f;
+			} else if (client->idealpitch < -180.0f) {
+				client->idealpitch += 360.0f;
+			}
+
 		}
 
 		void Bot::TurnMovementAngle() {
@@ -222,7 +244,11 @@ namespace pokebot {
 							game::MapFlags::Demolition,
 							[this] {
 								if (manager.C4Origin().has_value()) {
-									(common::Distance(Origin(), *manager.C4Origin()) <= 50.0f ? behavior::demolition::ct_defusing : behavior::demolition::ct_planted)->Evalute(this);
+									if (common::Distance(Origin(), *manager.C4Origin()) <= 50.0f) {
+										behavior::demolition::ct_defusing->Evalute(this);
+									} else {
+										behavior::demolition::ct_planted->Evalute(this);
+									}
 								} else {
 									behavior::demolition::ct_defend->Evalute(this);
 								}
@@ -266,7 +292,7 @@ namespace pokebot {
 		}
 
 		void Bot::Combat() noexcept {
-
+			behavior::fight::while_spotting_enemy->Evalute(this);
 		}
 
 		template<typename Array>
@@ -288,11 +314,12 @@ namespace pokebot {
 #endif
 			}
 
+			auto next_origin = node::czworld.GetOrigin(next_dest_node);
 			if (!look_direction.movement.has_value()) {
 #if !USE_NAVMESH
 				look_direction.movement = node::world.GetOrigin(next_dest_node);
 #else
-				look_direction.movement = node::czworld.GetOrigin(next_dest_node);
+				look_direction.movement = next_origin;
 #endif
 			}
 
@@ -323,36 +350,26 @@ namespace pokebot {
 			}
 
 			if (!entities[ENEMY].empty()) {
-				danger_time.SetTime(5.0);
+				// danger_time.SetTime(5.0);
+				state = State::Crisis;
+			} else {
+				state = State::Accomplishment;
 			}
-#if 0
-			for (const auto& other : game::game.clients.GetAll()) {
-				if (other.second == client)
-					continue;
-
-				if (CanSeeEntity(*other.second)) {
-					if (common::GetTeamFromModel(*client) != common::GetTeamFromModel(*other.second)) {
-						target.insert(other.second);
-					}
-				} else {
-					target.erase(other.second);
-				}
-			}
-
-			if (!target.empty()) {
-				if ((*target.begin())->IsDead()) {
-					target.erase(target.begin());
-				} else {
-					TurnAngle((*target.begin())->origin);
-				}
-			}
-#endif
 		}
 
 		void Bot::PressKey(ActionKey pressable_key) {
 			if (bool(pressable_key & ActionKey::Run)) {
 				move_speed = 255.0;
 			}
+
+			if (bool(pressable_key & ActionKey::Move_Right)) {
+				strafe_speed = 255.0;
+			}
+
+			if (bool(pressable_key & ActionKey::Move_Left)) {
+				strafe_speed = -255.0;
+			}
+
 			if (bool(pressable_key & ActionKey::Attack)) {
 
 			}
@@ -452,13 +469,16 @@ namespace pokebot {
 			float vecout[3]{};
 			Vector angle = Dest - Origin();
 			VEC_TO_ANGLES(angle, vecout);
+			if (vecout[0] > 180.0f)
+				vecout[0] -= 360.0f;
 			vecout[0] = -vecout[0];
-			return (common::Distance2D(Vector(vecout), client->v_angle) <= Range);
+			auto result = common::Distance2D(Vector(vecout), client->v_angle);
+			return (result <= Range);
 		}
 
-		bool Bot::CanSeeEnemy() const noexcept {
+		std::shared_ptr<game::Client> Bot::GetEnemyWithinView() const noexcept {
 			const game::ClientStatus status{client};
-			return status.CanSeeEnemy();
+			return status.GetEnemyWithinView();
 		}
 
 		bool Bot::HasGoalToHead() const noexcept {
@@ -662,7 +682,6 @@ namespace pokebot {
 			if (bot != nullptr) {
 				bot->current_weapon = game::Weapon::None;
 				bot->goal_queue.Clear();
-				bot->target.clear();
 			}
 		}
 

@@ -293,7 +293,7 @@ namespace pokebot {
 
 			common::Team GetTeam() const noexcept;
 			bool CanSeeFriend() const noexcept;
-			bool CanSeeEnemy() const noexcept;
+			std::shared_ptr<Client> GetEnemyWithinView() const noexcept;
 			std::vector<const edict_t*> GetEntitiesInView() const noexcept;
 		};
 

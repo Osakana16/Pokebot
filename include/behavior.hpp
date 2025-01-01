@@ -316,7 +316,7 @@ namespace pokebot::bot {
 			BEHAVIOR_CREATE_INLINE(Priority, ct_defend_wary);
 			BEHAVIOR_CREATE_INLINE(Priority, ct_defend_camp);
 			BEHAVIOR_CREATE_INLINE(Priority, ct_planted);
-			BEHAVIOR_CREATE_INLINE(Priority, ct_defusing);
+			BEHAVIOR_CREATE_INLINE(Sequence, ct_defusing);
 		}
 
 		// - Rescue Behaviors -

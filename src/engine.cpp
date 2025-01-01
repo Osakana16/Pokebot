@@ -78,6 +78,11 @@ void UTIL_TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTER
     TRACE_LINE(vecStart, vecEnd, igmon | iglass, pentIgnore, ptr);
 }
 
+void UTIL_TraceHull(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t *pentIgnore, TraceResult *ptr) {
+    TRACE_HULL(vecStart, vecEnd, igmon, hullNumber, pentIgnore, ptr);
+}
+
+
 C_DLLEXPORT int
 GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
     meta_engfuncs.pfnMessageBegin = [](int msg_dest, int msg_type, const float* pOrigin, edict_t* edict) {

@@ -414,13 +414,13 @@ namespace pokebot {
 			return false;
 		}
 
-		bool ClientStatus::CanSeeEnemy() const noexcept {
+		std::shared_ptr<Client> ClientStatus::GetEnemyWithinView() const noexcept {
 			for (auto other : game.clients.GetAll()) {
 				if (entity::CanSeeEntity(*client, *other.second) && other.second->GetTeam() != GetTeam()) {
-					return true;
+					return other.second;
 				}
 			}
-			return false;
+			return nullptr;
 		}
 
 		std::vector<const edict_t*> ClientStatus::GetEntitiesInView() const noexcept {
