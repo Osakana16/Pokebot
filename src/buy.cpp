@@ -20,6 +20,74 @@ namespace pokebot {
 						game::game.IssueCommand(*client, std::format("menuselect {}", menu));
 					}
 				}
+				
+				if (bool(node->equipment_flag & buy::Shield_Flag)) {
+					game::game.IssueCommand(*client, "shield");
+					node->equipment_flag &= ~buy::Shield_Flag;
+				}
+
+				if (bool(node->equipment_flag & buy::DefuseKit_Flag)) {
+					game::game.IssueCommand(*client, "defuser");
+					node->equipment_flag &= ~buy::DefuseKit_Flag;
+				}
+
+				if (bool(node->equipment_flag & buy::NVG_Flag)) {
+					game::game.IssueCommand(*client, "nvgs");
+					node->equipment_flag &= ~buy::NVG_Flag;
+				}
+
+				if (bool(node->equipment_flag & buy::Smoke_Flag)) {
+					game::game.IssueCommand(*client, "sgren");
+					node->equipment_flag &= ~buy::Smoke_Flag;
+				}
+
+				if (bool(node->equipment_flag & buy::HE_Flag)) {
+					game::game.IssueCommand(*client, "hegren");
+					node->equipment_flag &= ~buy::HE_Flag;
+				}
+
+				if (bool(node->equipment_flag & buy::Kelvar_Flag)) {
+					game::game.IssueCommand(*client, "vest");
+					node->equipment_flag &= ~buy::Kelvar_Flag;
+				}			
+
+				if (bool(node->equipment_flag & buy::Helmet_Flag)) {
+					game::game.IssueCommand(*client, "vesthelm");
+					node->equipment_flag &= ~buy::Helmet_Flag;
+				}
+
+				std::uint32_t flashbang_buy_bit = 0b000'0'0'0'0'0'10'00'0000000000'0000000000;
+				while ((node->equipment_flag & buy::Flashbang_Flag) > 0) {
+					if (bool(node->equipment_flag & flashbang_buy_bit)) {
+						game::game.IssueCommand(*client, "flash");
+						// Set 0 to a bit to decrement the number of buy.
+						node->equipment_flag &= ~flashbang_buy_bit;
+						flashbang_buy_bit >>= 1;
+					}
+				}
+				
+				std::uint32_t primaryammo_buy_bit = 0b000'0'0'0'0'0'00'00'0100000000'0000000000;
+				while ((node->equipment_flag & buy::Primary_Ammo_Flag) > 0) {
+					if (bool(node->equipment_flag & primaryammo_buy_bit)) {
+						game::game.IssueCommand(*client, "buyammo1");
+
+						// Set 0 to a bit to decrement the number of buy.
+						node->equipment_flag &= ~primaryammo_buy_bit;
+						primaryammo_buy_bit >>= 1;
+					}
+				}
+				
+				std::uint32_t secondaryammo_buy_bit = 0b000'0'0'0'0'0'00'00'0000000000'0100000000;
+				while ((node->equipment_flag & buy::Secondary_Ammo_Flag) > 0) {
+					if (bool(node->equipment_flag & secondaryammo_buy_bit)) {
+						game::game.IssueCommand(*client, "buyammo2");
+
+						// Set 0 to a bit to decrement the number of buy.
+						node->equipment_flag &= ~secondaryammo_buy_bit;
+						secondaryammo_buy_bit >>= 1;
+					}
+				}
+				
 				start_action = Message::Normal;
 			}
 		}
@@ -49,6 +117,8 @@ namespace pokebot {
 				union { float f; int i; } value{};
 			};
 		private:
+			// -- Weapon Filters --
+
 			/**
 			* Narrow down weapon candidates by the price.
 			* @param filter The filter for the weapon list.
@@ -278,16 +348,20 @@ namespace pokebot {
 					node->money.first = Money + rewards[win_state];
 					node->money.second = Money + rewards[win_state] + (300 * 32) + (150 * 4) + (1000 * 4);
 					buy.BuyWeapon(&node->data[0],
-						{
-							Buy::Filter{.kind = Buy::Filter::Kind::Primary, .is_lower = false, .value = {.i = 0 } },
-							Buy::Filter{.kind = Buy::Filter::Kind::Random, .is_lower = false, .value = {.i = 0 } },
-						});
+								  {
+									  Buy::Filter{.kind = Buy::Filter::Kind::Primary, .is_lower = false, .value = {.i = 0 } },
+									  Buy::Filter{.kind = Buy::Filter::Kind::Random, .is_lower = false, .value = {.i = 0 } },
+								  });
 
 					buy.BuyWeapon(&node->data[1],
-						{
-							Buy::Filter{.kind = Buy::Filter::Kind::Secondary, .is_lower = false, .value = {.i = 0 } },
-							Buy::Filter{.kind = Buy::Filter::Kind::Random, .is_lower = false, .value = {.i = 0 } },
-						});
+								  {
+									  Buy::Filter{.kind = Buy::Filter::Kind::Secondary, .is_lower = false, .value = {.i = 0 } },
+									  Buy::Filter{.kind = Buy::Filter::Kind::Random, .is_lower = false, .value = {.i = 0 } },
+								  });
+
+					node->equipment_flag |= Primary_Ammo_Flag;
+					node->equipment_flag |= Secondary_Ammo_Flag;
+					node->equipment_flag |= DefuseKit_Flag;
 				}
 			}
 		}
