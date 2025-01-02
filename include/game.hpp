@@ -261,7 +261,20 @@ namespace pokebot {
 			bool IsReadyToThrowGrenade() const noexcept { return IsFiring() && bool(client->v.weapons & Grenade_Bit); }
 			bool IsPlantingBomb() const noexcept { return IsFiring() && bool(client->v.weapons & C4_Bit); }
 			bool IsClimblingLadder() const noexcept { return (client->v.movetype & MOVETYPE_FLY); }
-			bool IsReloading() const noexcept;
+			
+			/**
+			* @brief Check the p_model animation is reloading.
+			* @return True if player is reloading, false if the player is not reloading or is swimming.
+			*/
+			bool IsPlayerModelReloading() const noexcept;
+
+			/**
+			* @brief Check the v_model animation is reloading.
+			* @return True if player is reloading, false if the player is not reloading.
+			* @remarks This function does not work correctly if the player keeps holding a
+			*/
+			bool IsViewModelReloading() const noexcept;
+
 			bool HasHostages() const noexcept;
 
 			const float& Health;

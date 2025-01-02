@@ -1,4 +1,4 @@
-#include <unordered_set>
+﻿#include <unordered_set>
 
 namespace pokebot {
 	namespace game {
@@ -233,54 +233,7 @@ namespace pokebot {
 			bot_args.clear();
 		}
 
-		bool Client::IsReloading() const noexcept {
-#if 0
-			// The value of entvars_t::weapon_anim.
-			// weaponanim has two values, weapons with different animation values ​​are as follows:
-			//	1. Glock(This is the only weapon the reload animation changes randomly).
-			//  2. USP with or without silencer
-			//	3. M4A1 with or without silencer
-			//
-			// weaponanim[weapon_id][0] is the value without silencer.
-			// weaponanim[weapon_id][1] is the value with silencer.
-			static int weaponanim[][2] {
-				{ 5, 5 },	// P228
-				{ 4, 4 },	// Shield	NOTE: Only shield has a problem; weaponanim never be changed after reloaded. This might causes something glitches.
-				{ 3, 3 },	// Scout
-				{ -1, -1 },	// HEGrenade(No reload animation)
-				{ 5, 5 },	// XM1014(This weapon has multiple animations; 5 is the start of reloading, 3 is the just reloading, and 4 is the end of reloading).
-				{ -1, -1 },	// C4(No reload animation)
-				{ 1, 1 },	// MAC10
-				{ 1, 1 },	// Aug
-				{ -1, -1 },	// Smoke(No reload animation)
-				{ 14, 14 },	// Elite
-				{ 4, 4 },	// Five-seveN
-				{ 1, 1 },	// UMP45
-				{ 3, 3 },	// SG550
-				{ 1, 1 },	// Galil
-				{ 1, 1 },	// Famas
-				{ 13, 5 },	// USP(Without a silencer is 13, with silencer is 5)
-				{ 7, 12 },	// Glock(The one is 7, another is 12)
-				{ 4, 4 },	// AWP
-				{ 1, 1 },	// MP5
-				{ 3, 3 },	// M249
-				{ 5, 5 },	// M3(This weapon has multiple animations; 5 is the start of reloading, 3 is the just reloading, and 4 is the end of reloading).
-				{ 11, 4 },	// M4A1(Without a silencer is 11, with silencer is 4)
-				{ 1, 1 },	// TMP
-				{ 3, 3 },	// G3SG1
-				{ 1, 1 },	// Flashbang
-				{ 4, 4 },	// Deagle
-				{ 1, 1 },	// SG552
-				{ 1, 1 },	// AK47
-				{ 1, 1 },	// Knife
-				{ 1, 1 },	// P90
-			};
-
-			const bool Is_View_Reloading =
-				client->v.weaponanim == weaponanim[static_cast<int>(current_weapon) - 1][0] ||
-				client->v.weaponanim == weaponanim[static_cast<int>(current_weapon) - 1][1];
-#endif
-
+		bool Client::IsPlayerModelReloading() const noexcept {
 			// The value of entvars_t::sequence.
 			// sequence has two values. The value changes depending on whether the player is standing or not.
 			// 
@@ -323,6 +276,55 @@ namespace pokebot {
 				client->v.sequence == sequence[static_cast<int>(current_weapon) - 1][0] || 
 				client->v.sequence == sequence[static_cast<int>(current_weapon) - 1][1];
 			return (Is_Model_Reloading);
+		}
+
+		bool Client::IsViewModelReloading() const noexcept {
+			// The value of entvars_t::weapon_anim.
+			// weaponanim has two values, weapons with different animation values ​​are as follows:
+			//	1. Glock(This is the only weapon the reload animation changes randomly).
+			//  2. USP with or without silencer
+			//	3. M4A1 with or without silencer
+			//
+			// weaponanim[weapon_id][0] is the value without silencer.
+			// weaponanim[weapon_id][1] is the value with silencer.
+			static int weaponanim[][2] {
+				{ 5, 5 },	// P228
+				{ 4, 4 },	// Shield	NOTE: Only shield has a problem; weaponanim never be changed after reloaded. This might causes something glitches.
+				{ 3, 3 },	// Scout
+				{ -1, -1 },	// HEGrenade(No reload animation)
+				{ 5, 5 },	// XM1014(This weapon has multiple animations; 5 is the start of reloading, 3 is the just reloading, and 4 is the end of reloading).
+				{ -1, -1 },	// C4(No reload animation)
+				{ 1, 1 },	// MAC10
+				{ 1, 1 },	// Aug
+				{ -1, -1 },	// Smoke(No reload animation)
+				{ 14, 14 },	// Elite
+				{ 4, 4 },	// Five-seveN
+				{ 1, 1 },	// UMP45
+				{ 3, 3 },	// SG550
+				{ 1, 1 },	// Galil
+				{ 1, 1 },	// Famas
+				{ 13, 5 },	// USP(Without a silencer is 13, with silencer is 5)
+				{ 7, 12 },	// Glock(The one is 7, another is 12)
+				{ 4, 4 },	// AWP
+				{ 1, 1 },	// MP5
+				{ 3, 3 },	// M249
+				{ 5, 5 },	// M3(This weapon has multiple animations; 5 is the start of reloading, 3 is the just reloading, and 4 is the end of reloading).
+				{ 11, 4 },	// M4A1(Without a silencer is 11, with silencer is 4)
+				{ 1, 1 },	// TMP
+				{ 3, 3 },	// G3SG1
+				{ -1, -1 },	// Flashbang(No reload animation)
+				{ 4, 4 },	// Deagle
+				{ 1, 1 },	// SG552
+				{ 1, 1 },	// AK47
+				{ 1, 1 },	// Knife
+				{ 1, 1 },	// P90
+			};
+
+			const bool Is_View_Reloading =
+				client->v.weaponanim == weaponanim[static_cast<int>(current_weapon) - 1][0] ||
+				client->v.weaponanim == weaponanim[static_cast<int>(current_weapon) - 1][1];
+
+			return (Is_View_Reloading);
 		}
 
 		bool Client::HasHostages() const noexcept {
