@@ -309,7 +309,7 @@ namespace pokebot {
 			bool IsSwimming() const noexcept { return (client->IsInWater()); }
 			bool IsOnFloor() const noexcept { return (client->IsOnFloor()); }
 			bool IsClimbingLadder() const noexcept { return client->IsClimblingLadder(); }
-			bool IsReloading() const noexcept { return client->IsReloading(); }
+			bool IsReloading() const noexcept { return client->IsPlayerModelReloading(); }
 			bool IsPlantingBomb() const noexcept { return false; }
 			bool IsChangingWeapon() const noexcept { return false; }
 			bool IsFalling() const noexcept { return false; }
