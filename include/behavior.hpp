@@ -133,25 +133,6 @@ namespace pokebot::bot {
 			}
 		};
 
-		template<Status status>
-		class After final : public BehaviorNode {
-			std::shared_ptr<BehaviorNode> child{}, after{};
-		public:
-			Status Evalute(Bot* const self) override {
-				auto result = child->Evalute(self) ;
-				if (result == status) {
-					return after->Evalute(self);
-				}
-				return result;
-			}
-
-			After(std::shared_ptr<BehaviorNode> behavior, std::shared_ptr<BehaviorNode> after_node) : BehaviorNode("After"), child(behavior), after(after_node) {}
-
-			static std::shared_ptr<After<status>> With(std::shared_ptr<BehaviorNode> behavior, std::shared_ptr<BehaviorNode> after_node) {
-				return std::make_shared<After<status>>(behavior, after_node); 
-			}
-		};
-
 		template<bool b>
 		bool Always(const Bot* const) noexcept { return b; }
 
