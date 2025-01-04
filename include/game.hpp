@@ -59,6 +59,22 @@ namespace pokebot {
 			Defuser = 33
 		};
 
+		enum class AmmoID {
+			None,
+			Magnum338,
+			Nato776,
+			NatoBox556,
+			Nato556,
+			Buckshot,
+			ACP45,
+			MM57,
+			AE50,
+			SIG357,
+			MM9
+		};
+
+		constexpr float Default_Max_Move_Speed = 255.0f;
+
 		constexpr int Primary_Weapon_Bit = (common::ToBit<int>(Weapon::M3) | common::ToBit<int>(Weapon::XM1014) | common::ToBit<int>(Weapon::MAC10) | common::ToBit<int>(Weapon::TMP) | common::ToBit<int>(Weapon::MP5) | common::ToBit<int>(Weapon::UMP45) | common::ToBit<int>(Weapon::P90) | common::ToBit<int>(Weapon::Famas) | common::ToBit<int>(Weapon::Galil) | common::ToBit<int>(Weapon::AK47) | common::ToBit<int>(Weapon::M4A1) | common::ToBit<int>(Weapon::AUG) | common::ToBit<int>(Weapon::SG552) | common::ToBit<int>(Weapon::SG550) | common::ToBit<int>(Weapon::G3SG1) | common::ToBit<int>(Weapon::Scout) | common::ToBit<int>(Weapon::AWP) | common::ToBit<int>(Weapon::M249));
 		constexpr int Secondary_Weapon_Bit = (common::ToBit<int>(Weapon::P228) | common::ToBit<int>(Weapon::USP) | common::ToBit<int>(Weapon::Deagle) | common::ToBit<int>(Weapon::FiveSeven) | common::ToBit<int>(Weapon::Glock18) | common::ToBit<int>(Weapon::Elite));
 		constexpr int Melee_Bit = (common::ToBit<int>(Weapon::Knife));
@@ -202,7 +218,7 @@ namespace pokebot {
 			bool is_nvg_on{};
 			bool is_vip{};
 
-			int weapon_ammo[10]{};
+			int weapon_ammo[15]{};
 			int weapon_clip{};
 			Weapon current_weapon{};
 		public:
@@ -234,6 +250,19 @@ namespace pokebot {
 
 			bool IsValid() const noexcept { return IsValid(client); }
 			bool IsDead() const noexcept { return IsDead(client); }
+
+			/**
+			* @brief Check the clip of current weapon remains or not
+			* @return 
+			*/
+			bool IsOutOfClip() const noexcept { return (Weapon_Type[static_cast<int>(current_weapon)] == WeaponType::Primary || Weapon_Type[static_cast<int>(current_weapon)] == WeaponType::Secondary) && weapon_clip <= 0; }
+			bool IsOutOfAmmo(const AmmoID Ammo_ID) const noexcept { return weapon_ammo[static_cast<int>(Ammo_ID)] <= 0; }
+			bool IsOutOfCurrentWeaponAmmo() const noexcept { 
+				return 
+					(Weapon_Type[static_cast<int>(current_weapon)] == WeaponType::Primary || 
+					 Weapon_Type[static_cast<int>(current_weapon)] == WeaponType::Secondary) && 
+					IsOutOfAmmo(std::get<AmmoID>(Weapon_CVT[static_cast<int>(current_weapon) - 1])); 
+			}
 
 			bool IsVIP() const noexcept { return is_vip; }
 			bool IsInBuyzone() const noexcept { return bool(status_icon & StatusIcon::Buy_Zone); }
@@ -306,9 +335,9 @@ namespace pokebot {
 			}
 
 			std::shared_ptr<Client> Get(const std::string& Name) const noexcept {
-				if (auto it = clients.find(Name); it != clients.end())
+				if (auto it = clients.find(Name); it != clients.end()) {
 					return it->second;
-
+				}
 				return nullptr;
 			}
 
@@ -325,7 +354,7 @@ namespace pokebot {
 			void OnNVGToggled(const std::string_view Client_Name, const bool) noexcept;
 			void OnWeaponChanged(const std::string_view Client_Name, const game::Weapon) noexcept;
 			void OnClipChanged(const std::string_view Client_Name, const game::Weapon, const int) noexcept;
-			void OnAmmoPickedup(const std::string_view Client_Name, const game::Weapon, const int) noexcept;
+			void OnAmmoPickedup(const std::string_view Client_Name, const game::AmmoID, const int) noexcept;
 			void OnTeamAssigned(const std::string_view Client_Name, common::Team) noexcept;
 			void OnItemChanged(const std::string_view Client_Name, game::Item) noexcept;
 			void OnStatusIconShown(const std::string_view Client_Name, const StatusIcon) noexcept;

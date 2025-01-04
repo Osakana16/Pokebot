@@ -462,7 +462,7 @@ namespace pokebot {
 		}
 
 		void ClientManager::OnAmmoPickedup(const std::string_view Client_Name, const game::AmmoID Ammo_ID, const int Amount) noexcept {
-			Get(Client_Name.data())->weapon_ammo[static_cast<int>(Ammo_ID) - 1] = Amount;
+			Get(Client_Name.data())->weapon_ammo[static_cast<int>(Ammo_ID)] = Amount;
 		}
 
 		void ClientManager::OnTeamAssigned(const std::string_view Client_Name, const common::Team Assigned_Team) noexcept {
