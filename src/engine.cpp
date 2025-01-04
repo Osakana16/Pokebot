@@ -213,9 +213,9 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                     if (std::get<int>(args[1]) < 32) {
                         using namespace pokebot;
                         if (std::get<int>(args[0]) != 0) {
-                            game::game.clients.OnWeaponChanged(STRING(engine_target_edict->v.netname), (game::Weapon)std::get<int>(args[0]));
+                            game::game.clients.OnWeaponChanged(STRING(engine_target_edict->v.netname), (game::Weapon)std::get<int>(args[1]));
                         }
-                        game::game.clients.OnClipChanged(STRING(engine_target_edict->v.netname), (game::Weapon)std::get<int>(args[0]), std::get<int>(args[1]));
+                        game::game.clients.OnClipChanged(STRING(engine_target_edict->v.netname), static_cast<game::Weapon>(std::get<int>(args[1])), std::get<int>(args[2]));
                     }
                 }
             },
@@ -238,7 +238,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         return;
                     }
                     using namespace pokebot;
-                    game::game.clients.OnAmmoPickedup(STRING(engine_target_edict->v.netname), static_cast<game::Weapon>(std::get<int>(args[0])), std::get<int>(args[1]));
+                    game::game.clients.OnAmmoPickedup(STRING(engine_target_edict->v.netname), static_cast<game::AmmoID>(std::get<int>(args[0])), std::get<int>(args[1]));
                 }
             },
             {
@@ -269,8 +269,8 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                     const int Health = std::get<int>(args[1]);
                     const int Armor = std::get<int>(args[0]);
                     const int Bit = std::get<int>(args[2]);
-                    game::game.clients.OnDamageTaken(STRING(engine_target_edict->v.netname), engine_target_edict->v.dmg_inflictor, std::get<int>(args[1]), std::get<int>(args[0]), std::get<int>(args[2]));
-                    bot::manager.OnDamageTaken(STRING(engine_target_edict->v.netname), engine_target_edict->v.dmg_inflictor, std::get<int>(args[1]), std::get<int>(args[0]), std::get<int>(args[2]));
+                    game::game.clients.OnDamageTaken(STRING(engine_target_edict->v.netname), engine_target_edict->v.dmg_inflictor, Health, Armor, Bit);
+                    bot::manager.OnDamageTaken(STRING(engine_target_edict->v.netname), engine_target_edict->v.dmg_inflictor,  Health, Armor, Bit);
                 }
             },
             {

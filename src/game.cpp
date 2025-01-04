@@ -23,7 +23,7 @@ namespace pokebot {
 		}
 
 		bool Hostage::RecoginzeOwner(std::shared_ptr<Client>& client) noexcept {
-			if (common::Distance(client->origin, entity->v.origin) < 83.0f && client->GetTeam() == common::Team::CT) {
+			if (common::Distance(client->origin(), entity->v.origin) < 83.0f && client->GetTeam() == common::Team::CT) {
 				if (owner == client) {
 					owner = nullptr;
 				} else {
@@ -39,7 +39,7 @@ namespace pokebot {
 				return;
 
 			const bool Is_Owner_Terrorist = owner->GetTeam() == common::Team::T;
-			if (IsReleased() || owner->GetTeam() == common::Team::T || common::Distance(owner->origin, entity->v.origin) > 200.0f)
+			if (IsReleased() || owner->GetTeam() == common::Team::T || common::Distance(owner->origin(), entity->v.origin) > 200.0f)
 				owner = nullptr;
 		}
 
@@ -124,7 +124,7 @@ namespace pokebot {
 
 				if (bool(client.second->Button() & IN_USE)) {
 					// Sound occurs.
-					produced_sound = Sound{ .origin = client.second->origin, .volume = 50 };
+					produced_sound = Sound{ .origin = client.second->origin(), .volume = 50 };
 					// Recoginze the player as a owner.
 					for (auto& hostage : hostages) {
 						if (hostage.RecoginzeOwner(client.second)) {
@@ -396,7 +396,7 @@ namespace pokebot {
 
 			MDLL_ClientPutInServer(client);
 			client->v.flags |= pokebot::common::Third_Party_Bot_Flag;
-			return std::make_shared<FakeClient>(client);
+			return std::make_shared<Client>(client);
 		}
 
 		std::shared_ptr<Client> Client::Attach(edict_t* edict) {
@@ -433,7 +433,8 @@ namespace pokebot {
 		}
 
 		void ClientManager::OnDamageTaken(const std::string_view Client_Name, const edict_t* Inflictor, const int Health, const int Armor, const int Bit) noexcept {
-			if (decltype(auto) target = Get(Client_Name.data()); target->Health - Health <= 0) {
+			if (auto target = Get(Client_Name.data()); target != nullptr) {
+				if (target->Health() - Health <= 0) {
 				OnDeath(Client_Name);
 			} else {
 				// TODO: Send the event message for a bot.
@@ -457,11 +458,11 @@ namespace pokebot {
 		}
 
 		void ClientManager::OnClipChanged(const std::string_view Client_Name, const game::Weapon Weapon_ID, const int Amount) noexcept {
-			Get(Client_Name.data())->weapon[static_cast<int>(Weapon_ID) - 1].clip = Amount;
+			Get(Client_Name.data())->weapon_clip = Amount;
 		}
 
-		void ClientManager::OnAmmoPickedup(const std::string_view Client_Name, const game::Weapon Weapon_ID, const int Amount) noexcept {
-			Get(Client_Name.data())->weapon[static_cast<int>(Weapon_ID) - 1].ammo = Amount;
+		void ClientManager::OnAmmoPickedup(const std::string_view Client_Name, const game::AmmoID Ammo_ID, const int Amount) noexcept {
+			Get(Client_Name.data())->weapon_ammo[static_cast<int>(Ammo_ID) - 1] = Amount;
 		}
 
 		void ClientManager::OnTeamAssigned(const std::string_view Client_Name, const common::Team Assigned_Team) noexcept {

@@ -56,10 +56,10 @@ namespace pokebot {
 			}
 #if ENABLE_NEW_TURN_ANGLE
 			
-			client->v_angle.x = destination.x;
+			client->v_angle().x = destination.x;
 
-			if (std::abs(destination.y - client->v_angle.y) <= 1.0f) {
-				client->v_angle.y = destination.y;
+			if (std::abs(destination.y - client->v_angle().y) <= 1.0f) {
+				client->v_angle().y = destination.y;
 			} else {
 				auto AngleClamp = [](const float angle, const float destination) {
 					return (angle > destination ? std::clamp(angle, destination, angle) : std::clamp(angle, angle, destination));
@@ -72,35 +72,35 @@ namespace pokebot {
 				constexpr float Base_Frame = 30.0f;
 				constexpr float Sensitivity = 1.0f;
 				const common::AngleVector Next_Angle = {
-					CalculateNextAngle(destination.x, client->v_angle.x) / (Base_Frame - Sensitivity),
-					CalculateNextAngle(destination.y, client->v_angle.y) / (Base_Frame - Sensitivity),
+					CalculateNextAngle(destination.x, client->v_angle().x) / (Base_Frame - Sensitivity),
+					CalculateNextAngle(destination.y, client->v_angle().y) / (Base_Frame - Sensitivity),
 					0.0
 				};
 
-				client->v_angle.y += Next_Angle.y;
-				client->v_angle.y = AngleClamp(client->v_angle.y, destination.y);
+				client->v_angle().y += Next_Angle.y;
+				client->v_angle().y = AngleClamp(client->v_angle().y, destination.y);
 			}
 
 #else
-			client->v_angle = destination;
+			client->v_angle() = destination;
 #endif
-			client->v_angle.z = 0.0f;
-			client->angles.x = client->v_angle.x / 3;
-			client->angles.y = client->v_angle.y;
-			client->v_angle.x = -client->v_angle.x;
-			client->angles.z = 0;
-			client->ideal_yaw = client->v_angle.y;
-			if (client->ideal_yaw > 180.0f) {
-				client->ideal_yaw -= 360.0f;
-			} else if (client->ideal_yaw < -180.0f) {
-				client->ideal_yaw += 360.0f;
+			client->v_angle().z = 0.0f;
+			client->angles().x = client->v_angle().x / 3;
+			client->angles().y = client->v_angle().y;
+			client->v_angle().x = -client->v_angle().x;
+			client->angles().z = 0;
+			client->ideal_yaw() = client->v_angle().y;
+			if (client->ideal_yaw() > 180.0f) {
+				client->ideal_yaw() -= 360.0f;
+			} else if (client->ideal_yaw() < -180.0f) {
+				client->ideal_yaw() += 360.0f;
 			}
 
-			client->idealpitch = client->v_angle.x;
-			if (client->idealpitch > 180.0f) {
-				client->idealpitch -= 360.0f;
-			} else if (client->idealpitch < -180.0f) {
-				client->idealpitch += 360.0f;
+			client->idealpitch() = client->v_angle().x;
+			if (client->idealpitch() > 180.0f) {
+				client->idealpitch() -= 360.0f;
+			} else if (client->idealpitch() < -180.0f) {
+				client->idealpitch() += 360.0f;
 			}
 
 		}
@@ -425,7 +425,7 @@ namespace pokebot {
 		void Bot::SelectWeapon(const game::Weapon Target_Weapon) {
 			if (HasWeapon(Target_Weapon)) {
 				current_weapon = Target_Weapon;
-				game::game.IssueCommand(*client, std::format("{}", game::Weapon_CVT[static_cast<int>(Target_Weapon) - 1]));
+				game::game.IssueCommand(*client, std::format("{}", std::get<game::WeaponName>(game::Weapon_CVT[static_cast<int>(Target_Weapon) - 1])));
 			}
 		}
 
@@ -472,7 +472,7 @@ namespace pokebot {
 			if (vecout[0] > 180.0f)
 				vecout[0] -= 360.0f;
 			vecout[0] = -vecout[0];
-			auto result = common::Distance2D(Vector(vecout), client->v_angle);
+			auto result = common::Distance2D(Vector(vecout), client->v_angle());
 			return (result <= Range);
 		}
 
@@ -486,11 +486,11 @@ namespace pokebot {
 		}
 
 		Vector Bot::Origin() const noexcept {
-			return client->origin;
+			return client->origin();
 		}
 
 		float Bot::Health() const noexcept {
-			return client->Health;
+			return client->Health();
 		}
 
 		uint8_t Bot::ComputeMsec() noexcept {
@@ -524,7 +524,7 @@ namespace pokebot {
 #if !USE_NAVMESH
 						goal_queue.AddGoalQueue(node::world.GetNearest(game::game.clients.Get(Sender_Name)->origin));
 #else
-						goal_queue.AddGoalQueue(node::czworld.GetNearest(game::game.clients.Get(Sender_Name)->origin)->m_id);
+						goal_queue.AddGoalQueue(node::czworld.GetNearest(game::game.clients.Get(Sender_Name)->origin())->m_id);
 #endif
 					} 
 				},
@@ -686,7 +686,7 @@ namespace pokebot {
 		}
 
 		void Manager::OnDamageTaken(const std::string_view Bot_Name, const edict_t* Inflictor, const int Damage, const int Armor, const int Bit) noexcept {
-			if (decltype(auto) target = Get(Bot_Name.data()); target->client->Health <= 0) {
+			if (decltype(auto) target = Get(Bot_Name.data()); target->client->Health() <= 0) {
 				OnDied(Bot_Name.data());
 			} else {
 				// TODO: Send the event message for a bot.

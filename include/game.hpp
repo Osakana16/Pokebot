@@ -107,37 +107,38 @@ namespace pokebot {
 			WeaponType::Primary//30
 		};
 
-		constexpr const char* const Weapon_CVT[30]{
-			"weapon_p228",
-			"weapon_shield",
-			"weapon_scout",
-			"weapon_hegrenade",
-			"weapon_xm1014",
-			"weapon_c4",
-			"weapon_aug",
-			"weapon_mac10",
-			"weapon_smoke",
-			"weapon_elite",
-			"weapon_fiveseven",
-			"weapon_ump45",
-			"weapon_sg550",
-			"weapon_galil",
-			"weapon_famas",
-			"weapon_usp",
-			"weapon_glock18",
-			"weapon_awp",
-			"weapon_mp5navy",
-			"weapon_m249",
-			"weapon_m3",
-			"weapon_m4a1",
-			"weapon_tmp",
-			"weapon_g3sg1",
-			"weapon_flashbang",
-			"weapon_deagle",
-			"weapon_sg552",
-			"weapon_ak47",
-			"weapon_knife",
-			"weapon_p90"
+		using WeaponName = const char* const;
+		constexpr std::tuple<WeaponName, AmmoID> Weapon_CVT[30]{
+			std::make_tuple<WeaponName, AmmoID>("weapon_p228", AmmoID::SIG357),
+			std::make_tuple<WeaponName, AmmoID>("weapon_shield", AmmoID::None),
+			std::make_tuple<WeaponName, AmmoID>("weapon_scout", AmmoID::Nato776),
+			std::make_tuple<WeaponName, AmmoID>("weapon_hegrenade", AmmoID::None),
+			std::make_tuple<WeaponName, AmmoID>("weapon_xm1014", AmmoID::Buckshot),
+			std::make_tuple<WeaponName, AmmoID>("weapon_c4", AmmoID::None),
+			std::make_tuple<WeaponName, AmmoID>("weapon_aug", AmmoID::Nato556),
+			std::make_tuple<WeaponName, AmmoID>("weapon_mac10", AmmoID::ACP45),
+			std::make_tuple<WeaponName, AmmoID>("weapon_smoke", AmmoID::None),
+			std::make_tuple<WeaponName, AmmoID>("weapon_elite", AmmoID::MM9),
+			std::make_tuple<WeaponName, AmmoID>("weapon_fiveseven", AmmoID::MM57),
+			std::make_tuple<WeaponName, AmmoID>("weapon_ump45", AmmoID::ACP45),
+			std::make_tuple<WeaponName, AmmoID>("weapon_sg550", AmmoID::Nato556),
+			std::make_tuple<WeaponName, AmmoID>("weapon_galil", AmmoID::Nato556),
+			std::make_tuple<WeaponName, AmmoID>("weapon_famas", AmmoID::Nato556),
+			std::make_tuple<WeaponName, AmmoID>("weapon_usp", AmmoID::ACP45),
+			std::make_tuple<WeaponName, AmmoID>("weapon_glock18", AmmoID::MM9),
+			std::make_tuple<WeaponName, AmmoID>("weapon_awp", AmmoID::Magnum338),
+			std::make_tuple<WeaponName, AmmoID>("weapon_mp5navy", AmmoID::MM9),
+			std::make_tuple<WeaponName, AmmoID>("weapon_m249", AmmoID::NatoBox556),
+			std::make_tuple<WeaponName, AmmoID>("weapon_m3", AmmoID::Buckshot),
+			std::make_tuple<WeaponName, AmmoID>("weapon_m4a1", AmmoID::Nato556),
+			std::make_tuple<WeaponName, AmmoID>("weapon_tmp", AmmoID::MM9),
+			std::make_tuple<WeaponName, AmmoID>("weapon_g3sg1", AmmoID::Nato776),
+			std::make_tuple<WeaponName, AmmoID>("weapon_flashbang", AmmoID::None),
+			std::make_tuple<WeaponName, AmmoID>("weapon_deagle", AmmoID::AE50),
+			std::make_tuple<WeaponName, AmmoID>("weapon_sg552", AmmoID::Nato556),
+			std::make_tuple<WeaponName, AmmoID>("weapon_ak47", AmmoID::Nato776),
+			std::make_tuple<WeaponName, AmmoID>("weapon_knife", AmmoID::None),
+			std::make_tuple<WeaponName, AmmoID>("weapon_p90", AmmoID::MM57)
 		};
 
 		// variable type
@@ -191,8 +192,8 @@ namespace pokebot {
 		class Client {
 			friend class ClientManager;
 
-			edict_t* client{};
-			int& button;
+			edict_t* const client{};
+			int& button() { return client->v.button; }
 
 			common::Team team{};
 			int money{};
@@ -201,30 +202,19 @@ namespace pokebot {
 			bool is_nvg_on{};
 			bool is_vip{};
 
-			struct {
-				int clip{};
-				int ammo{};
-			} weapon[32]{};
+			int weapon_ammo[10]{};
+			int weapon_clip{};
 			Weapon current_weapon{};
 		public:
 			static bool IsDead(const edict_t* const Target) noexcept { return Target->v.deadflag == DEAD_DEAD || Target->v.health <= 0 || Target->v.movetype == MOVETYPE_NOCLIP; }
 			static bool IsValid(const edict_t* const Target) noexcept { return (Target != nullptr && !Target->free); }
 			static int Index(const edict_t* const Target) noexcept { return ENTINDEX(const_cast<edict_t*>(Target)); }
+
+			Client() = delete;
+			Client(const Client&) = delete;
+			Client& operator=(const Client&) = delete;
 		public:
-			Client(edict_t* e) noexcept :
-				client(e),
-				origin(client->v.origin),
-				angles(client->v.angles),
-				avelocity(client->v.avelocity),
-				punchangle(client->v.punchangle),
-				v_angle(client->v.v_angle),
-				ideal_yaw(client->v.ideal_yaw),
-				idealpitch(client->v.idealpitch),
-				button(client->v.button),
-				view_ofs(client->v.view_ofs),
-				Health(client->v.health),
-				Max_Health(client->v.max_health),
-				Speed(client->v.speed) {}
+			Client(edict_t* e) noexcept : client(e) {}
 
 			static std::shared_ptr<Client> Create(std::string client_name);
 			static std::shared_ptr<Client> Attach(edict_t*), Attach(const int);
@@ -242,7 +232,6 @@ namespace pokebot {
 			void PressKey(const int Key) noexcept { client->v.button |= Key; }
 			common::Team GetTeam() const noexcept { return common::GetTeamFromModel(client); }
 
-			virtual bool IsBot() const noexcept { return false; }
 			bool IsValid() const noexcept { return IsValid(client); }
 			bool IsDead() const noexcept { return IsDead(client); }
 
@@ -277,25 +266,19 @@ namespace pokebot {
 
 			bool HasHostages() const noexcept;
 
-			const float& Health;
-			const float& Max_Health;
-			const float& Speed;
-			const int& Money = money;
+			const float& Health() { return client->v.health; }
+			const float& MaxHealth() { return client->v.max_health; }
+			const float& Speed() { return client->v.speed; }
+			const int& Money() { return money; }
 
-			Vector& view_ofs;
-			Vector& origin;
-			Vector& angles;
-			Vector& avelocity;
-			Vector& punchangle;
-			Vector& v_angle;
-			float& ideal_yaw;
-			float& idealpitch;
-		};
-
-		class FakeClient final : public Client {
-		public:
-			using Client::Client;
-			bool IsBot() const noexcept final { return true; }
+			Vector& view_ofs() { return client->v.view_ofs; }
+			Vector& origin() { return client->v.origin; }
+			Vector& angles() { return client->v.angles; }
+			Vector& avelocity() { return client->v.avelocity; }
+			Vector& punchangle() { return client->v.punchangle; }
+			Vector& v_angle() { return client->v.v_angle; }
+			float& ideal_yaw() { return client->v.ideal_yaw; }
+			float& idealpitch() { return client->v.idealpitch; }
 		};
 
 		// The status in the game

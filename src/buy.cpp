@@ -9,7 +9,7 @@ namespace pokebot {
 			}
 
 			if (client->IsInBuyzone() && !buy_wait_timer.IsRunning()) {
-				auto ai = buy::BuyAI(this->client->Money);
+				auto ai = buy::BuyAI(this->client->Money());
 				auto node = ai.GetPattern(0, 0);
 				for (auto data : node->data) {
 					if (data == nullptr)
@@ -293,7 +293,7 @@ namespace pokebot {
 
 			static void PrepareData(std::vector<const database::WeaponData*>* datas) {
 				for (auto name : game::Weapon_CVT) {
-					if (auto data = database::database.GetWeaponData(name); data != nullptr)
+					if (auto data = database::database.GetWeaponData(std::get<game::WeaponName>(name)); data != nullptr)
 						datas->push_back(data);
 				}
 			}
