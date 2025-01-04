@@ -72,6 +72,7 @@ namespace pokebot {
 			Score = IN_SCORE,
 			Shift = 1 << 16
 		};
+		POKEBOT_ENUM_BIT_OPERATORS(ActionKey);
 
 		enum class State {
 			Accomplishment,

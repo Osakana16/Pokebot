@@ -4,18 +4,6 @@
 
 namespace pokebot {
 	namespace bot {
-		ActionKey operator|(ActionKey ak1, ActionKey ak2) noexcept {
-			return static_cast<ActionKey>(static_cast<int>(ak1) | static_cast<int>(ak2));
-		}
-
-		ActionKey operator&(ActionKey ak1, ActionKey ak2) noexcept {
-			return static_cast<ActionKey>(static_cast<int>(ak1) & static_cast<int>(ak2));
-		}
-
-		ActionKey operator^(ActionKey ak1, ActionKey ak2) noexcept {
-			return static_cast<ActionKey>(static_cast<int>(ak1) ^ static_cast<int>(ak2));
-		}
-
 		void Bot::Run() POKEBOT_DEBUG_NOEXCEPT {
 			const static std::unordered_map<Message, std::function<void(Bot&)>> Update_Funcs{
 				{ Message::Team_Select, &Bot::SelectionUpdate },
