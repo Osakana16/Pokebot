@@ -24,6 +24,8 @@ namespace pokebot::bot::behavior {
 	std::shared_ptr<Sequence> t_ordinary = Sequence::Create("elimination::t_ordinary");
 	std::shared_ptr<Sequence> ct_ordinary = Sequence::Create("elimination::ct_ordinary");
 
+	BEHAVIOR_CREATE(Sequence, reset_team_objective);
+
 	template<bool b>
 	bool IsEnoughToRescueHostage(const Bot* const Self) noexcept {
 		// Return true if the following conditions meet the requirements
@@ -61,19 +63,16 @@ namespace pokebot::bot::behavior {
 		}
 	}
 
-	template<bool b>
-	bool ShouldFollowTeamObjective(const Bot* const Self) noexcept {
-		if constexpr (b) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 	void DefineObjective() {
+		reset_team_objective->Define
+		({
+			reset_goal,
+			set_goal_team_objective
+		 });
+
 		demolition::t_plant->Define
 		({
-			Condition::If(ShouldFollowTeamObjective<false>, set_goal_bombspot),
+			Condition::If(IsTeamObjectiveSet<false>, reset_team_objective),
 			find_goal,
 			head_to_goal,
 			change_c4,

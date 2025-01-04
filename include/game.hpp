@@ -277,7 +277,7 @@ namespace pokebot {
 			bool IsOnTrain() const noexcept { return (client->v.flags & FL_ONTRAIN); }
 			bool IsFiring() const noexcept { return (client->v.button & IN_ATTACK); }
 			bool IsReadyToThrowGrenade() const noexcept { return IsFiring() && bool(client->v.weapons & Grenade_Bit); }
-			bool IsPlantingBomb() const noexcept { return IsFiring() && bool(client->v.weapons & C4_Bit); }
+			bool IsPlantingBomb() const noexcept { return IsFiring() && bool(client->v.weapons & C4_Bit) && (client->v.sequence == 63 || client->v.sequence == 61); }
 			bool IsClimblingLadder() const noexcept { return (client->v.movetype & MOVETYPE_FLY); }
 			
 			/**

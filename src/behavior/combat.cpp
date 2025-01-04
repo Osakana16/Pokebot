@@ -2,8 +2,6 @@
 
 namespace pokebot::bot::behavior {
 	namespace fight {
-		std::shared_ptr<Priority> while_spotting_enemy = Priority::Create("fight::while_spotting_enemy");
-		std::shared_ptr<Sequence> beat_enemies = Sequence::Create("fight::beat_enemies");
 		std::shared_ptr<Sequence> try_to_lose_sight = Sequence::Create("fight::try_to_lose_sight");		// Try to lose the sight from the enemy
 
 		std::shared_ptr<Priority> pick_best_weapon = Priority::Create("fight::pick_best_weapon");
@@ -17,9 +15,12 @@ namespace pokebot::bot::behavior {
 
 		std::shared_ptr<Priority> one_tap_fire = Priority::Create("fight::one_tap_fire");
 		std::shared_ptr<Priority> full_burst_fire = Priority::Create("fight::full_burst_fire");
+
 	}
 
 	namespace {
+		BEHAVIOR_CREATE(Sequence, reset_goal_to_retreat);
+
 		bool HasGuns(const bot::Bot* const Self) noexcept {
 			return Self->HasPrimaryWeapon() || Self->HasSecondaryWeapon();
 		}
@@ -45,9 +46,10 @@ namespace pokebot::bot::behavior {
 	}
 
 	void DefineCombat() {
-		fight::while_spotting_enemy->Define
+		reset_goal_to_retreat->Define
 		({
-			fight::beat_enemies
+			Condition::If(Is<true, common::Team::CT>, set_goal_ctspawn),
+			Condition::If(Is<true, common::Team::T>, set_goal_tspawn)					  
 		});
 
 		fight::beat_enemies->Define
@@ -55,6 +57,14 @@ namespace pokebot::bot::behavior {
 			look_enemy,
 			fight::pick_best_weapon,
 			fight::decide_firing
+		});
+
+		fight::retreat->Define
+		({
+			Condition::If(IsTeamObjectiveSet<true>, reset_goal),
+			Condition::If(HasGoal<false>, reset_goal_to_retreat),
+			find_goal,
+			head_to_goal
 		});
 
 		fight::try_to_lose_sight->Define

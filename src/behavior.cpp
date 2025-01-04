@@ -4,10 +4,10 @@ namespace pokebot::bot {
 	namespace behavior {
 		std::shared_ptr<Action> breakpoint = Action::Create("breakpoint");
 
-		Status Sequence::Evalute(Bot* const self) {
+		Status Sequence::Evaluate(Bot* const self) {
 			// SERVER_PRINT(std::format("{}\n", name).c_str());
 			for (auto child : children) {
-				switch (child->Evalute(self)) {
+				switch (child->Evaluate(self)) {
 					case Status::Running:
 						return Status::Running;
 					case Status::Failed:
@@ -17,10 +17,10 @@ namespace pokebot::bot {
 			return Status::Success;
 		}
 
-		Status Priority::Evalute(Bot* const self) {
+		Status Priority::Evaluate(Bot* const self) {
 			// SERVER_PRINT(std::format("{}\n", name).c_str());
 			for (auto child : children) {
-				switch (child->Evalute(self)) {
+				switch (child->Evaluate(self)) {
 					case Status::Running:
 						return Status::Running;
 					case Status::Success:

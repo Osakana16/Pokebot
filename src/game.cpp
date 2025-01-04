@@ -417,6 +417,7 @@ namespace pokebot {
 		}
 
 		std::shared_ptr<Client> ClientManager::Create(std::string client_name) {
+			assert(!client_name.empty());
 			auto client = Client::Create(client_name);
 			client_name = client->Name();
 			return clients.insert({ client_name, client }).first->second;
@@ -435,9 +436,10 @@ namespace pokebot {
 		void ClientManager::OnDamageTaken(const std::string_view Client_Name, const edict_t* Inflictor, const int Health, const int Armor, const int Bit) noexcept {
 			if (auto target = Get(Client_Name.data()); target != nullptr) {
 				if (target->Health() - Health <= 0) {
-				OnDeath(Client_Name);
-			} else {
-				// TODO: Send the event message for a bot.
+					OnDeath(Client_Name);
+				} else {
+					// TODO: Send the event message for a bot.
+				}
 			}
 		}
 

@@ -219,8 +219,7 @@ namespace pokebot {
 
 			Timer danger_time{};
 
-			static constexpr int MATE = 0, ENEMY = 1;
-			std::vector<const edict_t*> entities[2]{};
+			std::vector<const edict_t*> target_enemies{};
 
 			State state = State::Accomplishment;
 			void AccomplishMission() noexcept, Combat() noexcept;
@@ -258,6 +257,7 @@ namespace pokebot {
 
 			void SelectWeapon(const game::Weapon), SelectPrimaryWeapon(), SelectSecondaryWeapon();
 
+			bool HasEnemy() const noexcept;
 			void LookAtClosestEnemy();
 			bool IsLookingAtEnemy() const noexcept;
 			bool IsEnemyFar() const noexcept;

@@ -45,38 +45,6 @@ namespace pokebot::bot::behavior {
 		return Status::Success;
 	};
 
-	BEHAVIOR_CREATE(Action, change_primary);
-	BEHAVIOR_CREATE(Action, change_secondary);
-	BEHAVIOR_CREATE(Action, change_melee);
-	BEHAVIOR_CREATE(Action, change_grenade);
-	BEHAVIOR_CREATE(Action, change_flashbang);
-	BEHAVIOR_CREATE(Action, change_smoke);
-	BEHAVIOR_CREATE(Action, change_c4);
-	BEHAVIOR_CREATE(Action, look_c4);
-	BEHAVIOR_CREATE(Action, look_hostage);
-	BEHAVIOR_CREATE(Action, look_enemy);
-	BEHAVIOR_CREATE(Action, look_door);
-	BEHAVIOR_CREATE(Action, look_button);
-	BEHAVIOR_CREATE(Action, move_forward);
-	BEHAVIOR_CREATE(Action, use);
-	BEHAVIOR_CREATE(Action, tap_fire);
-	BEHAVIOR_CREATE(Action, jump);
-	BEHAVIOR_CREATE(Action, duck);
-	BEHAVIOR_CREATE(Action, walk);
-	BEHAVIOR_CREATE(Action, change_silencer);
-	BEHAVIOR_CREATE(Action, adjust_scope);
-	BEHAVIOR_CREATE(Action, set_goal_team_objective);
-	BEHAVIOR_CREATE(Action, set_goal_from_c4_within_range);
-	BEHAVIOR_CREATE(Action, set_goal_hostage);
-	BEHAVIOR_CREATE(Action, set_goal_bombspot);
-	BEHAVIOR_CREATE(Action, set_goal_rescuezone);
-	BEHAVIOR_CREATE(Action, set_goal_escapezone);
-	BEHAVIOR_CREATE(Action, set_goal_vipsafety);
-	BEHAVIOR_CREATE(Action, set_goal_tspawn);
-	BEHAVIOR_CREATE(Action, set_goal_ctspawn);
-	BEHAVIOR_CREATE(Action, set_goal_weapon);
-	BEHAVIOR_CREATE(Action, find_goal);
-	BEHAVIOR_CREATE(Action, head_to_goal);
 	
 	template<ActionKey key>
 	Status BotPressesKey(Bot* const self) {
@@ -97,6 +65,16 @@ namespace pokebot::bot::behavior {
 				return Status::Failed;
 			}
 		};
+
+		reset_goal->Define([](Bot* const self) -> Status {
+			if (self->goal_node == node::Invalid_NodeID && self->next_dest_node == node::Invalid_NodeID)
+				return Status::Failed;
+
+			self->goal_queue.Clear();
+			self->next_dest_node = self->goal_node = node::Invalid_NodeID;
+			self->routes.Clear();
+			return Status::Success;
+		});
 
 		change_primary->Define([](Bot* const self) -> Status {
 			if (self->HasPrimaryWeapon()) {
@@ -145,7 +123,7 @@ namespace pokebot::bot::behavior {
 		});
 
 		look_enemy->Define([](Bot* const self) -> Status {
-			if (!self->IsLookingAtEnemy()) {
+			if (self->HasEnemy()) {
 				self->LookAtClosestEnemy();
 				return Status::Success;
 			} else {
@@ -354,8 +332,7 @@ namespace pokebot::bot::behavior {
 			return SetGoal<node::GoalKind::Terrorist_Spawn>(self);
 		});
 
-		set_goal_ctspawn->Define(
-			[](Bot* const self) -> Status {
+		set_goal_ctspawn->Define([](Bot* const self) -> Status {
 			return SetGoal<node::GoalKind::CT_Spawn>(self);
 		});
 
@@ -459,7 +436,7 @@ namespace pokebot::bot::behavior {
 						}
 					}
 				} else {
-					self->PressKey(ActionKey::Run);
+					// self->PressKey(ActionKey::Run);
 				}
 				return Status::Running;
 			}

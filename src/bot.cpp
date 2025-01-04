@@ -169,9 +169,14 @@ namespace pokebot {
 					break;
 				}
 			}
-			if (next_dest_node != node::Invalid_NodeID) {
-				PressKey(ActionKey::Run);
+
+			if (!routes.Empty() && next_dest_node != node::Invalid_NodeID) {
+				if (look_direction.view.has_value() && look_direction.movement.has_value()) {
+					auto r = look_direction.movement->ToAngleVector(Origin()) - look_direction.view->ToAngleVector(Origin());
+					PressKey(ActionKey::Run);
+				}
 			}
+			look_direction.Clear();
 		}
 
 		void Bot::OnSelectionCompleted() noexcept {
@@ -190,10 +195,10 @@ namespace pokebot {
 							game::MapFlags::Demolition,
 							[this] {
 								if (manager.C4Origin().has_value()) {
-									behavior::demolition::t_planted_wary->Evalute(this);
+									behavior::demolition::t_planted_wary->Evaluate(this);
 								} else {
 									if (HasWeapon(game::Weapon::C4)) {
-										behavior::demolition::t_plant->Evalute(this);
+										behavior::demolition::t_plant->Evaluate(this);
 									} else {
 									}
 								}
@@ -214,7 +219,7 @@ namespace pokebot {
 						{
 							game::MapFlags::Escape,
 							[this] {
-								behavior::escape::t_take_point->Evalute(this);
+								behavior::escape::t_take_point->Evaluate(this);
 							}
 						},
 					};
@@ -233,12 +238,12 @@ namespace pokebot {
 							[this] {
 								if (manager.C4Origin().has_value()) {
 									if (common::Distance(Origin(), *manager.C4Origin()) <= 50.0f) {
-										behavior::demolition::ct_defusing->Evalute(this);
+										behavior::demolition::ct_defusing->Evaluate(this);
 									} else {
-										behavior::demolition::ct_planted->Evalute(this);
+										behavior::demolition::ct_planted->Evaluate(this);
 									}
 								} else {
-									behavior::demolition::ct_defend->Evalute(this);
+									behavior::demolition::ct_defend->Evaluate(this);
 								}
 							}
 						},
@@ -246,9 +251,9 @@ namespace pokebot {
 							game::MapFlags::HostageRescue,
 							[this] {
 								if (!client->HasHostages()) {
-									behavior::rescue::ct_try->Evalute(this);
+									behavior::rescue::ct_try->Evaluate(this);
 								} else {
-									behavior::rescue::ct_leave->Evalute(this);
+									behavior::rescue::ct_leave->Evaluate(this);
 								}
 							}
 						},
@@ -256,7 +261,7 @@ namespace pokebot {
 							game::MapFlags::Assassination,
 							[this] {
 								if (client->IsVIP()) {
-									behavior::assist::ct_vip_escape->Evalute(this);
+									behavior::assist::ct_vip_escape->Evaluate(this);
 								} else {
 
 								}
@@ -280,7 +285,46 @@ namespace pokebot {
 		}
 
 		void Bot::Combat() noexcept {
-			behavior::fight::while_spotting_enemy->Evalute(this);
+			assert(!target_enemies.empty() && "The bot has no enemies despite being in combat mode.");
+			/*
+				Choose to fight or to flee.
+				The bot has 'fighting spirit' that affects willingness to fight.
+			*/
+
+			constexpr int Max_Health = 100;
+			constexpr int Max_Armor = 100;
+			constexpr int Base_Fearless = Max_Health / 2 + Max_Armor / 5;
+
+			const bool Enemy_Has_Primary = bool(target_enemies.front()->v.weapons & game::Primary_Weapon_Bit);
+			const bool Enemy_Has_Secondary = bool(target_enemies.front()->v.weapons & game::Secondary_Weapon_Bit);
+
+			int fighting_spirit = Max_Health + Max_Armor + (HasPrimaryWeapon() ? 50 : 0) + (HasSecondaryWeapon() ? 50 : 0);
+			if (!HasPrimaryWeapon() && !HasSecondaryWeapon() || 
+				(client->IsOutOfClip() && client->IsOutOfCurrentWeaponAmmo())) {
+				// If I have no guns.
+				if (Enemy_Has_Primary || Enemy_Has_Secondary) {
+					// The enemy has weapon so I should flee.
+					fighting_spirit = std::numeric_limits<decltype(fighting_spirit)>::min();
+				} else {
+					// This is the good chance to beat enemies.
+				}
+			} else {
+				if (IsReloading() || client->IsOutOfClip()) {
+					// I'm reloading so I have to flee.
+					fighting_spirit = std::numeric_limits<decltype(fighting_spirit)>::min();
+				} else {
+					// If I have guns.
+					fighting_spirit -= (Max_Health - Health());
+					fighting_spirit -= (Max_Armor - client->Edict()->v.armorvalue);
+					// fighting_spirit -= (Enemy_Has_Primary ? 25 : 0);
+					// fighting_spirit -= (Enemy_Has_Secondary ? 25 : 0);
+				}
+			}
+
+			if (fighting_spirit <= Base_Fearless) {
+				behavior::fight::retreat->Evaluate(this);
+			}
+			behavior::fight::beat_enemies->Evaluate(this);
 		}
 
 		template<typename Array>
@@ -308,54 +352,58 @@ namespace pokebot {
 				look_direction.movement = node::world.GetOrigin(next_dest_node);
 #else
 				look_direction.movement = next_origin;
+				look_direction.movement->z = Origin().z;
 #endif
 			}
 
 			TurnViewAngle();
 			TurnMovementAngle();
-			look_direction.Clear();
 			auto status = game::game.clients.GetClientStatus(client->Name());
-			for (auto& entity : entities) {
-				entity.clear();
-			}
-			for (auto& target : status.GetEntitiesInView()) {
-				switch (common::GetTeamFromModel(target)) {
-					case common::Team::T:
-					case common::Team::CT:
-						entities[(common::GetTeamFromModel(target) != JoinedTeam())].push_back(target);
-						break;
-					default:
-						break;
+			const edict_t* enemies_in_view[32]{};
+			if (game::poke_fight) {
+				int i{};
+				for (auto& target : status.GetEntitiesInView()) {
+					if (JoinedTeam() != common::GetTeamFromModel(target)) {
+						enemies_in_view[i++] = target;
+					}
 				}
 			}
 
-			if (!game::poke_fight) {
-				entities[ENEMY].clear();
-			}
-			
-			if (!entities[MATE].empty()) {
-				const auto Mate_Distances = std::move(SortedDistances(Origin(), entities[MATE]));
+			if (enemies_in_view[0] != nullptr) {
+				for (auto& enemy : enemies_in_view) {
+					if (enemy == nullptr) {
+						break;
+					}
+					if (std::find(target_enemies.begin(), target_enemies.end(), enemy) == target_enemies.end()) {
+						target_enemies.push_back(enemy);
+					}
+				}
+				danger_time.SetTime(5.0);
 			}
 
-			if (!entities[ENEMY].empty()) {
-				// danger_time.SetTime(5.0);
-				state = State::Crisis;
-			} else {
+			if (!danger_time.IsRunning()) {
+				target_enemies.clear();
 				state = State::Accomplishment;
+			} else {
+				state = State::Crisis;
 			}
 		}
 
 		void Bot::PressKey(ActionKey pressable_key) {
 			if (bool(pressable_key & ActionKey::Run)) {
-				move_speed = 255.0;
+				move_speed = game::Default_Max_Move_Speed;
 			}
 
 			if (bool(pressable_key & ActionKey::Move_Right)) {
-				strafe_speed = 255.0;
+				strafe_speed = game::Default_Max_Move_Speed;
 			}
 
 			if (bool(pressable_key & ActionKey::Move_Left)) {
-				strafe_speed = -255.0;
+				strafe_speed = -game::Default_Max_Move_Speed;
+			}
+			
+			if (bool(pressable_key & ActionKey::Back)) {
+
 			}
 
 			if (bool(pressable_key & ActionKey::Attack)) {
@@ -375,9 +423,12 @@ namespace pokebot {
 			if (bool(pressable_key & ActionKey::Duck)) {
 
 			}
+
 			if (bool(pressable_key & ActionKey::Shift)) {
-				
+				pressable_key &= ~ActionKey::Shift;
+				move_speed = game::Default_Max_Move_Speed / 2.0f;
 			}
+
 			client->PressKey(static_cast<int>(pressable_key));
 		}
 
@@ -426,30 +477,34 @@ namespace pokebot {
 		}
 
 		void Bot::LookAtClosestEnemy() {
-			if (entities[ENEMY].empty()) {
+			if (target_enemies.empty()) {
 				return;
 			}
-			const auto Enemy_Distances = std::move(SortedDistances(Origin(), entities[ENEMY]));
-			const auto& Nearest_Enemy = entities[ENEMY][Enemy_Distances.begin()->second];
+			const auto Enemy_Distances = std::move(SortedDistances(Origin(), target_enemies));
+			const auto& Nearest_Enemy = target_enemies[Enemy_Distances.begin()->second];
 			look_direction.view = Nearest_Enemy->v.origin - Vector(20.0f, 0, 0) + manager.GetCompensation(Name().data());
 		}
 
+		bool Bot::HasEnemy() const noexcept {
+			return !target_enemies.empty();
+		}
+
 		bool Bot::IsLookingAtEnemy() const noexcept {
-			if (entities[ENEMY].empty()) {
+			if (target_enemies.empty()) {
 				return false;
 			}
 
-			const auto Enemy_Distances = std::move(SortedDistances(Origin(), entities[ENEMY]));
-			const auto& Nearest_Enemy = entities[ENEMY][Enemy_Distances.begin()->second];
+			const auto Enemy_Distances = std::move(SortedDistances(Origin(), target_enemies));
+			const auto& Nearest_Enemy = target_enemies[Enemy_Distances.begin()->second];
 			return IsLookingAt(Nearest_Enemy->v.origin, 1.0f);
 		}
 
 		bool Bot::IsEnemyFar() const noexcept {
-			if (entities[ENEMY].empty()) {
+			if (target_enemies.empty()) {
 				return false;
 			}
-			const auto Enemy_Distances = std::move(SortedDistances(Origin(), entities[ENEMY]));
-			const auto& Nearest_Enemy = entities[ENEMY][Enemy_Distances.begin()->second];
+			const auto Enemy_Distances = std::move(SortedDistances(Origin(), target_enemies));
+			const auto& Nearest_Enemy = target_enemies[Enemy_Distances.begin()->second];
 			return common::Distance(Origin(), Nearest_Enemy->v.origin) > 1000.0f;
 		}
 

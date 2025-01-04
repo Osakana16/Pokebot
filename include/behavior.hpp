@@ -15,7 +15,8 @@ namespace pokebot::bot {
 		enum class Status {
 			Failed,
 			Success,
-			Running
+			Running,
+			Not_Executed
 		};
 
 		void DefineBehavior();
@@ -31,13 +32,13 @@ namespace pokebot::bot {
 			std::string_view name{};
 		public:
 			BehaviorNode(std::string_view self_name) : name(self_name) {}
-			virtual Status Evalute(Bot* const) = 0;
+			virtual Status Evaluate(Bot* const) = 0;
 		};
 
 		class Root : public BehaviorNode {
 			std::shared_ptr<BehaviorNode> child{};
-			Status Evalute(Bot* const self) override {
-				return child->Evalute(self);
+			Status Evaluate(Bot* const self) override {
+				return child->Evaluate(self);
 			}
 		public:
 			Root(std::shared_ptr<BehaviorNode> child_) : BehaviorNode("Root"), child(child_) {}
@@ -46,7 +47,7 @@ namespace pokebot::bot {
 		class Sequence : public BehaviorNode {
 			std::vector<std::shared_ptr<BehaviorNode>> children;
 		public:
-			Status Evalute(Bot* const self) override;
+			Status Evaluate(Bot* const self) override;
 
 			using BehaviorNode::BehaviorNode;
 
@@ -72,7 +73,7 @@ namespace pokebot::bot {
 		public:
 			using BehaviorNode::BehaviorNode;
 
-			Status Evalute(Bot* const self) override;
+			Status Evaluate(Bot* const self) override;
 
 			void Define(std::initializer_list<std::shared_ptr<BehaviorNode>> behaviors) {
 				assert(children.empty());
@@ -95,11 +96,11 @@ namespace pokebot::bot {
 			std::shared_ptr<BehaviorNode> child{};
 			Activator CanActive;
 		public:
-			Status Evalute(Bot* const self) override {
+			Status Evaluate(Bot* const self) override {
 				if (CanActive(self)) {
-					return child->Evalute(self);
+					return child->Evaluate(self);
 				}
-				return Status::Failed;
+				return Status::Not_Executed;
 			}
 
 			Condition(Activator activator, std::shared_ptr<BehaviorNode> behavior) : BehaviorNode("If"), CanActive(activator), child(behavior){}
@@ -112,7 +113,7 @@ namespace pokebot::bot {
 		public:
 			using BehaviorNode::BehaviorNode;
 
-			Status Evalute(Bot* const self) noexcept override {
+			Status Evaluate(Bot* const self) noexcept override {
 				// SERVER_PRINT(std::format("{}\n", name).c_str());
 				return action(self);
 			}
@@ -154,6 +155,17 @@ namespace pokebot::bot {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, manager.C4Origin().has_value());
 		}
 
+
+		template<bool b>
+		bool IsTeamObjectiveSet(const Bot* const Self) noexcept {
+			if constexpr (b) {
+				return Self->goal_node == manager.GetGoalNode(Self->JoinedTeam(), Self->JoinedPlatoon());
+			} else {
+				return Self->goal_node != manager.GetGoalNode(Self->JoinedTeam(), Self->JoinedPlatoon());
+			}
+		}
+
+
 		template<bool b>
 		bool IsTickingToExplosion(const Bot* const Self) noexcept {
 			return false;
@@ -162,6 +174,11 @@ namespace pokebot::bot {
 		template<bool b>
 		bool IsOnBomb(const Bot* const Self) noexcept {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (common::Distance(Self->Origin(), *manager.C4Origin()) <= 50.0f));
+		}
+		
+		template<bool b>
+		bool HasGoal(const Bot* const Self) noexcept {
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->goal_node != node::Invalid_NodeID);
 		}
 
 		template<bool b>
@@ -244,46 +261,61 @@ namespace pokebot::bot {
 			return false;
 		}
 
-		extern std::shared_ptr<Action> change_primary;
-		extern std::shared_ptr<Action> change_secondary;
-		extern std::shared_ptr<Action> change_melee;
-		extern std::shared_ptr<Action> change_grenade;
-		extern std::shared_ptr<Action> change_flashbang;
-		extern std::shared_ptr<Action> change_smoke;
-		extern std::shared_ptr<Action> change_c4;
-		extern std::shared_ptr<Action> look_c4;
-		extern std::shared_ptr<Action> look_hostage;
-		extern std::shared_ptr<Action> look_enemy;
-		extern std::shared_ptr<Action> look_door;
-		extern std::shared_ptr<Action> look_button;
-		extern std::shared_ptr<Action> use;
-		extern std::shared_ptr<Action> tap_fire;
-		extern std::shared_ptr<Action> jump;
-		extern std::shared_ptr<Action> duck;
-		extern std::shared_ptr<Action> walk;
-		extern std::shared_ptr<Action> change_silencer;
-		extern std::shared_ptr<Action> adjust_scope;
-		extern std::shared_ptr<Action> set_goal_team_objective;
-		extern std::shared_ptr<Action> set_goal_from_c4_within_range;
-		extern std::shared_ptr<Action> set_goal_bombspot;
-		extern std::shared_ptr<Action> set_goal_hostage;
-		extern std::shared_ptr<Action> set_goal_rescuezone;
-		extern std::shared_ptr<Action> set_goal_escapezone;
-		extern std::shared_ptr<Action> set_goal_vipsafety;
-		extern std::shared_ptr<Action> set_goal_tspawn;
-		extern std::shared_ptr<Action> set_goal_ctspawn;
-		extern std::shared_ptr<Action> set_goal_weapon;
-		extern std::shared_ptr<Action> find_goal;
-		extern std::shared_ptr<Action> head_to_goal;
+		template<bool b, typename T>
+		bool Is(const Bot* const Self) {
+			static_assert(false);
+			return false;
+		}
+
+		template<bool b, common::Team specified_team>
+		bool Is(const Bot* const Self) {
+			return Self->JoinedTeam() == specified_team;
+		}
+
+		BEHAVIOR_CREATE_INLINE(Action, change_primary);
+		BEHAVIOR_CREATE_INLINE(Action, change_secondary);
+		BEHAVIOR_CREATE_INLINE(Action, change_melee);
+		BEHAVIOR_CREATE_INLINE(Action, change_grenade);
+		BEHAVIOR_CREATE_INLINE(Action, change_flashbang);
+		BEHAVIOR_CREATE_INLINE(Action, change_smoke);
+		BEHAVIOR_CREATE_INLINE(Action, change_c4);
+		BEHAVIOR_CREATE_INLINE(Action, look_c4);
+		BEHAVIOR_CREATE_INLINE(Action, look_hostage);
+		BEHAVIOR_CREATE_INLINE(Action, look_enemy);
+		BEHAVIOR_CREATE_INLINE(Action, look_door);
+		BEHAVIOR_CREATE_INLINE(Action, look_button);
+		BEHAVIOR_CREATE_INLINE(Action, move_forward);
+		BEHAVIOR_CREATE_INLINE(Action, use);
+		BEHAVIOR_CREATE_INLINE(Action, tap_fire);
+		BEHAVIOR_CREATE_INLINE(Action, jump);
+		BEHAVIOR_CREATE_INLINE(Action, duck);
+		BEHAVIOR_CREATE_INLINE(Action, walk);
+		BEHAVIOR_CREATE_INLINE(Action, change_silencer);
+		BEHAVIOR_CREATE_INLINE(Action, adjust_scope);
+		BEHAVIOR_CREATE_INLINE(Action, set_goal_hostage);
+		BEHAVIOR_CREATE_INLINE(Action, set_goal_bombspot);
+		BEHAVIOR_CREATE_INLINE(Action, set_goal_rescuezone);
+		BEHAVIOR_CREATE_INLINE(Action, set_goal_escapezone);
+		BEHAVIOR_CREATE_INLINE(Action, set_goal_vipsafety);
+		BEHAVIOR_CREATE_INLINE(Action, set_goal_tspawn);
+		BEHAVIOR_CREATE_INLINE(Action, set_goal_ctspawn);
+		BEHAVIOR_CREATE_INLINE(Action, set_goal_weapon);
+		BEHAVIOR_CREATE_INLINE(Action, find_goal);
+		BEHAVIOR_CREATE_INLINE(Action, head_to_goal);
+		BEHAVIOR_CREATE_INLINE(Action, set_goal_team_objective);
+		BEHAVIOR_CREATE_INLINE(Action, set_goal_from_c4_within_range);
+		BEHAVIOR_CREATE_INLINE(Action, reset_goal);
 		BEHAVIOR_CREATE_INLINE(Action, set_goal_c4_node);
 		BEHAVIOR_CREATE_INLINE(Action, set_goal_c4_vector);
 		BEHAVIOR_CREATE_INLINE(Action, rapid_fire);
 		BEHAVIOR_CREATE_INLINE(Action, move_vector);
 		BEHAVIOR_CREATE_INLINE(Action, set_goal_from_team_objective_within_range);
+
 		std::shared_ptr<Action> wait(std::uint32_t, float);
 
 		namespace fight {
-			extern std::shared_ptr<Priority> while_spotting_enemy;
+			BEHAVIOR_CREATE_INLINE(Sequence, beat_enemies);
+			BEHAVIOR_CREATE_INLINE(Priority, retreat);
 		}
 
 		// - DEmolition Behaviors - 
