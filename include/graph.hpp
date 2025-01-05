@@ -14,13 +14,13 @@ namespace pokebot::node {
 	constexpr T Range = 50;
 	constexpr NodeID Invalid_NodeID = std::numeric_limits<NodeID>::max();
 
-	enum class NodeFlag {
+	POKEBOT_DEFINE_ENUM_WITH_BIT_OPERATOR(
+		NodeFlag,
 		None,
 		Water = 1 << 1,
 		Ladder = 1 << 2,
 		Goal = 1 << 3
-	};
-	POKEBOT_ENUM_BIT_OPERATORS(NodeFlag);
+	);
 
 	enum class RouteState {
 		New,

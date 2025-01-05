@@ -6,7 +6,8 @@ namespace pokebot {
 
 		inline bool is_enabled_auto_waypoint = true;
 
-		enum class StatusIcon {
+		POKEBOT_DEFINE_ENUM_WITH_BIT_OPERATOR(
+			StatusIcon,
 			Not_Displayed,
 			Buy_Zone = 1 << 0,
 			Defuser = 1 << 1,
@@ -14,15 +15,14 @@ namespace pokebot {
 			Rescue_Zone = 1 << 3,
 			Vip_Safety = 1 << 4,
 			Escape_Zone = 1 << 5
-		};
-		POKEBOT_ENUM_BIT_OPERATORS(StatusIcon);
+		);
 
-		enum class Item {
+		POKEBOT_DEFINE_ENUM_WITH_BIT_OPERATOR(
+			Item,
 			None,
 			Nightvision=1<<0,
 			Defuse_Kit=1<<1
-		};
-		POKEBOT_ENUM_BIT_OPERATORS(Item);
+		);
 
 		enum class Weapon {
 			None = -1,
@@ -391,13 +391,13 @@ namespace pokebot {
 			int volume{};
 		};
 
-		enum class MapFlags {
+		POKEBOT_DEFINE_ENUM_WITH_BIT_OPERATOR(
+			MapFlags,
 			Assassination = 1 << 0,
 			HostageRescue = 1 << 1,
 			Demolition = 1 << 2,
 			Escape = 1 << 3
-		};
-		POKEBOT_ENUM_BIT_OPERATORS(MapFlags);
+		);
 
 		class Hostage final {
 			Hostage() = default;

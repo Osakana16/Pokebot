@@ -52,7 +52,9 @@ namespace pokebot {
 			void SetTime(const common::Time t) noexcept { time = t + Base_Time; }
 		};
 
-		enum class ActionKey {
+		
+		POKEBOT_DEFINE_ENUM_WITH_BIT_OPERATOR(
+			ActionKey,
 			None = 0,
 			Run = IN_RUN,
 			Attack = IN_ATTACK,
@@ -71,8 +73,7 @@ namespace pokebot {
 			ALT1 = IN_ALT1,
 			Score = IN_SCORE,
 			Shift = 1 << 16
-		};
-		POKEBOT_ENUM_BIT_OPERATORS(ActionKey);
+		);
 
 		enum class State {
 			Accomplishment,

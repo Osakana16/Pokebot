@@ -30,6 +30,7 @@ namespace pokebot::bot::behavior {
 				id = goal->second;
 				break;
 			}
+;
 			
 			if (id != node::Invalid_NodeID && !node::czworld.IsOnNode(self->Origin(), id) && self->goal_queue.AddGoalQueue(id, 1)) {
 				return Status::Success;
