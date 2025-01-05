@@ -123,27 +123,6 @@ namespace pokebot {
 				return;
 			}
 			
-			const int current_weapon_integer = static_cast<int>(current_weapon);
-			assert(current_weapon_integer >= static_cast<int>(game::Weapon::None) &&  current_weapon_integer <= static_cast<int>(game::Weapon::P90));  
-				
-			if (manager.C4Origin().has_value()) {
-				need_to_update = true;
-			}
-
-			if (!update_timer.IsRunning()) {
-				need_to_update = true;
-				update_timer.SetTime(30.0);
-			}
-
-			if (need_to_update) {
-				if (!allow_listen_radio_timer.IsRunning()) {
-					can_listen_radio = true;
-					can_follow_radio = true;
-					allow_listen_radio_timer.SetTime(30.0);
-				}
-				need_to_update = false;
-			}
-
 			if (!freeze_time.IsRunning() && !spawn_cooldown_time.IsRunning()) {
 				// Do not do anything when freezing.
 				// Due to game engine specifications or bugs, 
@@ -159,9 +138,6 @@ namespace pokebot {
 						break;
 				}
 				CheckAround();
-			} else {
-				SelectWeapon(game::Weapon::Knife);
-			}
 
 			for (auto& vector : { Vector(0.0f, 0.0f, 0.0f), Vector(50.0f, 0.0f, 0.0f), Vector(-50.0f, 0.0f, 0.0f), Vector(0.0f, 50.0f, 0.0f), Vector(0.0f, -50.0f, 0.0f) }) {
 				if (auto area = node::czworld.GetNearest(Origin() + vector); area != nullptr && node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Jump)) {
