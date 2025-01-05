@@ -175,7 +175,7 @@
       <AdditionalDependencies>CZNavmesh-Lib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(TargetPath)" "D:\Program Files\Steam\steamapps\common\Half-Life\cstrike\addons\pokebot\$(TargetFileName)"</Command>
+      <Command>copy /Y "$(TargetPath)" "D:\SteamLibrary\steamapps\common\Half-Life\cstrike\addons\pokebot\$(TargetFileName)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_Source|Win32'">
