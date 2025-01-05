@@ -263,6 +263,7 @@ namespace pokebot {
 
 		void Bot::Combat() noexcept {
 			auto client = game::game.clients.Get(Name().data());
+			auto client_status = game::game.clients.GetClientStatus(Name().data());
 			assert(!target_enemies.empty() && "The bot has no enemies despite being in combat mode.");
 			/*
 				Choose to fight or to flee.
@@ -278,7 +279,7 @@ namespace pokebot {
 
 			int fighting_spirit = Max_Health + Max_Armor + (HasPrimaryWeapon() ? 50 : 0) + (HasSecondaryWeapon() ? 50 : 0);
 			if (!HasPrimaryWeapon() && !HasSecondaryWeapon() || 
-				(client->IsOutOfClip() && client->IsOutOfCurrentWeaponAmmo())) {
+				(client_status.IsOutOfClip() && client_status.IsOutOfCurrentWeaponAmmo())) {
 				// If I have no guns.
 				if (Enemy_Has_Primary || Enemy_Has_Secondary) {
 					// The enemy has weapon so I should flee.
@@ -287,7 +288,7 @@ namespace pokebot {
 					// This is the good chance to beat enemies.
 				}
 			} else {
-				if (IsReloading() || client->IsOutOfClip()) {
+				if (IsReloading() || client_status.IsOutOfClip()) {
 					// I'm reloading so I have to flee.
 					fighting_spirit = std::numeric_limits<decltype(fighting_spirit)>::min();
 				} else {
@@ -370,6 +371,7 @@ namespace pokebot {
 
 		void Bot::PressKey(ActionKey pressable_key) {
 			auto client = game::game.clients.GetAsMutable(Name().data());
+			auto client_status = game::game.clients.GetClientStatus(Name().data());
 			if (bool(pressable_key & ActionKey::Run)) {
 				move_speed = game::Default_Max_Move_Speed;
 			}
@@ -396,7 +398,7 @@ namespace pokebot {
 
 			}
 			if (bool(pressable_key & ActionKey::Jump)) {
-				if (!client->IsOnFloor()) {
+				if (!client_status.IsOnFloor()) {
 					return;
 				}
 			}
@@ -509,7 +511,7 @@ namespace pokebot {
 		}
 
 		
-		bool Bot::IsInBuyzone() const noexcept { return game::game.clients.Get(Name().data())->IsInBuyzone(); }
+		bool Bot::IsInBuyzone() const noexcept { return game::game.clients.GetClientStatus(Name().data()).IsInBuyzone(); }
 
 		std::string_view Bot::Name() const noexcept { return game::game.clients.Get(name)->Name(); }
 
@@ -524,13 +526,13 @@ namespace pokebot {
 		bool Bot::HasPrimaryWeapon() const noexcept { return bool(game::game.clients.Get(Name().data())->Edict()->v.weapons & game::Primary_Weapon_Bit); }
 		bool Bot::HasSecondaryWeapon() const noexcept { return bool(game::game.clients.Get(Name().data())->Edict()->v.weapons & game::Secondary_Weapon_Bit); }
 		bool Bot::HasWeapon(const game::Weapon Weapon_ID) const noexcept { return bool(game::game.clients.Get(Name().data())->Edict()->v.weapons & common::ToBit<int>(Weapon_ID)); }
-		bool Bot::IsDucking() const noexcept { return (game::game.clients.Get(Name().data())->IsDucking()); }
-		bool Bot::IsDriving() const noexcept { return (game::game.clients.Get(Name().data())->IsOnTrain()); }
-		bool Bot::IsInWater() const noexcept { return (game::game.clients.Get(Name().data())->IsInWater()); }
-		bool Bot::IsSwimming() const noexcept { return (game::game.clients.Get(Name().data())->IsInWater()); }
-		bool Bot::IsOnFloor() const noexcept { return (game::game.clients.Get(Name().data())->IsOnFloor()); }
-		bool Bot::IsClimbingLadder() const noexcept { return game::game.clients.Get(Name().data())->IsClimblingLadder(); }
-		bool Bot::IsReloading() const noexcept { return game::game.clients.Get(Name().data())->IsPlayerModelReloading(); }
+		bool Bot::IsDucking() const noexcept { return (game::game.clients.GetClientStatus(Name().data()).IsDucking()); }
+		bool Bot::IsDriving() const noexcept { return (game::game.clients.GetClientStatus(Name().data()).IsOnTrain()); }
+		bool Bot::IsInWater() const noexcept { return (game::game.clients.GetClientStatus(Name().data()).IsInWater()); }
+		bool Bot::IsSwimming() const noexcept { return (game::game.clients.GetClientStatus(Name().data()).IsInWater()); }
+		bool Bot::IsOnFloor() const noexcept { return (game::game.clients.GetClientStatus(Name().data()).IsOnFloor()); }
+		bool Bot::IsClimbingLadder() const noexcept { return game::game.clients.GetClientStatus(Name().data()).IsClimblingLadder(); }
+		bool Bot::IsReloading() const noexcept { return game::game.clients.GetClientStatus(Name().data()).IsPlayerModelReloading(); }
 		bool Bot::IsPlantingBomb() const noexcept { return false; }
 		bool Bot::IsChangingWeapon() const noexcept { return false; }
 		bool Bot::IsFalling() const noexcept { return false; }

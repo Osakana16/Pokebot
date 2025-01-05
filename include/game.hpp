@@ -251,35 +251,57 @@ namespace pokebot {
 			bool IsValid() const noexcept { return IsValid(client); }
 			bool IsDead() const noexcept { return IsDead(client); }
 
-			/**
-			* @brief Check the clip of current weapon remains or not
-			* @return 
-			*/
-			bool IsOutOfClip() const noexcept { return (Weapon_Type[static_cast<int>(current_weapon)] == WeaponType::Primary || Weapon_Type[static_cast<int>(current_weapon)] == WeaponType::Secondary) && weapon_clip <= 0; }
-			bool IsOutOfAmmo(const AmmoID Ammo_ID) const noexcept { return weapon_ammo[static_cast<int>(Ammo_ID)] <= 0; }
-			bool IsOutOfCurrentWeaponAmmo() const noexcept { 
-				return 
-					(Weapon_Type[static_cast<int>(current_weapon)] == WeaponType::Primary || 
-					 Weapon_Type[static_cast<int>(current_weapon)] == WeaponType::Secondary) && 
-					IsOutOfAmmo(std::get<AmmoID>(Weapon_CVT[static_cast<int>(current_weapon) - 1])); 
-			}
 
 			bool IsVIP() const noexcept { return is_vip; }
-			bool IsInBuyzone() const noexcept { return bool(status_icon & StatusIcon::Buy_Zone); }
-			bool IsInEscapezone() const noexcept { return bool(status_icon & StatusIcon::Escape_Zone); }
-			bool IsInRescuezone() const noexcept { return bool(status_icon & StatusIcon::Rescue_Zone); }
-			bool IsInVipSafety() const noexcept { return bool(status_icon & StatusIcon::Vip_Safety); }
-			bool HasDefuser() const noexcept { return bool(status_icon & StatusIcon::Defuser); }
 
-			bool IsDucking() const noexcept { return (client->v.flags & FL_DUCKING); }
-			bool IsInWater() const noexcept { return (client->v.flags & FL_INWATER); }
-			bool IsOnFloor() const noexcept { return (client->v.flags & (FL_ONGROUND | FL_PARTIALGROUND)) != 0; }
-			bool IsOnTrain() const noexcept { return (client->v.flags & FL_ONTRAIN); }
-			bool IsFiring() const noexcept { return (client->v.button & IN_ATTACK); }
-			bool IsReadyToThrowGrenade() const noexcept { return IsFiring() && bool(client->v.weapons & Grenade_Bit); }
-			bool IsPlantingBomb() const noexcept { return IsFiring() && bool(client->v.weapons & C4_Bit) && (client->v.sequence == 63 || client->v.sequence == 61); }
-			bool IsClimblingLadder() const noexcept { return (client->v.movetype & MOVETYPE_FLY); }
-			
+			int WeaponAmmo(const AmmoID Ammo_ID) const noexcept { return weapon_ammo[static_cast<int>(Ammo_ID)]; }
+
+			bool HasHostages() const noexcept;
+
+			const float& Health() const { return client->v.health; }
+			const float& MaxHealth() const { return client->v.max_health; }
+			const float& Speed() const { return client->v.speed; }
+			const int& Money() const { return money; }
+
+			Vector& view_ofs() { return client->v.view_ofs; }
+			Vector& origin() { return client->v.origin; }
+			Vector& angles() { return client->v.angles; }
+			Vector& avelocity() { return client->v.avelocity; }
+			Vector& punchangle() { return client->v.punchangle; }
+			Vector& v_angle() { return client->v.v_angle; }
+			float& ideal_yaw() { return client->v.ideal_yaw; }
+			float& idealpitch() { return client->v.idealpitch; }
+			int& flags() { return client->v.flags; }
+
+			const Vector& view_ofs() const { return client->v.view_ofs; }
+			const Vector& origin() const { return client->v.origin; }
+			const Vector& angles() const { return client->v.angles; }
+			const Vector& avelocity() const { return client->v.avelocity; }
+			const Vector& punchangle() const { return client->v.punchangle; }
+			const Vector& v_angle() const { return client->v.v_angle; }
+			float ideal_yaw() const { return client->v.ideal_yaw; }
+			float idealpitch() const { return client->v.idealpitch; }
+			int flags() const { return client->v.flags; }
+			int movetype() const { return client->v.movetype; }
+			int weapons() const { return client->v.weapons; }
+			int sequence() const { return client->v.sequence; }
+			StatusIcon DisplayingStatusIcon() const noexcept { return status_icon; }
+			Weapon CurrentWeapon() const noexcept { return current_weapon; }
+			int CurrentWeaponClip() const noexcept { return weapon_clip; }
+		};
+
+		// The status in the game
+		class ClientStatus {
+			const Client* client;
+		public:
+			ClientStatus(const ClientName&);
+
+			common::Team GetTeam() const noexcept;
+			bool CanSeeFriend() const noexcept;
+			ClientName GetEnemyNameWithinView() const noexcept;
+			std::vector<ClientName> GetEntityNamesInView() const noexcept;
+			common::Team GetTeamFromModel() const noexcept;
+						
 			/**
 			* @brief Check the p_model animation is reloading.
 			* @return True if player is reloading, false if the player is not reloading or is swimming.
@@ -297,57 +319,74 @@ namespace pokebot {
 			* @brief Check the client is a fakeclient.
 			*/
 			bool IsFakeClient() const noexcept;
+			const float& Impulse() const { return client->Impulse(); }
 
-			bool HasHostages() const noexcept;
 
-			const float& Health() const { return client->v.health; }
-			const float& MaxHealth() const { return client->v.max_health; }
-			const float& Speed() const { return client->v.speed; }
-			const int& Money() const { return money; }
+			/**
+			* @brief Check the clip of current weapon remains or not
+			* @return 
+			*/
+			bool IsOutOfClip() const noexcept { return (Weapon_Type[static_cast<int>(client->CurrentWeapon())] == WeaponType::Primary || Weapon_Type[static_cast<int>(client->CurrentWeapon())] == WeaponType::Secondary) && client->CurrentWeaponClip() <= 0; }
+			bool IsOutOfAmmo(const AmmoID Ammo_ID) const noexcept { return client->WeaponAmmo(Ammo_ID) <= 0; }
+			bool IsOutOfCurrentWeaponAmmo() const noexcept { 
+				return 
+					(Weapon_Type[static_cast<int>(client->CurrentWeapon())] == WeaponType::Primary || 
+					 Weapon_Type[static_cast<int>(client->CurrentWeapon())] == WeaponType::Secondary) && 
+					IsOutOfAmmo(std::get<AmmoID>(Weapon_CVT[static_cast<int>(client->CurrentWeapon()) - 1])); 
+			}
 
-			Vector& view_ofs() { return client->v.view_ofs; }
-			Vector& origin() { return client->v.origin; }
-			Vector& angles() { return client->v.angles; }
-			Vector& avelocity() { return client->v.avelocity; }
-			Vector& punchangle() { return client->v.punchangle; }
-			Vector& v_angle() { return client->v.v_angle; }
-			float& ideal_yaw() { return client->v.ideal_yaw; }
-			float& idealpitch() { return client->v.idealpitch; }
+			bool IsInBuyzone() const noexcept { return bool(client->DisplayingStatusIcon() & StatusIcon::Buy_Zone); }
+			bool IsInEscapezone() const noexcept { return bool(client->DisplayingStatusIcon() & StatusIcon::Escape_Zone); }
+			bool IsInRescuezone() const noexcept { return bool(client->DisplayingStatusIcon() & StatusIcon::Rescue_Zone); }
+			bool IsInVipSafety() const noexcept { return bool(client->DisplayingStatusIcon() & StatusIcon::Vip_Safety); }
+			bool HasDefuser() const noexcept { return bool(client->DisplayingStatusIcon() & StatusIcon::Defuser); }
 
-			const Vector& view_ofs() const { return client->v.view_ofs; }
-			const Vector& origin() const { return client->v.origin; }
-			const Vector& angles() const { return client->v.angles; }
-			const Vector& avelocity() const { return client->v.avelocity; }
-			const Vector& punchangle() const { return client->v.punchangle; }
-			const Vector& v_angle() const { return client->v.v_angle; }
-			const float& ideal_yaw() const { return client->v.ideal_yaw; }
-			const float& idealpitch() const { return client->v.idealpitch; }
-		};
+			bool IsDucking() const noexcept { return (client->flags() & FL_DUCKING); }
+			bool IsInWater() const noexcept { return (client->flags() & FL_INWATER); }
+			bool IsOnFloor() const noexcept { return (client->flags() & (FL_ONGROUND | FL_PARTIALGROUND)) != 0; }
+			bool IsOnTrain() const noexcept { return (client->flags() & FL_ONTRAIN); }
+			bool IsFiring() const noexcept { return (client->Button() & IN_ATTACK); }
+			bool IsReadyToThrowGrenade() const noexcept { return IsFiring() && bool(client->weapons() & Grenade_Bit); }
+			bool IsPlantingBomb() const noexcept { return IsFiring() && bool(client->weapons() & C4_Bit) && (client->sequence() == 63 || client->sequence() == 61); }
+			bool IsClimblingLadder() const noexcept { return (client->movetype() & MOVETYPE_FLY); }
 
-		// The status in the game
-		class ClientStatus {
-			const Client* client;
-		public:
-			ClientStatus(const ClientName&);
+			const float& Health() const { return client->Health(); }
+			const float& MaxHealth() const { return client->MaxHealth(); }
+			const float& Speed() const { return client->Speed(); }
+			const int& Money() const { return client->Money(); }
 
-			common::Team GetTeam() const noexcept;
-			bool CanSeeFriend() const noexcept;
-			ClientName GetEnemyNameWithinView() const noexcept;
-			std::vector<ClientName> GetEntityNamesInView() const noexcept;
-			common::Team GetTeamFromModel() const noexcept;
+			const Vector& view_ofs() const { return client->view_ofs(); }
+			const Vector& origin() const { return client->origin(); }
+			const Vector& angles() const { return client->angles(); }
+			const Vector& avelocity() const { return client->avelocity(); }
+			const Vector& punchangle() const { return client->punchangle(); }
+			const Vector& v_angle() const { return client->v_angle(); }
+			float ideal_yaw() const { return client->ideal_yaw(); }
+			float idealpitch() const { return client->idealpitch(); }
+			int flags() const { return client->flags(); }
+			int movetype() const { return client->movetype(); }
+			int weapons() const { return client->weapons(); }
+			int sequence() const { return client->sequence(); }
+			StatusIcon DisplayingStatusIcon() const noexcept { return client->DisplayingStatusIcon(); }
+			Weapon CurrentWeapon() const noexcept { return client->CurrentWeapon(); }
+			int CurrentWeaponClip() const noexcept { return client->CurrentWeaponClip(); }
 		};
 		
 		/**
 		* 
 		*/
 		class ClientCommiter {
+			friend class ClientManager;
+			struct {
+				std::vector<std::string> commands{};
+			} commit_status;
 		public:
 
 		};
 
+
 		class ClientManager {
 			std::unordered_map<std::string, Client> clients{};
-
 		public:
 			void OnNewRound();
 			ClientStatus GetClientStatus(std::string_view client_name);
