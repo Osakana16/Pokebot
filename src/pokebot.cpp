@@ -147,7 +147,7 @@ namespace pokebot::plugin {
         REG_SVR_COMMAND("pk_kill", [] {
             auto args = GetArgs();
             using namespace pokebot;
-            MDLL_ClientKill(*game::game.clients.Get(args[0]));
+            MDLL_ClientKill(const_cast<edict_t*>(game::game.clients.Get(args[0])->Edict()));
         });
 
         REG_SVR_COMMAND("pk_kill_t",[] {

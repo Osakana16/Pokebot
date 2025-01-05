@@ -178,16 +178,15 @@ namespace pokebot {
 			friend class Manager;
 			friend class Troops;
 
-			std::shared_ptr<game::Client> client{};
-			pokebot::common::Time 
+			common::Time 
 				frame_interval{}, 
 				last_command_time{};
 
 			// This variable is used to prevent freezing the whole game.
 			Timer spawn_cooldown_time{};
 
-
-			Timer freeze_time{};			// Make the bot to do nothing except buying while round freeze.
+			// Make the bot to do nothing except buying while round freeze.
+			Timer freeze_time{};
 			Timer buy_wait_timer{};
 
 			Message start_action{};
@@ -213,7 +212,7 @@ namespace pokebot {
 
 			Timer danger_time{};
 
-			std::vector<const edict_t*> target_enemies{};
+			std::vector<std::string> target_enemies{};
 
 			State state = State::Accomplishment;
 			void AccomplishMission() noexcept, Combat() noexcept;
@@ -243,7 +242,7 @@ namespace pokebot {
 			} look_direction{}, ideal_direction{};
 
 
-			Bot(std::shared_ptr<game::Client>, const common::Team, const common::Model) noexcept;
+			Bot(const std::string&, const common::Team, const common::Model) noexcept;
 
 			void OnNewRound() noexcept;
 			void Run() noexcept;
@@ -270,24 +269,24 @@ namespace pokebot {
 
 			// -- Getters --
 
-			std::string_view Name() const noexcept { return client->Name(); }
+			std::string_view Name() const noexcept;
 			Vector Origin() const noexcept;
 			float Health() const noexcept;
 
 			bool IsLookingAt(const Vector& Dest, const float Range) const noexcept;
 		
-			bool HasPrimaryWeapon() const noexcept { return bool(client->Edict()->v.weapons & game::Primary_Weapon_Bit); }
-			bool HasSecondaryWeapon() const noexcept { return bool(client->Edict()->v.weapons & game::Secondary_Weapon_Bit); }
-			bool HasWeapon(const game::Weapon Weapon_ID) const noexcept { return bool(client->Edict()->v.weapons & common::ToBit<int>(Weapon_ID)); }
+			bool HasPrimaryWeapon() const noexcept;
+			bool HasSecondaryWeapon() const noexcept;
+			bool HasWeapon(const game::Weapon Weapon_ID) const noexcept;
 			bool IsCurrentWeapon(const game::Weapon Weapon_ID) const noexcept { return (current_weapon == Weapon_ID);  }
 
 			bool HasGoalToHead() const noexcept;
-			bool IsInBuyzone() const noexcept { return client->IsInBuyzone(); }
+			bool IsInBuyzone() const noexcept;
 
 			bool IsInBombTargetZone() const noexcept;
 
 			bool IsFighting() const noexcept { return danger_time.IsRunning(); }
-			std::shared_ptr<game::Client> GetEnemyWithinView() const noexcept;
+			std::string GetEnemyWithinView() const noexcept;
 			bool CanSeeEntity() const noexcept;
 
 			int JoinedPlatoon() const noexcept;
@@ -296,24 +295,24 @@ namespace pokebot {
 
 			/* - Client Wrapper - */
 
-			bool IsDucking() const noexcept { return (client->IsDucking()); }
-			bool IsDriving() const noexcept { return (client->IsOnTrain()); }
-			bool IsInWater() const noexcept { return (client->IsInWater()); }
-			bool IsSwimming() const noexcept { return (client->IsInWater()); }
-			bool IsOnFloor() const noexcept { return (client->IsOnFloor()); }
-			bool IsClimbingLadder() const noexcept { return client->IsClimblingLadder(); }
-			bool IsReloading() const noexcept { return client->IsPlayerModelReloading(); }
-			bool IsPlantingBomb() const noexcept { return false; }
-			bool IsChangingWeapon() const noexcept { return false; }
-			bool IsFalling() const noexcept { return false; }
-			bool Jumped() const noexcept { return false; }
-			bool IsJumping() const noexcept { return false; }
-			bool IsLeadingHostages() const noexcept { return false; }
-			bool IsLookingThroughScope() const noexcept { return false; }
-			bool IsLookingThroughCamera() const noexcept { return false; }
-			bool IsChangingSilencer() const noexcept { return false; }
-			bool IsEnabledFlashlight() const noexcept { return false; }
-			bool IsEnabledNightvision() const noexcept { return false; }
+			bool IsDucking() const noexcept;
+			bool IsDriving() const noexcept;
+			bool IsInWater() const noexcept;
+			bool IsSwimming() const noexcept;
+			bool IsOnFloor() const noexcept;
+			bool IsClimbingLadder() const noexcept;
+			bool IsReloading() const noexcept;
+			bool IsPlantingBomb() const noexcept;
+			bool IsChangingWeapon() const noexcept;
+			bool IsFalling() const noexcept;
+			bool Jumped() const noexcept;
+			bool IsJumping() const noexcept;
+			bool IsLeadingHostages() const noexcept;
+			bool IsLookingThroughScope() const noexcept;
+			bool IsLookingThroughCamera() const noexcept;
+			bool IsChangingSilencer() const noexcept;
+			bool IsEnabledFlashlight() const noexcept;
+			bool IsEnabledNightvision() const noexcept;
 		};
 
 		enum class Difficult {

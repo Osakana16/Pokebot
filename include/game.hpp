@@ -2,6 +2,8 @@
 #include "database.hpp"
 namespace pokebot {
 	namespace game {
+		using ClientName = std::string;
+
 		inline bool is_enabled_auto_waypoint = true;
 
 		enum class StatusIcon {
@@ -232,10 +234,8 @@ namespace pokebot {
 		public:
 			Client(edict_t* e) noexcept : client(e) {}
 
-			static std::shared_ptr<Client> Create(std::string client_name);
-			static std::shared_ptr<Client> Attach(edict_t*), Attach(const int);
-
 			edict_t* Edict() noexcept { return client; }
+			const edict_t* Edict() const noexcept { return client; }
 			operator edict_t* () noexcept { return Edict(); }
 			operator const edict_t* () const noexcept { return client; }
 
@@ -293,12 +293,17 @@ namespace pokebot {
 			*/
 			bool IsViewModelReloading() const noexcept;
 
+			/**
+			* @brief Check the client is a fakeclient.
+			*/
+			bool IsFakeClient() const noexcept;
+
 			bool HasHostages() const noexcept;
 
-			const float& Health() { return client->v.health; }
-			const float& MaxHealth() { return client->v.max_health; }
-			const float& Speed() { return client->v.speed; }
-			const int& Money() { return money; }
+			const float& Health() const { return client->v.health; }
+			const float& MaxHealth() const { return client->v.max_health; }
+			const float& Speed() const { return client->v.speed; }
+			const int& Money() const { return money; }
 
 			Vector& view_ofs() { return client->v.view_ofs; }
 			Vector& origin() { return client->v.origin; }
@@ -308,41 +313,62 @@ namespace pokebot {
 			Vector& v_angle() { return client->v.v_angle; }
 			float& ideal_yaw() { return client->v.ideal_yaw; }
 			float& idealpitch() { return client->v.idealpitch; }
+
+			const Vector& view_ofs() const { return client->v.view_ofs; }
+			const Vector& origin() const { return client->v.origin; }
+			const Vector& angles() const { return client->v.angles; }
+			const Vector& avelocity() const { return client->v.avelocity; }
+			const Vector& punchangle() const { return client->v.punchangle; }
+			const Vector& v_angle() const { return client->v.v_angle; }
+			const float& ideal_yaw() const { return client->v.ideal_yaw; }
+			const float& idealpitch() const { return client->v.idealpitch; }
 		};
 
 		// The status in the game
 		class ClientStatus {
-			const std::shared_ptr<Client> client{};
+			const Client* client;
 		public:
-			ClientStatus(const std::shared_ptr<Client>&);
+			ClientStatus(const ClientName&);
 
 			common::Team GetTeam() const noexcept;
 			bool CanSeeFriend() const noexcept;
-			std::shared_ptr<Client> GetEnemyWithinView() const noexcept;
-			std::vector<const edict_t*> GetEntitiesInView() const noexcept;
+			ClientName GetEnemyNameWithinView() const noexcept;
+			std::vector<ClientName> GetEntityNamesInView() const noexcept;
+			common::Team GetTeamFromModel() const noexcept;
+		};
+		
+		/**
+		* 
+		*/
+		class ClientCommiter {
+		public:
+
 		};
 
 		class ClientManager {
-			std::shared_ptr<Client> vip{};
-			std::unordered_map<std::string, std::shared_ptr<Client>> clients{};
+			std::unordered_map<std::string, Client> clients{};
+
 		public:
 			void OnNewRound();
 			ClientStatus GetClientStatus(std::string_view client_name);
-			std::shared_ptr<Client> Create(std::string client_name);
-			std::shared_ptr<Client> Register(edict_t*);
+			bool Create(std::string client_name);
+			bool Register(edict_t*);
 			auto& GetAll() const noexcept {
 				return clients;
 			}
 
-			std::shared_ptr<Client> Get(const std::string& Name) const noexcept {
+			const Client* Get(const std::string& Name) const noexcept {
 				if (auto it = clients.find(Name); it != clients.end()) {
-					return it->second;
+					return &it->second;
 				}
 				return nullptr;
 			}
-
-			auto& Get(std::function<bool(const std::pair<std::string, std::shared_ptr<Client>>&)> condition) const noexcept {
-				return std::find_if(clients.cbegin(), clients.cend(), condition);
+						
+			Client* GetAsMutable(const std::string& Name) noexcept {
+				if (auto it = clients.find(Name); it != clients.end()) {
+					return &it->second;
+				}
+				return nullptr;
 			}
 
 			void OnVIPChanged(const std::string_view Client_Name) noexcept;
@@ -381,24 +407,23 @@ namespace pokebot {
 			common::Time time{};
 
 			const edict_t* entity;
-			std::shared_ptr<Client> owner;
+			ClientName owner_name{};
 		public:
 			operator const edict_t* const () const noexcept {
 				return entity;
 			}
 			void Update() noexcept;
-			bool RecoginzeOwner(std::shared_ptr<Client>&) noexcept;
+			bool RecoginzeOwner(const ClientName&) noexcept;
 
-			bool IsUsed() const noexcept { return owner != nullptr; }
-			bool IsOwnedBy(const std::string_view& Name) const noexcept { return (IsUsed() && owner->Name() == Name); }
-	 		bool IsReleased() const noexcept { return (entity->v.effects & EF_NODRAW); }
+			bool IsUsed() const noexcept;
+			bool IsOwnedBy(const std::string_view& Name) const noexcept;
+			bool IsReleased() const noexcept;
 			static Hostage AttachHostage(const edict_t*) noexcept;
-			const Vector& Origin() const noexcept {
-				return entity->v.origin;
-			}
+			const Vector& Origin() const noexcept;
 
 			Hostage(Hostage&& h) noexcept {
-				owner = std::move(h.owner);
+				owner_name = std::move(h.owner_name);
+				assert(h.owner_name.empty());
 				entity = h.entity;
 				h.entity = nullptr;
 			}
@@ -442,7 +467,7 @@ namespace pokebot {
 			uint32_t CurrentRonud() const noexcept;
 			bool IsCurrentMode(const MapFlags) const noexcept;
 			MapFlags GetMapFlag() const noexcept;
-			void IssueCommand(edict_t* client, const std::string& Sentence) noexcept;
+			void IssueCommand(const ClientName&, const std::string& Sentence) noexcept;
 
 			void Init(edict_t* entities, int max);
 			void PreUpdate();
@@ -458,9 +483,9 @@ namespace pokebot {
 	}
 
 	namespace entity {
-		bool CanSeeEntity(edict_t* const self, const const edict_t* Target) noexcept;
-		bool InViewCone(edict_t* const self, const Vector& Origin) noexcept;
-		bool IsVisible(edict_t* const Self, const Vector& Origin) noexcept;
+		bool CanSeeEntity(const edict_t* const self, const const edict_t* Target) noexcept;
+		bool InViewCone(const edict_t* const self, const Vector& Origin) noexcept;
+		bool IsVisible(const edict_t* const Self, const Vector& Origin) noexcept;
 	}
 
 	namespace engine {

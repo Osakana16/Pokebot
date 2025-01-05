@@ -18,16 +18,17 @@ namespace pokebot {
 			assert(Hostage_Entity != nullptr);
 			Hostage hostage{};
 			hostage.entity = Hostage_Entity;
-			hostage.owner = nullptr;
+			hostage.owner_name.clear();
 			return hostage;
 		}
 
-		bool Hostage::RecoginzeOwner(std::shared_ptr<Client>& client) noexcept {
+		bool Hostage::RecoginzeOwner(const ClientName& Client_Name) noexcept {
+			auto client = game.clients.Get(Client_Name);
 			if (common::Distance(client->origin(), entity->v.origin) < 83.0f && client->GetTeam() == common::Team::CT) {
-				if (owner == client) {
-					owner = nullptr;
+				if (owner_name == Client_Name) {
+					owner_name.clear();
 				} else {
-					owner = client;
+					owner_name = Client_Name;
 				}
 				return true;
 			}
@@ -35,13 +36,22 @@ namespace pokebot {
 		}
 
 		void Hostage::Update() noexcept {
-			if (owner == nullptr)
+			if (owner_name.empty())
 				return;
-
+			
+			auto owner = game.clients.Get(owner_name);
 			const bool Is_Owner_Terrorist = owner->GetTeam() == common::Team::T;
 			if (IsReleased() || owner->GetTeam() == common::Team::T || common::Distance(owner->origin(), entity->v.origin) > 200.0f)
 				owner = nullptr;
 		}
+
+		bool Hostage::IsUsed() const noexcept { return game.clients.Get(owner_name) != nullptr; }
+		bool Hostage::IsOwnedBy(const std::string_view& Name) const noexcept { return (IsUsed() && owner_name == Name); }
+	 	bool Hostage::IsReleased() const noexcept { return (entity->v.effects & EF_NODRAW); }
+		const Vector& Hostage::Origin() const noexcept {
+			return entity->v.origin;
+		}
+
 
 		void Game::AddCvar(const char *name, const char *value, const char *info, bool bounded, float min, float max, Var varType, bool missingAction, const char *regval, ConVar *self) {
 			ConVarReg reg{
@@ -116,18 +126,18 @@ namespace pokebot {
 				hostage.Update();
 			}
 			
-			for (auto client : clients.GetAll()) {
+			for (const auto& client : clients.GetAll()) {
 				Sound produced_sound{};
-				if (bool(client.second->Button() & IN_ATTACK)) {
+				if (bool(client.second.Button() & IN_ATTACK)) {
 					produced_sound = Sound{ .origin = Vector{}, .volume = 100 };
 				}
 
-				if (bool(client.second->Button() & IN_USE)) {
+				if (bool(client.second.Button() & IN_USE)) {
 					// Sound occurs.
-					produced_sound = Sound{ .origin = client.second->origin(), .volume = 50 };
+					produced_sound = Sound{ .origin = client.second.origin(), .volume = 50 };
 					// Recoginze the player as a owner.
 					for (auto& hostage : hostages) {
-						if (hostage.RecoginzeOwner(client.second)) {
+						if (hostage.RecoginzeOwner(client.first)) {
 							break;
 						}
 					}
@@ -136,9 +146,9 @@ namespace pokebot {
 		}
 
 		void Game::PostUpdate() {
-			for (auto client : clients.GetAll()) {
-				if (bool(static_cast<edict_t*>(*client.second)->v.flags & pokebot::common::Third_Party_Bot_Flag)) {
-					static_cast<edict_t*>(*client.second)->v.button = 0;
+			for (const auto& client : clients.GetAll()) {
+				if (client.second.IsFakeClient()) {
+					const_cast<edict_t*>(static_cast<const edict_t*>(client.second))->v.button = 0;
 				}
 			}
 		}
@@ -226,10 +236,10 @@ namespace pokebot {
 			return map_flags;
 		}
 
-		void Game::IssueCommand(edict_t* client, const std::string& Sentence) noexcept {
+		void Game::IssueCommand(const ClientName& Client_Name, const std::string& Sentence) noexcept {
 			bot_args.clear();
 			bot_args = common::StringSplit(&Sentence, ' ');
-			MDLL_ClientCommand(client);
+			MDLL_ClientCommand(const_cast<edict_t*>(clients.Get(Client_Name)->Edict()));
 			bot_args.clear();
 		}
 
@@ -327,6 +337,10 @@ namespace pokebot {
 			return (Is_View_Reloading);
 		}
 
+		bool Client::IsFakeClient() const noexcept {
+			return bool(client->v.flags & common::Third_Party_Bot_Flag);
+		}
+
 		bool Client::HasHostages() const noexcept {
 			for (int i = 0; i < game::game.GetHostageNumber(); i++) {
 				if (game::game.IsHostageOwnedBy(i, Name())) {
@@ -360,8 +374,14 @@ namespace pokebot {
 			}
 		}
 
-		std::shared_ptr<Client> Client::Create(std::string client_name) {
-			DEBUG_PRINTF("{}\n", __FUNCTION__);
+		void ClientManager::OnNewRound() {
+			for (auto& client : clients) {
+				client.second.is_nvg_on = false;
+			}
+		}
+
+		bool ClientManager::Create(std::string client_name) {
+			assert(!client_name.empty());
 			if (client_name.empty())
 				return nullptr;
 
@@ -398,45 +418,25 @@ namespace pokebot {
 
 			MDLL_ClientPutInServer(client);
 			client->v.flags |= pokebot::common::Third_Party_Bot_Flag;
-			return std::make_shared<Client>(client);
+			return Register(client);
 		}
 
-		std::shared_ptr<Client> Client::Attach(edict_t* edict) {
-			return std::make_shared<Client>(edict);
-		}
-
-
-		std::shared_ptr<Client> Client::Attach(const int Index) {
-			return std::make_shared<Client>(INDEXENT(Index));
-		}
-
-		void ClientManager::OnNewRound() {
-			if (vip != nullptr) vip->is_vip = false;
-			vip = nullptr;
-			for (auto& client : clients) {
-				client.second->is_nvg_on = false;
+		bool ClientManager::Register(edict_t* edict) {
+			if (auto it = clients.find(STRING(edict->v.netname)); it == clients.end()) {
+				clients.emplace(STRING(edict->v.netname), edict);
+				return true;
 			}
-		}
-
-		std::shared_ptr<Client> ClientManager::Create(std::string client_name) {
-			assert(!client_name.empty());
-			auto client = Client::Create(client_name);
-			client_name = client->Name();
-			return clients.insert({ client_name, client }).first->second;
-		}
-
-		std::shared_ptr<Client> ClientManager::Register(edict_t* edict) {
-			return clients.insert({ STRING(edict->v.netname), Client::Attach(edict) }).first->second;
+			return false;
 		}
 
 		void ClientManager::OnDeath(const std::string_view Client_Name) noexcept {
-			decltype(auto) target = Get(Client_Name.data());
+			decltype(auto) target = GetAsMutable(Client_Name.data());
 			target->status_icon = StatusIcon::Not_Displayed;
 			target->item = Item::None;
 		}
 
 		void ClientManager::OnDamageTaken(const std::string_view Client_Name, const edict_t* Inflictor, const int Health, const int Armor, const int Bit) noexcept {
-			if (auto target = Get(Client_Name.data()); target != nullptr) {
+			if (auto target = GetAsMutable(Client_Name.data()); target != nullptr) {
 				if (target->Health() - Health <= 0) {
 					OnDeath(Client_Name);
 				} else {
@@ -446,7 +446,7 @@ namespace pokebot {
 		}
 
 		void ClientManager::OnMoneyChanged(const std::string_view Client_Name, const int Money) noexcept {
-			Get(Client_Name.data())->money = Money;
+			GetAsMutable(Client_Name.data())->money = Money;
 		}
 
 		void ClientManager::OnScreenFaded(const std::string_view Client_Name) noexcept {
@@ -454,101 +454,104 @@ namespace pokebot {
 		}
 
 		void ClientManager::OnNVGToggled(const std::string_view Client_Name, const bool Toggle) noexcept {
-			Get(Client_Name.data())->is_nvg_on = Toggle;
+			GetAsMutable(Client_Name.data())->is_nvg_on = Toggle;
 		}
 
 		void ClientManager::OnWeaponChanged(const std::string_view Client_Name, const game::Weapon Weapon_ID) noexcept {
-			Get(Client_Name.data())->current_weapon = Weapon_ID;
+			GetAsMutable(Client_Name.data())->current_weapon = Weapon_ID;
 		}
 
 		void ClientManager::OnClipChanged(const std::string_view Client_Name, const game::Weapon Weapon_ID, const int Amount) noexcept {
-			Get(Client_Name.data())->weapon_clip = Amount;
+			GetAsMutable(Client_Name.data())->weapon_clip = Amount;
 		}
 
 		void ClientManager::OnAmmoPickedup(const std::string_view Client_Name, const game::AmmoID Ammo_ID, const int Amount) noexcept {
-			Get(Client_Name.data())->weapon_ammo[static_cast<int>(Ammo_ID)] = Amount;
+			GetAsMutable(Client_Name.data())->weapon_ammo[static_cast<int>(Ammo_ID)] = Amount;
 		}
 
 		void ClientManager::OnTeamAssigned(const std::string_view Client_Name, const common::Team Assigned_Team) noexcept {
-			auto target = Get(Client_Name.data());
+			auto target = GetAsMutable(Client_Name.data());
 			if (target != nullptr)
 				target->team = Assigned_Team;
 		}
 
 		void ClientManager::OnItemChanged(const std::string_view Client_Name, game::Item item) noexcept {
-			Get(Client_Name.data())->item |= item;
+			GetAsMutable(Client_Name.data())->item |= item;
 		}
 
 		void ClientManager::OnStatusIconShown(const std::string_view Client_Name, const StatusIcon Icon) noexcept {
-			Get(Client_Name.data())->status_icon |= Icon;
+			GetAsMutable(Client_Name.data())->status_icon |= Icon;
 		}
 
 		void ClientManager::OnVIPChanged(const std::string_view Client_Name) noexcept {
-			auto&& candidate = Get(Client_Name.data());
-			assert(vip == candidate || vip == nullptr);
-			vip = candidate;
-			vip->is_vip = true;
+			auto&& candidate = GetAsMutable(Client_Name.data());
+			candidate->is_vip = true;
 		}
 
 		void ClientManager::OnDefuseKitEquiped(const std::string_view Client_Name) noexcept {
-			Get(Client_Name.data())->item |= Item::Defuse_Kit;
+			GetAsMutable(Client_Name.data())->item |= Item::Defuse_Kit;
 		}
 
 		ClientStatus ClientManager::GetClientStatus(std::string_view client_name) {
-			return ClientStatus{ Get(client_name.data()) };
+			return ClientStatus{ client_name.data() };
 		}
 
-		ClientStatus::ClientStatus(const std::shared_ptr<Client>& target) : client(target) {}
+		ClientStatus::ClientStatus(const ClientName& Client_Name) : client(game.clients.Get(Client_Name)) {}
 
 		common::Team ClientStatus::GetTeam() const noexcept {
 			return client->GetTeam();
 		}
 
 		bool ClientStatus::CanSeeFriend() const noexcept {
-			for (auto other : game.clients.GetAll()) {
-				if (entity::CanSeeEntity(*client, *other.second) && other.second->GetTeam() == GetTeam()) {
+			for (auto& other : game.clients.GetAll()) {
+				if (entity::CanSeeEntity(client->Edict(), other.second) && other.second.GetTeam() == GetTeam()) {
 					return true;
 				}
 			}
 			return false;
 		}
 
-		std::shared_ptr<Client> ClientStatus::GetEnemyWithinView() const noexcept {
-			for (auto other : game.clients.GetAll()) {
-				if (entity::CanSeeEntity(*client, *other.second) && other.second->GetTeam() != GetTeam()) {
-					return other.second;
+		ClientName ClientStatus::GetEnemyNameWithinView() const noexcept {
+			for (const auto& other : game.clients.GetAll()) {
+				if (entity::CanSeeEntity(*client, other.second) && other.second.GetTeam() != GetTeam()) {
+					return other.first;
 				}
 			}
-			return nullptr;
+			return "";
 		}
 
-		std::vector<const edict_t*> ClientStatus::GetEntitiesInView() const noexcept {
-			decltype(GetEntitiesInView()) result{};
-			for (auto other : game.clients.GetAll()) {
-				if (entity::CanSeeEntity(*client, *other.second)) {
-					result.push_back(*other.second);
+		std::vector<ClientName> ClientStatus::GetEntityNamesInView() const noexcept {
+			decltype(GetEntityNamesInView()) result{};
+			for (auto& other : game.clients.GetAll()) {
+				if (entity::CanSeeEntity(*client, other.second)) {
+					result.push_back(other.first);
 				}
 			}
 			return result;
 		}
+
+		
+		common::Team ClientStatus::GetTeamFromModel() const noexcept {
+			return common::GetTeamFromModel(*client);
+		}
 	}
 
 	namespace entity {
-		bool InViewCone(edict_t* const self, const Vector& Origin) noexcept {
+		bool InViewCone(const edict_t* const self, const Vector& Origin) noexcept {
 			MAKE_VECTORS(self->v.angles);
 			const auto Vector_2D_Los = (Origin - self->v.origin).Make2D().Normalize();
 			const auto Dot = DotProduct(Vector_2D_Los, gpGlobals->v_forward.Make2D());
 			return (Dot > 0.50);
 		}
 
-		bool IsVisible(edict_t* const self, const Vector& Origin) noexcept {
+		bool IsVisible(const edict_t* const self, const Vector& Origin) noexcept {
 			// look through caller's eyes
 			TraceResult tr;
-			UTIL_TraceLine(self->v.origin + self->v.view_ofs, Origin, dont_ignore_monsters, ignore_glass, self, &tr);
+			UTIL_TraceLine(self->v.origin + self->v.view_ofs, Origin, dont_ignore_monsters, ignore_glass, const_cast<edict_t*>(self), &tr);
 			return (tr.flFraction >= 1.0);	// line of sight is not established or valid
 		}
 
-		bool CanSeeEntity(edict_t* const self, const const edict_t* Target) noexcept {
+		bool CanSeeEntity(const edict_t* const self, const const edict_t* Target) noexcept {
 			const auto Body = Target->v.origin;
 			const auto Head = Target->v.origin + Target->v.view_ofs;
 			
