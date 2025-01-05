@@ -123,7 +123,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         }
 
                         if (is_host) {
-                            pokebot::game::game.clients.Register(const_cast<edict_t*>(engine_target_edict));
+                            pokebot::game::game.RegisterClient(const_cast<edict_t*>(engine_target_edict));
                         }
 
                         if (args.size() >= 4) {
@@ -171,9 +171,9 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         };
 
                         if (Menu_Cache.at(std::get<std::string>(args[1])) == common::Team::Spector) {
-                            game::game.clients.Register(const_cast<edict_t*>(engine_target_edict));
+                            game::game.RegisterClient(const_cast<edict_t*>(engine_target_edict));
                         } else {
-                            game::game.clients.OnTeamAssigned(STRING(engine_target_edict->v.netname), Menu_Cache.at(std::get<std::string>(args[1])));
+                            game::game.OnTeamAssigned(STRING(engine_target_edict->v.netname), Menu_Cache.at(std::get<std::string>(args[1])));
                         }
                     }
                 },
@@ -199,7 +199,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         };
 
                         if (bool(std::get<int>(args[1]) & ScoreStatus::VIP)) {
-                            pokebot::game::game.clients.OnVIPChanged(STRING(INDEXENT(std::get<int>(args[0]))->v.netname));
+                            pokebot::game::game.OnVIPChanged(STRING(INDEXENT(std::get<int>(args[0]))->v.netname));
                         } else if ((std::get<int>(args[1]) & ScoreStatus::Dead)) {
 
                         } else if ((std::get<int>(args[1]) & ScoreStatus::Defuse_Kit)) {
@@ -219,9 +219,9 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         if (std::get<int>(args[1]) < 32) {
                             using namespace pokebot;
                             if (std::get<int>(args[0]) != 0) {
-                                game::game.clients.OnWeaponChanged(STRING(engine_target_edict->v.netname), (game::Weapon)std::get<int>(args[1]));
+                                game::game.OnWeaponChanged(STRING(engine_target_edict->v.netname), (game::Weapon)std::get<int>(args[1]));
                             }
-                            game::game.clients.OnClipChanged(STRING(engine_target_edict->v.netname), static_cast<game::Weapon>(std::get<int>(args[1])), std::get<int>(args[2]));
+                            game::game.OnClipChanged(STRING(engine_target_edict->v.netname), static_cast<game::Weapon>(std::get<int>(args[1])), std::get<int>(args[2]));
                         }
                     }
                 },
@@ -244,7 +244,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             return;
                         }
                         using namespace pokebot;
-                        game::game.clients.OnAmmoPickedup(STRING(engine_target_edict->v.netname), static_cast<game::AmmoID>(std::get<int>(args[0])), std::get<int>(args[1]));
+                        game::game.OnAmmoPickedup(STRING(engine_target_edict->v.netname), static_cast<game::AmmoID>(std::get<int>(args[0])), std::get<int>(args[1]));
                     }
                 },
                 {
@@ -255,7 +255,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
 
                         if (args.size() >= 1 && std::holds_alternative<int>(args[0])) {
                             using namespace pokebot;
-                            game::game.clients.OnMoneyChanged(STRING(engine_target_edict->v.netname), std::clamp(std::get<int>(args[0]), 0, 16000));
+                            game::game.OnMoneyChanged(STRING(engine_target_edict->v.netname), std::clamp(std::get<int>(args[0]), 0, 16000));
                         }
                     }
                 },
@@ -275,7 +275,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         const int Health = std::get<int>(args[1]);
                         const int Armor = std::get<int>(args[0]);
                         const int Bit = std::get<int>(args[2]);
-                        game::game.clients.OnDamageTaken(STRING(engine_target_edict->v.netname), engine_target_edict->v.dmg_inflictor, Health, Armor, Bit);
+                        game::game.OnDamageTaken(STRING(engine_target_edict->v.netname), engine_target_edict->v.dmg_inflictor, Health, Armor, Bit);
                         bot::Manager::Instance().OnDamageTaken(STRING(engine_target_edict->v.netname), engine_target_edict->v.dmg_inflictor,  Health, Armor, Bit);
                     }
                 },
@@ -299,7 +299,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
 
                         if (auto it = Icon_Cache.find(std::get<std::string>(args[1])); it != Icon_Cache.end()) {
                             using namespace pokebot;
-                            game::game.clients.OnStatusIconShown(STRING(engine_target_edict->v.netname), it->second);
+                            game::game.OnStatusIconShown(STRING(engine_target_edict->v.netname), it->second);
                         }
                     }
                 },
@@ -314,7 +314,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         }
 
                         using namespace pokebot;
-                        game::game.clients.OnItemChanged(STRING(engine_target_edict->v.netname), static_cast<game::Item>(std::get<int>(args[0])));
+                        game::game.OnItemChanged(STRING(engine_target_edict->v.netname), static_cast<game::Item>(std::get<int>(args[0])));
                     }
                 },
                 {
@@ -330,7 +330,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         }
 
                         using namespace pokebot;
-                        game::game.clients.OnNVGToggled(STRING(engine_target_edict->v.netname), std::get<int>(args[0]) > 0);
+                        game::game.OnNVGToggled(STRING(engine_target_edict->v.netname), std::get<int>(args[0]) > 0);
                     }
                 },
                 {

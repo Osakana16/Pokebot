@@ -8,7 +8,7 @@ namespace pokebot {
 				return;
 			}
 			
-			auto client = game::game.clients.GetClientStatus(Name().data());
+			auto client = game::game.GetClientStatus(Name().data());
 			if (client.IsInBuyzone() && !buy_wait_timer.IsRunning()) {
 				auto ai = buy::BuyAI(client.Money());
 				auto node = ai.GetPattern(0, 0);

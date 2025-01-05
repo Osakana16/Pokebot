@@ -178,7 +178,8 @@ namespace pokebot {
 		class Bot {
 			friend class Manager;
 			friend class Troops;
-
+			
+			game::ClientCommitter committer;
 			common::Time 
 				frame_interval{}, 
 				last_command_time{};

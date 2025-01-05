@@ -256,9 +256,8 @@ namespace pokebot {
 
 			int WeaponAmmo(const AmmoID Ammo_ID) const noexcept { return weapon_ammo[static_cast<int>(Ammo_ID)]; }
 
-			bool HasHostages() const noexcept;
-
 			const float& Health() const { return client->v.health; }
+			const float& Armor() const { return client->v.armorvalue; }
 			const float& MaxHealth() const { return client->v.max_health; }
 			const float& Speed() const { return client->v.speed; }
 			const int& Money() const { return money; }
@@ -319,8 +318,16 @@ namespace pokebot {
 			* @brief Check the client is a fakeclient.
 			*/
 			bool IsFakeClient() const noexcept;
-			const float& Impulse() const { return client->Impulse(); }
-
+			auto Button() const { return client->Button(); }
+			auto Impulse() const { return client->Impulse(); }
+			
+			bool HasHostages() const noexcept;
+			bool IsVIP() const noexcept { return client->IsVIP(); }
+			bool IsDead() const noexcept { return client->IsDead(); }
+			
+			bool HasWeapon(const Weapon Weapon_ID) const noexcept { return bool(client->Edict()->v.weapons & common::ToBit<int>(Weapon_ID)); }
+			bool HasPrimaryWeapon() const noexcept { return client->Edict()->v.weapons & game::Primary_Weapon_Bit; }
+			bool HasSecondaryWeapon() const noexcept { return client->Edict()->v.weapons & game::Secondary_Weapon_Bit; }
 
 			/**
 			* @brief Check the clip of current weapon remains or not
@@ -351,6 +358,7 @@ namespace pokebot {
 			bool IsClimblingLadder() const noexcept { return (client->movetype() & MOVETYPE_FLY); }
 
 			const float& Health() const { return client->Health(); }
+			const float& Armor() const { return client->Armor(); }
 			const float& MaxHealth() const { return client->MaxHealth(); }
 			const float& Speed() const { return client->Speed(); }
 			const int& Money() const { return client->Money(); }
@@ -375,13 +383,27 @@ namespace pokebot {
 		/**
 		* 
 		*/
-		class ClientCommiter {
-			friend class ClientManager;
-			struct {
-				std::vector<std::string> commands{};
-			} commit_status;
-		public:
+		class ClientCommitter {
+			friend class Game;
+			std::vector<std::string> commands{};
+			int flags{};
+			int button{};
 
+			Vector v_angle, angles;
+			float idealpitch, idealyaw;
+		public:
+			/**
+			* @brief Set the fake client flag for client.
+			*/
+			void SetFakeClientFlag();
+			void AddCommand(const std::string);
+			void TurnViewAngle(common::AngleVector);
+			void PressKey(int);
+			void Clear() {
+				v_angle = angles = Vector();
+				flags = button = idealpitch = idealyaw = 0;
+				commands.clear();
+			}
 		};
 
 
@@ -480,6 +502,7 @@ namespace pokebot {
 		};
 
 		inline class Game {
+			friend class ClientStatus;
 			database::Database database{};
 			std::vector<Hostage> hostages{};
 
@@ -489,9 +512,17 @@ namespace pokebot {
 			bool is_newround{};
 
 			std::vector<ConVarReg> convars{};
-		public:
-			Host host{};
 			ClientManager clients{};
+		public:
+			void RunPlayerMove(const ClientName&, Vector movement_angle, float move_speed, float strafe_speed, float forward_speed, const std::uint8_t, const ClientCommitter&);
+
+			bool Kill(const ClientName&);
+
+			bool Spawn(std::string_view client_name) { return clients.Create(client_name.data()); }
+			bool RegisterClient(edict_t* client) { return clients.Register(client); }
+
+			auto GetClientStatus(std::string_view client_name) { return clients.GetClientStatus(client_name); }
+			Host host{};
 
 			size_t GetHostageNumber() const noexcept;
 			bool IsHostageUsed(const int Index) const noexcept;
@@ -512,12 +543,67 @@ namespace pokebot {
 			void PreUpdate();
 			void PostUpdate();
 
+			bool PlayerExists(const ClientName& Client_Name) const noexcept { return clients.Get(Client_Name) != nullptr; }
+
 			void AddCvar(const char *name, const char *value, const char *info, bool bounded, float min, float max, Var varType, bool missingAction, const char *regval, ConVar *self);
 			void RegisterCvars();
 
 			// - Event funcs -
 
 			void OnNewRound() noexcept;
+
+			void OnVIPChanged(const std::string_view Client_Name) noexcept {
+				clients.OnVIPChanged(Client_Name);
+			}
+
+			void OnDefuseKitEquiped(const std::string_view Client_Name) noexcept {
+				clients.OnDefuseKitEquiped(Client_Name);
+			}
+
+			void OnDeath(const std::string_view Client_Name) noexcept {
+				clients.OnDeath(Client_Name);
+			}
+
+			void OnDamageTaken(const std::string_view Client_Name, const edict_t* Inflictor, const int Health, const int Armor, const int Bit) noexcept {
+				clients.OnDamageTaken(Client_Name, Inflictor, Health, Armor, Bit);
+			}
+
+			void OnMoneyChanged(const std::string_view Client_Name, const int Money) noexcept {
+				clients.OnMoneyChanged(Client_Name, Money);
+			}
+
+			void OnScreenFaded(const std::string_view Client_Name) noexcept {
+				clients.OnScreenFaded(Client_Name);
+			}
+
+			void OnNVGToggled(const std::string_view Client_Name, const bool Toggled) noexcept {
+				clients.OnNVGToggled(Client_Name, Toggled);
+			}
+
+			void OnWeaponChanged(const std::string_view Client_Name, const game::Weapon Weapon_ID) noexcept {
+				clients.OnWeaponChanged(Client_Name, Weapon_ID);
+			}
+
+			void OnClipChanged(const std::string_view Client_Name, const game::Weapon Weapon_ID, const int Clip) noexcept {
+				clients.OnClipChanged(Client_Name, Weapon_ID, Clip);
+			}
+
+			void OnAmmoPickedup(const std::string_view Client_Name, const game::AmmoID Ammo_ID, const int Ammo) noexcept {
+				clients.OnAmmoPickedup(Client_Name, Ammo_ID, Ammo);
+			}
+
+			void OnTeamAssigned(const std::string_view Client_Name, common::Team Team) noexcept {
+				clients.OnTeamAssigned(Client_Name, Team);
+			}
+
+			void OnItemChanged(const std::string_view Client_Name, game::Item Item_ID) noexcept {
+				clients.OnItemChanged(Client_Name, Item_ID);
+			}
+
+			void OnStatusIconShown(const std::string_view Client_Name, const StatusIcon Icon) noexcept {
+				clients.OnStatusIconShown(Client_Name, Icon);
+			}
+
 		} game{};
 	}
 
@@ -528,12 +614,6 @@ namespace pokebot {
 	}
 
 	namespace engine {
-		class ClientController {
-		public:
-			bool Connect();
-
-		};
-
 		class ClientKey final {
 			const int Client_Index{};
 			char* const infobuffer{};

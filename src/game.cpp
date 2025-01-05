@@ -23,8 +23,8 @@ namespace pokebot {
 		}
 
 		bool Hostage::RecoginzeOwner(const ClientName& Client_Name) noexcept {
-			auto client = game.clients.Get(Client_Name);
-			if (common::Distance(client->origin(), entity->v.origin) < 83.0f && client->GetTeam() == common::Team::CT) {
+			auto client_status = game.GetClientStatus(Client_Name);
+			if (common::Distance(client_status.origin(), entity->v.origin) < 83.0f && client_status.GetTeam() == common::Team::CT) {
 				if (owner_name == Client_Name) {
 					owner_name.clear();
 				} else {
@@ -39,13 +39,13 @@ namespace pokebot {
 			if (owner_name.empty())
 				return;
 			
-			auto owner = game.clients.Get(owner_name);
-			const bool Is_Owner_Terrorist = owner->GetTeam() == common::Team::T;
-			if (IsReleased() || owner->GetTeam() == common::Team::T || common::Distance(owner->origin(), entity->v.origin) > 200.0f)
-				owner = nullptr;
+			auto owner_status = game.GetClientStatus(owner_name);
+			const bool Is_Owner_Terrorist = owner_status.GetTeam() == common::Team::T;
+			if (IsReleased() || owner_status.GetTeam() == common::Team::T || common::Distance(owner_status.origin(), entity->v.origin) > 200.0f)
+				owner_name.clear();
 		}
 
-		bool Hostage::IsUsed() const noexcept { return game.clients.Get(owner_name) != nullptr; }
+		bool Hostage::IsUsed() const noexcept { return game.PlayerExists(owner_name); }
 		bool Hostage::IsOwnedBy(const std::string_view& Name) const noexcept { return (IsUsed() && owner_name == Name); }
 	 	bool Hostage::IsReleased() const noexcept { return (entity->v.effects & EF_NODRAW); }
 		const Vector& Hostage::Origin() const noexcept {
@@ -186,6 +186,35 @@ namespace pokebot {
 
 			RegisterCvars();
 		}
+		
+		void Game::RunPlayerMove(const ClientName& Client_Name, Vector movement_angle, float move_speed, float strafe_speed, float forward_speed, const std::uint8_t Msec_Value, const ClientCommitter& committer) {
+			auto client = game::game.clients.GetAsMutable(Client_Name);
+			client->PressKey(committer.button);
+			client->angles() = committer.angles;
+			client->v_angle() = committer.v_angle;
+			client->idealpitch() = committer.idealpitch;
+			client->ideal_yaw() = committer.idealyaw;
+
+			client->flags() |= common::Third_Party_Bot_Flag;
+			g_engfuncs.pfnRunPlayerMove(client->Edict(),
+					movement_angle,
+					move_speed,
+					strafe_speed,
+					0.0f,
+					client->Button(),
+					client->Impulse(),
+					Msec_Value);
+			client->Edict()->v.button = 0;
+		}
+		
+		bool Game::Kill(const ClientName& Client_Name) {
+			if (PlayerExists(Client_Name)) {
+				MDLL_ClientKill(const_cast<edict_t*>(game::game.clients.Get(Client_Name)->Edict()));
+				return true;
+			} else {
+				return false;
+			}
+		}
 
 		size_t Game::GetHostageNumber() const noexcept {
 			return hostages.size();
@@ -243,9 +272,9 @@ namespace pokebot {
 			bot_args.clear();
 		}
 
-		bool Client::HasHostages() const noexcept {
+		bool ClientStatus::HasHostages() const noexcept {
 			for (int i = 0; i < game::game.GetHostageNumber(); i++) {
-				if (game::game.IsHostageOwnedBy(i, Name())) {
+				if (game::game.IsHostageOwnedBy(i, client->Name())) {
 					return true;
 				}
 			}
@@ -274,6 +303,42 @@ namespace pokebot {
 #endif
 				}
 			}
+		}
+
+		
+		void ClientCommitter::SetFakeClientFlag() {
+			flags |= common::Third_Party_Bot_Flag;
+		}
+
+		void ClientCommitter::AddCommand(const std::string Command_Sentence) {
+			commands.push_back(Command_Sentence);
+		}
+
+		void ClientCommitter::TurnViewAngle(common::AngleVector v) {
+			v_angle = v;
+			v_angle.z = 0.0f;
+			angles.x = v_angle.x / 3;
+			angles.y = v_angle.y;
+			v_angle.x = -v_angle.x;
+			angles.z = 0;
+			
+			idealyaw = v.y;
+			if (idealyaw > 180.0f) {
+				idealyaw -= 360.0f;
+			} else if (idealyaw < -180.0f) {
+				idealyaw += 360.0f;
+			}
+			
+			idealpitch = v.x;
+			if (idealpitch > 180.0f) {
+				idealpitch-= 360.0f;
+			} else if (idealpitch < -180.0f) {
+				idealpitch += 360.0f;
+			}
+		}
+
+		void ClientCommitter::PressKey(int key) {
+			button |= key;
 		}
 
 		void ClientManager::OnNewRound() {
