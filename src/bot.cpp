@@ -128,7 +128,7 @@ namespace pokebot {
 				// Due to game engine specifications or bugs, 
 				// if we execute a heavy process immediately after the start of a round, 
 				// the game will freeze.
-				
+
 				switch (state) {
 					case State::Accomplishment:
 						AccomplishMission();
@@ -139,20 +139,21 @@ namespace pokebot {
 				}
 				CheckAround();
 
-			for (auto& vector : { Vector(0.0f, 0.0f, 0.0f), Vector(50.0f, 0.0f, 0.0f), Vector(-50.0f, 0.0f, 0.0f), Vector(0.0f, 50.0f, 0.0f), Vector(0.0f, -50.0f, 0.0f) }) {
-				if (auto area = node::czworld.GetNearest(Origin() + vector); area != nullptr && node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Jump)) {
-					PressKey(ActionKey::Jump);
-					break;
+				for (auto& vector : { Vector(0.0f, 0.0f, 0.0f), Vector(50.0f, 0.0f, 0.0f), Vector(-50.0f, 0.0f, 0.0f), Vector(0.0f, 50.0f, 0.0f), Vector(0.0f, -50.0f, 0.0f) }) {
+					if (auto area = node::czworld.GetNearest(Origin() + vector); area != nullptr && node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Jump)) {
+						PressKey(ActionKey::Jump);
+						break;
+					}
 				}
-			}
 
-			if (!routes.Empty() && next_dest_node != node::Invalid_NodeID) {
-				if (look_direction.view.has_value() && look_direction.movement.has_value()) {
-					auto r = look_direction.movement->ToAngleVector(Origin()) - look_direction.view->ToAngleVector(Origin());
-					PressKey(ActionKey::Run);
+				if (!routes.Empty() && next_dest_node != node::Invalid_NodeID) {
+					if (look_direction.view.has_value() && look_direction.movement.has_value()) {
+						auto r = look_direction.movement->ToAngleVector(Origin()) - look_direction.view->ToAngleVector(Origin());
+						PressKey(ActionKey::Run);
+					}
 				}
+				look_direction.Clear();
 			}
-			look_direction.Clear();
 		}
 
 		void Bot::OnSelectionCompleted() noexcept {

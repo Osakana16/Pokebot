@@ -87,7 +87,6 @@ C_DLLEXPORT int
 GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
     meta_engfuncs.pfnMessageBegin = [](int msg_dest, int msg_type, const float* pOrigin, edict_t* edict) {
         if (gpGlobals->deathmatch) {
-            SERVER_PRINT(std::format("{}\n", __FUNCTION__).c_str());
             using namespace pokebot;
             is_bot = (edict != nullptr && pokebot::bot::manager.IsExist(STRING(edict->v.netname)));
             is_host = (edict == game::game.host.AsEdict());
