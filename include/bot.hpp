@@ -183,12 +183,6 @@ namespace pokebot {
 				frame_interval{}, 
 				last_command_time{};
 
-			bool can_listen_radio{},
-				can_follow_radio{};
-
-			Timer update_timer{},
-				allow_listen_radio_timer{};
-
 			// This variable is used to prevent freezing the whole game.
 			Timer spawn_cooldown_time{};
 
@@ -231,7 +225,6 @@ namespace pokebot {
 			Mood mood{};
 			Timer behavior_wait_timer{};
 
-			bool need_to_update{};
 			GoalQueue goal_queue{};
 #if !USE_NAVMESH
 			node::PathWalk<node::NodeID> routes{};
