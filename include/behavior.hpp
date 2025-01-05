@@ -152,16 +152,16 @@ namespace pokebot::bot {
 
 		template<bool b>
 		bool IsBombPlanted(const Bot* const Self) {
-			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, manager.C4Origin().has_value());
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Manager::Instance().C4Origin().has_value());
 		}
 
 
 		template<bool b>
 		bool IsTeamObjectiveSet(const Bot* const Self) noexcept {
 			if constexpr (b) {
-				return Self->goal_node == manager.GetGoalNode(Self->JoinedTeam(), Self->JoinedPlatoon());
+				return Self->goal_node == Manager::Instance().GetGoalNode(Self->JoinedTeam(), Self->JoinedPlatoon());
 			} else {
-				return Self->goal_node != manager.GetGoalNode(Self->JoinedTeam(), Self->JoinedPlatoon());
+				return Self->goal_node != Manager::Instance().GetGoalNode(Self->JoinedTeam(), Self->JoinedPlatoon());
 			}
 		}
 
@@ -173,7 +173,7 @@ namespace pokebot::bot {
 
 		template<bool b>
 		bool IsOnBomb(const Bot* const Self) noexcept {
-			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (common::Distance(Self->Origin(), *manager.C4Origin()) <= 50.0f));
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (common::Distance(Self->Origin(), *Manager::Instance().C4Origin()) <= 50.0f));
 		}
 		
 		template<bool b>

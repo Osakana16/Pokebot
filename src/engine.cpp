@@ -88,7 +88,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
     meta_engfuncs.pfnMessageBegin = [](int msg_dest, int msg_type, const float* pOrigin, edict_t* edict) {
         if (gpGlobals->deathmatch) {
             using namespace pokebot;
-            is_bot = (edict != nullptr && pokebot::bot::manager.IsExist(STRING(edict->v.netname)));
+            is_bot = (edict != nullptr && pokebot::bot::Manager::Instance().IsExist(STRING(edict->v.netname)));
             is_host = (edict == game::game.host.AsEdict());
         
             engine_target_edict = edict;
@@ -140,7 +140,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
 
                             auto it = Menu_Cache.find(std::get<std::string>(args[3]));
                             if (it != Menu_Cache.end()) {
-                                pokebot::bot::manager.Assign(STRING(engine_target_edict->v.netname), it->second);
+                                pokebot::bot::Manager::Instance().Assign(STRING(engine_target_edict->v.netname), it->second);
                             }
                         }
                     }
@@ -276,7 +276,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         const int Armor = std::get<int>(args[0]);
                         const int Bit = std::get<int>(args[2]);
                         game::game.clients.OnDamageTaken(STRING(engine_target_edict->v.netname), engine_target_edict->v.dmg_inflictor, Health, Armor, Bit);
-                        bot::manager.OnDamageTaken(STRING(engine_target_edict->v.netname), engine_target_edict->v.dmg_inflictor,  Health, Armor, Bit);
+                        bot::Manager::Instance().OnDamageTaken(STRING(engine_target_edict->v.netname), engine_target_edict->v.dmg_inflictor,  Health, Armor, Bit);
                     }
                 },
                 {
@@ -404,7 +404,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             auto& radio = std::get<std::string>(args[4]);
 
                             if (it == Text_Message.find("#Game_radio")) {
-                                bot::manager.OnRadioRecieved(sender, radio);
+                                bot::Manager::Instance().OnRadioRecieved(sender, radio);
                             }
                         } else if (args.size() >= 2 && std::holds_alternative<std::string>(args[1])) {
                             auto it = Text_Message.find(std::get<std::string>(args[1]));

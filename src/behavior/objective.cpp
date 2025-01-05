@@ -44,17 +44,17 @@ namespace pokebot::bot::behavior {
 
 	template<bool b>
 	bool IsFarFromC4(const Bot* const Self) noexcept {
-		assert(bot::manager.C4Origin().has_value());
+		assert(bot::Manager::Instance().C4Origin().has_value());
 		if constexpr (b) {
-			return common::Distance(Self->Origin(), *bot::manager.C4Origin()) > 100.0f;
+			return common::Distance(Self->Origin(), *bot::Manager::Instance().C4Origin()) > 100.0f;
 		} else {
-			return common::Distance(Self->Origin(), *bot::manager.C4Origin()) <= 100.0f;
+			return common::Distance(Self->Origin(), *bot::Manager::Instance().C4Origin()) <= 100.0f;
 		}
 	}
 
 	template<bool b>
 	bool IsFarFromMainGoal(const Bot* const Self) noexcept {
-		auto id = manager.GetGoalNode(Self->JoinedTeam(), Self->JoinedPlatoon());
+		auto id = Manager::Instance().GetGoalNode(Self->JoinedTeam(), Self->JoinedPlatoon());
 		auto origin = node::czworld.GetOrigin(id);
 		if constexpr (b) {
 			return common::Distance(Self->Origin(), origin) > 100.0f;

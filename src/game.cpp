@@ -91,7 +91,7 @@ namespace pokebot {
 
 		void Game::OnNewRound() noexcept {
 			round++;
-			bot::manager.OnNewRound();
+			bot::Manager::Instance().OnNewRound();
 			clients.OnNewRound();
 #if false
 			node::world.OnNewRound();

@@ -243,10 +243,10 @@ namespace pokebot {
 			} look_direction{}, ideal_direction{};
 
 
-			Bot(std::shared_ptr<game::Client>, const common::Team, const common::Model) POKEBOT_DEBUG_NOEXCEPT;
+			Bot(std::shared_ptr<game::Client>, const common::Team, const common::Model) noexcept;
 
-			void OnNewRound() POKEBOT_DEBUG_NOEXCEPT;
-			void Run() POKEBOT_DEBUG_NOEXCEPT;
+			void OnNewRound() noexcept;
+			void Run() noexcept;
 
 			void SelectWeapon(const game::Weapon), SelectPrimaryWeapon(), SelectSecondaryWeapon();
 
@@ -340,7 +340,10 @@ namespace pokebot {
 			Vector gap{};
 		};
 
-		inline class Manager {
+        /**
+        * @brief Manager class for Bot.
+        */
+		class Manager final : private common::Singleton<Manager> {
 			std::optional<Vector> c4_origin{};
 
 			Troops troops[2];
@@ -350,37 +353,134 @@ namespace pokebot {
 
 			Bot* const Get(const std::string&) noexcept;
 			RadioMessage radio_message{};
-		public:
 			Manager();
-			void OnNewRound();
+		public:
+			/**
+			* @brief Get the instance of Manager
+			* @return The instance of Manager
+			*/
+			static Manager& Instance() noexcept {
+				static Manager manager{};
+				return manager;
+			}
+
+			/**
+			* @brief Called when a new round starts.
+			*/
+			void OnNewRound() noexcept;
+
+			/**
+			* @brief Get the compensation vector for a bot.
+			* @param Bot_Name The name of the bot.
+			* @return The compensation vector.
+			*/
 			const Vector& GetCompensation(const std::string& Bot_Name) { return balancer[Bot_Name].gap; }
 
-			void Insert(std::string bot_name, const common::Team, const common::Model, const bot::Difficult) POKEBOT_DEBUG_NOEXCEPT;
-			void Kick(const std::string& Bot_Name) noexcept;
-			void Remove(const std::string& Bot_Name) noexcept;
+			/**
+			* @brief Update the state of all bots.
+			*/
 			void Update() noexcept;
 
+			/**
+			* @brief Insert a new bot into the game.
+			* @param bot_name The name of the bot.
+			* @param team The team of the bot.
+			* @param model The model of the bot.
+			* @param difficulty The difficulty level of the bot.
+			*/
+			void Insert(std::string bot_name, const common::Team team, const common::Model model, const bot::Difficult difficulty) noexcept;
+
+			/**
+			* @brief Kick a bot from the game.
+			* @param Bot_Name The name of the bot.
+			*/
+			void Kick(const std::string& Bot_Name) noexcept;
+
+			/**
+			* @brief Remove a bot from the game.
+			* @param Bot_Name The name of the bot.
+			*/
+			void Remove(const std::string& Bot_Name) noexcept;
+
+			/**
+			* @brief Check if a bot exists by name.
+			* @param Bot_Name The name of the bot.
+			* @return true if the bot exists, false otherwise.
+			*/
 			bool IsExist(const std::string& Bot_Name) const noexcept;
+
+			/**
+			* @brief Assign an engine message to a bot.
+			* @param Bot_Name The name of the bot.
+			* @param message The message to assign.
+			*/
 			void Assign(const std::string_view Bot_Name, Message message) noexcept;
+
+			/**
+			* @brief Called when a bot dies.
+			* @param Bot_Name The name of the bot.
+			*/
 			void OnDied(const std::string& Bot_Name) noexcept;
+
+			/**
+			* @brief Called when a bot takes damage.
+			* @param Bot_Name The name of the bot.
+			* @param Inflictor The entity that inflicted the damage.
+			* @param Damage The amount of damage taken.
+			* @param Armor The amount of armor remaining.
+			* @param Bit Additional information about the damage.
+			*/
 			void OnDamageTaken(const std::string_view Bot_Name, const edict_t* Inflictor, const int Damage, const int Armor, const int Bit) noexcept;
+
+			/**
+			* @brief Called when a bot joins a team.
+			* @param Bot_Name The name of the bot.
+			*/
 			void OnJoinedTeam(const std::string&) noexcept;
+
+			/**
+			* @brief Called when a chat message is received.
+			* @param Bot_Name The name of the bot.
+			*/
 			void OnChatRecieved(const std::string&) noexcept;
+
+			/**
+			* @brief Called when a team chat message is received.
+			* @param Bot_Name The name of the bot.
+			*/
 			void OnTeamChatRecieved(const std::string&) noexcept;
+
+			/**
+			* @brief Called when a radio message is received.
+			* @param Sender_Name The name of the sender.
+			* @param Radio_Sentence The radio message.
+			*/
 			void OnRadioRecieved(const std::string& Sender_Name, const std::string& Radio_Sentence) noexcept;
 
+			/**
+			* @brief Called when the bomb is planted.
+			*/
 			void OnBombPlanted() noexcept;
+
+			/**
+			* @brief Called when a bot has completely joined the game.
+			* @param bot The bot that joined.
+			*/
 			void OnBotJoinedCompletely(Bot* const) noexcept;
 
 			/**
-			* @brief Get goal ID from a troop or platoon.
-			* @param Target_Team the team of troop.
+			* @brief Get the goal node ID for a troop or platoon.
+			* @param Target_Team The team of the troop.
 			* @param Index The platoon index.
-			* @return If Index is less than 0, returns troops.
+			* @return The goal node ID. If Index is less than 0, returns the troop's goal node ID.
 			*/
 			node::NodeID GetGoalNode(const common::Team Target_Team, const int Index) const noexcept;
 
+			/**
+			* @brief Get the origin of the C4 bomb.
+			* @return The origin of the C4 bomb.
+			*/
 			const std::optional<Vector>& C4Origin() const noexcept { return c4_origin; }
-		} manager{};
+		};
 	}
 }

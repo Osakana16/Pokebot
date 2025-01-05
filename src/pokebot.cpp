@@ -173,7 +173,7 @@ namespace pokebot::plugin {
 
     void Pokebot::OnUpdate() noexcept {
         pokebot::game::game.PreUpdate();
-        pokebot::bot::manager.Update();
+        pokebot::bot::Manager::Instance().Update();
         pokebot::game::game.PostUpdate();
         
         if (draw_node) {
@@ -184,7 +184,7 @@ namespace pokebot::plugin {
     }
 
     void Pokebot::AddBot(const std::string& Bot_Name, const common::Team Selected_Team, const common::Model Selected_Model, const bot::Difficult Difficult) POKEBOT_DEBUG_NOEXCEPT {
-        pokebot::bot::manager.Insert(Bot_Name, Selected_Team, Selected_Model, Difficult);
+        pokebot::bot::Manager::Instance().Insert(Bot_Name, Selected_Team, Selected_Model, Difficult);
     }
     
     void Pokebot::OnEntitySpawned() {
@@ -203,6 +203,6 @@ namespace pokebot::plugin {
     }
 
     void Pokebot::OnClientDisconnect(const edict_t* const disconnected_client) {
-        pokebot::bot::manager.Remove(STRING(disconnected_client->v.netname));
+        pokebot::bot::Manager::Instance().Remove(STRING(disconnected_client->v.netname));
     }
 }

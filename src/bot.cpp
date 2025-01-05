@@ -4,7 +4,7 @@
 
 namespace pokebot {
 	namespace bot {
-		void Bot::Run() POKEBOT_DEBUG_NOEXCEPT {
+		void Bot::Run() noexcept {
 			const static std::unordered_map<Message, std::function<void(Bot&)>> Update_Funcs{
 				{ Message::Team_Select, &Bot::SelectionUpdate },
 				{ Message::Model_Select, &Bot::SelectionUpdate },
@@ -97,7 +97,7 @@ namespace pokebot {
 			movement_angle = look_direction.movement->ToAngleVector(Origin());
 		}
 
-		void Bot::OnNewRound() POKEBOT_DEBUG_NOEXCEPT {
+		void Bot::OnNewRound() noexcept {
 			goal_queue.Clear();
 			routes.Clear();
 
@@ -157,7 +157,7 @@ namespace pokebot {
 		}
 
 		void Bot::OnSelectionCompleted() noexcept {
-			manager.OnBotJoinedCompletely(this);
+			Manager::Instance().OnBotJoinedCompletely(this);
 			start_action = Message::Buy;
 		}
 
@@ -171,7 +171,7 @@ namespace pokebot {
 						{
 							game::MapFlags::Demolition,
 							[this] {
-								if (manager.C4Origin().has_value()) {
+								if (Manager::Instance().C4Origin().has_value()) {
 									behavior::demolition::t_planted_wary->Evaluate(this);
 								} else {
 									if (HasWeapon(game::Weapon::C4)) {
@@ -213,8 +213,8 @@ namespace pokebot {
 						{
 							game::MapFlags::Demolition,
 							[this] {
-								if (manager.C4Origin().has_value()) {
-									if (common::Distance(Origin(), *manager.C4Origin()) <= 50.0f) {
+								if (Manager::Instance().C4Origin().has_value()) {
+									if (common::Distance(Origin(), *Manager::Instance().C4Origin()) <= 50.0f) {
 										behavior::demolition::ct_defusing->Evaluate(this);
 									} else {
 										behavior::demolition::ct_planted->Evaluate(this);
@@ -459,7 +459,7 @@ namespace pokebot {
 			}
 			const auto Enemy_Distances = std::move(SortedDistances(Origin(), target_enemies));
 			const auto& Nearest_Enemy = target_enemies[Enemy_Distances.begin()->second];
-			look_direction.view = Nearest_Enemy->v.origin - Vector(20.0f, 0, 0) + manager.GetCompensation(Name().data());
+			look_direction.view = Nearest_Enemy->v.origin - Vector(20.0f, 0, 0) + Manager::Instance().GetCompensation(Name().data());
 		}
 
 		bool Bot::HasEnemy() const noexcept {
@@ -653,6 +653,35 @@ namespace pokebot {
 			}
 		}
 
+		Bot::Bot(std::shared_ptr<game::Client> assigned_client, const common::Team Join_Team, const common::Model Select_Model) noexcept :
+			client(assigned_client)
+		{
+			team = Join_Team;
+			model = Select_Model;
+
+			name = client->Name();
+
+			OnNewRound();
+		}
+
+		int Bot::JoinedPlatoon() const noexcept {
+			return platoon;
+		}
+		
+		common::Team Bot::JoinedTeam() const noexcept {
+			return team;
+		}
+
+		void Bot::ReceiveCommand(const TroopsStrategy& Received_Strategy) {
+			switch (Received_Strategy.strategy) {
+				case TroopsStrategy::Strategy::Defend_Bombsite_Divided:
+					break;
+				default:
+					goal_queue.AddGoalQueue(Received_Strategy.objective_goal_node, 1);
+					break;
+			}
+			// SERVER_PRINT(std::format("[POKEBOT]New Goal ID:{}\n", goal_node).c_str());
+		}
 		
 		Manager::Manager() :
 			troops{{ 
@@ -669,7 +698,7 @@ namespace pokebot {
 
 		}
 
-		void Manager::OnNewRound() {
+		void Manager::OnNewRound() noexcept {
 			for (auto& bot : bots) {
 				bot.second.OnNewRound();
 			}
@@ -732,7 +761,7 @@ namespace pokebot {
 			radio_message.message = Radio_Sentence;
 		}
 
-		void Manager::Insert(std::string bot_name, const common::Team team, const common::Model model, const bot::Difficult Assigned_Diffcult) POKEBOT_DEBUG_NOEXCEPT {
+		void Manager::Insert(std::string bot_name, const common::Team team, const common::Model model, const bot::Difficult Assigned_Diffcult) noexcept {
 			auto bot_client = game::game.clients.Create(bot_name);
 			bot_name = bot_client->Name();
 			bots.insert({ bot_name, Bot(bot_client, team, model) });
@@ -819,36 +848,6 @@ namespace pokebot {
 			} else {
 				return troop.at(Index).GetGoalNode();
 			}
-		}
-
-		Bot::Bot(std::shared_ptr<game::Client> assigned_client, const common::Team Join_Team, const common::Model Select_Model) POKEBOT_DEBUG_NOEXCEPT :
-			client(assigned_client)
-		{
-			team = Join_Team;
-			model = Select_Model;
-
-			name = client->Name();
-
-			OnNewRound();
-		}
-
-		int Bot::JoinedPlatoon() const noexcept {
-			return platoon;
-		}
-		
-		common::Team Bot::JoinedTeam() const noexcept {
-			return team;
-		}
-
-		void Bot::ReceiveCommand(const TroopsStrategy& Received_Strategy) {
-			switch (Received_Strategy.strategy) {
-				case TroopsStrategy::Strategy::Defend_Bombsite_Divided:
-					break;
-				default:
-					goal_queue.AddGoalQueue(Received_Strategy.objective_goal_node, 1);
-					break;
-			}
-			// SERVER_PRINT(std::format("[POKEBOT]New Goal ID:{}\n", goal_node).c_str());
 		}
 
 	
