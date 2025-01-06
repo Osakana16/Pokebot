@@ -499,7 +499,14 @@ namespace pokebot::node {
 	void CZBotGraph::FindPath(PathWalk<std::uint32_t>* const walk_routes, const Vector& Source, const Vector& Destination, const common::Team Joined_Team) {
 		const int Joined_Team_Index = static_cast<int>(Joined_Team) - 1;
 		auto source = navigation_map.GetNavArea(&Source);
+		if (source == nullptr) {
+			return;
+		}
+
 		auto destination = navigation_map.GetNavArea(&Destination);
+		if (destination == nullptr) {
+			return;
+		}
 		auto start_node_id = source->m_id;
 		auto end_node_id = destination->m_id;
 
@@ -558,7 +565,9 @@ namespace pokebot::node {
 				for (auto& connection : direction) {
 					auto near_route = &routes.at(connection.area->m_id);
 					auto current_node = navigation_map.GetNavAreaByID(current_node_id);
+					assert(current_node != nullptr);
 					auto near_node = navigation_map.GetNavAreaByID(connection.area->m_id);
+					assert(near_node != nullptr);
 
 					float base_cost{};
 #if 1
@@ -651,7 +660,7 @@ namespace pokebot::node {
 
 	bool CZBotGraph::IsOnNode(const Vector& Position, const NodeID Target_Node_ID) const noexcept {
 		auto area = GetNearest(Position);
-		return (area && area->m_id == Target_Node_ID);
+		return (area != nullptr && area->m_id == Target_Node_ID);
 	}
 
 	decltype(static_cast<const decltype(CZBotGraph::goals)>(CZBotGraph::goals).equal_range(GoalKind::None)) CZBotGraph::GetGoal(const GoalKind kind) const noexcept {
