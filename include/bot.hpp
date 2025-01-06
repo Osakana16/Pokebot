@@ -145,7 +145,7 @@ namespace pokebot {
 		class Troops final {
 			TroopsStrategy strategy;
 			TroopsStrategy old_strategy;
-			std::function<bool(const std::pair<std::string, Bot>& target)> leader_condition;
+			std::function<bool(const std::pair<std::string, Bot>& target)> commander_condition;	// The condition to become the commander.
 			std::function<bool(const std::pair<std::string, Bot>& target)> condition;
 
 			common::Team team{};
@@ -153,9 +153,9 @@ namespace pokebot {
 			std::vector<Troops> platoons{};
 		public:
 			common::Team Team() { return team; }
-			Troops(decltype(condition) target_condition, decltype(leader_condition) target_leader_condition, decltype(team) target_team) : condition(target_condition), leader_condition(target_leader_condition), team(target_team) {}
+			Troops(decltype(condition) target_condition, decltype(commander_condition) target_commander_condition, decltype(team) target_team) : condition(target_condition), commander_condition(target_commander_condition), team(target_team) {}
 			bool IsRoot() const POKEBOT_NOEXCEPT { return parent == nullptr; }
-			int CreatePlatoon(decltype(condition) target_condition, decltype(condition) target_leader_condition);
+			int CreatePlatoon(decltype(condition) target_condition, decltype(condition) target_commander_condition);
 			bool DeletePlatoon(const int Index);
 
 			void DecideStrategy(std::unordered_map<std::string, Bot>* bots);

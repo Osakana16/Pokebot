@@ -872,8 +872,8 @@ namespace pokebot {
 			return strategy.objective_goal_node == node::Invalid_NodeID;
 		}
 
-		int Troops::CreatePlatoon(decltype(condition) target_condition, decltype(condition) target_leader_condition) {
-			platoons.push_back({ target_condition, target_leader_condition, Team()});
+		int Troops::CreatePlatoon(decltype(condition) target_condition, decltype(condition) target_commander_condition) {
+			platoons.push_back({ target_condition, target_commander_condition, Team()});
 			platoons.back().parent = this;
 			return platoons.size() - 1;
 		}
@@ -907,7 +907,7 @@ namespace pokebot {
 				}
 			};
 
-			auto candidates = (*bots | std::views::filter(leader_condition));
+			auto candidates = (*bots | std::views::filter(commander_condition));
 			if (candidates.empty())
 				return;
 
