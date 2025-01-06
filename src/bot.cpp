@@ -933,6 +933,7 @@ namespace pokebot {
 									while (DeletePlatoon(0));	// Delete all platoon.
 
 									const size_t Number_Of_Goals = node::czworld.GetNumberOfGoals(node::GoalKind::Bombspot);
+									assert(Number_Of_Goals > 0);
 									for (int i = 0; i < Number_Of_Goals; i++) {
 										CreatePlatoon(
 											[i] (const std::pair<std::string, Bot>& target) -> bool {
@@ -945,12 +946,14 @@ namespace pokebot {
 									}
 
 									auto cts = (*bots | std::views::filter([](const std::pair<std::string, Bot>& target) -> bool { return target.second.JoinedTeam() == common::Team::CT; }));
-									const size_t Range = std::distance(cts.begin(), cts.end()) / Number_Of_Goals;
-									if (Range > 0) {
-										auto size = std::distance(cts.begin(), cts.end());
-										for (int i = 0; i < size; i++) {
-											auto bot = std::next(cts.begin(), i);
-											bot->second.platoon = i / (size % Number_Of_Goals + 1);
+									const size_t Number_Of_Cts = std::distance(cts.begin(), cts.end());
+									if (Number_Of_Cts > 1) {
+										const size_t Number_Of_Member_In_Squad = static_cast<size_t>(std::ceil(static_cast<common::Dec>(Number_Of_Cts) / static_cast<common::Dec>(Number_Of_Goals)));
+										auto member = cts.begin();
+										for (int squad = 0; squad < Number_Of_Goals; squad++) {
+											for (int j = 0; j < Number_Of_Member_In_Squad && member != cts.end(); j++, member++) {
+												member->second.platoon = squad;
+											}
 										}
 									} else {
 										new_strategy.strategy = TroopsStrategy::Strategy::Defend_Bombsite_Concentrative;

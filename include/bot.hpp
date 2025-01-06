@@ -168,7 +168,7 @@ namespace pokebot {
 			node::NodeID GetGoalNode() const POKEBOT_NOEXCEPT { return strategy.objective_goal_node; }
 			
 			Troops& operator[](const int index) { return platoons[index]; }
-			const Troops& at(const int index) const { return platoons[index]; }
+			const Troops& at(const int index) const { return platoons.at(index); }
 
 			auto begin() { return platoons.begin(); }
 			auto end() { return platoons.end(); }
