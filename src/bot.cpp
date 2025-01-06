@@ -469,7 +469,7 @@ namespace pokebot {
 			return (result <= Range);
 		}
 
-		std::vector<game::ClientName> Bot::GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT {
+		std::vector<game::client::Name> Bot::GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT {
 			const game::ClientStatus status{ Name().data() };
 			return status.GetEnemyNamesWithinView();
 		}
@@ -481,7 +481,7 @@ namespace pokebot {
 		
 		bool Bot::IsInBuyzone() const POKEBOT_NOEXCEPT { return game::game.GetClientStatus(Name().data()).IsInBuyzone(); }
 
-		std::string_view Bot::Name() const POKEBOT_NOEXCEPT { return name; }
+		const Name& Bot::Name() const POKEBOT_NOEXCEPT { return name; }
 
 		Vector Bot::Origin() const POKEBOT_NOEXCEPT {
 			return game::game.GetClientStatus(Name().data()).origin();

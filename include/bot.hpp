@@ -214,11 +214,11 @@ namespace pokebot {
 
 			Timer danger_time{};
 
-			std::vector<std::string> target_enemies{};
+			std::vector<Name> target_enemies{};
 
 			State state = State::Accomplishment;
 			void AccomplishMission() POKEBOT_NOEXCEPT, Combat() POKEBOT_NOEXCEPT;
-			std::string name{};
+			Name name{};
 		public:
 			void ReceiveCommand(const TroopsStrategy&);
 
@@ -244,7 +244,7 @@ namespace pokebot {
 			} look_direction{}, ideal_direction{};
 
 
-			Bot(const std::string&, const common::Team, const common::Model) POKEBOT_NOEXCEPT;
+			Bot(const Name&, const common::Team, const common::Model) POKEBOT_NOEXCEPT;
 
 			void OnNewRound() POKEBOT_NOEXCEPT;
 			void Run() POKEBOT_NOEXCEPT;
@@ -271,7 +271,7 @@ namespace pokebot {
 
 			// -- Getters --
 
-			std::string_view Name() const POKEBOT_NOEXCEPT;
+			const Name& Name() const POKEBOT_NOEXCEPT;
 			Vector Origin() const POKEBOT_NOEXCEPT;
 			float Health() const POKEBOT_NOEXCEPT;
 
@@ -288,7 +288,7 @@ namespace pokebot {
 			bool IsInBombTargetZone() const POKEBOT_NOEXCEPT;
 
 			bool IsFighting() const POKEBOT_NOEXCEPT { return danger_time.IsRunning(); }
-			std::vector<game::ClientName> GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT;
+			std::vector<game::client::Name> GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT;
 			bool CanSeeEntity() const POKEBOT_NOEXCEPT;
 
 			int JoinedPlatoon() const POKEBOT_NOEXCEPT;

@@ -22,7 +22,7 @@ namespace pokebot {
 			return hostage;
 		}
 
-		bool Hostage::RecoginzeOwner(const ClientName& Client_Name) POKEBOT_NOEXCEPT {
+		bool Hostage::RecoginzeOwner(const client::Name& Client_Name) POKEBOT_NOEXCEPT {
 			auto client_status = game.GetClientStatus(Client_Name);
 			if (common::Distance(client_status.origin(), entity->v.origin) < 83.0f && client_status.GetTeam() == common::Team::CT) {
 				if (owner_name == Client_Name) {
@@ -187,7 +187,7 @@ namespace pokebot {
 			RegisterCvars();
 		}
 		
-		void Game::RunPlayerMove(const ClientName& Client_Name, Vector movement_angle, float move_speed, float strafe_speed, float forward_speed, const std::uint8_t Msec_Value, const ClientCommitter& committer) {
+		void Game::RunPlayerMove(const client::Name& Client_Name, Vector movement_angle, float move_speed, float strafe_speed, float forward_speed, const std::uint8_t Msec_Value, const ClientCommitter& committer) {
 			auto client = game::game.clients.GetAsMutable(Client_Name);
 			client->PressKey(committer.button);
 			client->angles() = committer.angles;
@@ -207,7 +207,7 @@ namespace pokebot {
 			client->Edict()->v.button = 0;
 		}
 		
-		bool Game::Kill(const ClientName& Client_Name) {
+		bool Game::Kill(const client::Name& Client_Name) {
 			if (PlayerExists(Client_Name)) {
 				MDLL_ClientKill(const_cast<edict_t*>(game::game.clients.Get(Client_Name)->Edict()));
 				return true;
@@ -265,7 +265,7 @@ namespace pokebot {
 			return map_flags;
 		}
 
-		void Game::IssueCommand(const ClientName& Client_Name, const std::string& Sentence) POKEBOT_NOEXCEPT {
+		void Game::IssueCommand(const client::Name& Client_Name, const std::string& Sentence) POKEBOT_NOEXCEPT {
 			bot_args.clear();
 			bot_args = common::StringSplit(&Sentence, ' ');
 			MDLL_ClientCommand(const_cast<edict_t*>(clients.Get(Client_Name)->Edict()));
@@ -463,7 +463,7 @@ namespace pokebot {
 			return ClientStatus{ client_name.data() };
 		}
 
-		ClientStatus::ClientStatus(const ClientName& Client_Name) : client(game.clients.Get(Client_Name)) {}
+		ClientStatus::ClientStatus(const client::Name& Client_Name) : client(game.clients.Get(Client_Name)) {}
 
 		common::Team ClientStatus::GetTeam() const POKEBOT_NOEXCEPT {
 			return client->GetTeam();
@@ -478,7 +478,7 @@ namespace pokebot {
 			return false;
 		}
 
-		std::vector<ClientName> ClientStatus::GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT {
+		std::vector<client::Name> ClientStatus::GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT {
 			decltype(GetEnemyNamesWithinView()) result{};
 			for (const auto& other : game.clients.GetAll()) {
 				if (entity::CanSeeEntity(*client, other.second) && other.second.GetTeam() != common::Team::Spector && !other.second.IsDead() && other.second.GetTeam() != GetTeam()) {
@@ -488,7 +488,7 @@ namespace pokebot {
 			return result;
 		}
 
-		std::vector<ClientName> ClientStatus::GetEntityNamesInView() const POKEBOT_NOEXCEPT {
+		std::vector<client::Name> ClientStatus::GetEntityNamesInView() const POKEBOT_NOEXCEPT {
 			decltype(GetEntityNamesInView()) result{};
 			for (auto& other : game.clients.GetAll()) {
 				if (entity::CanSeeEntity(*client, other.second)) {
