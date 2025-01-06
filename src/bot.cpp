@@ -308,29 +308,28 @@ namespace pokebot {
 
 			TurnViewAngle();
 			TurnMovementAngle();
-			auto status = game::game.GetClientStatus(Name().data());
-			std::string enemies_in_view[32]{};
+#if 1
 			if (game::poke_fight) {
+				auto status = game::game.GetClientStatus(Name().data());
+				std::string enemies_in_view[32]{};
 				int i{};
-				for (const auto& target : status.GetEntityNamesInView()) {
-					if (JoinedTeam() != game::game.GetClientStatus(target).GetTeamFromModel()) {
-						enemies_in_view[i++] = target;
+				for (const auto& target : status.GetEnemyNamesWithinView()) {
+					enemies_in_view[i++] = target;
+				}
+
+				if (!enemies_in_view[0].empty()) {
+					for (auto& enemy : enemies_in_view) {
+						if (enemy.empty()) {
+							break;
+						}
+						if (std::find(target_enemies.begin(), target_enemies.end(), enemy) == target_enemies.end()) {
+							target_enemies.push_back(enemy);
+						}
 					}
+					danger_time.SetTime(5.0);
 				}
 			}
-
-			if (!enemies_in_view[0].empty()) {
-				for (auto& enemy : enemies_in_view) {
-					if (enemy.empty()) {
-						break;
-					}
-					if (std::find(target_enemies.begin(), target_enemies.end(), enemy) == target_enemies.end()) {
-						target_enemies.push_back(enemy);
-					}
-				}
-				danger_time.SetTime(5.0);
-			}
-
+#endif
 			if (!danger_time.IsRunning()) {
 				target_enemies.clear();
 				state = State::Accomplishment;
@@ -470,9 +469,9 @@ namespace pokebot {
 			return (result <= Range);
 		}
 
-		std::string Bot::GetEnemyWithinView() const POKEBOT_NOEXCEPT {
+		std::vector<game::ClientName> Bot::GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT {
 			const game::ClientStatus status{ Name().data() };
-			return status.GetEnemyNameWithinView();
+			return status.GetEnemyNamesWithinView();
 		}
 
 		bool Bot::HasGoalToHead() const POKEBOT_NOEXCEPT {

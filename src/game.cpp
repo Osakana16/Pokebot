@@ -478,13 +478,14 @@ namespace pokebot {
 			return false;
 		}
 
-		ClientName ClientStatus::GetEnemyNameWithinView() const POKEBOT_NOEXCEPT {
+		std::vector<ClientName> ClientStatus::GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT {
+			decltype(GetEnemyNamesWithinView()) result{};
 			for (const auto& other : game.clients.GetAll()) {
-				if (entity::CanSeeEntity(*client, other.second) && other.second.GetTeam() != GetTeam()) {
-					return other.first;
+				if (entity::CanSeeEntity(*client, other.second) && other.second.GetTeam() != common::Team::Spector && !other.second.IsDead() && other.second.GetTeam() != GetTeam()) {
+					result.push_back(other.first);
 				}
 			}
-			return "";
+			return result;
 		}
 
 		std::vector<ClientName> ClientStatus::GetEntityNamesInView() const POKEBOT_NOEXCEPT {

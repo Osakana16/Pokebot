@@ -33,7 +33,7 @@ namespace pokebot::bot {
 		namespace {
 			template<bool b>
 			bool IsSeeingEnemy(const Bot* const Self) POKEBOT_NOEXCEPT {
-				RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->GetEnemyWithinView().empty());
+				RETURN_BEHAVIOR_TRUE_OR_FALSE(b, !Self->GetEnemyNamesWithinView().empty());
 			}
 
 			template<bool b>

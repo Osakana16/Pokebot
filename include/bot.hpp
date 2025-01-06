@@ -288,7 +288,7 @@ namespace pokebot {
 			bool IsInBombTargetZone() const POKEBOT_NOEXCEPT;
 
 			bool IsFighting() const POKEBOT_NOEXCEPT { return danger_time.IsRunning(); }
-			std::string GetEnemyWithinView() const POKEBOT_NOEXCEPT;
+			std::vector<game::ClientName> GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT;
 			bool CanSeeEntity() const POKEBOT_NOEXCEPT;
 
 			int JoinedPlatoon() const POKEBOT_NOEXCEPT;

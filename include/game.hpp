@@ -298,7 +298,7 @@ namespace pokebot {
 
 			common::Team GetTeam() const POKEBOT_NOEXCEPT;
 			bool CanSeeFriend() const POKEBOT_NOEXCEPT;
-			ClientName GetEnemyNameWithinView() const POKEBOT_NOEXCEPT;
+			std::vector<ClientName> GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT;
 			std::vector<ClientName> GetEntityNamesInView() const POKEBOT_NOEXCEPT;
 			common::Team GetTeamFromModel() const POKEBOT_NOEXCEPT;
 						
