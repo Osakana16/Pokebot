@@ -761,8 +761,9 @@ namespace pokebot {
 		}
 
 		void Manager::Insert(std::string bot_name, const common::Team team, const common::Model model, const bot::Difficult Assigned_Diffcult) noexcept {
-			if (game::game.Spawn(bot_name)) {
-				bots.insert({ bot_name, Bot(bot_name, team, model) });
+			if (auto spawn_result = game::game.Spawn(bot_name); std::get<bool>(spawn_result)) {
+				bot_name = std::get<std::string>(spawn_result);
+				assert(bots.insert({ bot_name, Bot(bot_name, team, model) }).second);
 
 				auto result = balancer.insert({ bot_name, BotBalancer{.gap = {} } });
 				assert(result.second);

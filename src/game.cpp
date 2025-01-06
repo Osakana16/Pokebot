@@ -347,14 +347,14 @@ namespace pokebot {
 			}
 		}
 
-		bool ClientManager::Create(std::string client_name) {
+		ClientCreationResult ClientManager::Create(std::string client_name) {
 			assert(!client_name.empty());
 			if (client_name.empty())
-				return nullptr;
+				return std::make_tuple(false, "");
 
 			auto client = (*g_engfuncs.pfnCreateFakeClient)(client_name.c_str());
 			if (client == nullptr)
-				return nullptr;
+				return std::make_tuple(false, "");
 
 			client_name = STRING(client->v.netname);
 			if (client->pvPrivateData != nullptr)
@@ -381,11 +381,11 @@ namespace pokebot {
 
 			char ptr[128]{};            // allocate space for message from ClientConnect
 			if (!MDLL_ClientConnect(client, client_name.c_str(), "127.0.0.1", ptr))
-				return nullptr;
+				return std::make_tuple(false, "");
 
 			MDLL_ClientPutInServer(client);
 			client->v.flags |= pokebot::common::Third_Party_Bot_Flag;
-			return Register(client);
+			return std::make_tuple(Register(client), client_name);
 		}
 
 		bool ClientManager::Register(edict_t* edict) {

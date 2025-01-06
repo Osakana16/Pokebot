@@ -3,6 +3,7 @@
 namespace pokebot {
 	namespace game {
 		using ClientName = std::string;
+		using ClientCreationResult = std::tuple<bool, ClientName>;
 
 		inline bool is_enabled_auto_waypoint = true;
 
@@ -220,7 +221,7 @@ namespace pokebot {
 			bool is_nvg_on{};
 			bool is_vip{};
 
-			int weapon_ammo[15]{};
+			common::Array<int, 10> weapon_ammo{};
 			int weapon_clip{};
 			Weapon current_weapon{};
 		public:
@@ -254,7 +255,7 @@ namespace pokebot {
 
 			bool IsVIP() const noexcept { return is_vip; }
 
-			int WeaponAmmo(const AmmoID Ammo_ID) const noexcept { return weapon_ammo[static_cast<int>(Ammo_ID)]; }
+			int WeaponAmmo(const AmmoID Ammo_ID) const noexcept { return weapon_ammo[static_cast<int>(Ammo_ID) - 1]; }
 
 			const float& Health() const { return client->v.health; }
 			const float& Armor() const { return client->v.armorvalue; }
@@ -412,7 +413,7 @@ namespace pokebot {
 		public:
 			void OnNewRound();
 			ClientStatus GetClientStatus(std::string_view client_name);
-			bool Create(std::string client_name);
+			ClientCreationResult Create(std::string client_name);
 			bool Register(edict_t*);
 			auto& GetAll() const noexcept {
 				return clients;
@@ -518,7 +519,7 @@ namespace pokebot {
 
 			bool Kill(const ClientName&);
 
-			bool Spawn(std::string_view client_name) { return clients.Create(client_name.data()); }
+			ClientCreationResult Spawn(std::string_view client_name) { return clients.Create(client_name.data()); }
 			bool RegisterClient(edict_t* client) { return clients.Register(client); }
 
 			auto GetClientStatus(std::string_view client_name) { return clients.GetClientStatus(client_name); }

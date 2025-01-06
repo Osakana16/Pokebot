@@ -243,8 +243,13 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         if (args.size() < 2) {
                             return;
                         }
+                        const int Ammo_ID = std::get<int>(args[0]);
+                        const int Amount = std::get<int>(args[1]);
+                        if (Ammo_ID <= 0 || Ammo_ID > 10)
+                            return;
+
                         using namespace pokebot;
-                        game::game.OnAmmoPickedup(STRING(engine_target_edict->v.netname), static_cast<game::AmmoID>(std::get<int>(args[0])), std::get<int>(args[1]));
+                        game::game.OnAmmoPickedup(STRING(engine_target_edict->v.netname), static_cast<game::AmmoID>(Ammo_ID - 1), Amount);
                     }
                 },
                 {

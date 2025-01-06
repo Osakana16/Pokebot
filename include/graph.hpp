@@ -181,7 +181,7 @@ namespace pokebot::node {
 	// Compatibility with ZBot navmesh.
 	inline class CZBotGraph {
 		std::unordered_multimap<GoalKind, NodeID> goals{};
-		Danger danger[2]{};
+		common::Array<Danger, 2> danger;
 	public:
 		size_t GetNumberOfGoals(GoalKind) const noexcept;
 
