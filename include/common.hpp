@@ -10,6 +10,14 @@
 
 namespace pokebot{
 	namespace common {
+#ifndef NDEBUG
+		template<typename T, size_t N>
+		using Array = std::array<T, N>;
+#else
+		template<typename T, size_t N>
+		using Array = T[N];
+#endif
+
 		using Dec = float;
 		using Time = Dec;
 
