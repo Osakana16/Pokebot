@@ -117,7 +117,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                     }
                 },
                 {
-                    GET_USER_MSG_ID(PLID, "ShowMenu", nullptr), []() noexcept {
+                    GET_USER_MSG_ID(PLID, "ShowMenu", nullptr), []() POKEBOT_NOEXCEPT {
                         if (!is_bot) {
                             return;
                         }
@@ -472,7 +472,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                     }
                 },
                 {
-                    GET_USER_MSG_ID(PLID, "HLTV", nullptr), []() noexcept {
+                    GET_USER_MSG_ID(PLID, "HLTV", nullptr), []() POKEBOT_NOEXCEPT {
                         // New round message in CS1.6.
 
                         if (args.size() < 2 || !std::holds_alternative<int>(args[0]) || !std::holds_alternative<int>(args[1])) {
@@ -513,7 +513,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
         RETURN_META(MRES_IGNORED);
     };
 
-    meta_engfuncs.pfnClientCommand = [](edict_t* pEdict, const char* szFmt, ...) noexcept {
+    meta_engfuncs.pfnClientCommand = [](edict_t* pEdict, const char* szFmt, ...) POKEBOT_NOEXCEPT {
         if (gpGlobals->deathmatch) {
             if (pEdict->v.flags & (FL_FAKECLIENT | pokebot::common::Third_Party_Bot_Flag))
                 RETURN_META(MRES_SUPERCEDE);
@@ -521,49 +521,49 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
         RETURN_META(MRES_IGNORED);
     };
 
-    meta_engfuncs.pfnWriteByte = [](int value) noexcept {
+    meta_engfuncs.pfnWriteByte = [](int value) POKEBOT_NOEXCEPT {
         if (gpGlobals->deathmatch) {
             args.push_back(value);
         }
         RETURN_META(MRES_IGNORED);
     };
 
-    meta_engfuncs.pfnWriteChar = [](int value) noexcept {
+    meta_engfuncs.pfnWriteChar = [](int value) POKEBOT_NOEXCEPT {
         if (gpGlobals->deathmatch) {
             args.push_back(value);
         }
         RETURN_META(MRES_IGNORED);
     };
 
-    meta_engfuncs.pfnWriteShort = [](int value) noexcept {
+    meta_engfuncs.pfnWriteShort = [](int value) POKEBOT_NOEXCEPT {
         if (gpGlobals->deathmatch) {
             args.push_back(value);
         }
         RETURN_META(MRES_IGNORED);
     };
 
-    meta_engfuncs.pfnWriteLong = [](int value) noexcept {
+    meta_engfuncs.pfnWriteLong = [](int value) POKEBOT_NOEXCEPT {
         if (gpGlobals->deathmatch) {
             args.push_back(value);
         }
         RETURN_META(MRES_IGNORED);
     };
 
-    meta_engfuncs.pfnWriteAngle = [](float value) noexcept {
+    meta_engfuncs.pfnWriteAngle = [](float value) POKEBOT_NOEXCEPT {
         if (gpGlobals->deathmatch) {
             args.push_back(value);
         }
         RETURN_META(MRES_IGNORED);
     };
 
-    meta_engfuncs.pfnWriteCoord = [](float value) noexcept {
+    meta_engfuncs.pfnWriteCoord = [](float value) POKEBOT_NOEXCEPT {
         if (gpGlobals->deathmatch) {
             args.push_back(value);
         }
         RETURN_META(MRES_IGNORED);
     };
 
-    meta_engfuncs.pfnWriteString = [](const char* value) noexcept {
+    meta_engfuncs.pfnWriteString = [](const char* value) POKEBOT_NOEXCEPT {
         if (gpGlobals->deathmatch) {
             args.push_back(value);
         }

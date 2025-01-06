@@ -4,7 +4,7 @@
 namespace pokebot::bot::behavior {
 	namespace {
 		template<node::GoalKind kind>
-		Status SetGoal(Bot *const self) noexcept {
+		Status SetGoal(Bot *const self) POKEBOT_NOEXCEPT {
 #if !USE_NAVMESH
 			if (node::world.IsOnNode(self->Origin(), self->goal_node) && node::world.IsSameGoal(self->goal_node, kind))
 				return Status::Enough;
@@ -40,7 +40,7 @@ namespace pokebot::bot::behavior {
 		}
 	}
 
-	auto LookAt = [](Bot* const self, const Vector& Dest, const float Range) noexcept -> Status {
+	auto LookAt = [](Bot* const self, const Vector& Dest, const float Range) POKEBOT_NOEXCEPT -> Status {
 		self->look_direction.view = Dest;
 		self->look_direction.movement = Dest;
 		return Status::Success;
@@ -58,7 +58,7 @@ namespace pokebot::bot::behavior {
 	}
 
 	void DefineAction() {
-		auto changeIfNotSelected = [](Bot* const self, const game::Weapon Target_Weapon) noexcept -> Status {
+		auto changeIfNotSelected = [](Bot* const self, const game::Weapon Target_Weapon) POKEBOT_NOEXCEPT -> Status {
 			if (!self->IsCurrentWeapon(Target_Weapon)) {
 				self->SelectWeapon(Target_Weapon);
 				return Status::Success;
@@ -214,7 +214,7 @@ namespace pokebot::bot::behavior {
 		});
 
 		set_goal_from_team_objective_within_range->Define([](Bot* const self) -> Status {
-			auto findCircleLine = [self](const Vector& Origin, const float Distance) noexcept -> node::NodeID {
+			auto findCircleLine = [self](const Vector& Origin, const float Distance) POKEBOT_NOEXCEPT -> node::NodeID {
 				node::NodeID id = node::Invalid_NodeID;
 				for (const auto& Line : { Vector(Distance, .0f, .0f), Vector(-Distance, .0f, .0f), Vector(.0f, Distance, .0f), Vector(.0f, -Distance, .0f) }) {
 					auto area = node::czworld.GetNearest(node::czworld.GetOrigin(bot::Manager::Instance().GetGoalNode(self->JoinedTeam(), self->JoinedPlatoon())) + Line);
@@ -246,7 +246,7 @@ namespace pokebot::bot::behavior {
 		});
 
 		set_goal_from_c4_within_range->Define([](Bot* const self) -> Status {
-			auto findCircleLine = [](const Vector& Origin, const float Distance) noexcept -> node::NodeID {
+			auto findCircleLine = [](const Vector& Origin, const float Distance) POKEBOT_NOEXCEPT -> node::NodeID {
 				node::NodeID id = node::Invalid_NodeID;
 				for (const auto& Line : { Vector(Distance, .0f, .0f), Vector(-Distance, .0f, .0f), Vector(.0f, Distance, .0f), Vector(.0f, -Distance, .0f) }) {
 					auto area = node::czworld.GetNearest(*Manager::Instance().C4Origin() + Line);
@@ -459,7 +459,7 @@ namespace pokebot::bot::behavior {
 						Not_Running,
 						Running,
 						Finished
-					} RunningStatus() const noexcept {
+					} RunningStatus() const POKEBOT_NOEXCEPT {
 						if (time <= 0.0f) {
 							return Status::Not_Running;
 						} else if (time >= gpGlobals->time) {
@@ -469,7 +469,7 @@ namespace pokebot::bot::behavior {
 						}
 					}
 
-					void SetTime(const float time_) noexcept {
+					void SetTime(const float time_) POKEBOT_NOEXCEPT {
 						time = time_ + gpGlobals->time;
 					}
 				private:

@@ -48,8 +48,8 @@ namespace pokebot {
 
 			const common::Time& Base_Time = gpGlobals->time;
 		public:
-			bool IsRunning() const noexcept { return time >= Base_Time; }
-			void SetTime(const common::Time t) noexcept { time = t + Base_Time; }
+			bool IsRunning() const POKEBOT_NOEXCEPT { return time >= Base_Time; }
+			void SetTime(const common::Time t) POKEBOT_NOEXCEPT { time = t + Base_Time; }
 		};
 
 		
@@ -86,33 +86,33 @@ namespace pokebot {
 				int Priority{};
 			};
 
-			inline static auto Compare = [](const Element& a, const Element& b) noexcept {
+			inline static auto Compare = [](const Element& a, const Element& b) POKEBOT_NOEXCEPT {
 				return a.Priority > b.Priority;
 			};
 			std::set<Element, decltype(Compare)> queue{};
 		public:
-			bool AddGoalQueue(const node::NodeID ID) noexcept {
+			bool AddGoalQueue(const node::NodeID ID) POKEBOT_NOEXCEPT {
 				return AddGoalQueue(ID, 0);
 			}
 
-			bool AddGoalQueue(const node::NodeID ID, const int Priority) noexcept {
+			bool AddGoalQueue(const node::NodeID ID, const int Priority) POKEBOT_NOEXCEPT {
 				assert(ID != node::Invalid_NodeID);
 				return queue.insert(Element{ .ID = ID, .Priority = Priority }).second;
 			}
 
-			bool IsEmpty() const noexcept { return queue.empty(); }
-			node::NodeID Get() const noexcept { return (queue.empty() ? node::Invalid_NodeID : queue.cbegin()->ID); }
-			void Pop() noexcept { queue.erase(queue.begin()); }
-			void Remove(const node::NodeID ID) noexcept { queue.erase(std::find_if(queue.begin(), queue.end(), [ID](const Element& E) { return E.ID == ID; })); }
-			void Clear() noexcept { queue.clear(); }
+			bool IsEmpty() const POKEBOT_NOEXCEPT { return queue.empty(); }
+			node::NodeID Get() const POKEBOT_NOEXCEPT { return (queue.empty() ? node::Invalid_NodeID : queue.cbegin()->ID); }
+			void Pop() POKEBOT_NOEXCEPT { queue.erase(queue.begin()); }
+			void Remove(const node::NodeID ID) POKEBOT_NOEXCEPT { queue.erase(std::find_if(queue.begin(), queue.end(), [ID](const Element& E) { return E.ID == ID; })); }
+			void Clear() POKEBOT_NOEXCEPT { queue.clear(); }
 		};
 
 		template<int min, int max>
 		class PersonalityItem {
 			int value{};
 		public:
-			inline PersonalityItem& operator=(const auto& v) noexcept { value = std::clamp(v, min, max); return *this; }
-			operator int() const noexcept { return value; }
+			inline PersonalityItem& operator=(const auto& v) POKEBOT_NOEXCEPT { value = std::clamp(v, min, max); return *this; }
+			operator int() const POKEBOT_NOEXCEPT { return value; }
 			PersonalityItem() : PersonalityItem(0) {}
 			PersonalityItem(const auto& v) { operator=(v); }
 		};
@@ -154,18 +154,18 @@ namespace pokebot {
 		public:
 			common::Team Team() { return team; }
 			Troops(decltype(condition) target_condition, decltype(leader_condition) target_leader_condition, decltype(team) target_team) : condition(target_condition), leader_condition(target_leader_condition), team(target_team) {}
-			bool IsRoot() const noexcept { return parent == nullptr; }
+			bool IsRoot() const POKEBOT_NOEXCEPT { return parent == nullptr; }
 			int CreatePlatoon(decltype(condition) target_condition, decltype(condition) target_leader_condition);
 			bool DeletePlatoon(const int Index);
 
 			void DecideStrategy(std::unordered_map<std::string, Bot>* bots);
 			void Command(std::unordered_map<std::string, Bot>* bots);
 			void SetNewStrategy(const TroopsStrategy&);
-			bool HasGoalBeenDevised(const node::NodeID) const noexcept;
-			bool HasGoalBeenDevisedByOtherPlatoon(const node::NodeID) const noexcept;
-			bool NeedToDevise() const noexcept;
+			bool HasGoalBeenDevised(const node::NodeID) const POKEBOT_NOEXCEPT;
+			bool HasGoalBeenDevisedByOtherPlatoon(const node::NodeID) const POKEBOT_NOEXCEPT;
+			bool NeedToDevise() const POKEBOT_NOEXCEPT;
 
-			node::NodeID GetGoalNode() const noexcept { return strategy.objective_goal_node; }
+			node::NodeID GetGoalNode() const POKEBOT_NOEXCEPT { return strategy.objective_goal_node; }
 			
 			Troops& operator[](const int index) { return platoons[index]; }
 			const Troops& at(const int index) const { return platoons[index]; }
@@ -202,12 +202,12 @@ namespace pokebot {
 			common::AngleVector movement_angle{};
 			float move_speed{}, strafe_speed{};
 
-			std::uint8_t ComputeMsec() noexcept;
+			std::uint8_t ComputeMsec() POKEBOT_NOEXCEPT;
 			
-			void SelectionUpdate() noexcept;
-			void NormalUpdate() noexcept;
-			void BuyUpdate() noexcept;
-			void OnSelectionCompleted() noexcept;
+			void SelectionUpdate() POKEBOT_NOEXCEPT;
+			void NormalUpdate() POKEBOT_NOEXCEPT;
+			void BuyUpdate() POKEBOT_NOEXCEPT;
+			void OnSelectionCompleted() POKEBOT_NOEXCEPT;
 			void CheckAround();
 
 			void TurnViewAngle(), TurnMovementAngle();
@@ -217,7 +217,7 @@ namespace pokebot {
 			std::vector<std::string> target_enemies{};
 
 			State state = State::Accomplishment;
-			void AccomplishMission() noexcept, Combat() noexcept;
+			void AccomplishMission() POKEBOT_NOEXCEPT, Combat() POKEBOT_NOEXCEPT;
 			std::string name{};
 		public:
 			void ReceiveCommand(const TroopsStrategy&);
@@ -236,85 +236,85 @@ namespace pokebot {
 			pokebot::node::NodeID goal_node{};
 			pokebot::node::NodeID next_dest_node{};
 
-			bool IsHelpingMate() const noexcept { return false; }
+			bool IsHelpingMate() const POKEBOT_NOEXCEPT { return false; }
 
 			struct { 
 				std::optional<common::PositionVector> view{}, movement{}; 
-				void Clear() noexcept { view = movement = std::nullopt; }
+				void Clear() POKEBOT_NOEXCEPT { view = movement = std::nullopt; }
 			} look_direction{}, ideal_direction{};
 
 
-			Bot(const std::string&, const common::Team, const common::Model) noexcept;
+			Bot(const std::string&, const common::Team, const common::Model) POKEBOT_NOEXCEPT;
 
-			void OnNewRound() noexcept;
-			void Run() noexcept;
+			void OnNewRound() POKEBOT_NOEXCEPT;
+			void Run() POKEBOT_NOEXCEPT;
 
 			void SelectWeapon(const game::Weapon), SelectPrimaryWeapon(), SelectSecondaryWeapon();
 
-			bool HasEnemy() const noexcept;
+			bool HasEnemy() const POKEBOT_NOEXCEPT;
 			void LookAtClosestEnemy();
-			bool IsLookingAtEnemy() const noexcept;
-			bool IsEnemyFar() const noexcept;
+			bool IsLookingAtEnemy() const POKEBOT_NOEXCEPT;
+			bool IsEnemyFar() const POKEBOT_NOEXCEPT;
 
-			inline bool IsGoodCondition() const noexcept { return Health() >= 50; }
+			inline bool IsGoodCondition() const POKEBOT_NOEXCEPT { return Health() >= 50; }
 
-			void OnRadioRecieved(const std::string& Sender_Name, const std::string& Radio_Sentence) noexcept;
+			void OnRadioRecieved(const std::string& Sender_Name, const std::string& Radio_Sentence) POKEBOT_NOEXCEPT;
 
-			void OnBombPlanted() noexcept;
+			void OnBombPlanted() POKEBOT_NOEXCEPT;
 
 			// -- Setters --
 
-			void SetGoal(const node::NodeID) noexcept;
+			void SetGoal(const node::NodeID) POKEBOT_NOEXCEPT;
 			void PressKey(ActionKey);
-			bool IsPressingKey(const ActionKey) const noexcept;
-			bool IsFollowing() const noexcept { return false; }
+			bool IsPressingKey(const ActionKey) const POKEBOT_NOEXCEPT;
+			bool IsFollowing() const POKEBOT_NOEXCEPT { return false; }
 
 			// -- Getters --
 
-			std::string_view Name() const noexcept;
-			Vector Origin() const noexcept;
-			float Health() const noexcept;
+			std::string_view Name() const POKEBOT_NOEXCEPT;
+			Vector Origin() const POKEBOT_NOEXCEPT;
+			float Health() const POKEBOT_NOEXCEPT;
 
-			bool IsLookingAt(const Vector& Dest, const float Range) const noexcept;
+			bool IsLookingAt(const Vector& Dest, const float Range) const POKEBOT_NOEXCEPT;
 		
-			bool HasPrimaryWeapon() const noexcept;
-			bool HasSecondaryWeapon() const noexcept;
-			bool HasWeapon(const game::Weapon Weapon_ID) const noexcept;
-			bool IsCurrentWeapon(const game::Weapon Weapon_ID) const noexcept { return (current_weapon == Weapon_ID);  }
+			bool HasPrimaryWeapon() const POKEBOT_NOEXCEPT;
+			bool HasSecondaryWeapon() const POKEBOT_NOEXCEPT;
+			bool HasWeapon(const game::Weapon Weapon_ID) const POKEBOT_NOEXCEPT;
+			bool IsCurrentWeapon(const game::Weapon Weapon_ID) const POKEBOT_NOEXCEPT { return (current_weapon == Weapon_ID);  }
 
-			bool HasGoalToHead() const noexcept;
-			bool IsInBuyzone() const noexcept;
+			bool HasGoalToHead() const POKEBOT_NOEXCEPT;
+			bool IsInBuyzone() const POKEBOT_NOEXCEPT;
 
-			bool IsInBombTargetZone() const noexcept;
+			bool IsInBombTargetZone() const POKEBOT_NOEXCEPT;
 
-			bool IsFighting() const noexcept { return danger_time.IsRunning(); }
-			std::string GetEnemyWithinView() const noexcept;
-			bool CanSeeEntity() const noexcept;
+			bool IsFighting() const POKEBOT_NOEXCEPT { return danger_time.IsRunning(); }
+			std::string GetEnemyWithinView() const POKEBOT_NOEXCEPT;
+			bool CanSeeEntity() const POKEBOT_NOEXCEPT;
 
-			int JoinedPlatoon() const noexcept;
-			common::Team JoinedTeam() const noexcept;
-			float GetSecondLeftToCompleteReloading() const noexcept;
+			int JoinedPlatoon() const POKEBOT_NOEXCEPT;
+			common::Team JoinedTeam() const POKEBOT_NOEXCEPT;
+			float GetSecondLeftToCompleteReloading() const POKEBOT_NOEXCEPT;
 
 			/* - Client Wrapper - */
 
-			bool IsDucking() const noexcept;
-			bool IsDriving() const noexcept;
-			bool IsInWater() const noexcept;
-			bool IsSwimming() const noexcept;
-			bool IsOnFloor() const noexcept;
-			bool IsClimbingLadder() const noexcept;
-			bool IsReloading() const noexcept;
-			bool IsPlantingBomb() const noexcept;
-			bool IsChangingWeapon() const noexcept;
-			bool IsFalling() const noexcept;
-			bool Jumped() const noexcept;
-			bool IsJumping() const noexcept;
-			bool IsLeadingHostages() const noexcept;
-			bool IsLookingThroughScope() const noexcept;
-			bool IsLookingThroughCamera() const noexcept;
-			bool IsChangingSilencer() const noexcept;
-			bool IsEnabledFlashlight() const noexcept;
-			bool IsEnabledNightvision() const noexcept;
+			bool IsDucking() const POKEBOT_NOEXCEPT;
+			bool IsDriving() const POKEBOT_NOEXCEPT;
+			bool IsInWater() const POKEBOT_NOEXCEPT;
+			bool IsSwimming() const POKEBOT_NOEXCEPT;
+			bool IsOnFloor() const POKEBOT_NOEXCEPT;
+			bool IsClimbingLadder() const POKEBOT_NOEXCEPT;
+			bool IsReloading() const POKEBOT_NOEXCEPT;
+			bool IsPlantingBomb() const POKEBOT_NOEXCEPT;
+			bool IsChangingWeapon() const POKEBOT_NOEXCEPT;
+			bool IsFalling() const POKEBOT_NOEXCEPT;
+			bool Jumped() const POKEBOT_NOEXCEPT;
+			bool IsJumping() const POKEBOT_NOEXCEPT;
+			bool IsLeadingHostages() const POKEBOT_NOEXCEPT;
+			bool IsLookingThroughScope() const POKEBOT_NOEXCEPT;
+			bool IsLookingThroughCamera() const POKEBOT_NOEXCEPT;
+			bool IsChangingSilencer() const POKEBOT_NOEXCEPT;
+			bool IsEnabledFlashlight() const POKEBOT_NOEXCEPT;
+			bool IsEnabledNightvision() const POKEBOT_NOEXCEPT;
 		};
 
 		enum class Difficult {
@@ -352,7 +352,7 @@ namespace pokebot {
 			std::unordered_map<std::string, Bot> bots{};
 			std::unordered_map<std::string, BotBalancer> balancer{};
 
-			Bot* const Get(const std::string&) noexcept;
+			Bot* const Get(const std::string&) POKEBOT_NOEXCEPT;
 			RadioMessage radio_message{};
 			Manager();
 		public:
@@ -360,7 +360,7 @@ namespace pokebot {
 			* @brief Get the instance of Manager
 			* @return The instance of Manager
 			*/
-			static Manager& Instance() noexcept {
+			static Manager& Instance() POKEBOT_NOEXCEPT {
 				static Manager manager{};
 				return manager;
 			}
@@ -368,7 +368,7 @@ namespace pokebot {
 			/**
 			* @brief Called when a new round starts.
 			*/
-			void OnNewRound() noexcept;
+			void OnNewRound() POKEBOT_NOEXCEPT;
 
 			/**
 			* @brief Get the compensation vector for a bot.
@@ -380,7 +380,7 @@ namespace pokebot {
 			/**
 			* @brief Update the state of all bots.
 			*/
-			void Update() noexcept;
+			void Update() POKEBOT_NOEXCEPT;
 
 			/**
 			* @brief Insert a new bot into the game.
@@ -389,39 +389,39 @@ namespace pokebot {
 			* @param model The model of the bot.
 			* @param difficulty The difficulty level of the bot.
 			*/
-			void Insert(std::string bot_name, const common::Team team, const common::Model model, const bot::Difficult difficulty) noexcept;
+			void Insert(std::string bot_name, const common::Team team, const common::Model model, const bot::Difficult difficulty) POKEBOT_NOEXCEPT;
 
 			/**
 			* @brief Kick a bot from the game.
 			* @param Bot_Name The name of the bot.
 			*/
-			void Kick(const std::string& Bot_Name) noexcept;
+			void Kick(const std::string& Bot_Name) POKEBOT_NOEXCEPT;
 
 			/**
 			* @brief Remove a bot from the game.
 			* @param Bot_Name The name of the bot.
 			*/
-			void Remove(const std::string& Bot_Name) noexcept;
+			void Remove(const std::string& Bot_Name) POKEBOT_NOEXCEPT;
 
 			/**
 			* @brief Check if a bot exists by name.
 			* @param Bot_Name The name of the bot.
 			* @return true if the bot exists, false otherwise.
 			*/
-			bool IsExist(const std::string& Bot_Name) const noexcept;
+			bool IsExist(const std::string& Bot_Name) const POKEBOT_NOEXCEPT;
 
 			/**
 			* @brief Assign an engine message to a bot.
 			* @param Bot_Name The name of the bot.
 			* @param message The message to assign.
 			*/
-			void Assign(const std::string_view Bot_Name, Message message) noexcept;
+			void Assign(const std::string_view Bot_Name, Message message) POKEBOT_NOEXCEPT;
 
 			/**
 			* @brief Called when a bot dies.
 			* @param Bot_Name The name of the bot.
 			*/
-			void OnDied(const std::string& Bot_Name) noexcept;
+			void OnDied(const std::string& Bot_Name) POKEBOT_NOEXCEPT;
 
 			/**
 			* @brief Called when a bot takes damage.
@@ -431,43 +431,43 @@ namespace pokebot {
 			* @param Armor The amount of armor remaining.
 			* @param Bit Additional information about the damage.
 			*/
-			void OnDamageTaken(const std::string_view Bot_Name, const edict_t* Inflictor, const int Damage, const int Armor, const int Bit) noexcept;
+			void OnDamageTaken(const std::string_view Bot_Name, const edict_t* Inflictor, const int Damage, const int Armor, const int Bit) POKEBOT_NOEXCEPT;
 
 			/**
 			* @brief Called when a bot joins a team.
 			* @param Bot_Name The name of the bot.
 			*/
-			void OnJoinedTeam(const std::string&) noexcept;
+			void OnJoinedTeam(const std::string&) POKEBOT_NOEXCEPT;
 
 			/**
 			* @brief Called when a chat message is received.
 			* @param Bot_Name The name of the bot.
 			*/
-			void OnChatRecieved(const std::string&) noexcept;
+			void OnChatRecieved(const std::string&) POKEBOT_NOEXCEPT;
 
 			/**
 			* @brief Called when a team chat message is received.
 			* @param Bot_Name The name of the bot.
 			*/
-			void OnTeamChatRecieved(const std::string&) noexcept;
+			void OnTeamChatRecieved(const std::string&) POKEBOT_NOEXCEPT;
 
 			/**
 			* @brief Called when a radio message is received.
 			* @param Sender_Name The name of the sender.
 			* @param Radio_Sentence The radio message.
 			*/
-			void OnRadioRecieved(const std::string& Sender_Name, const std::string& Radio_Sentence) noexcept;
+			void OnRadioRecieved(const std::string& Sender_Name, const std::string& Radio_Sentence) POKEBOT_NOEXCEPT;
 
 			/**
 			* @brief Called when the bomb is planted.
 			*/
-			void OnBombPlanted() noexcept;
+			void OnBombPlanted() POKEBOT_NOEXCEPT;
 
 			/**
 			* @brief Called when a bot has completely joined the game.
 			* @param bot The bot that joined.
 			*/
-			void OnBotJoinedCompletely(Bot* const) noexcept;
+			void OnBotJoinedCompletely(Bot* const) POKEBOT_NOEXCEPT;
 
 			/**
 			* @brief Get the goal node ID for a troop or platoon.
@@ -475,13 +475,13 @@ namespace pokebot {
 			* @param Index The platoon index.
 			* @return The goal node ID. If Index is less than 0, returns the troop's goal node ID.
 			*/
-			node::NodeID GetGoalNode(const common::Team Target_Team, const int Index) const noexcept;
+			node::NodeID GetGoalNode(const common::Team Target_Team, const int Index) const POKEBOT_NOEXCEPT;
 
 			/**
 			* @brief Get the origin of the C4 bomb.
 			* @return The origin of the C4 bomb.
 			*/
-			const std::optional<Vector>& C4Origin() const noexcept { return c4_origin; }
+			const std::optional<Vector>& C4Origin() const POKEBOT_NOEXCEPT { return c4_origin; }
 		};
 	}
 }

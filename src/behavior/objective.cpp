@@ -27,7 +27,7 @@ namespace pokebot::bot::behavior {
 	BEHAVIOR_CREATE(Sequence, reset_team_objective);
 
 	template<bool b>
-	bool IsEnoughToRescueHostage(const Bot* const Self) noexcept {
+	bool IsEnoughToRescueHostage(const Bot* const Self) POKEBOT_NOEXCEPT {
 		// Return true if the following conditions meet the requirements
 		// 1. I have some hostages.
 		// 2. Teammates are leading some hostages.
@@ -38,12 +38,12 @@ namespace pokebot::bot::behavior {
 		}
 	}
 	
-	bool CanUseHostage(const Bot* const Self) noexcept {
+	bool CanUseHostage(const Bot* const Self) POKEBOT_NOEXCEPT {
 		return game::game.GetClosedHostage(Self->Origin(), 83.0f) != nullptr;
 	}
 
 	template<bool b>
-	bool IsFarFromC4(const Bot* const Self) noexcept {
+	bool IsFarFromC4(const Bot* const Self) POKEBOT_NOEXCEPT {
 		assert(bot::Manager::Instance().C4Origin().has_value());
 		if constexpr (b) {
 			return common::Distance(Self->Origin(), *bot::Manager::Instance().C4Origin()) > 100.0f;
@@ -53,7 +53,7 @@ namespace pokebot::bot::behavior {
 	}
 
 	template<bool b>
-	bool IsFarFromMainGoal(const Bot* const Self) noexcept {
+	bool IsFarFromMainGoal(const Bot* const Self) POKEBOT_NOEXCEPT {
 		auto id = Manager::Instance().GetGoalNode(Self->JoinedTeam(), Self->JoinedPlatoon());
 		auto origin = node::czworld.GetOrigin(id);
 		if constexpr (b) {

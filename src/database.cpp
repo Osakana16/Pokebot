@@ -14,13 +14,13 @@ namespace pokebot::database {
 				}
 
 				for (const auto item : data["template"].items()) {
-					auto ArrayPushBack = [](std::list<std::string>* const target, const nlohmann::json_abi_v3_11_2::json& Datas) noexcept {
+					auto ArrayPushBack = [](std::list<std::string>* const target, const nlohmann::json_abi_v3_11_2::json& Datas) POKEBOT_NOEXCEPT {
 						for (int i = 0; i < Datas.size(); i++) {
 							target->push_back(Datas[i].get<std::string>());
 						}
 					};
 
-					auto ArraySet = [](int* target, const nlohmann::json_abi_v3_11_2::json& Datas) noexcept {
+					auto ArraySet = [](int* target, const nlohmann::json_abi_v3_11_2::json& Datas) POKEBOT_NOEXCEPT {
 						*target = Datas.get<int>();
 					};
 
@@ -116,14 +116,14 @@ namespace pokebot::database {
 		}();
 	}
 
-	const WeaponData* const Database::GetWeaponData(const std::string_view Item_ID) const noexcept {
+	const WeaponData* const Database::GetWeaponData(const std::string_view Item_ID) const POKEBOT_NOEXCEPT {
 		if (auto it = weapons.find(Item_ID.data()); it != weapons.end())
 			return &it->second;
 		else
 			return nullptr;
 	}
 
-	const Cartridge* const Database::GetCartridge(const std::string_view Item_ID) const noexcept {
+	const Cartridge* const Database::GetCartridge(const std::string_view Item_ID) const POKEBOT_NOEXCEPT {
 		if (auto it = cartridges.find(Item_ID.data()); it != cartridges.end())
 			return &it->second;
 		else

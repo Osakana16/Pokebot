@@ -21,17 +21,17 @@ namespace pokebot::bot::behavior {
 	namespace {
 		BEHAVIOR_CREATE(Sequence, reset_goal_to_retreat);
 
-		bool HasGuns(const bot::Bot* const Self) noexcept {
+		bool HasGuns(const bot::Bot* const Self) POKEBOT_NOEXCEPT {
 			return Self->HasPrimaryWeapon() || Self->HasSecondaryWeapon();
 		}
 
 		template<bool b>
-		bool IsDying(const bot::Bot* const Self) noexcept {
+		bool IsDying(const bot::Bot* const Self) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (Self->Health() <= 25));
 		}
 
 		template<bool b>
-		bool HasCrisis(const bot::Bot* const Self) noexcept {
+		bool HasCrisis(const bot::Bot* const Self) POKEBOT_NOEXCEPT {
 			if constexpr (b) {
 				return !Self->IsGoodCondition();
 			} else {
@@ -40,7 +40,7 @@ namespace pokebot::bot::behavior {
 		}
 
 		template<bool b>
-		bool IsEnemyFar(const bot::Bot* const Self) noexcept {
+		bool IsEnemyFar(const bot::Bot* const Self) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->IsEnemyFar());
 		}
 	}

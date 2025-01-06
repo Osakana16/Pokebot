@@ -13,12 +13,12 @@ namespace pokebot::plugin {
 		edict_t* pWorldEntity{};
 		edict_t *spawned_entity{};
 	public:
-		int BeamSprite() const noexcept { return beam_sprite; }
-		void AppendSpawnedEntity(edict_t* entity) noexcept { spawned_entity = entity; }
+		int BeamSprite() const POKEBOT_NOEXCEPT { return beam_sprite; }
+		void AppendSpawnedEntity(edict_t* entity) POKEBOT_NOEXCEPT { spawned_entity = entity; }
 
-		void RegisterCommand() noexcept;
-		void OnUpdate() noexcept;
-		void AddBot(const std::string& Bot_Name, const common::Team, const common::Model, const bot::Difficult) POKEBOT_DEBUG_NOEXCEPT;
+		void RegisterCommand() POKEBOT_NOEXCEPT;
+		void OnUpdate() POKEBOT_NOEXCEPT;
+		void AddBot(const std::string& Bot_Name, const common::Team, const common::Model, const bot::Difficult) POKEBOT_NOEXCEPT;
 		
 		void OnServerInit();
 		

@@ -2,7 +2,7 @@
 #include "plugin.hpp"
 
 namespace pokebot::common {
-	AngleVector PositionVector::ToAngleVector(const Vector& Origin) const noexcept {
+	AngleVector PositionVector::ToAngleVector(const Vector& Origin) const POKEBOT_NOEXCEPT {
 		float vecout[3]{};
 		Vector angle = *this - Origin;
 		VEC_TO_ANGLES(angle, vecout);
@@ -31,7 +31,7 @@ namespace pokebot::common {
 		return *this;
 	}
 
-	bool Tracer::IsHit() const noexcept {
+	bool Tracer::IsHit() const POKEBOT_NOEXCEPT {
 		return flFraction < 1.0;
 	}
 

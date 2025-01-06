@@ -181,14 +181,14 @@ namespace pokebot {
 
 			ConVar(const char* name, const char* initval, Var type = Var::NoServer, bool regMissing = false, const char* regVal = nullptr);
 			ConVar(const char* name, const char* initval, const char* info, bool bounded = true, float min = 0.0f, float max = 1.0f, Var type = Var::NoServer, bool regMissing = false, const char* regVal = nullptr);
-			explicit operator bool() const noexcept { return ptr->value > 0.0f; }
-			explicit operator int() const noexcept { return static_cast<int>(ptr->value); }
-			explicit operator float() const noexcept { return ptr->value; }
-			explicit operator const char* () const noexcept { return ptr->string;  }
+			explicit operator bool() const POKEBOT_NOEXCEPT { return ptr->value > 0.0f; }
+			explicit operator int() const POKEBOT_NOEXCEPT { return static_cast<int>(ptr->value); }
+			explicit operator float() const POKEBOT_NOEXCEPT { return ptr->value; }
+			explicit operator const char* () const POKEBOT_NOEXCEPT { return ptr->string;  }
 		
-			void operator=(const float val) noexcept { g_engfuncs.pfnCVarSetFloat(ptr->name, val); }
-			void operator=(const int val) noexcept { operator=(static_cast<float>(val)); }
-			void operator=(const char* val) noexcept { g_engfuncs.pfnCvar_DirectSet(ptr, const_cast<char*>(val)); }
+			void operator=(const float val) POKEBOT_NOEXCEPT { g_engfuncs.pfnCVarSetFloat(ptr->name, val); }
+			void operator=(const int val) POKEBOT_NOEXCEPT { operator=(static_cast<float>(val)); }
+			void operator=(const char* val) POKEBOT_NOEXCEPT { g_engfuncs.pfnCvar_DirectSet(ptr, const_cast<char*>(val)); }
 
 		};
 
@@ -225,37 +225,37 @@ namespace pokebot {
 			int weapon_clip{};
 			Weapon current_weapon{};
 		public:
-			static bool IsDead(const edict_t* const Target) noexcept { return Target->v.deadflag == DEAD_DEAD || Target->v.health <= 0 || Target->v.movetype == MOVETYPE_NOCLIP; }
-			static bool IsValid(const edict_t* const Target) noexcept { return (Target != nullptr && !Target->free); }
-			static int Index(const edict_t* const Target) noexcept { return ENTINDEX(const_cast<edict_t*>(Target)); }
+			static bool IsDead(const edict_t* const Target) POKEBOT_NOEXCEPT { return Target->v.deadflag == DEAD_DEAD || Target->v.health <= 0 || Target->v.movetype == MOVETYPE_NOCLIP; }
+			static bool IsValid(const edict_t* const Target) POKEBOT_NOEXCEPT { return (Target != nullptr && !Target->free); }
+			static int Index(const edict_t* const Target) POKEBOT_NOEXCEPT { return ENTINDEX(const_cast<edict_t*>(Target)); }
 
 			Client() = delete;
 			Client(const Client&) = delete;
 			Client& operator=(const Client&) = delete;
 		public:
-			Client(edict_t* e) noexcept : client(e) {}
+			Client(edict_t* e) POKEBOT_NOEXCEPT : client(e) {}
 
-			edict_t* Edict() noexcept { return client; }
-			const edict_t* Edict() const noexcept { return client; }
-			operator edict_t* () noexcept { return Edict(); }
-			operator const edict_t* () const noexcept { return client; }
+			edict_t* Edict() POKEBOT_NOEXCEPT { return client; }
+			const edict_t* Edict() const POKEBOT_NOEXCEPT { return client; }
+			operator edict_t* () POKEBOT_NOEXCEPT { return Edict(); }
+			operator const edict_t* () const POKEBOT_NOEXCEPT { return client; }
 
-			int Index() const noexcept { return Index(client); }
+			int Index() const POKEBOT_NOEXCEPT { return Index(client); }
 
-			auto Button() const noexcept { return client->v.button; }
-			auto Impulse() const noexcept { return client->v.impulse; }
-			const char* ClassName() const noexcept { return STRING(client->v.classname); }
-			std::string_view Name() const noexcept { return STRING(client->v.netname); }
-			void PressKey(const int Key) noexcept { client->v.button |= Key; }
-			common::Team GetTeam() const noexcept { return common::GetTeamFromModel(client); }
+			auto Button() const POKEBOT_NOEXCEPT { return client->v.button; }
+			auto Impulse() const POKEBOT_NOEXCEPT { return client->v.impulse; }
+			const char* ClassName() const POKEBOT_NOEXCEPT { return STRING(client->v.classname); }
+			std::string_view Name() const POKEBOT_NOEXCEPT { return STRING(client->v.netname); }
+			void PressKey(const int Key) POKEBOT_NOEXCEPT { client->v.button |= Key; }
+			common::Team GetTeam() const POKEBOT_NOEXCEPT { return common::GetTeamFromModel(client); }
 
-			bool IsValid() const noexcept { return IsValid(client); }
-			bool IsDead() const noexcept { return IsDead(client); }
+			bool IsValid() const POKEBOT_NOEXCEPT { return IsValid(client); }
+			bool IsDead() const POKEBOT_NOEXCEPT { return IsDead(client); }
 
 
-			bool IsVIP() const noexcept { return is_vip; }
+			bool IsVIP() const POKEBOT_NOEXCEPT { return is_vip; }
 
-			int WeaponAmmo(const AmmoID Ammo_ID) const noexcept { return weapon_ammo[static_cast<int>(Ammo_ID) - 1]; }
+			int WeaponAmmo(const AmmoID Ammo_ID) const POKEBOT_NOEXCEPT { return weapon_ammo[static_cast<int>(Ammo_ID) - 1]; }
 
 			const float& Health() const { return client->v.health; }
 			const float& Armor() const { return client->v.armorvalue; }
@@ -285,9 +285,9 @@ namespace pokebot {
 			int movetype() const { return client->v.movetype; }
 			int weapons() const { return client->v.weapons; }
 			int sequence() const { return client->v.sequence; }
-			StatusIcon DisplayingStatusIcon() const noexcept { return status_icon; }
-			Weapon CurrentWeapon() const noexcept { return current_weapon; }
-			int CurrentWeaponClip() const noexcept { return weapon_clip; }
+			StatusIcon DisplayingStatusIcon() const POKEBOT_NOEXCEPT { return status_icon; }
+			Weapon CurrentWeapon() const POKEBOT_NOEXCEPT { return current_weapon; }
+			int CurrentWeaponClip() const POKEBOT_NOEXCEPT { return weapon_clip; }
 		};
 
 		// The status in the game
@@ -296,67 +296,67 @@ namespace pokebot {
 		public:
 			ClientStatus(const ClientName&);
 
-			common::Team GetTeam() const noexcept;
-			bool CanSeeFriend() const noexcept;
-			ClientName GetEnemyNameWithinView() const noexcept;
-			std::vector<ClientName> GetEntityNamesInView() const noexcept;
-			common::Team GetTeamFromModel() const noexcept;
+			common::Team GetTeam() const POKEBOT_NOEXCEPT;
+			bool CanSeeFriend() const POKEBOT_NOEXCEPT;
+			ClientName GetEnemyNameWithinView() const POKEBOT_NOEXCEPT;
+			std::vector<ClientName> GetEntityNamesInView() const POKEBOT_NOEXCEPT;
+			common::Team GetTeamFromModel() const POKEBOT_NOEXCEPT;
 						
 			/**
 			* @brief Check the p_model animation is reloading.
 			* @return True if player is reloading, false if the player is not reloading or is swimming.
 			*/
-			bool IsPlayerModelReloading() const noexcept;
+			bool IsPlayerModelReloading() const POKEBOT_NOEXCEPT;
 
 			/**
 			* @brief Check the v_model animation is reloading.
 			* @return True if player is reloading, false if the player is not reloading.
 			* @remarks This function does not work correctly if the player keeps holding a
 			*/
-			bool IsViewModelReloading() const noexcept;
+			bool IsViewModelReloading() const POKEBOT_NOEXCEPT;
 
 			/**
 			* @brief Check the client is a fakeclient.
 			*/
-			bool IsFakeClient() const noexcept;
+			bool IsFakeClient() const POKEBOT_NOEXCEPT;
 			auto Button() const { return client->Button(); }
 			auto Impulse() const { return client->Impulse(); }
 			
-			bool HasHostages() const noexcept;
-			bool IsVIP() const noexcept { return client->IsVIP(); }
-			bool IsDead() const noexcept { return client->IsDead(); }
+			bool HasHostages() const POKEBOT_NOEXCEPT;
+			bool IsVIP() const POKEBOT_NOEXCEPT { return client->IsVIP(); }
+			bool IsDead() const POKEBOT_NOEXCEPT { return client->IsDead(); }
 			
-			bool HasWeapon(const Weapon Weapon_ID) const noexcept { return bool(client->Edict()->v.weapons & common::ToBit<int>(Weapon_ID)); }
-			bool HasPrimaryWeapon() const noexcept { return client->Edict()->v.weapons & game::Primary_Weapon_Bit; }
-			bool HasSecondaryWeapon() const noexcept { return client->Edict()->v.weapons & game::Secondary_Weapon_Bit; }
+			bool HasWeapon(const Weapon Weapon_ID) const POKEBOT_NOEXCEPT { return bool(client->Edict()->v.weapons & common::ToBit<int>(Weapon_ID)); }
+			bool HasPrimaryWeapon() const POKEBOT_NOEXCEPT { return client->Edict()->v.weapons & game::Primary_Weapon_Bit; }
+			bool HasSecondaryWeapon() const POKEBOT_NOEXCEPT { return client->Edict()->v.weapons & game::Secondary_Weapon_Bit; }
 
 			/**
 			* @brief Check the clip of current weapon remains or not
 			* @return 
 			*/
-			bool IsOutOfClip() const noexcept { return (Weapon_Type[static_cast<int>(client->CurrentWeapon())] == WeaponType::Primary || Weapon_Type[static_cast<int>(client->CurrentWeapon())] == WeaponType::Secondary) && client->CurrentWeaponClip() <= 0; }
-			bool IsOutOfAmmo(const AmmoID Ammo_ID) const noexcept { return client->WeaponAmmo(Ammo_ID) <= 0; }
-			bool IsOutOfCurrentWeaponAmmo() const noexcept { 
+			bool IsOutOfClip() const POKEBOT_NOEXCEPT { return (Weapon_Type[static_cast<int>(client->CurrentWeapon())] == WeaponType::Primary || Weapon_Type[static_cast<int>(client->CurrentWeapon())] == WeaponType::Secondary) && client->CurrentWeaponClip() <= 0; }
+			bool IsOutOfAmmo(const AmmoID Ammo_ID) const POKEBOT_NOEXCEPT { return client->WeaponAmmo(Ammo_ID) <= 0; }
+			bool IsOutOfCurrentWeaponAmmo() const POKEBOT_NOEXCEPT { 
 				return 
 					(Weapon_Type[static_cast<int>(client->CurrentWeapon())] == WeaponType::Primary || 
 					 Weapon_Type[static_cast<int>(client->CurrentWeapon())] == WeaponType::Secondary) && 
 					IsOutOfAmmo(std::get<AmmoID>(Weapon_CVT[static_cast<int>(client->CurrentWeapon()) - 1])); 
 			}
 
-			bool IsInBuyzone() const noexcept { return bool(client->DisplayingStatusIcon() & StatusIcon::Buy_Zone); }
-			bool IsInEscapezone() const noexcept { return bool(client->DisplayingStatusIcon() & StatusIcon::Escape_Zone); }
-			bool IsInRescuezone() const noexcept { return bool(client->DisplayingStatusIcon() & StatusIcon::Rescue_Zone); }
-			bool IsInVipSafety() const noexcept { return bool(client->DisplayingStatusIcon() & StatusIcon::Vip_Safety); }
-			bool HasDefuser() const noexcept { return bool(client->DisplayingStatusIcon() & StatusIcon::Defuser); }
+			bool IsInBuyzone() const POKEBOT_NOEXCEPT { return bool(client->DisplayingStatusIcon() & StatusIcon::Buy_Zone); }
+			bool IsInEscapezone() const POKEBOT_NOEXCEPT { return bool(client->DisplayingStatusIcon() & StatusIcon::Escape_Zone); }
+			bool IsInRescuezone() const POKEBOT_NOEXCEPT { return bool(client->DisplayingStatusIcon() & StatusIcon::Rescue_Zone); }
+			bool IsInVipSafety() const POKEBOT_NOEXCEPT { return bool(client->DisplayingStatusIcon() & StatusIcon::Vip_Safety); }
+			bool HasDefuser() const POKEBOT_NOEXCEPT { return bool(client->DisplayingStatusIcon() & StatusIcon::Defuser); }
 
-			bool IsDucking() const noexcept { return (client->flags() & FL_DUCKING); }
-			bool IsInWater() const noexcept { return (client->flags() & FL_INWATER); }
-			bool IsOnFloor() const noexcept { return (client->flags() & (FL_ONGROUND | FL_PARTIALGROUND)) != 0; }
-			bool IsOnTrain() const noexcept { return (client->flags() & FL_ONTRAIN); }
-			bool IsFiring() const noexcept { return (client->Button() & IN_ATTACK); }
-			bool IsReadyToThrowGrenade() const noexcept { return IsFiring() && bool(client->weapons() & Grenade_Bit); }
-			bool IsPlantingBomb() const noexcept { return IsFiring() && bool(client->weapons() & C4_Bit) && (client->sequence() == 63 || client->sequence() == 61); }
-			bool IsClimblingLadder() const noexcept { return (client->movetype() & MOVETYPE_FLY); }
+			bool IsDucking() const POKEBOT_NOEXCEPT { return (client->flags() & FL_DUCKING); }
+			bool IsInWater() const POKEBOT_NOEXCEPT { return (client->flags() & FL_INWATER); }
+			bool IsOnFloor() const POKEBOT_NOEXCEPT { return (client->flags() & (FL_ONGROUND | FL_PARTIALGROUND)) != 0; }
+			bool IsOnTrain() const POKEBOT_NOEXCEPT { return (client->flags() & FL_ONTRAIN); }
+			bool IsFiring() const POKEBOT_NOEXCEPT { return (client->Button() & IN_ATTACK); }
+			bool IsReadyToThrowGrenade() const POKEBOT_NOEXCEPT { return IsFiring() && bool(client->weapons() & Grenade_Bit); }
+			bool IsPlantingBomb() const POKEBOT_NOEXCEPT { return IsFiring() && bool(client->weapons() & C4_Bit) && (client->sequence() == 63 || client->sequence() == 61); }
+			bool IsClimblingLadder() const POKEBOT_NOEXCEPT { return (client->movetype() & MOVETYPE_FLY); }
 
 			const float& Health() const { return client->Health(); }
 			const float& Armor() const { return client->Armor(); }
@@ -376,9 +376,9 @@ namespace pokebot {
 			int movetype() const { return client->movetype(); }
 			int weapons() const { return client->weapons(); }
 			int sequence() const { return client->sequence(); }
-			StatusIcon DisplayingStatusIcon() const noexcept { return client->DisplayingStatusIcon(); }
-			Weapon CurrentWeapon() const noexcept { return client->CurrentWeapon(); }
-			int CurrentWeaponClip() const noexcept { return client->CurrentWeaponClip(); }
+			StatusIcon DisplayingStatusIcon() const POKEBOT_NOEXCEPT { return client->DisplayingStatusIcon(); }
+			Weapon CurrentWeapon() const POKEBOT_NOEXCEPT { return client->CurrentWeapon(); }
+			int CurrentWeaponClip() const POKEBOT_NOEXCEPT { return client->CurrentWeaponClip(); }
 		};
 		
 		/**
@@ -415,37 +415,37 @@ namespace pokebot {
 			ClientStatus GetClientStatus(std::string_view client_name);
 			ClientCreationResult Create(std::string client_name);
 			bool Register(edict_t*);
-			auto& GetAll() const noexcept {
+			auto& GetAll() const POKEBOT_NOEXCEPT {
 				return clients;
 			}
 
-			const Client* Get(const std::string& Name) const noexcept {
+			const Client* Get(const std::string& Name) const POKEBOT_NOEXCEPT {
 				if (auto it = clients.find(Name); it != clients.end()) {
 					return &it->second;
 				}
 				return nullptr;
 			}
 						
-			Client* GetAsMutable(const std::string& Name) noexcept {
+			Client* GetAsMutable(const std::string& Name) POKEBOT_NOEXCEPT {
 				if (auto it = clients.find(Name); it != clients.end()) {
 					return &it->second;
 				}
 				return nullptr;
 			}
 
-			void OnVIPChanged(const std::string_view Client_Name) noexcept;
-			void OnDefuseKitEquiped(const std::string_view Client_Name) noexcept;
-			void OnDeath(const std::string_view Client_Name) noexcept;
-			void OnDamageTaken(const std::string_view Client_Name, const edict_t* Inflictor, const int Health, const int Armor, const int Bit) noexcept;
-			void OnMoneyChanged(const std::string_view Client_Name, const int) noexcept;
-			void OnScreenFaded(const std::string_view Client_Name) noexcept;
-			void OnNVGToggled(const std::string_view Client_Name, const bool) noexcept;
-			void OnWeaponChanged(const std::string_view Client_Name, const game::Weapon) noexcept;
-			void OnClipChanged(const std::string_view Client_Name, const game::Weapon, const int) noexcept;
-			void OnAmmoPickedup(const std::string_view Client_Name, const game::AmmoID, const int) noexcept;
-			void OnTeamAssigned(const std::string_view Client_Name, common::Team) noexcept;
-			void OnItemChanged(const std::string_view Client_Name, game::Item) noexcept;
-			void OnStatusIconShown(const std::string_view Client_Name, const StatusIcon) noexcept;
+			void OnVIPChanged(const std::string_view Client_Name) POKEBOT_NOEXCEPT;
+			void OnDefuseKitEquiped(const std::string_view Client_Name) POKEBOT_NOEXCEPT;
+			void OnDeath(const std::string_view Client_Name) POKEBOT_NOEXCEPT;
+			void OnDamageTaken(const std::string_view Client_Name, const edict_t* Inflictor, const int Health, const int Armor, const int Bit) POKEBOT_NOEXCEPT;
+			void OnMoneyChanged(const std::string_view Client_Name, const int) POKEBOT_NOEXCEPT;
+			void OnScreenFaded(const std::string_view Client_Name) POKEBOT_NOEXCEPT;
+			void OnNVGToggled(const std::string_view Client_Name, const bool) POKEBOT_NOEXCEPT;
+			void OnWeaponChanged(const std::string_view Client_Name, const game::Weapon) POKEBOT_NOEXCEPT;
+			void OnClipChanged(const std::string_view Client_Name, const game::Weapon, const int) POKEBOT_NOEXCEPT;
+			void OnAmmoPickedup(const std::string_view Client_Name, const game::AmmoID, const int) POKEBOT_NOEXCEPT;
+			void OnTeamAssigned(const std::string_view Client_Name, common::Team) POKEBOT_NOEXCEPT;
+			void OnItemChanged(const std::string_view Client_Name, game::Item) POKEBOT_NOEXCEPT;
+			void OnStatusIconShown(const std::string_view Client_Name, const StatusIcon) POKEBOT_NOEXCEPT;
 		};
 
 		struct Sound final {
@@ -471,19 +471,19 @@ namespace pokebot {
 			const edict_t* entity;
 			ClientName owner_name{};
 		public:
-			operator const edict_t* const () const noexcept {
+			operator const edict_t* const () const POKEBOT_NOEXCEPT {
 				return entity;
 			}
-			void Update() noexcept;
-			bool RecoginzeOwner(const ClientName&) noexcept;
+			void Update() POKEBOT_NOEXCEPT;
+			bool RecoginzeOwner(const ClientName&) POKEBOT_NOEXCEPT;
 
-			bool IsUsed() const noexcept;
-			bool IsOwnedBy(const std::string_view& Name) const noexcept;
-			bool IsReleased() const noexcept;
-			static Hostage AttachHostage(const edict_t*) noexcept;
-			const Vector& Origin() const noexcept;
+			bool IsUsed() const POKEBOT_NOEXCEPT;
+			bool IsOwnedBy(const std::string_view& Name) const POKEBOT_NOEXCEPT;
+			bool IsReleased() const POKEBOT_NOEXCEPT;
+			static Hostage AttachHostage(const edict_t*) POKEBOT_NOEXCEPT;
+			const Vector& Origin() const POKEBOT_NOEXCEPT;
 
-			Hostage(Hostage&& h) noexcept {
+			Hostage(Hostage&& h) POKEBOT_NOEXCEPT {
 				owner_name = std::move(h.owner_name);
 				assert(h.owner_name.empty());
 				entity = h.entity;
@@ -494,11 +494,11 @@ namespace pokebot {
 		class Host {
 			edict_t* host{};
 		public:
-			const edict_t* AsEdict() const noexcept { return host; }
-			bool IsHostValid() const noexcept;
-			void SetHost(edict_t* const target) noexcept;
-			const char* const HostName() const noexcept;
-			const Vector& Origin() const noexcept;
+			const edict_t* AsEdict() const POKEBOT_NOEXCEPT { return host; }
+			bool IsHostValid() const POKEBOT_NOEXCEPT;
+			void SetHost(edict_t* const target) POKEBOT_NOEXCEPT;
+			const char* const HostName() const POKEBOT_NOEXCEPT;
+			const Vector& Origin() const POKEBOT_NOEXCEPT;
 			void Update();
 		};
 
@@ -525,83 +525,83 @@ namespace pokebot {
 			auto GetClientStatus(std::string_view client_name) { return clients.GetClientStatus(client_name); }
 			Host host{};
 
-			size_t GetHostageNumber() const noexcept;
-			bool IsHostageUsed(const int Index) const noexcept;
+			size_t GetHostageNumber() const POKEBOT_NOEXCEPT;
+			bool IsHostageUsed(const int Index) const POKEBOT_NOEXCEPT;
 			bool IsHostageOwnedBy(const int Index, const std::string_view& Owner_Name);
 			const edict_t* const GetClosedHostage(const Vector& Origin, const float Base_Distance);
 
-			const std::string& GetBotArg(const size_t Index) const noexcept;
-			size_t GetBotArgCount() const noexcept;
-			bool IsBotCmd() const noexcept;
+			const std::string& GetBotArg(const size_t Index) const POKEBOT_NOEXCEPT;
+			size_t GetBotArgCount() const POKEBOT_NOEXCEPT;
+			bool IsBotCmd() const POKEBOT_NOEXCEPT;
 
-			size_t GetLives(const common::Team) const noexcept;	// Get the number of lives of the team.
-			uint32_t CurrentRonud() const noexcept;
-			bool IsCurrentMode(const MapFlags) const noexcept;
-			MapFlags GetMapFlag() const noexcept;
-			void IssueCommand(const ClientName&, const std::string& Sentence) noexcept;
+			size_t GetLives(const common::Team) const POKEBOT_NOEXCEPT;	// Get the number of lives of the team.
+			uint32_t CurrentRonud() const POKEBOT_NOEXCEPT;
+			bool IsCurrentMode(const MapFlags) const POKEBOT_NOEXCEPT;
+			MapFlags GetMapFlag() const POKEBOT_NOEXCEPT;
+			void IssueCommand(const ClientName&, const std::string& Sentence) POKEBOT_NOEXCEPT;
 
 			void Init(edict_t* entities, int max);
 			void PreUpdate();
 			void PostUpdate();
 
-			bool PlayerExists(const ClientName& Client_Name) const noexcept { return clients.Get(Client_Name) != nullptr; }
+			bool PlayerExists(const ClientName& Client_Name) const POKEBOT_NOEXCEPT { return clients.Get(Client_Name) != nullptr; }
 
 			void AddCvar(const char *name, const char *value, const char *info, bool bounded, float min, float max, Var varType, bool missingAction, const char *regval, ConVar *self);
 			void RegisterCvars();
 
 			// - Event funcs -
 
-			void OnNewRound() noexcept;
+			void OnNewRound() POKEBOT_NOEXCEPT;
 
-			void OnVIPChanged(const std::string_view Client_Name) noexcept {
+			void OnVIPChanged(const std::string_view Client_Name) POKEBOT_NOEXCEPT {
 				clients.OnVIPChanged(Client_Name);
 			}
 
-			void OnDefuseKitEquiped(const std::string_view Client_Name) noexcept {
+			void OnDefuseKitEquiped(const std::string_view Client_Name) POKEBOT_NOEXCEPT {
 				clients.OnDefuseKitEquiped(Client_Name);
 			}
 
-			void OnDeath(const std::string_view Client_Name) noexcept {
+			void OnDeath(const std::string_view Client_Name) POKEBOT_NOEXCEPT {
 				clients.OnDeath(Client_Name);
 			}
 
-			void OnDamageTaken(const std::string_view Client_Name, const edict_t* Inflictor, const int Health, const int Armor, const int Bit) noexcept {
+			void OnDamageTaken(const std::string_view Client_Name, const edict_t* Inflictor, const int Health, const int Armor, const int Bit) POKEBOT_NOEXCEPT {
 				clients.OnDamageTaken(Client_Name, Inflictor, Health, Armor, Bit);
 			}
 
-			void OnMoneyChanged(const std::string_view Client_Name, const int Money) noexcept {
+			void OnMoneyChanged(const std::string_view Client_Name, const int Money) POKEBOT_NOEXCEPT {
 				clients.OnMoneyChanged(Client_Name, Money);
 			}
 
-			void OnScreenFaded(const std::string_view Client_Name) noexcept {
+			void OnScreenFaded(const std::string_view Client_Name) POKEBOT_NOEXCEPT {
 				clients.OnScreenFaded(Client_Name);
 			}
 
-			void OnNVGToggled(const std::string_view Client_Name, const bool Toggled) noexcept {
+			void OnNVGToggled(const std::string_view Client_Name, const bool Toggled) POKEBOT_NOEXCEPT {
 				clients.OnNVGToggled(Client_Name, Toggled);
 			}
 
-			void OnWeaponChanged(const std::string_view Client_Name, const game::Weapon Weapon_ID) noexcept {
+			void OnWeaponChanged(const std::string_view Client_Name, const game::Weapon Weapon_ID) POKEBOT_NOEXCEPT {
 				clients.OnWeaponChanged(Client_Name, Weapon_ID);
 			}
 
-			void OnClipChanged(const std::string_view Client_Name, const game::Weapon Weapon_ID, const int Clip) noexcept {
+			void OnClipChanged(const std::string_view Client_Name, const game::Weapon Weapon_ID, const int Clip) POKEBOT_NOEXCEPT {
 				clients.OnClipChanged(Client_Name, Weapon_ID, Clip);
 			}
 
-			void OnAmmoPickedup(const std::string_view Client_Name, const game::AmmoID Ammo_ID, const int Ammo) noexcept {
+			void OnAmmoPickedup(const std::string_view Client_Name, const game::AmmoID Ammo_ID, const int Ammo) POKEBOT_NOEXCEPT {
 				clients.OnAmmoPickedup(Client_Name, Ammo_ID, Ammo);
 			}
 
-			void OnTeamAssigned(const std::string_view Client_Name, common::Team Team) noexcept {
+			void OnTeamAssigned(const std::string_view Client_Name, common::Team Team) POKEBOT_NOEXCEPT {
 				clients.OnTeamAssigned(Client_Name, Team);
 			}
 
-			void OnItemChanged(const std::string_view Client_Name, game::Item Item_ID) noexcept {
+			void OnItemChanged(const std::string_view Client_Name, game::Item Item_ID) POKEBOT_NOEXCEPT {
 				clients.OnItemChanged(Client_Name, Item_ID);
 			}
 
-			void OnStatusIconShown(const std::string_view Client_Name, const StatusIcon Icon) noexcept {
+			void OnStatusIconShown(const std::string_view Client_Name, const StatusIcon Icon) POKEBOT_NOEXCEPT {
 				clients.OnStatusIconShown(Client_Name, Icon);
 			}
 
@@ -609,9 +609,9 @@ namespace pokebot {
 	}
 
 	namespace entity {
-		bool CanSeeEntity(const edict_t* const self, const const edict_t* Target) noexcept;
-		bool InViewCone(const edict_t* const self, const Vector& Origin) noexcept;
-		bool IsVisible(const edict_t* const Self, const Vector& Origin) noexcept;
+		bool CanSeeEntity(const edict_t* const self, const const edict_t* Target) POKEBOT_NOEXCEPT;
+		bool InViewCone(const edict_t* const self, const Vector& Origin) POKEBOT_NOEXCEPT;
+		bool IsVisible(const edict_t* const Self, const Vector& Origin) POKEBOT_NOEXCEPT;
 	}
 
 	namespace engine {
@@ -619,8 +619,8 @@ namespace pokebot {
 			const int Client_Index{};
 			char* const infobuffer{};
 		public:
-			ClientKey(edict_t* target) noexcept;
-			ClientKey& SetValue(const char* Key, const char* Value) noexcept;
+			ClientKey(edict_t* target) POKEBOT_NOEXCEPT;
+			ClientKey& SetValue(const char* Key, const char* Value) POKEBOT_NOEXCEPT;
 		};
 	}
 }

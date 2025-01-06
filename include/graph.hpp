@@ -48,42 +48,42 @@ namespace pokebot::node {
 		std::list<NodeIdentity> nodes{};
 		std::list<NodeIdentity>::const_iterator cursor{};
 	public:
-		void PushFront(const NodeIdentity n) noexcept {
+		void PushFront(const NodeIdentity n) POKEBOT_NOEXCEPT {
 			nodes.push_front(n);
 			cursor = nodes.begin();
 		}
 
-		void PushBack(const NodeIdentity n) noexcept {
+		void PushBack(const NodeIdentity n) POKEBOT_NOEXCEPT {
 			nodes.push_back(n);
 			cursor = nodes.begin();
 		}
 
-		NodeIdentity Current() const noexcept {
+		NodeIdentity Current() const POKEBOT_NOEXCEPT {
 			return *cursor;
 		}
 
-		NodeIdentity Destination() const noexcept {
+		NodeIdentity Destination() const POKEBOT_NOEXCEPT {
 			return nodes.back();
 		}
 
-		bool Next() noexcept {
+		bool Next() POKEBOT_NOEXCEPT {
 			cursor++;
 			return !IsEnd();
 		}
 
-		void Previous() noexcept {
+		void Previous() POKEBOT_NOEXCEPT {
 			cursor--;
 		}
 
-		bool IsEnd() const noexcept {
+		bool IsEnd() const POKEBOT_NOEXCEPT {
 			return cursor == nodes.cend();
 		}
 
-		bool Empty() const noexcept {
+		bool Empty() const POKEBOT_NOEXCEPT {
 			return nodes.empty();
 		}
 
-		void Clear() noexcept {
+		void Clear() POKEBOT_NOEXCEPT {
 			nodes.clear();
 		}
 	};
@@ -92,7 +92,7 @@ namespace pokebot::node {
 
 	// Waypoint
 	class Point final {
-		inline operator Vector() const noexcept { return Origin(); }
+		inline operator Vector() const POKEBOT_NOEXCEPT { return Origin(); }
 
 
 		static constexpr float MAX_COST = std::numeric_limits<float>::max();
@@ -104,14 +104,14 @@ namespace pokebot::node {
 	public:
 		float time{};
 		void Write(std::ofstream* const), Read(std::ifstream* const);
-		const Vector& Origin() const noexcept;
-		std::pair<float, float> Length() const noexcept;
+		const Vector& Origin() const POKEBOT_NOEXCEPT;
+		std::pair<float, float> Length() const POKEBOT_NOEXCEPT;
 
 		Point(const Vector& Initialize_Point) : point(Initialize_Point) {}
 
-		std::pair<std::unordered_set<NodeID>::const_iterator, std::unordered_set<NodeID>::const_iterator> GetConnections() const noexcept;
-		bool AddConnection(const NodeID) noexcept;
-		bool AddFlag(const NodeFlag) noexcept;
+		std::pair<std::unordered_set<NodeID>::const_iterator, std::unordered_set<NodeID>::const_iterator> GetConnections() const POKEBOT_NOEXCEPT;
+		bool AddConnection(const NodeID) POKEBOT_NOEXCEPT;
+		bool AddFlag(const NodeFlag) POKEBOT_NOEXCEPT;
 	};
 
 	enum class GoalKind {
@@ -151,17 +151,17 @@ namespace pokebot::node {
 
 		NodeID TryToConnect(const NodeID Node_ID);
 
-		bool IsSameGoal(const NodeID, const GoalKind) const noexcept;
-		bool IsOnNode(const Vector& Position, const NodeID) const noexcept;
-		Vector GetOrigin(const NodeID Node_ID) const noexcept;
-		NodeID GetNearest(const Vector& Destination) const noexcept;
+		bool IsSameGoal(const NodeID, const GoalKind) const POKEBOT_NOEXCEPT;
+		bool IsOnNode(const Vector& Position, const NodeID) const POKEBOT_NOEXCEPT;
+		Vector GetOrigin(const NodeID Node_ID) const POKEBOT_NOEXCEPT;
+		NodeID GetNearest(const Vector& Destination) const POKEBOT_NOEXCEPT;
 
 		void FindPath(PathWalk<NodeID>* const, const Vector&, const Vector&),
 			FindPath(PathWalk<NodeID>* const, const NodeID, const NodeID);
 
-		decltype(static_cast<const decltype(goals)>(goals).equal_range(GoalKind::None)) GetGoal(const GoalKind kind) const noexcept;
+		decltype(static_cast<const decltype(goals)>(goals).equal_range(GoalKind::None)) GetGoal(const GoalKind kind) const POKEBOT_NOEXCEPT;
 
-		bool IsPossibleToReachInTime() const noexcept;
+		bool IsPossibleToReachInTime() const POKEBOT_NOEXCEPT;
 
 	public:
 		void Draw();
@@ -183,11 +183,11 @@ namespace pokebot::node {
 		std::unordered_multimap<GoalKind, NodeID> goals{};
 		common::Array<Danger, 2> danger;
 	public:
-		size_t GetNumberOfGoals(GoalKind) const noexcept;
+		size_t GetNumberOfGoals(GoalKind) const POKEBOT_NOEXCEPT;
 
-		bool IsSameGoal(const NodeID, const GoalKind) const noexcept;
-		bool IsOnNode(const Vector& Position, const NodeID) const noexcept;
-		Vector GetOrigin(const NodeID Node_ID) const noexcept;
+		bool IsSameGoal(const NodeID, const GoalKind) const POKEBOT_NOEXCEPT;
+		bool IsOnNode(const Vector& Position, const NodeID) const POKEBOT_NOEXCEPT;
+		Vector GetOrigin(const NodeID Node_ID) const POKEBOT_NOEXCEPT;
 
 		// Call on map loaded.
 		void OnMapLoaded();
@@ -196,13 +196,13 @@ namespace pokebot::node {
 		navmesh::NavigationMap navigation_map{};
 		std::vector<Route<navmesh::NavArea*>> routes{};
 
-		navmesh::NavArea* GetNearest(const Vector& Destination) const noexcept;
+		navmesh::NavArea* GetNearest(const Vector& Destination) const POKEBOT_NOEXCEPT;
 		
-		decltype(static_cast<const decltype(goals)>(goals).equal_range(GoalKind::None)) GetGoal(const GoalKind kind) const noexcept;
+		decltype(static_cast<const decltype(goals)>(goals).equal_range(GoalKind::None)) GetGoal(const GoalKind kind) const POKEBOT_NOEXCEPT;
 
 		void FindPath(PathWalk<std::uint32_t>* const, const Vector&, const Vector&, const common::Team);
 		
-		bool HasFlag(const NodeID, NavmeshFlag) const noexcept;
+		bool HasFlag(const NodeID, NavmeshFlag) const POKEBOT_NOEXCEPT;
 	} czworld;
 #endif
 	void AStarSearch(std::pair<const Vector&, const Vector&>);

@@ -12,45 +12,45 @@ namespace pokebot::buy {
 	class Money final {
 		T money;
 
-		static constexpr int Fix(const T Value) noexcept {
+		static constexpr int Fix(const T Value) POKEBOT_NOEXCEPT {
 			return (Value > max_money ? max_money :
 				(Value < min_money ? min_money : Value));
 		}
 	public:
 		using BaseType = T;
 
-		constexpr Money(const T Init_Money) noexcept : money(Fix(Init_Money)) {}
-		constexpr operator T() const noexcept { return money; }
+		constexpr Money(const T Init_Money) POKEBOT_NOEXCEPT : money(Fix(Init_Money)) {}
+		constexpr operator T() const POKEBOT_NOEXCEPT { return money; }
 		explicit operator bool() = delete;
 		
 		template<typename U>
-		constexpr Money& operator=(const U value) noexcept {
+		constexpr Money& operator=(const U value) POKEBOT_NOEXCEPT {
 			money = Fix(value);
 			return *this;
 		}
 
 		template<>Money& operator=(const bool) = delete;
 
-		constexpr Money& operator+=(const Money& value) noexcept { money = Fix(money + value); return *this; }
-		constexpr Money& operator-=(const Money& value) noexcept { money = Fix(money - value); return *this; }
-		constexpr Money& operator*=(const Money& value) noexcept { money = Fix(money * value); return *this; }
-		constexpr Money& operator/=(const Money& value) noexcept { money = Fix(money / value); return *this; }
-		constexpr Money& operator%=(const Money& value) noexcept { money = Fix(money % value); return *this; }
-		constexpr bool operator<(const Money& value) noexcept { return money < value; }
-		constexpr bool operator>(const Money& value) noexcept { return money > value; }
-		constexpr bool operator<=(const Money& value) noexcept { return money <= value; }
-		constexpr bool operator>=(const Money& value) noexcept { return money >= value; }
-		constexpr bool operator==(const Money& value) noexcept { return money == value; }
-		constexpr bool operator!=(const Money& value) noexcept { return money == value; }
+		constexpr Money& operator+=(const Money& value) POKEBOT_NOEXCEPT { money = Fix(money + value); return *this; }
+		constexpr Money& operator-=(const Money& value) POKEBOT_NOEXCEPT { money = Fix(money - value); return *this; }
+		constexpr Money& operator*=(const Money& value) POKEBOT_NOEXCEPT { money = Fix(money * value); return *this; }
+		constexpr Money& operator/=(const Money& value) POKEBOT_NOEXCEPT { money = Fix(money / value); return *this; }
+		constexpr Money& operator%=(const Money& value) POKEBOT_NOEXCEPT { money = Fix(money % value); return *this; }
+		constexpr bool operator<(const Money& value) POKEBOT_NOEXCEPT { return money < value; }
+		constexpr bool operator>(const Money& value) POKEBOT_NOEXCEPT { return money > value; }
+		constexpr bool operator<=(const Money& value) POKEBOT_NOEXCEPT { return money <= value; }
+		constexpr bool operator>=(const Money& value) POKEBOT_NOEXCEPT { return money >= value; }
+		constexpr bool operator==(const Money& value) POKEBOT_NOEXCEPT { return money == value; }
+		constexpr bool operator!=(const Money& value) POKEBOT_NOEXCEPT { return money == value; }
 
 		template<typename U>
-		constexpr Money operator+(const U& value) noexcept { return (money + value); }
+		constexpr Money operator+(const U& value) POKEBOT_NOEXCEPT { return (money + value); }
 		template<typename U>
-		constexpr Money operator-(const U& value) noexcept { return (money - value); }
+		constexpr Money operator-(const U& value) POKEBOT_NOEXCEPT { return (money - value); }
 		template<typename U>
-		constexpr Money operator*(const U& value) noexcept { return (money * value); }
+		constexpr Money operator*(const U& value) POKEBOT_NOEXCEPT { return (money * value); }
 		template<typename U>
-		constexpr Money operator/(const U& value) noexcept { return (money / value); }
+		constexpr Money operator/(const U& value) POKEBOT_NOEXCEPT { return (money / value); }
 
 		static constexpr T Min_Money = min_money;
 		static constexpr T Max_Money = max_money;
@@ -96,7 +96,7 @@ namespace pokebot::buy {
 	class TEST_API BuyPattern {
 		BuyNode pattern[32]{};			// Buy patterns for all bots.
 	public:
-		BuyNode* GetPattern(int round, int win) noexcept;
+		BuyNode* GetPattern(int round, int win) POKEBOT_NOEXCEPT;
 		BuyPattern(const int Money);
 	};
 

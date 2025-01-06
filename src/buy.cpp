@@ -3,7 +3,7 @@
 
 namespace pokebot {
 	namespace bot {
-		void Bot::BuyUpdate() noexcept {
+		void Bot::BuyUpdate() POKEBOT_NOEXCEPT {
 			if (!game::poke_buy) {
 				return;
 			}
@@ -124,7 +124,7 @@ namespace pokebot {
 			* Narrow down weapon candidates by the price.
 			* @param filter The filter for the weapon list.
 			*/
-			void FilterWeaponByPrice(const Filter* filter, std::vector<const database::WeaponData*>* result) noexcept {
+			void FilterWeaponByPrice(const Filter* filter, std::vector<const database::WeaponData*>* result) POKEBOT_NOEXCEPT {
 				assert(!result->empty());
 				std::vector<const database::WeaponData*> datas = std::move(*result);
 				for (auto data : datas) {
@@ -139,7 +139,7 @@ namespace pokebot {
 			* Narrow down weapon candidates by the damage amount.
 			* @param filter The filter for the weapon list.
 			*/
-			void FilterWeaponByDamage(const Filter* filter, std::vector<const database::WeaponData*>* result) noexcept {
+			void FilterWeaponByDamage(const Filter* filter, std::vector<const database::WeaponData*>* result) POKEBOT_NOEXCEPT {
 				assert(!result->empty());
 				std::vector<const database::WeaponData*> datas = std::move(*result);
 				for (auto data : datas) {
@@ -154,7 +154,7 @@ namespace pokebot {
 			* Narrow down weapon candidates by weight.
 			* @param filter The filter for the weapon list.
 			*/
-			void FilterWeaponBySpeed(const Filter* filter, std::vector<const database::WeaponData*>* result) noexcept {
+			void FilterWeaponBySpeed(const Filter* filter, std::vector<const database::WeaponData*>* result) POKEBOT_NOEXCEPT {
 				assert(!result->empty());
 				std::vector<const database::WeaponData*> datas = std::move(*result);
 				for (auto data : datas) {
@@ -169,7 +169,7 @@ namespace pokebot {
 			* Narrow down weapon candidates by primary.
 			* @param filter The filter for the weapon list.
 			*/
-			void FilterWeaponByPrimary(const Filter* filter, std::vector<const database::WeaponData*>* result) noexcept {
+			void FilterWeaponByPrimary(const Filter* filter, std::vector<const database::WeaponData*>* result) POKEBOT_NOEXCEPT {
 				assert(!result->empty());
 				std::vector<const database::WeaponData*> datas = std::move(*result);
 				for (auto& data : datas) {
@@ -183,7 +183,7 @@ namespace pokebot {
 			* Narrow down weapon candidates by secondary.
 			* @param filter The filter for the weapon list.
 			*/
-			void FilterWeaponBySecondary(const Filter* filter, std::vector<const database::WeaponData*>* result) noexcept {
+			void FilterWeaponBySecondary(const Filter* filter, std::vector<const database::WeaponData*>* result) POKEBOT_NOEXCEPT {
 				assert(!result->empty());
 				std::vector<const database::WeaponData*> datas = std::move(*result);
 				for (auto& data : datas) {
@@ -197,7 +197,7 @@ namespace pokebot {
 			* Narrow down weapon candidates by shotgun.
 			* @param filter The filter for the weapon list.
 			*/
-			void FilterWeaponByShotgun(const Filter* filter, std::vector<const database::WeaponData*>* result) noexcept {
+			void FilterWeaponByShotgun(const Filter* filter, std::vector<const database::WeaponData*>* result) POKEBOT_NOEXCEPT {
 				assert(!result->empty());
 				std::vector<const database::WeaponData*> datas = std::move(*result);
 				for (auto& data : datas) {
@@ -211,7 +211,7 @@ namespace pokebot {
 			* Narrow down weapon candidates by submachinegun.
 			* @param filter The filter for the weapon list.
 			*/
-			void FilterWeaponBySubmachinegun(const Filter* filter, std::vector<const database::WeaponData*>* result) noexcept {
+			void FilterWeaponBySubmachinegun(const Filter* filter, std::vector<const database::WeaponData*>* result) POKEBOT_NOEXCEPT {
 				assert(!result->empty());
 				std::vector<const database::WeaponData*> datas = std::move(*result);
 				for (auto& data : datas) {
@@ -225,7 +225,7 @@ namespace pokebot {
 			* Narrow down weapon candidates by rifle.
 			* @param filter The filter for the weapon list.
 			*/
-			void FilterWeaponByRifle(const Filter* filter, std::vector<const database::WeaponData*>* result) noexcept {
+			void FilterWeaponByRifle(const Filter* filter, std::vector<const database::WeaponData*>* result) POKEBOT_NOEXCEPT {
 				assert(!result->empty());
 				std::vector<const database::WeaponData*> datas = std::move(*result);
 				for (auto& data : datas) {
@@ -239,7 +239,7 @@ namespace pokebot {
 			* Narrow down weapon candidates by rifle.
 			* @param filter The filter for the weapon list.
 			*/
-			void FilterWeaponByMachinegun(const Filter* filter, std::vector<const database::WeaponData*>* result) noexcept {
+			void FilterWeaponByMachinegun(const Filter* filter, std::vector<const database::WeaponData*>* result) POKEBOT_NOEXCEPT {
 				assert(!result->empty());
 				std::vector<const database::WeaponData*> datas = std::move(*result);
 				for (auto& data : datas) {
@@ -253,7 +253,7 @@ namespace pokebot {
 			* Narrow down weapon candidates by reload time.
 			* @param filter The filter for the weapon list.
 			*/
-			void FilterWeaponByReload(const Filter* filter, std::vector<const database::WeaponData*>* result) noexcept {
+			void FilterWeaponByReload(const Filter* filter, std::vector<const database::WeaponData*>* result) POKEBOT_NOEXCEPT {
 				assert(!result->empty());
 				std::vector<const database::WeaponData*> datas = std::move(*result);
 				for (auto data : datas) {
@@ -264,7 +264,7 @@ namespace pokebot {
 				}
 			}
 
-			void FilterWeaponByCarryingAmmo(const Filter* filter, std::vector<const database::WeaponData*>* result) noexcept {
+			void FilterWeaponByCarryingAmmo(const Filter* filter, std::vector<const database::WeaponData*>* result) POKEBOT_NOEXCEPT {
 				assert(!result->empty());
 				std::vector<const database::WeaponData*> datas = std::move(*result);
 				for (auto data : datas) {
@@ -329,7 +329,7 @@ namespace pokebot {
 			}
 		};
 
-		BuyNode* BuyPattern::GetPattern(int round, int win_state) noexcept {
+		BuyNode* BuyPattern::GetPattern(int round, int win_state) POKEBOT_NOEXCEPT {
 			if ((round < 0 || round >= 16) || (win_state < 0 || win_state > 1)) 
 				return nullptr;
 			else

@@ -50,8 +50,8 @@ namespace pokebot {
 		public:
 			Database();
 
-			const WeaponData* const GetWeaponData(const std::string_view) const noexcept;
-			const Cartridge* const GetCartridge(const std::string_view) const noexcept;
+			const WeaponData* const GetWeaponData(const std::string_view) const POKEBOT_NOEXCEPT;
+			const Cartridge* const GetCartridge(const std::string_view) const POKEBOT_NOEXCEPT;
 
 		} database{};
 	}

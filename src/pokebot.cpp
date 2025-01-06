@@ -21,11 +21,11 @@ typename function_traits<R(Args...)>::function_type to_function_pointer(std::fun
 
 class Command {
 public:
-    inline Command(const std::string_view& Command_Name, std::function<void()> command_function) noexcept { REG_SVR_COMMAND(Command_Name.data(), command_function.target<void()>()); }
+    inline Command(const std::string_view& Command_Name, std::function<void()> command_function) POKEBOT_NOEXCEPT { REG_SVR_COMMAND(Command_Name.data(), command_function.target<void()>()); }
 };
 
 namespace pokebot::plugin {
-    void Pokebot::RegisterCommand() noexcept {
+    void Pokebot::RegisterCommand() POKEBOT_NOEXCEPT {
         static auto GetArgs = []() {
             static std::vector<std::string> args{};
             for (int i = 1; ; i++) {
@@ -171,7 +171,7 @@ namespace pokebot::plugin {
         });
     }
 
-    void Pokebot::OnUpdate() noexcept {
+    void Pokebot::OnUpdate() POKEBOT_NOEXCEPT {
         pokebot::game::game.PreUpdate();
         pokebot::bot::Manager::Instance().Update();
         pokebot::game::game.PostUpdate();
@@ -183,7 +183,7 @@ namespace pokebot::plugin {
         }
     }
 
-    void Pokebot::AddBot(const std::string& Bot_Name, const common::Team Selected_Team, const common::Model Selected_Model, const bot::Difficult Difficult) POKEBOT_DEBUG_NOEXCEPT {
+    void Pokebot::AddBot(const std::string& Bot_Name, const common::Team Selected_Team, const common::Model Selected_Model, const bot::Difficult Difficult) POKEBOT_NOEXCEPT {
         pokebot::bot::Manager::Instance().Insert(Bot_Name, Selected_Team, Selected_Model, Difficult);
     }
     

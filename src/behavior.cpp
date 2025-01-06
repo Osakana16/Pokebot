@@ -32,67 +32,67 @@ namespace pokebot::bot {
 
 		namespace {
 			template<bool b>
-			bool IsSeeingEnemy(const Bot* const Self) noexcept {
+			bool IsSeeingEnemy(const Bot* const Self) POKEBOT_NOEXCEPT {
 				RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->GetEnemyWithinView().empty());
 			}
 
 			template<bool b>
-			bool HasPrimaryWeapon(const Bot* const Self) noexcept {
+			bool HasPrimaryWeapon(const Bot* const Self) POKEBOT_NOEXCEPT {
 				RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (Self->HasPrimaryWeapon()));
 			}
 
 			template<bool b>
-			bool HasSecondaryWeapon(const Bot* const Self) noexcept {
+			bool HasSecondaryWeapon(const Bot* const Self) POKEBOT_NOEXCEPT {
 				RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (Self->HasSecondaryWeapon()));
 			}
 
 			template<bool b>
-			bool HasMelee(const Bot* const Self) noexcept {
+			bool HasMelee(const Bot* const Self) POKEBOT_NOEXCEPT {
 				return true;
 			}
 
 			template<bool b>
-			bool HasGrenade(const Bot* const Self) noexcept {
+			bool HasGrenade(const Bot* const Self) POKEBOT_NOEXCEPT {
 				RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (Self->HasWeapon(game::Weapon::HEGrenade)));
 			}
 
 			template<bool b>
-			bool HasFlashbang(const Bot* const Self) noexcept {
+			bool HasFlashbang(const Bot* const Self) POKEBOT_NOEXCEPT {
 				RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (Self->HasWeapon(game::Weapon::Flashbang)));
 			}
 
 			template<bool b>
-			bool HasSmoke(const Bot* const Self) noexcept {
+			bool HasSmoke(const Bot* const Self) POKEBOT_NOEXCEPT {
 				RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (Self->HasWeapon(game::Weapon::Smoke)));
 			}
 
 			template<bool b>
-			bool IsEquipingArmour(const Bot* const Self) noexcept {
+			bool IsEquipingArmour(const Bot* const Self) POKEBOT_NOEXCEPT {
 				return false;
 			}
 
 			template<bool b>
-			bool IsEquipingHelmet(const Bot* const Self) noexcept {
+			bool IsEquipingHelmet(const Bot* const Self) POKEBOT_NOEXCEPT {
 				return false;
 			}
 
 			template<bool b>
-			bool IsDying(const Bot* const Self) noexcept {
+			bool IsDying(const Bot* const Self) POKEBOT_NOEXCEPT {
 				RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (Self->Health() <= 25));
 			}
 
 			template<bool b>
-			bool IsLonely(const Bot* const Self) noexcept {
+			bool IsLonely(const Bot* const Self) POKEBOT_NOEXCEPT {
 				return false;
 			}
 
 			template<bool b>
-			bool HasEnoughPrimaryAmmo(const Bot* const Self) noexcept {
+			bool HasEnoughPrimaryAmmo(const Bot* const Self) POKEBOT_NOEXCEPT {
 				return false;
 			}
 
 			template<bool b>
-			bool HasEnoughSecondaryAmmo(const Bot* const Self) noexcept {
+			bool HasEnoughSecondaryAmmo(const Bot* const Self) POKEBOT_NOEXCEPT {
 				return false;
 			}
 		}

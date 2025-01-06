@@ -25,15 +25,15 @@ namespace pokebot::node {
 		}
 	}
 
-	const Vector& Point::Origin() const noexcept {
+	const Vector& Point::Origin() const POKEBOT_NOEXCEPT {
 		return point;
 	}
 
-	std::pair<float, float> Point::Length() const noexcept {
+	std::pair<float, float> Point::Length() const POKEBOT_NOEXCEPT {
 		return std::make_pair(Range<float>, Range<float>);
 	}
 
-	size_t PointAsIndex(const float Pos) noexcept {
+	size_t PointAsIndex(const float Pos) POKEBOT_NOEXCEPT {
 		return static_cast<size_t>(Pos / Split_Size) + 16;
 	}
 
@@ -99,7 +99,7 @@ namespace pokebot::node {
 		return Invalid_NodeID;
 	}
 		
-	bool WaypointGraph::IsSameGoal(const NodeID Node_ID, const GoalKind Goal_Kind) const noexcept {
+	bool WaypointGraph::IsSameGoal(const NodeID Node_ID, const GoalKind Goal_Kind) const POKEBOT_NOEXCEPT {
 		auto goals = GetGoal(node::GoalKind::Bombspot);
 		for (auto goal = goals.first; goal != goals.second; goal++) {
 			if (Node_ID == goal->second) {
@@ -109,7 +109,7 @@ namespace pokebot::node {
 		return false;
 	}
 
-	bool WaypointGraph::IsOnNode(const Vector& Position, const NodeID Target_Node_ID) const noexcept {
+	bool WaypointGraph::IsOnNode(const Vector& Position, const NodeID Target_Node_ID) const POKEBOT_NOEXCEPT {
 		return (GetNearest(Position) == Target_Node_ID);
 	}
 
@@ -133,7 +133,7 @@ namespace pokebot::node {
 	}
 
 	void WaypointGraph::AddBasic() {
-		auto MoveOriginOnGround = [](Vector* const origin) noexcept {
+		auto MoveOriginOnGround = [](Vector* const origin) POKEBOT_NOEXCEPT {
 			common::Tracer tracer{};
 			tracer.MoveStart(*origin);
 			tracer.MoveDest(Vector(origin->x, origin->y, -9999));
@@ -346,11 +346,11 @@ namespace pokebot::node {
 	}
 
 
-	decltype(static_cast<const decltype(WaypointGraph::goals)>(WaypointGraph::goals).equal_range(GoalKind::None)) WaypointGraph::GetGoal(const GoalKind kind) const noexcept {
+	decltype(static_cast<const decltype(WaypointGraph::goals)>(WaypointGraph::goals).equal_range(GoalKind::None)) WaypointGraph::GetGoal(const GoalKind kind) const POKEBOT_NOEXCEPT {
 		return goals.equal_range(kind);
 	}
 
-	NodeID WaypointGraph::GetNearest(const Vector& Destination) const noexcept {
+	NodeID WaypointGraph::GetNearest(const Vector& Destination) const POKEBOT_NOEXCEPT {
 		NodeID result = Invalid_NodeID;
 		const size_t X = PointAsIndex(Destination.x),
 			Y = PointAsIndex(Destination.y),
@@ -474,25 +474,25 @@ namespace pokebot::node {
 		return false;
 	}
 
-	Vector WaypointGraph::GetOrigin(const NodeID Node_ID) const noexcept {
+	Vector WaypointGraph::GetOrigin(const NodeID Node_ID) const POKEBOT_NOEXCEPT {
 		return (Node_ID != Invalid_NodeID ? nodes.at(Node_ID)->Origin() : Vector(9999, 9999, 9999));
 	}
 
-	std::pair<std::unordered_set<NodeID>::const_iterator, std::unordered_set<NodeID>::const_iterator> Point::GetConnections() const noexcept {
+	std::pair<std::unordered_set<NodeID>::const_iterator, std::unordered_set<NodeID>::const_iterator> Point::GetConnections() const POKEBOT_NOEXCEPT {
 		return std::make_pair(connections.begin(), connections.end());
 	}
 
-	bool Point::AddConnection(const NodeID node_id) noexcept {
+	bool Point::AddConnection(const NodeID node_id) POKEBOT_NOEXCEPT {
 		connections.insert(node_id);
 		return true;
 	}
 
-	bool Point::AddFlag(const NodeFlag flag) noexcept {
+	bool Point::AddFlag(const NodeFlag flag) POKEBOT_NOEXCEPT {
 		this->flag |= flag;
 		return true;
 	}
 #else
-	navmesh::NavArea* CZBotGraph::GetNearest(const Vector& Destination) const noexcept {
+	navmesh::NavArea* CZBotGraph::GetNearest(const Vector& Destination) const POKEBOT_NOEXCEPT {
 		return navigation_map.GetNavArea(&Destination);
 	}
 
@@ -639,7 +639,7 @@ namespace pokebot::node {
 	}
 
 	
-	size_t CZBotGraph::GetNumberOfGoals(const GoalKind Kind) const noexcept {
+	size_t CZBotGraph::GetNumberOfGoals(const GoalKind Kind) const POKEBOT_NOEXCEPT {
 		size_t number{};
 		auto goals = GetGoal(Kind);
 		for (auto goal = goals.first; goal != goals.second; goal++) {
@@ -648,7 +648,7 @@ namespace pokebot::node {
 		return number;
 	}
 
-	bool CZBotGraph::IsSameGoal(const NodeID Node_ID, const GoalKind Goal_Kind) const noexcept {
+	bool CZBotGraph::IsSameGoal(const NodeID Node_ID, const GoalKind Goal_Kind) const POKEBOT_NOEXCEPT {
 		auto goals = GetGoal(Goal_Kind);
 		for (auto goal = goals.first; goal != goals.second; goal++) {
 			if (Node_ID == goal->second) {
@@ -658,17 +658,17 @@ namespace pokebot::node {
 		return false;
 	}
 
-	bool CZBotGraph::IsOnNode(const Vector& Position, const NodeID Target_Node_ID) const noexcept {
+	bool CZBotGraph::IsOnNode(const Vector& Position, const NodeID Target_Node_ID) const POKEBOT_NOEXCEPT {
 		auto area = GetNearest(Position);
 		return (area != nullptr && area->m_id == Target_Node_ID);
 	}
 
-	decltype(static_cast<const decltype(CZBotGraph::goals)>(CZBotGraph::goals).equal_range(GoalKind::None)) CZBotGraph::GetGoal(const GoalKind kind) const noexcept {
+	decltype(static_cast<const decltype(CZBotGraph::goals)>(CZBotGraph::goals).equal_range(GoalKind::None)) CZBotGraph::GetGoal(const GoalKind kind) const POKEBOT_NOEXCEPT {
 		return goals.equal_range(kind);
 	}
 
 
-	Vector CZBotGraph::GetOrigin(const NodeID Node_ID) const noexcept {
+	Vector CZBotGraph::GetOrigin(const NodeID Node_ID) const POKEBOT_NOEXCEPT {
 		if (auto area = navigation_map.GetNavAreaByID(Node_ID); area != nullptr) {
 			return area->m_center;
 		} else {
@@ -677,7 +677,7 @@ namespace pokebot::node {
 	}
 
 	
-	bool CZBotGraph::HasFlag(const NodeID id, NavmeshFlag flag) const noexcept {
+	bool CZBotGraph::HasFlag(const NodeID id, NavmeshFlag flag) const POKEBOT_NOEXCEPT {
 		auto area = navigation_map.GetNavAreaByID(id);
 		return area != nullptr && bool(area->m_attributeFlags & static_cast<navmesh::NavAttributeType>(flag));
 	}

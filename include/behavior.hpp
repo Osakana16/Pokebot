@@ -1,6 +1,6 @@
 #pragma once
 #define BEHAVIOR_PRIVATE namespace
-#define BEHAVIOR_IF(A) [](const Bot* const Self) noexcept { return A; }
+#define BEHAVIOR_IF(A) [](const Bot* const Self) POKEBOT_NOEXCEPT { return A; }
 #define BEHAVIOR_IFELSE(AIF,A_PROCESS,BIF,B_PROCESS) Condition::If(AIF, A_PROCESS), Condition::If(BIF, B_PROCESS)
 #define BEHAVIOR_IFELSE_TEMPLATE(IF,A_PROCESS,B_PROCESS) Condition::If(IF<true>, A_PROCESS), Condition::If(IF<false>, B_PROCESS)
 
@@ -113,12 +113,12 @@ namespace pokebot::bot {
 		public:
 			using BehaviorNode::BehaviorNode;
 
-			Status Evaluate(Bot* const self) noexcept override {
+			Status Evaluate(Bot* const self) POKEBOT_NOEXCEPT override {
 				// SERVER_PRINT(std::format("{}\n", name).c_str());
 				return action(self);
 			}
 			
-			void Define(BehaviorFunc action_) noexcept {
+			void Define(BehaviorFunc action_) POKEBOT_NOEXCEPT {
 				assert(action == nullptr);
 				action = action_;
 			}
@@ -135,7 +135,7 @@ namespace pokebot::bot {
 		};
 
 		template<bool b>
-		bool Always(const Bot* const) noexcept { return b; }
+		bool Always(const Bot* const) POKEBOT_NOEXCEPT { return b; }
 
 		template<common::Team value>
 		bool Is(const Bot* const Self) { return Self->JoinedTeam() == value; }
@@ -157,7 +157,7 @@ namespace pokebot::bot {
 
 
 		template<bool b>
-		bool IsTeamObjectiveSet(const Bot* const Self) noexcept {
+		bool IsTeamObjectiveSet(const Bot* const Self) POKEBOT_NOEXCEPT {
 			if constexpr (b) {
 				return Self->goal_node == Manager::Instance().GetGoalNode(Self->JoinedTeam(), Self->JoinedPlatoon());
 			} else {
@@ -167,82 +167,82 @@ namespace pokebot::bot {
 
 
 		template<bool b>
-		bool IsTickingToExplosion(const Bot* const Self) noexcept {
+		bool IsTickingToExplosion(const Bot* const Self) POKEBOT_NOEXCEPT {
 			return false;
 		}
 
 		template<bool b>
-		bool IsOnBomb(const Bot* const Self) noexcept {
+		bool IsOnBomb(const Bot* const Self) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (common::Distance(Self->Origin(), *Manager::Instance().C4Origin()) <= 50.0f));
 		}
 		
 		template<bool b>
-		bool HasGoal(const Bot* const Self) noexcept {
+		bool HasGoal(const Bot* const Self) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->goal_node != node::Invalid_NodeID);
 		}
 
 		template<bool b>
-		bool HasBomb(const Bot* const Self) noexcept {
+		bool HasBomb(const Bot* const Self) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->HasWeapon(game::Weapon::C4));
 		}
 
 		template<bool b>
-		bool IsPlayerMate(const Bot* const Self) noexcept {
+		bool IsPlayerMate(const Bot* const Self) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (Self->JoinedTeam() == common::GetTeamFromModel(game::game.host.AsEdict())));
 		}
 
 		template<bool b>
-		bool IsJumping(const Bot* const Self) noexcept {
+		bool IsJumping(const Bot* const Self) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, !Self->IsOnFloor());
 		}
 
 		template<bool b>
-		bool IsDucking(const Bot* const Self) noexcept {
+		bool IsDucking(const Bot* const Self) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->IsDucking());
 		}
 
 		template<bool b>
-		bool IsSwimming(const Bot* const Self) noexcept {
+		bool IsSwimming(const Bot* const Self) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->IsSwimming());
 		}
 
 		template<bool b>
-		bool IsBlind(const Bot* const Self) noexcept {
+		bool IsBlind(const Bot* const Self) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, true);
 		}
 
 		template<bool b>
-		bool IsUsing(const Bot* const Self) noexcept {
+		bool IsUsing(const Bot* const Self) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->IsPressingKey(ActionKey::Use));
 		}
 
 		template<bool b>
-		bool IsDriving(const Bot* const Self) noexcept {
+		bool IsDriving(const Bot* const Self) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->IsDriving());
 		}
 
 		template<bool b>
-		bool IsInDark(const Bot* const) noexcept {
+		bool IsInDark(const Bot* const) POKEBOT_NOEXCEPT {
 			return false;
 		}
 
 		template<bool b>
-		bool HasMoneyEnough(const Bot* const) noexcept {
+		bool HasMoneyEnough(const Bot* const) POKEBOT_NOEXCEPT {
 			return false;
 		}
 
 		template<bool b>
-		bool IsTimeEarly(const Bot* const) noexcept {
+		bool IsTimeEarly(const Bot* const) POKEBOT_NOEXCEPT {
 			return false;
 		}
 
 		template<game::MapFlags flag>
-		bool IsCurrentMode(const Bot* const Self) noexcept {
+		bool IsCurrentMode(const Bot* const Self) POKEBOT_NOEXCEPT {
 			return game::game.IsCurrentMode(flag);
 		}
 
 		template<bool b>
-		bool IsHelper(const Bot* const) noexcept {
+		bool IsHelper(const Bot* const) POKEBOT_NOEXCEPT {
 			return false;
 		}
 

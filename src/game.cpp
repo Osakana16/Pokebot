@@ -14,7 +14,7 @@ namespace pokebot {
 		ConVar poke_fight{ "pk_fight", "1"};
 		ConVar poke_buy{ "pk_buy", "1"};
 
-		Hostage Hostage::AttachHostage(const edict_t* Hostage_Entity) noexcept {
+		Hostage Hostage::AttachHostage(const edict_t* Hostage_Entity) POKEBOT_NOEXCEPT {
 			assert(Hostage_Entity != nullptr);
 			Hostage hostage{};
 			hostage.entity = Hostage_Entity;
@@ -22,7 +22,7 @@ namespace pokebot {
 			return hostage;
 		}
 
-		bool Hostage::RecoginzeOwner(const ClientName& Client_Name) noexcept {
+		bool Hostage::RecoginzeOwner(const ClientName& Client_Name) POKEBOT_NOEXCEPT {
 			auto client_status = game.GetClientStatus(Client_Name);
 			if (common::Distance(client_status.origin(), entity->v.origin) < 83.0f && client_status.GetTeam() == common::Team::CT) {
 				if (owner_name == Client_Name) {
@@ -35,7 +35,7 @@ namespace pokebot {
 			return false;
 		}
 
-		void Hostage::Update() noexcept {
+		void Hostage::Update() POKEBOT_NOEXCEPT {
 			if (owner_name.empty())
 				return;
 			
@@ -45,10 +45,10 @@ namespace pokebot {
 				owner_name.clear();
 		}
 
-		bool Hostage::IsUsed() const noexcept { return game.PlayerExists(owner_name); }
-		bool Hostage::IsOwnedBy(const std::string_view& Name) const noexcept { return (IsUsed() && owner_name == Name); }
-	 	bool Hostage::IsReleased() const noexcept { return (entity->v.effects & EF_NODRAW); }
-		const Vector& Hostage::Origin() const noexcept {
+		bool Hostage::IsUsed() const POKEBOT_NOEXCEPT { return game.PlayerExists(owner_name); }
+		bool Hostage::IsOwnedBy(const std::string_view& Name) const POKEBOT_NOEXCEPT { return (IsUsed() && owner_name == Name); }
+	 	bool Hostage::IsReleased() const POKEBOT_NOEXCEPT { return (entity->v.effects & EF_NODRAW); }
+		const Vector& Hostage::Origin() const POKEBOT_NOEXCEPT {
 			return entity->v.origin;
 		}
 
@@ -99,7 +99,7 @@ namespace pokebot {
 			}
 		}
 
-		void Game::OnNewRound() noexcept {
+		void Game::OnNewRound() POKEBOT_NOEXCEPT {
 			round++;
 			bot::Manager::Instance().OnNewRound();
 			clients.OnNewRound();
@@ -216,11 +216,11 @@ namespace pokebot {
 			}
 		}
 
-		size_t Game::GetHostageNumber() const noexcept {
+		size_t Game::GetHostageNumber() const POKEBOT_NOEXCEPT {
 			return hostages.size();
 		}
 
-		bool Game::IsHostageUsed(const int Index) const noexcept {
+		bool Game::IsHostageUsed(const int Index) const POKEBOT_NOEXCEPT {
 			return hostages[Index].IsUsed();
 		}
 
@@ -237,42 +237,42 @@ namespace pokebot {
 			return nullptr;
 		}
 
-		const std::string& Game::GetBotArg(const size_t Index) const noexcept {
+		const std::string& Game::GetBotArg(const size_t Index) const POKEBOT_NOEXCEPT {
 			return bot_args[Index];
 		}
 
-		size_t Game::GetBotArgCount() const noexcept {
+		size_t Game::GetBotArgCount() const POKEBOT_NOEXCEPT {
 			return bot_args.size();
 		}
 
-		bool Game::IsBotCmd() const noexcept {
+		bool Game::IsBotCmd() const POKEBOT_NOEXCEPT {
 			return !bot_args.empty();
 		}
 
-		size_t Game::GetLives(const common::Team) const noexcept {
+		size_t Game::GetLives(const common::Team) const POKEBOT_NOEXCEPT {
 			return 0;
 		}
 
-		uint32_t Game::CurrentRonud() const noexcept {
+		uint32_t Game::CurrentRonud() const POKEBOT_NOEXCEPT {
 			return round;
 		}
 		
-		bool Game::IsCurrentMode(const MapFlags Game_Mode) const noexcept {
+		bool Game::IsCurrentMode(const MapFlags Game_Mode) const POKEBOT_NOEXCEPT {
 			return bool(map_flags & Game_Mode);
 		}
 
-		MapFlags Game::GetMapFlag() const noexcept {
+		MapFlags Game::GetMapFlag() const POKEBOT_NOEXCEPT {
 			return map_flags;
 		}
 
-		void Game::IssueCommand(const ClientName& Client_Name, const std::string& Sentence) noexcept {
+		void Game::IssueCommand(const ClientName& Client_Name, const std::string& Sentence) POKEBOT_NOEXCEPT {
 			bot_args.clear();
 			bot_args = common::StringSplit(&Sentence, ' ');
 			MDLL_ClientCommand(const_cast<edict_t*>(clients.Get(Client_Name)->Edict()));
 			bot_args.clear();
 		}
 
-		bool ClientStatus::HasHostages() const noexcept {
+		bool ClientStatus::HasHostages() const POKEBOT_NOEXCEPT {
 			for (int i = 0; i < game::game.GetHostageNumber(); i++) {
 				if (game::game.IsHostageOwnedBy(i, client->Name())) {
 					return true;
@@ -281,14 +281,14 @@ namespace pokebot {
 			return false;
 		}
 
-		bool Host::IsHostValid() const noexcept {
+		bool Host::IsHostValid() const POKEBOT_NOEXCEPT {
 			return host != nullptr;
 		}
 
-		const char* const Host::HostName() const noexcept { return STRING(host->v.netname); }
-		const Vector& Host::Origin() const noexcept { return host->v.origin; }
+		const char* const Host::HostName() const POKEBOT_NOEXCEPT { return STRING(host->v.netname); }
+		const Vector& Host::Origin() const POKEBOT_NOEXCEPT { return host->v.origin; }
 
-		void Host::SetHost(edict_t* const target) noexcept {
+		void Host::SetHost(edict_t* const target) POKEBOT_NOEXCEPT {
 			host = target;
 		}
 		
@@ -396,13 +396,13 @@ namespace pokebot {
 			return false;
 		}
 
-		void ClientManager::OnDeath(const std::string_view Client_Name) noexcept {
+		void ClientManager::OnDeath(const std::string_view Client_Name) POKEBOT_NOEXCEPT {
 			decltype(auto) target = GetAsMutable(Client_Name.data());
 			target->status_icon = StatusIcon::Not_Displayed;
 			target->item = Item::None;
 		}
 
-		void ClientManager::OnDamageTaken(const std::string_view Client_Name, const edict_t* Inflictor, const int Health, const int Armor, const int Bit) noexcept {
+		void ClientManager::OnDamageTaken(const std::string_view Client_Name, const edict_t* Inflictor, const int Health, const int Armor, const int Bit) POKEBOT_NOEXCEPT {
 			if (auto target = GetAsMutable(Client_Name.data()); target != nullptr) {
 				if (target->Health() - Health <= 0) {
 					OnDeath(Client_Name);
@@ -412,50 +412,50 @@ namespace pokebot {
 			}
 		}
 
-		void ClientManager::OnMoneyChanged(const std::string_view Client_Name, const int Money) noexcept {
+		void ClientManager::OnMoneyChanged(const std::string_view Client_Name, const int Money) POKEBOT_NOEXCEPT {
 			GetAsMutable(Client_Name.data())->money = Money;
 		}
 
-		void ClientManager::OnScreenFaded(const std::string_view Client_Name) noexcept {
+		void ClientManager::OnScreenFaded(const std::string_view Client_Name) POKEBOT_NOEXCEPT {
 
 		}
 
-		void ClientManager::OnNVGToggled(const std::string_view Client_Name, const bool Toggle) noexcept {
+		void ClientManager::OnNVGToggled(const std::string_view Client_Name, const bool Toggle) POKEBOT_NOEXCEPT {
 			GetAsMutable(Client_Name.data())->is_nvg_on = Toggle;
 		}
 
-		void ClientManager::OnWeaponChanged(const std::string_view Client_Name, const game::Weapon Weapon_ID) noexcept {
+		void ClientManager::OnWeaponChanged(const std::string_view Client_Name, const game::Weapon Weapon_ID) POKEBOT_NOEXCEPT {
 			GetAsMutable(Client_Name.data())->current_weapon = Weapon_ID;
 		}
 
-		void ClientManager::OnClipChanged(const std::string_view Client_Name, const game::Weapon Weapon_ID, const int Amount) noexcept {
+		void ClientManager::OnClipChanged(const std::string_view Client_Name, const game::Weapon Weapon_ID, const int Amount) POKEBOT_NOEXCEPT {
 			GetAsMutable(Client_Name.data())->weapon_clip = Amount;
 		}
 
-		void ClientManager::OnAmmoPickedup(const std::string_view Client_Name, const game::AmmoID Ammo_ID, const int Amount) noexcept {
+		void ClientManager::OnAmmoPickedup(const std::string_view Client_Name, const game::AmmoID Ammo_ID, const int Amount) POKEBOT_NOEXCEPT {
 			GetAsMutable(Client_Name.data())->weapon_ammo[static_cast<int>(Ammo_ID)] = Amount;
 		}
 
-		void ClientManager::OnTeamAssigned(const std::string_view Client_Name, const common::Team Assigned_Team) noexcept {
+		void ClientManager::OnTeamAssigned(const std::string_view Client_Name, const common::Team Assigned_Team) POKEBOT_NOEXCEPT {
 			auto target = GetAsMutable(Client_Name.data());
 			if (target != nullptr)
 				target->team = Assigned_Team;
 		}
 
-		void ClientManager::OnItemChanged(const std::string_view Client_Name, game::Item item) noexcept {
+		void ClientManager::OnItemChanged(const std::string_view Client_Name, game::Item item) POKEBOT_NOEXCEPT {
 			GetAsMutable(Client_Name.data())->item |= item;
 		}
 
-		void ClientManager::OnStatusIconShown(const std::string_view Client_Name, const StatusIcon Icon) noexcept {
+		void ClientManager::OnStatusIconShown(const std::string_view Client_Name, const StatusIcon Icon) POKEBOT_NOEXCEPT {
 			GetAsMutable(Client_Name.data())->status_icon |= Icon;
 		}
 
-		void ClientManager::OnVIPChanged(const std::string_view Client_Name) noexcept {
+		void ClientManager::OnVIPChanged(const std::string_view Client_Name) POKEBOT_NOEXCEPT {
 			auto&& candidate = GetAsMutable(Client_Name.data());
 			candidate->is_vip = true;
 		}
 
-		void ClientManager::OnDefuseKitEquiped(const std::string_view Client_Name) noexcept {
+		void ClientManager::OnDefuseKitEquiped(const std::string_view Client_Name) POKEBOT_NOEXCEPT {
 			GetAsMutable(Client_Name.data())->item |= Item::Defuse_Kit;
 		}
 
@@ -465,11 +465,11 @@ namespace pokebot {
 
 		ClientStatus::ClientStatus(const ClientName& Client_Name) : client(game.clients.Get(Client_Name)) {}
 
-		common::Team ClientStatus::GetTeam() const noexcept {
+		common::Team ClientStatus::GetTeam() const POKEBOT_NOEXCEPT {
 			return client->GetTeam();
 		}
 
-		bool ClientStatus::CanSeeFriend() const noexcept {
+		bool ClientStatus::CanSeeFriend() const POKEBOT_NOEXCEPT {
 			for (auto& other : game.clients.GetAll()) {
 				if (entity::CanSeeEntity(client->Edict(), other.second) && other.second.GetTeam() == GetTeam()) {
 					return true;
@@ -478,7 +478,7 @@ namespace pokebot {
 			return false;
 		}
 
-		ClientName ClientStatus::GetEnemyNameWithinView() const noexcept {
+		ClientName ClientStatus::GetEnemyNameWithinView() const POKEBOT_NOEXCEPT {
 			for (const auto& other : game.clients.GetAll()) {
 				if (entity::CanSeeEntity(*client, other.second) && other.second.GetTeam() != GetTeam()) {
 					return other.first;
@@ -487,7 +487,7 @@ namespace pokebot {
 			return "";
 		}
 
-		std::vector<ClientName> ClientStatus::GetEntityNamesInView() const noexcept {
+		std::vector<ClientName> ClientStatus::GetEntityNamesInView() const POKEBOT_NOEXCEPT {
 			decltype(GetEntityNamesInView()) result{};
 			for (auto& other : game.clients.GetAll()) {
 				if (entity::CanSeeEntity(*client, other.second)) {
@@ -498,11 +498,11 @@ namespace pokebot {
 		}
 
 		
-		common::Team ClientStatus::GetTeamFromModel() const noexcept {
+		common::Team ClientStatus::GetTeamFromModel() const POKEBOT_NOEXCEPT {
 			return common::GetTeamFromModel(*client);
 		}
 
-		bool ClientStatus::IsPlayerModelReloading() const noexcept {
+		bool ClientStatus::IsPlayerModelReloading() const POKEBOT_NOEXCEPT {
 			// The value of entvars_t::sequence.
 			// sequence has two values. The value changes depending on whether the player is standing or not.
 			// 
@@ -547,7 +547,7 @@ namespace pokebot {
 			return (Is_Model_Reloading);
 		}
 
-		bool ClientStatus::IsViewModelReloading() const noexcept {
+		bool ClientStatus::IsViewModelReloading() const POKEBOT_NOEXCEPT {
 			// The value of entvars_t::weapon_anim.
 			// weaponanim has two values, weapons with different animation values ​​are as follows:
 			//	1. Glock(This is the only weapon the reload animation changes randomly).
@@ -596,28 +596,28 @@ namespace pokebot {
 			return (Is_View_Reloading);
 		}
 
-		bool ClientStatus::IsFakeClient() const noexcept {
+		bool ClientStatus::IsFakeClient() const POKEBOT_NOEXCEPT {
 			return bool(client->Edict()->v.flags & common::Third_Party_Bot_Flag);
 		}
 
 	}
 
 	namespace entity {
-		bool InViewCone(const edict_t* const self, const Vector& Origin) noexcept {
+		bool InViewCone(const edict_t* const self, const Vector& Origin) POKEBOT_NOEXCEPT {
 			MAKE_VECTORS(self->v.angles);
 			const auto Vector_2D_Los = (Origin - self->v.origin).Make2D().Normalize();
 			const auto Dot = DotProduct(Vector_2D_Los, gpGlobals->v_forward.Make2D());
 			return (Dot > 0.50);
 		}
 
-		bool IsVisible(const edict_t* const self, const Vector& Origin) noexcept {
+		bool IsVisible(const edict_t* const self, const Vector& Origin) POKEBOT_NOEXCEPT {
 			// look through caller's eyes
 			TraceResult tr;
 			UTIL_TraceLine(self->v.origin + self->v.view_ofs, Origin, dont_ignore_monsters, ignore_glass, const_cast<edict_t*>(self), &tr);
 			return (tr.flFraction >= 1.0);	// line of sight is not established or valid
 		}
 
-		bool CanSeeEntity(const edict_t* const self, const const edict_t* Target) noexcept {
+		bool CanSeeEntity(const edict_t* const self, const const edict_t* Target) POKEBOT_NOEXCEPT {
 			const auto Body = Target->v.origin;
 			const auto Head = Target->v.origin + Target->v.view_ofs;
 			
@@ -635,12 +635,12 @@ namespace pokebot {
 	}
 
 	namespace engine {
-		ClientKey::ClientKey(edict_t* target) noexcept :
+		ClientKey::ClientKey(edict_t* target) POKEBOT_NOEXCEPT :
 			Client_Index(ENTINDEX(target)),
 			infobuffer((*g_engfuncs.pfnGetInfoKeyBuffer)(target)) {
 		}
 
-		ClientKey& ClientKey::SetValue(const char* Key, const char* Value) noexcept {
+		ClientKey& ClientKey::SetValue(const char* Key, const char* Value) POKEBOT_NOEXCEPT {
 			(*g_engfuncs.pfnSetClientKeyValue)(Client_Index, infobuffer, Key, Value);
 			return *this;
 		}
