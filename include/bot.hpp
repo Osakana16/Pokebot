@@ -347,7 +347,7 @@ namespace pokebot {
 		class Manager final : private common::Singleton<Manager> {
 			std::optional<Vector> c4_origin{};
 
-			Troops troops[2];
+			common::Array<Troops, 2> troops;
 			friend class pokebot::message::MessageDispatcher;
 			std::unordered_map<std::string, Bot> bots{};
 			std::unordered_map<std::string, BotBalancer> balancer{};

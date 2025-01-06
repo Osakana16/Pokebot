@@ -682,16 +682,16 @@ namespace pokebot {
 		}
 		
 		Manager::Manager() :
-			troops{{ 
-				[](const std::pair<std::string, Bot>& target) -> bool { return target.second.JoinedTeam() == common::Team::T; },
-				[](const std::pair<std::string, Bot>& target) -> bool { return target.second.JoinedTeam() == common::Team::T; },
-				common::Team::T 
-			},
-			{
-				[](const std::pair<std::string, Bot>& target) -> bool { return target.second.JoinedTeam() == common::Team::CT; },
-				[](const std::pair<std::string, Bot>& target) -> bool { return target.second.JoinedTeam() == common::Team::CT; },
-				common::Team::CT
-			}}
+			troops{
+				Troops(
+					[](const std::pair<std::string, Bot>& target) -> bool { return target.second.JoinedTeam() == common::Team::T; },
+					[](const std::pair<std::string, Bot>& target) -> bool { return target.second.JoinedTeam() == common::Team::T; },
+					common::Team::T),
+				Troops(
+					[](const std::pair<std::string, Bot>& target) -> bool { return target.second.JoinedTeam() == common::Team::CT; },
+					[](const std::pair<std::string, Bot>& target) -> bool { return target.second.JoinedTeam() == common::Team::CT; },
+					common::Team::CT)
+			}
 		{
 
 		}
@@ -700,6 +700,7 @@ namespace pokebot {
 			for (auto& bot : bots) {
 				bot.second.OnNewRound();
 			}
+
 
 			for (auto& troop : troops) {
 				troop.DecideStrategy(&bots);
