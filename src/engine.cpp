@@ -350,56 +350,63 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                 },
                 {
                     GET_USER_MSG_ID(PLID, "TextMsg", nullptr), []() {
-                        if (!is_bot) {
-                            return;
-                        }
+                        auto nothingToDo = [] {};
+                        auto failIfBotDoes = [] { assert(!is_bot); };
 
-                        enum TextMsg {
-                            None = 0,
-                            Round_End = 1 << 0,
-                            CT_Win = 1 << 1,
-                            T_Win = 1 << 2,
-                            Eliminated = 1 << 3,
-                            Chat = 1 << 4
-                        };
-                        constexpr TextMsg T_Won_Round = (TextMsg)(T_Win | Round_End);
-                        constexpr TextMsg CT_Won_Round = (TextMsg)(CT_Win | Round_End);
-
-                        static const std::unordered_map<std::string, TextMsg> Text_Message{
-                            { "#Cstrike_Chat_All", TextMsg::Chat },
-                            { "#Cstrike_Chat_CT", TextMsg::Chat },
-                            { "#Cstrike_Chat_T", TextMsg::Chat },
-                            { "#CTs_Win", CT_Won_Round },
-                            { "#Terrorists_Win", CT_Won_Round },
-                            { "#Round_Draw", TextMsg::Round_End },
-                            { "#All_Hostages_Rescued", CT_Won_Round },
-                            { "#Target_Saved", CT_Won_Round },
-                            { "#Bomb_Defused", CT_Won_Round },
-                            { "#Bomb_Planted", TextMsg::None },
-                            { "#Hostages_Not_Rescued", T_Won_Round },
-                            { "#Terrorists_Not_Escaped", CT_Won_Round },
-                            { "#VIP_Not_Escaped", T_Won_Round },
-                            { "#Escaping_Terrorists_Neutralized", CT_Won_Round },
-                            { "#VIP_Assassinated", T_Won_Round },
-                            { "#VIP_Escaped", CT_Won_Round },
-                            { "#Terrorists_Escaped", T_Won_Round },
-                            { "#CTs_PreventEscape", CT_Won_Round },
-                            { "#Target_Bombed", T_Won_Round },
-                            { "#Game_Commencing", TextMsg::None },
-                            { "#Game_will_restart_in", TextMsg::None },
-                            { "#Switch_To_BurstFire", TextMsg::None },
-                            { "#Switch_To_SemiAuto", TextMsg::None },
-                            { "#Game_radio", TextMsg::None },
-                            { "#Killed_Teammate", TextMsg::None },
-                            { "#C4_Plant_Must_Be_On_Ground", TextMsg::None },
-                            { "#Injured_Hostage", TextMsg::None },
-                            { "#Auto_Team_Balance_Next_Round", TextMsg::None },
-                            { "#Killed_Hostage", TextMsg::None },
-                            { "#Too_Many_Terrorists", TextMsg::None },
-                            { "#Too_Many_CTs", TextMsg::None },
-                            { "#Weapon_Not_Available", TextMsg::None },
-                            { "#Game_bomb_pickup", TextMsg::None },
-                            { "#Game_bomb_drop", TextMsg::None }
+                        const std::unordered_map<std::string, std::function<void()>> Text_Message{
+                            { "#Game_scoring", nothingToDo },
+                            { "#Cstrike_Chat_All", nothingToDo },
+                            { "#Cstrike_Chat_CT", nothingToDo },
+                            { "#Cstrike_Chat_T", nothingToDo },
+                            { "#CTs_Win", nothingToDo },
+                            { "#Terrorists_Win", nothingToDo },
+                            { "#Round_Draw", nothingToDo },
+                            { "#All_Hostages_Rescued", nothingToDo },
+                            { "#Target_Saved", nothingToDo },
+                            { "#Bomb_Defused", nothingToDo },
+                            { "#Bomb_Planted", nothingToDo },
+                            { "#Hostages_Not_Rescued", nothingToDo,},
+                            { "#Terrorists_Not_Escaped", nothingToDo },
+                            { "#VIP_Not_Escaped", nothingToDo },
+                            { "#Escaping_Terrorists_Neutralized", nothingToDo },
+                            { "#Terrorist_Escaped", nothingToDo },
+                            { "#VIP_Assassinated", nothingToDo },
+                            { "#VIP_Escaped", nothingToDo },
+                            { "#Terrorists_Escaped", nothingToDo },
+                            { "#CTs_PreventEscape", nothingToDo },
+                            { "#Target_Bombed", nothingToDo },
+                            { "#Game_Commencing", nothingToDo },
+                            { "#Game_will_restart_in", nothingToDo },
+                            { "#Switch_To_BurstFire", nothingToDo },
+                            { "#Switch_To_SemiAuto", nothingToDo },
+                            { "#Game_radio", nothingToDo },
+                            { "#Killed_Teammate", nothingToDo },
+                            { "#C4_Plant_Must_Be_On_Ground", nothingToDo },
+                            { "#Injured_Hostage", nothingToDo },
+                            { "#Auto_Team_Balance_Next_Round", nothingToDo },
+                            { "#Killed_Hostage", nothingToDo },
+                            { "#Too_Many_Terrorists", nothingToDo },
+                            { "#Too_Many_CTs", nothingToDo },
+                            { "#Weapon_Not_Available", nothingToDo },
+                            { "#Game_bomb_pickup", nothingToDo },
+                            { "#Got_bomb", nothingToDo },
+                            { "#Game_bomb_drop", nothingToDo },
+                            { "#Not_Enough_Money", nothingToDo },
+                            { "#Cstrike_Already_Own_Weapon", nothingToDo },
+                            // - The message that should not be sent caused by a bot. -
+                            { "#Weapon_Cannot_Be_Dropped", failIfBotDoes },
+                            { "#C4_Plant_At_Bomb_Spot", failIfBotDoes },
+                            { "#VIP_cant_buy", failIfBotDoes },
+                            { "#Cannot_Switch_From_VIP", failIfBotDoes },
+                            { "#Only_1_Team_Change", failIfBotDoes },
+                            // - Spec Mode(Always nothing to do) -
+                            { "#Spec_Mode1", nothingToDo },
+                            { "#Spec_Mode2", nothingToDo },
+                            { "#Spec_Mode3", nothingToDo },
+                            { "#Spec_Mode4", nothingToDo },
+                            { "#Spec_Mode5", nothingToDo },
+                            { "#Spec_Mode6", nothingToDo },
+                            { "#Spec_NoTarget", nothingToDo }
                         };
 
                         using namespace pokebot;
@@ -411,11 +418,13 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             if (it == Text_Message.find("#Game_radio")) {
                                 bot::Manager::Instance().OnRadioRecieved(sender, radio);
                             }
-                        } else if (args.size() >= 2 && std::holds_alternative<std::string>(args[1])) {
+                        } else if (args.size() >= 3 && std::holds_alternative<std::string>(args[2])) {
                             auto it = Text_Message.find(std::get<std::string>(args[1]));
                             if (it != Text_Message.end()) {
 
                             }
+                        } else if (args.size() >= 2 && std::holds_alternative<std::string>(args[1])) {
+                            Text_Message.at(std::get<std::string>(args[1]))();
                         }
                     }
                 },
