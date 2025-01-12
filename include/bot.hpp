@@ -6,7 +6,11 @@ namespace pokebot::message {
 namespace pokebot {
 	void ParseWeaponJson();
 	namespace bot {
+		using Name = std::string;
 		class Bot;
+
+		using PlatoonID = std::optional<int>;
+		constexpr auto Not_Joined_Any_Platoon = std::nullopt;
 
 		struct WeaponInfo {
 			int max_clip{};
@@ -76,8 +80,9 @@ namespace pokebot {
 		);
 
 		enum class State {
-			Accomplishment,
-			Crisis
+			Accomplishment,	// The bot mainly does accomplish the mission
+			Crisis,			// The bot is in dangerous situation.
+			Follow			// Follow the leader
 		};
 
 		class GoalQueue {
@@ -123,12 +128,31 @@ namespace pokebot {
 		};
 
 		struct TroopsStrategy {
+			std::string leader_name{};	// The name of the player to follow.
 			node::NodeID objective_goal_node = node::Invalid_NodeID;
 			enum class Strategy {
 				/*- Demolition -*/
-				Plant_C4_Specific_Bombsite,		// Plant the bomb on the specific bomb site.
-				Defend_Bombsite_Concentrative,	// Defend the specific bombsite
-				Defend_Bombsite_Divided,		// Divide the team and defend the bomb.
+
+				/*
+					Stick together and plant the bomb on the specific bombsite.
+					Terrorists never split the team. All members defend one bombsite.
+				*/
+				Plant_C4_Specific_Bombsite_Concentrative,
+				
+				/*
+					Divide the team into the bomber and the no-bomber.
+				*/
+				Plant_C4_And_Deceive,
+				/*
+					Stick together and defend the specific bombsite.
+					CTs never split the team. All members defend one bombsite.				
+				*/
+				Defend_Bombsite_Concentrative,
+				/*
+					Divide the team and defend the bombsite.
+					CTs splits into teams based on number of bombing sites and defend bombsites.
+				*/
+				Defend_Bombsite_Divided,
 				/*- Hostage Rescue -*/
 				Prevent_Hostages,
 				Prevent_Rescuezones,
@@ -139,6 +163,8 @@ namespace pokebot {
 				/*- Escape -*/
 				Rush_Escapezone,
 				Prevent_Escapezone,
+				/*- Common -*/
+				Follow
 			} strategy;
 		};
 
@@ -157,6 +183,7 @@ namespace pokebot {
 			bool IsRoot() const POKEBOT_NOEXCEPT { return parent == nullptr; }
 			int CreatePlatoon(decltype(condition) target_condition, decltype(condition) target_commander_condition);
 			bool DeletePlatoon(const int Index);
+			bool IsStrategyToFollow() const noexcept { return strategy.strategy == TroopsStrategy::Strategy::Follow; }
 
 			void DecideStrategy(std::unordered_map<std::string, Bot>* bots);
 			void Command(std::unordered_map<std::string, Bot>* bots);
@@ -166,6 +193,7 @@ namespace pokebot {
 			bool NeedToDevise() const POKEBOT_NOEXCEPT;
 
 			node::NodeID GetGoalNode() const POKEBOT_NOEXCEPT { return strategy.objective_goal_node; }
+			Vector CurrentLeaderOrigin() const POKEBOT_NOEXCEPT;
 			
 			Troops& operator[](const int index) { return platoons[index]; }
 			const Troops& at(const int index) const { return platoons.at(index); }
@@ -173,6 +201,7 @@ namespace pokebot {
 			auto begin() { return platoons.begin(); }
 			auto end() { return platoons.end(); }
 			auto GetPlatoonSize() { return platoons.size(); }
+			void AssertStrategy(TroopsStrategy::Strategy target) const { assert(strategy.strategy == target); }
 		};
 
 		class Bot {
@@ -193,7 +222,7 @@ namespace pokebot {
 
 			Message start_action{};
 			
-			int platoon = -1;
+			PlatoonID platoon = Not_Joined_Any_Platoon;
 			common::Team team{};
 			common::Model model{};
 
@@ -217,8 +246,11 @@ namespace pokebot {
 			std::vector<Name> target_enemies{};
 
 			State state = State::Accomplishment;
-			void AccomplishMission() POKEBOT_NOEXCEPT, Combat() POKEBOT_NOEXCEPT;
+			void AccomplishMission() POKEBOT_NOEXCEPT, Combat() POKEBOT_NOEXCEPT, Follow() POKEBOT_NOEXCEPT;
 			Name name{};
+
+			void JoinPlatoon(const PlatoonID Target_Platoon) noexcept;
+			void LeavePlatoon() noexcept { platoon = Not_Joined_Any_Platoon; }
 		public:
 			void ReceiveCommand(const TroopsStrategy&);
 
@@ -291,7 +323,7 @@ namespace pokebot {
 			std::vector<game::client::Name> GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT;
 			bool CanSeeEntity() const POKEBOT_NOEXCEPT;
 
-			int JoinedPlatoon() const POKEBOT_NOEXCEPT;
+			PlatoonID JoinedPlatoon() const POKEBOT_NOEXCEPT;
 			common::Team JoinedTeam() const POKEBOT_NOEXCEPT;
 			float GetSecondLeftToCompleteReloading() const POKEBOT_NOEXCEPT;
 
@@ -346,16 +378,22 @@ namespace pokebot {
         */
 		class Manager final : private common::Singleton<Manager> {
 			std::optional<Vector> c4_origin{};
-
 			common::Array<Troops, 2> troops;
 			friend class pokebot::message::MessageDispatcher;
 			std::unordered_map<std::string, Bot> bots{};
 			std::unordered_map<std::string, BotBalancer> balancer{};
+			
+			// The name of the player who has the bomb.
+			std::string bomber_name{};
+			
+			Timer round_started_timer{};
+			enum class InitializationStage { Preparation, Player_Action_Ready, Completed } initialization_stage{};
 
 			Bot* const Get(const std::string&) POKEBOT_NOEXCEPT;
 			RadioMessage radio_message{};
 			Manager();
 		public:
+			const decltype(bomber_name)& Bomber_Name = bomber_name;
 			/**
 			* @brief Get the instance of Manager
 			* @return The instance of Manager
@@ -368,7 +406,12 @@ namespace pokebot {
 			/**
 			* @brief Called when a new round starts.
 			*/
-			void OnNewRound() POKEBOT_NOEXCEPT;
+			void OnNewRoundPreparation() POKEBOT_NOEXCEPT;
+
+			/**
+			* @brief Called when a new round starts.
+			*/
+			void OnNewRoundReady() POKEBOT_NOEXCEPT;
 
 			/**
 			* @brief Get the compensation vector for a bot.
@@ -464,6 +507,18 @@ namespace pokebot {
 			void OnBombPlanted() POKEBOT_NOEXCEPT;
 
 			/**
+			* @brief Called when th bomb is picked up by a player.
+			* @param Client_Name The name of the player who picked up the bomb.
+			*/
+			void OnBombPickedUp(const std::string& Client_Name) POKEBOT_NOEXCEPT;
+
+			/**
+			* @brief Called when th bomb is dropped by a player.
+			* @param Client_Name The name of the player who picked up the bomb.
+			*/
+			void OnBombDropped(const std::string& Client_Name) POKEBOT_NOEXCEPT;
+
+			/**
 			* @brief Called when a bot has completely joined the game.
 			* @param bot The bot that joined.
 			*/
@@ -475,13 +530,26 @@ namespace pokebot {
 			* @param Index The platoon index.
 			* @return The goal node ID. If Index is less than 0, returns the troop's goal node ID.
 			*/
-			node::NodeID GetGoalNode(const common::Team Target_Team, const int Index) const POKEBOT_NOEXCEPT;
+			node::NodeID GetGoalNode(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
+
+			std::optional<Vector> GetLeaderOrigin(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
+			bool IsFollowerPlatoon(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
+
+			void AssertStrategy(const common::Team Target_Team, const PlatoonID Index, TroopsStrategy::Strategy strategy) {
+				auto& troop = troops[static_cast<int>(Target_Team) - 1];
+				if (Index < 0) {
+					troop.AssertStrategy(strategy);
+				} else {
+					troop.at(*Index).AssertStrategy(strategy);
+				}
+			}
 
 			/**
 			* @brief Get the origin of the C4 bomb.
 			* @return The origin of the C4 bomb.
 			*/
 			const std::optional<Vector>& C4Origin() const POKEBOT_NOEXCEPT { return c4_origin; }
+
 		};
 	}
 }

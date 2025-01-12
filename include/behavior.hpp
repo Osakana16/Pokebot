@@ -320,7 +320,11 @@ namespace pokebot::bot {
 
 		// - DEmolition Behaviors - 
 		namespace demolition {
-			BEHAVIOR_CREATE_INLINE(Priority, t_plant);			// The terrorist plant the bomb.
+			/*
+				The bomber plants the bomb.
+			*/
+			BEHAVIOR_CREATE_INLINE(Priority, t_plant);
+
 			BEHAVIOR_CREATE_INLINE(Priority, t_planted_wary);	// Terrorists make the rounds to defend the bomb.
 			BEHAVIOR_CREATE_INLINE(Priority, t_planted_camp);	// Terrorirts camp around c4 to defend the bomb.
 			BEHAVIOR_CREATE_INLINE(Priority, t_defusing);

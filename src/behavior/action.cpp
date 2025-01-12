@@ -436,8 +436,6 @@ namespace pokebot::bot::behavior {
 							self->next_dest_node = self->routes.Current();
 						}
 					}
-				} else {
-					// self->PressKey(ActionKey::Run);
 				}
 				return Status::Running;
 			}

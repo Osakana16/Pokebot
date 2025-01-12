@@ -72,6 +72,7 @@ namespace pokebot {
 			goal_node = node::Invalid_NodeID;
 			next_dest_node = node::Invalid_NodeID;
 
+			LeavePlatoon();
 			look_direction.Clear();
 			ideal_direction.Clear();
 
@@ -93,6 +94,10 @@ namespace pokebot {
 			}
 			
 			if (!freeze_time.IsRunning() && !spawn_cooldown_time.IsRunning()) {
+				if (state != State::Crisis && Manager::Instance().IsFollowerPlatoon(JoinedTeam(), JoinedPlatoon())) {
+					state = State::Follow;
+				}
+
 				// Do not do anything when freezing.
 				// Due to game engine specifications or bugs, 
 				// if we execute a heavy process immediately after the start of a round, 
@@ -104,6 +109,9 @@ namespace pokebot {
 						break;
 					case State::Crisis:
 						Combat();
+						break;
+					case State::Follow:
+						Follow();
 						break;
 				}
 				CheckAround();
@@ -145,7 +153,6 @@ namespace pokebot {
 								} else {
 									if (HasWeapon(game::Weapon::C4)) {
 										behavior::demolition::t_plant->Evaluate(this);
-									} else {
 									}
 								}
 							}
@@ -275,6 +282,49 @@ namespace pokebot {
 				behavior::fight::retreat->Evaluate(this);
 			}
 			behavior::fight::beat_enemies->Evaluate(this);
+		}
+
+		void Bot::Follow() POKEBOT_NOEXCEPT {
+			const auto Leader_Origin = Manager::Instance().GetLeaderOrigin(JoinedTeam(), JoinedPlatoon());
+			const auto Leader_Area = node::czworld.GetNearest(*Leader_Origin);
+			if (Leader_Area == nullptr)
+				return;
+
+			if (goal_node == node::Invalid_NodeID) {
+				goal_node = Leader_Area->m_id;
+			}
+
+			if (!routes.Empty() && !routes.IsEnd()) {
+				const auto Current_Area = node::czworld.GetNearest(Origin());
+				if (Current_Area == nullptr || Current_Area == Leader_Area) {
+					return;
+				}
+
+				// - Check -
+				const auto Current_Node_ID = Current_Area->m_id;
+				if (goal_node == Current_Node_ID) {
+					// The bot is already reached at the destination.
+					goal_queue.Clear();
+					routes.Clear();
+					goal_node = node::Invalid_NodeID;
+					return;
+				}
+
+				if (next_dest_node == node::Invalid_NodeID) {
+					next_dest_node = routes.Current();
+				} else if (node::czworld.IsOnNode(Origin(), next_dest_node)) {
+					if (!routes.IsEnd()) {
+						if (routes.Next()) {
+							next_dest_node = routes.Current();
+						}
+					}
+				}
+			} else {
+				node::czworld.FindPath(&routes, Origin(), node::czworld.GetOrigin(goal_node), JoinedTeam());
+				if (routes.Empty()) {
+					goal_node = node::Invalid_NodeID;
+				}
+			}
 		}
 
 		template<typename Array>
@@ -662,17 +712,23 @@ namespace pokebot {
 			OnNewRound();
 		}
 
-		int Bot::JoinedPlatoon() const POKEBOT_NOEXCEPT {
+		PlatoonID Bot::JoinedPlatoon() const POKEBOT_NOEXCEPT {
 			return platoon;
 		}
 		
 		common::Team Bot::JoinedTeam() const POKEBOT_NOEXCEPT {
 			return team;
 		}
+		
+		void Bot::JoinPlatoon(const PlatoonID Target_Platoon) noexcept {
+			assert(Target_Platoon.has_value());
+			platoon = *Target_Platoon;
+		}
 
 		void Bot::ReceiveCommand(const TroopsStrategy& Received_Strategy) {
 			switch (Received_Strategy.strategy) {
-				case TroopsStrategy::Strategy::Defend_Bombsite_Divided:
+				case TroopsStrategy::Strategy::Follow:
+					assert(!Received_Strategy.leader_name.empty());
 					break;
 				default:
 					goal_queue.AddGoalQueue(Received_Strategy.objective_goal_node, 1);
@@ -680,7 +736,8 @@ namespace pokebot {
 			}
 			// SERVER_PRINT(std::format("[POKEBOT]New Goal ID:{}\n", goal_node).c_str());
 		}
-		
+	
+
 		Manager::Manager() :
 			troops{
 				Troops(
@@ -696,11 +753,19 @@ namespace pokebot {
 
 		}
 
-		void Manager::OnNewRound() POKEBOT_NOEXCEPT {
+		void Manager::OnNewRoundPreparation() POKEBOT_NOEXCEPT {
 			for (auto& bot : bots) {
 				bot.second.OnNewRound();
 			}
-
+			c4_origin = std::nullopt;
+			initialization_stage = InitializationStage::Player_Action_Ready;
+			round_started_timer.SetTime(1.0f);
+		}
+		
+		void Manager::OnNewRoundReady() POKEBOT_NOEXCEPT {
+			if (!round_started_timer.IsRunning() && initialization_stage != InitializationStage::Player_Action_Ready) {
+				return;
+			}
 
 			for (auto& troop : troops) {
 				troop.DecideStrategy(&bots);
@@ -711,9 +776,9 @@ namespace pokebot {
 					platoon.Command(&bots);
 				}
 			}
-			c4_origin = std::nullopt;
+			initialization_stage = InitializationStage::Completed;
 		}
-		
+
 		bool Manager::IsExist(const std::string& Bot_Name) const POKEBOT_NOEXCEPT {
 			auto it = bots.find(Bot_Name);
 			return (it != bots.end());
@@ -788,6 +853,8 @@ namespace pokebot {
 			if (bots.empty())
 				return;
 
+			OnNewRoundReady();
+
 			if (!c4_origin.has_value()) {
 				edict_t* c4{};
 				while ((c4 = common::FindEntityByClassname(c4, "grenade")) != nullptr) {
@@ -832,6 +899,14 @@ namespace pokebot {
 			}
 		}
 
+		void Manager::OnBombPickedUp(const std::string& Client_Name) POKEBOT_NOEXCEPT {
+			bomber_name = Client_Name;
+		}
+		
+		void Manager::OnBombDropped(const std::string& Client_Name) POKEBOT_NOEXCEPT {
+			bomber_name = "";
+		}
+
 		void Manager::OnBotJoinedCompletely(Bot* const completed_guy) POKEBOT_NOEXCEPT {
 			assert(completed_guy->JoinedTeam() == common::Team::T || completed_guy->JoinedTeam() == common::Team::CT);
 			const int Team_Index = static_cast<int>(completed_guy->JoinedTeam()) - 1;
@@ -842,15 +917,32 @@ namespace pokebot {
 			}
 		}
 
-		node::NodeID Manager::GetGoalNode(const common::Team Target_Team, const int Index) const POKEBOT_NOEXCEPT {
+		node::NodeID Manager::GetGoalNode(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT {
 			auto& troop = troops[static_cast<int>(Target_Team) - 1];
-			if (Index < 0) {
+			if (!Index.has_value()) {
 				return troop.GetGoalNode();
 			} else {
-				return troop.at(Index).GetGoalNode();
+				return troop.at(*Index).GetGoalNode();
 			}
 		}
 
+		std::optional<Vector> Manager::GetLeaderOrigin(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT {
+			auto& troop = troops[static_cast<int>(Target_Team) - 1];
+			if (!Index.has_value()) {
+				return troop.CurrentLeaderOrigin();
+			} else {
+				return troop.at(*Index).CurrentLeaderOrigin();
+			}
+		}
+
+		bool Manager::IsFollowerPlatoon(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT {
+			if (!Index.has_value()) {
+				return false;
+			} else {
+				auto& troop = troops[static_cast<int>(Target_Team) - 1];
+				return troop.at(*Index).IsStrategyToFollow();
+			}
+		}
 	
 		bool Troops::HasGoalBeenDevised(const node::NodeID target_objective_node) const POKEBOT_NOEXCEPT {
 			return old_strategy.objective_goal_node == target_objective_node;
@@ -872,6 +964,12 @@ namespace pokebot {
 			return strategy.objective_goal_node == node::Invalid_NodeID;
 		}
 
+		Vector Troops::CurrentLeaderOrigin() const POKEBOT_NOEXCEPT {
+			assert(!strategy.leader_name.empty());
+			auto leader_status = game::game.GetClientStatus(strategy.leader_name);
+			return leader_status.origin();
+		}
+
 		int Troops::CreatePlatoon(decltype(condition) target_condition, decltype(condition) target_commander_condition) {
 			platoons.push_back({ target_condition, target_commander_condition, Team()});
 			platoons.back().parent = this;
@@ -882,10 +980,11 @@ namespace pokebot {
 			return !platoons.empty() && platoons.erase(platoons.begin() + Index) != platoons.end();
 		}
 
-		void Troops::DecideStrategy(std::unordered_map<std::string, Bot>* bots) {
+		void Troops::DecideStrategy(std::unordered_map<std::string, Bot>* const bots) {
 			if (bots->empty())
 				return;
 
+#if 1
 			TroopsStrategy new_strategy{};
 			auto selectGoal = [&](node::GoalKind kind)->node::NodeID {
 #if !USE_NAVMESH
@@ -919,8 +1018,38 @@ namespace pokebot {
 				switch (leader->JoinedTeam()) {
 					case common::Team::T:
 					{
-						new_strategy.strategy = TroopsStrategy::Strategy::Plant_C4_Specific_Bombsite;
-						new_strategy.objective_goal_node = selectGoal(kind);
+						new_strategy.strategy = TroopsStrategy::Strategy::Plant_C4_Specific_Bombsite_Concentrative;
+						switch (new_strategy.strategy) {
+							case TroopsStrategy::Strategy::Plant_C4_Specific_Bombsite_Concentrative:
+							{
+								if (IsRoot()) {
+									// If the troop is the root, create new platoons.
+									while (DeletePlatoon(0));	// Delete all platoon.
+									
+									int platoon = CreatePlatoon(
+										[](const std::pair<std::string, Bot>& target) -> bool { return target.second.JoinedPlatoon() == 0; },
+										[](const std::pair<std::string, Bot>& target) -> bool { return target.second.HasWeapon(game::Weapon::C4); }
+									);
+
+                                    auto followers = (*bots | std::views::filter([](const std::pair<std::string, Bot>& target) -> bool { 
+										return target.second.JoinedTeam() == common::Team::T && !target.second.HasWeapon(game::Weapon::C4); }) | std::views::take(5)
+									);
+									for (auto& follower : followers) {
+										follower.second.JoinPlatoon(platoon);
+									}
+									new_strategy.objective_goal_node = selectGoal(kind);
+								} else {
+									// If the troop is a platoon
+									new_strategy.strategy = TroopsStrategy::Strategy::Follow;
+									new_strategy.leader_name = Manager::Instance().Bomber_Name;
+									assert(!new_strategy.leader_name.empty());
+								}
+								break;
+							}
+							default:
+								assert(false);
+								break;
+						}
 						break;
 					}
 					case common::Team::CT:
@@ -937,12 +1066,12 @@ namespace pokebot {
 									assert(Number_Of_Goals > 0);
 									for (int i = 0; i < Number_Of_Goals; i++) {
 										CreatePlatoon(
-											[i] (const std::pair<std::string, Bot>& target) -> bool {
-												return i == target.second.JoinedPlatoon();
-											},
-											[i] (const std::pair<std::string, Bot>& target) -> bool {
-												return i == target.second.JoinedPlatoon();
-											}
+											[i](const std::pair<std::string, Bot>& target) -> bool {
+											return i == target.second.JoinedPlatoon();
+										},
+											[i](const std::pair<std::string, Bot>& target) -> bool {
+											return i == target.second.JoinedPlatoon();
+										}
 										);
 									}
 
@@ -953,20 +1082,23 @@ namespace pokebot {
 										auto member = cts.begin();
 										for (int squad = 0; squad < Number_Of_Goals; squad++) {
 											for (int j = 0; j < Number_Of_Member_In_Squad && member != cts.end(); j++, member++) {
-												member->second.platoon = squad;
+												member->second.JoinPlatoon(squad);
 											}
 										}
 									} else {
-										new_strategy.strategy = TroopsStrategy::Strategy::Defend_Bombsite_Concentrative;
+										new_strategy.strategy = TroopsStrategy::Strategy::Defend_Bombsite_Divided;
 										new_strategy.objective_goal_node = selectGoal(kind);
 									}
 								} else {
 									// If the troop is a platoon
-									new_strategy.strategy = TroopsStrategy::Strategy::Defend_Bombsite_Concentrative;
+									new_strategy.strategy = TroopsStrategy::Strategy::Defend_Bombsite_Divided;
 									new_strategy.objective_goal_node = selectGoal(kind);
 								}
 								break;
 							}
+							default:
+								assert(false);
+								break;
 						}
 						break;
 					}
@@ -996,8 +1128,21 @@ namespace pokebot {
 				new_strategy.objective_goal_node = selectGoal(kind);
 			}
 			SetNewStrategy(new_strategy);
+#else
+			auto candidates = (*bots | std::views::filter(commander_condition));
+			if (candidates.empty())
+				return;
+
+			switch (Bot* leader = &candidates.front().second; leader->JoinedTeam()) {
+				case common::Team::T:
+					DecideStrategyForT(bots);
+					break;
+				case common::Team::CT:
+					break;
+			}
+#endif
 		}
-		
+
 		void Troops::Command(std::unordered_map<std::string, Bot>* bots) {
 			for (auto& individual : (*bots | std::views::filter(condition))) {
 				individual.second.ReceiveCommand(strategy);

@@ -48,6 +48,10 @@ namespace pokebot::node {
 		std::list<NodeIdentity> nodes{};
 		std::list<NodeIdentity>::const_iterator cursor{};
 	public:
+		size_t Size() const {
+			return nodes.size();
+		}
+
 		void PushFront(const NodeIdentity n) POKEBOT_NOEXCEPT {
 			nodes.push_front(n);
 			cursor = nodes.begin();

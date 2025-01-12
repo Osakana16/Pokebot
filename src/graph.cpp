@@ -498,6 +498,7 @@ namespace pokebot::node {
 
 	void CZBotGraph::FindPath(PathWalk<std::uint32_t>* const walk_routes, const Vector& Source, const Vector& Destination, const common::Team Joined_Team) {
 		const int Joined_Team_Index = static_cast<int>(Joined_Team) - 1;
+		assert(Joined_Team_Index >= 0 && Joined_Team_Index <= 1);
 		auto source = navigation_map.GetNavArea(&Source);
 		if (source == nullptr) {
 			return;
@@ -509,6 +510,8 @@ namespace pokebot::node {
 		}
 		auto start_node_id = source->m_id;
 		auto end_node_id = destination->m_id;
+		if (start_node_id == end_node_id)
+			return;
 
 		routes.clear();
 		class FGreater {
@@ -543,6 +546,7 @@ namespace pokebot::node {
 
 			if (current_node_id == end_node_id) {
 				do {
+					assert(walk_routes->Size() <= navmesh::NavArea::m_nextID);
 					if (auto it = danger[Joined_Team_Index].number_of_reference.find(current_node_id); it != danger[Joined_Team_Index].number_of_reference.end()) {
 						it->second++;
 					} else {
@@ -555,7 +559,7 @@ namespace pokebot::node {
 				return;
 			}
 
-			auto current_route = &routes[current_node_id];
+			auto current_route = &routes.at(current_node_id);
 			if (current_route->state != RouteState::Open) {
 				continue;
 			}
@@ -563,6 +567,7 @@ namespace pokebot::node {
 			current_route->state = RouteState::Closed;
 			for (auto& direction : navigation_map.GetNavAreaByID(current_node_id)->m_connect) {
 				for (auto& connection : direction) {
+					assert(connection.area != nullptr);
 					auto near_route = &routes.at(connection.area->m_id);
 					auto current_node = navigation_map.GetNavAreaByID(current_node_id);
 					assert(current_node != nullptr);
