@@ -4,7 +4,6 @@ namespace pokebot::message {
 }
 
 namespace pokebot::bot {
-	using Name = std::string;
 	class Bot;
 
 	using PlatoonID = std::optional<int>;
@@ -147,13 +146,14 @@ namespace pokebot::bot {
 
 		void TurnViewAngle(), TurnMovementAngle();
 
+		ActionKey press_key{};
 		Timer danger_time{};
 
-		std::vector<Name> target_enemies{};
+		std::vector<std::string> target_enemies{};
 
 		State state = State::Accomplishment;
 		void AccomplishMission() POKEBOT_NOEXCEPT, Combat() POKEBOT_NOEXCEPT, Follow() POKEBOT_NOEXCEPT;
-		Name name{};
+		std::string name{};
 
 		void JoinPlatoon(const PlatoonID Target_Platoon) noexcept;
 		void LeavePlatoon() noexcept { platoon = Not_Joined_Any_Platoon; }
@@ -182,7 +182,7 @@ namespace pokebot::bot {
 		} look_direction{}, ideal_direction{};
 
 
-		Bot(const Name&, const common::Team, const common::Model) POKEBOT_NOEXCEPT;
+		Bot(const std::string&, const common::Team, const common::Model) POKEBOT_NOEXCEPT;
 
 		void OnNewRound() POKEBOT_NOEXCEPT;
 		void Run() POKEBOT_NOEXCEPT;
@@ -209,7 +209,7 @@ namespace pokebot::bot {
 
 		// -- Getters --
 
-		const Name& Name() const POKEBOT_NOEXCEPT;
+		const std::string& Name() const POKEBOT_NOEXCEPT;
 		Vector Origin() const POKEBOT_NOEXCEPT;
 		float Health() const POKEBOT_NOEXCEPT;
 
