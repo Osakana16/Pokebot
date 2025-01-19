@@ -67,14 +67,11 @@ namespace pokebot::bot {
 		if (candidates.empty())
 			return;
 
-		Bot* leader = &candidates.front().second;
-		node::GoalKind kind{};
-		if (game::game.IsCurrentMode(game::MapFlags::Demolition)) {
-			kind = node::GoalKind::Bombspot;
-
-			switch (leader->JoinedTeam()) {
-				case common::Team::T:
-				{
+		switch (team) {
+			case common::Team::T:
+			{
+				if (game::game.IsCurrentMode(game::MapFlags::Demolition)) {
+					auto kind = node::GoalKind::Bombspot;
 					new_strategy.strategy = TroopsStrategy::Strategy::Plant_C4_Specific_Bombsite_Concentrative;
 					switch (new_strategy.strategy) {
 						case TroopsStrategy::Strategy::Plant_C4_Specific_Bombsite_Concentrative:
@@ -90,7 +87,7 @@ namespace pokebot::bot {
 
 								auto followers = (*bots | std::views::filter([](const std::pair<std::string, Bot>& target) -> bool {
 									return target.second.JoinedTeam() == common::Team::T && !target.second.HasWeapon(game::Weapon::C4); }) | std::views::take(5)
-										);
+								);
 								for (auto& follower : followers) {
 									follower.second.JoinPlatoon(platoon);
 								}
@@ -107,10 +104,23 @@ namespace pokebot::bot {
 							assert(false);
 							break;
 					}
-					break;
+				} else if (game::game.IsCurrentMode(game::MapFlags::HostageRescue)) {
+					auto kind = node::GoalKind::Rescue_Zone;
+					strategy.strategy = TroopsStrategy::Strategy::Prevent_Hostages;
+					new_strategy.objective_goal_node = selectGoal(kind);
+				} else if (game::game.IsCurrentMode(game::MapFlags::Assassination)) {
+					auto kind = node::GoalKind::Vip_Safety;
+					new_strategy.objective_goal_node = selectGoal(kind);
+				} else if (game::game.IsCurrentMode(game::MapFlags::Escape)) {
+					auto kind = node::GoalKind::Escape_Zone;
+					new_strategy.objective_goal_node = selectGoal(kind);
 				}
-				case common::Team::CT:
-				{
+				break;
+			}
+			case common::Team::CT:
+			{
+				if (game::game.IsCurrentMode(game::MapFlags::Demolition)) {
+					auto kind = node::GoalKind::Bombspot;
 					new_strategy.strategy = TroopsStrategy::Strategy::Defend_Bombsite_Divided;
 					switch (new_strategy.strategy) {
 						case TroopsStrategy::Strategy::Defend_Bombsite_Divided:
@@ -157,32 +167,21 @@ namespace pokebot::bot {
 							assert(false);
 							break;
 					}
-					break;
-				}
-			}
-		} else if (game::game.IsCurrentMode(game::MapFlags::HostageRescue)) {
-			kind = node::GoalKind::Rescue_Zone;
-
-			switch (leader->JoinedTeam()) {
-				case common::Team::T:
-				{
-					strategy.strategy = TroopsStrategy::Strategy::Prevent_Hostages;
-					new_strategy.objective_goal_node = selectGoal(kind);
-					break;
-				}
-				case common::Team::CT:
-				{
+				} else if (game::game.IsCurrentMode(game::MapFlags::HostageRescue)) {
+					auto kind = node::GoalKind::Rescue_Zone;
 					strategy.strategy = TroopsStrategy::Strategy::Rush_And_Rescue;
 					new_strategy.objective_goal_node = selectGoal(kind);
-					break;
+				} else if (game::game.IsCurrentMode(game::MapFlags::Assassination)) {
+					auto kind = node::GoalKind::Vip_Safety;
+					new_strategy.objective_goal_node = selectGoal(kind);
+				} else if (game::game.IsCurrentMode(game::MapFlags::Escape)) {
+					auto kind = node::GoalKind::Escape_Zone;
+					new_strategy.objective_goal_node = selectGoal(kind);
 				}
+				break;
 			}
-		} else if (game::game.IsCurrentMode(game::MapFlags::Assassination)) {
-			kind = node::GoalKind::Vip_Safety;
-			new_strategy.objective_goal_node = selectGoal(kind);
-		} else if (game::game.IsCurrentMode(game::MapFlags::Escape)) {
-			kind = node::GoalKind::Escape_Zone;
-			new_strategy.objective_goal_node = selectGoal(kind);
+			default:
+				assert(false);
 		}
 		SetNewStrategy(new_strategy);
 #else
