@@ -10,15 +10,18 @@
     <Filter Include="resource">
       <UniqueIdentifier>{de81a63b-7241-412a-9937-e09769dfdbaa}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\behavior">
+    <Filter Include="src\bot">
+      <UniqueIdentifier>{e3d05d61-4a97-4af7-b61f-dba5e17cb12a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\bot\behavior">
       <UniqueIdentifier>{6f0d081d-e60c-44fd-b57f-b1c55ab513f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bot">
+      <UniqueIdentifier>{abe5e82f-88f4-4a8d-96ee-6700be527256}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\bot.hpp">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\game.hpp">
@@ -42,15 +45,21 @@
     <ClInclude Include="include\buy.hpp">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\bot\bot.hpp">
+      <Filter>include\bot</Filter>
+    </ClInclude>
+    <ClInclude Include="include\bot\manager.hpp">
+      <Filter>include\bot</Filter>
+    </ClInclude>
+    <ClInclude Include="include\bot\troops.hpp">
+      <Filter>include\bot</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\dll.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\bot.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\engine.cpp">
@@ -62,13 +71,7 @@
     <ClCompile Include="src\game.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\io.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\common.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\behavior.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\buy.cpp">
@@ -77,20 +80,35 @@
     <ClCompile Include="src\database.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\behavior\action.cpp">
-      <Filter>src\behavior</Filter>
-    </ClCompile>
-    <ClCompile Include="src\behavior\condition.cpp">
-      <Filter>src\behavior</Filter>
-    </ClCompile>
-    <ClCompile Include="src\behavior\objective.cpp">
-      <Filter>src\behavior</Filter>
-    </ClCompile>
-    <ClCompile Include="src\behavior\combat.cpp">
-      <Filter>src\behavior</Filter>
-    </ClCompile>
     <ClCompile Include="src\pokebot.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot\bot.cpp">
+      <Filter>src\bot</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot\behavior\action.cpp">
+      <Filter>src\bot\behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot\behavior\behavior.cpp">
+      <Filter>src\bot\behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot\behavior\combat.cpp">
+      <Filter>src\bot\behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot\behavior\condition.cpp">
+      <Filter>src\bot\behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot\behavior\objective.cpp">
+      <Filter>src\bot\behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot\botmanager.cpp">
+      <Filter>src\bot</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot\troops.cpp">
+      <Filter>src\bot</Filter>
+    </ClCompile>
+    <ClCompile Include="include\bot\basic.hpp">
+      <Filter>include\bot</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

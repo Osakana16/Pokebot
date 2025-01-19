@@ -1,4 +1,5 @@
 #include "behavior.hpp"
+#include "bot/manager.hpp"
 #include <future>
 
 namespace pokebot::bot::behavior {

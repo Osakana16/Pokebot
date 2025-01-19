@@ -213,7 +213,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\behavior.hpp" />
-    <ClInclude Include="include\bot.hpp" />
+    <ClInclude Include="include\bot\manager.hpp" />
+    <ClInclude Include="include\bot\bot.hpp" />
+    <ClInclude Include="include\bot\troops.hpp" />
     <ClInclude Include="include\buy.hpp" />
     <ClInclude Include="include\common.hpp" />
     <ClInclude Include="include\database.hpp" />
@@ -221,22 +223,24 @@
     <ClInclude Include="include\game.hpp" />
     <ClInclude Include="include\graph.hpp" />
     <ClInclude Include="include\stdafx.h" />
-    <ClCompile Include="src\behavior.cpp" />
-    <ClCompile Include="src\behavior\action.cpp" />
-    <ClCompile Include="src\behavior\combat.cpp" />
-    <ClCompile Include="src\behavior\condition.cpp" />
-    <ClCompile Include="src\behavior\objective.cpp" />
+    <ClCompile Include="include\bot\basic.hpp" />
+    <ClCompile Include="src\bot\behavior\action.cpp" />
+    <ClCompile Include="src\bot\behavior\behavior.cpp" />
+    <ClCompile Include="src\bot\behavior\combat.cpp" />
+    <ClCompile Include="src\bot\behavior\condition.cpp" />
+    <ClCompile Include="src\bot\behavior\objective.cpp" />
+    <ClCompile Include="src\bot\bot.cpp" />
+    <ClCompile Include="src\bot\botmanager.cpp" />
+    <ClCompile Include="src\bot\troops.cpp" />
     <ClCompile Include="src\buy.cpp" />
     <ClCompile Include="src\common.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\bot.cpp" />
     <ClCompile Include="src\database.cpp" />
     <ClCompile Include="src\dll.cpp" />
     <ClCompile Include="src\engine.cpp" />
     <ClCompile Include="src\game.cpp" />
     <ClCompile Include="src\graph.cpp" />
-    <ClCompile Include="src\io.cpp" />
     <ClCompile Include="src\pokebot.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_Goldsrc|Win32'">Create</PrecompiledHeader>

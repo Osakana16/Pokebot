@@ -1,4 +1,5 @@
 #include "behavior.hpp"
+#include "bot/manager.hpp"
 
 #include <thread>
 
@@ -42,7 +43,7 @@ namespace pokebot {
 					return (angle > destination ? std::clamp(angle, destination, angle) : std::clamp(angle, angle, destination));
 				};
 
-				auto CalculateNextAngle = [](const float dest, const float angle) POKEBOT_NOEXCEPT {
+				auto CalculateNextAngle = [](const float dest, const float angle) POKEBOT_NOEXCEPT{
 					return std::clamp(dest - angle, -180.0f, 180.0f);
 				};
 
@@ -92,7 +93,7 @@ namespace pokebot {
 			if (client_status.IsDead()) {
 				return;
 			}
-			
+
 			if (!freeze_time.IsRunning() && !spawn_cooldown_time.IsRunning()) {
 				if (state != State::Crisis && Manager::Instance().IsFollowerPlatoon(JoinedTeam(), JoinedPlatoon())) {
 					state = State::Follow;
@@ -160,13 +161,13 @@ namespace pokebot {
 						{
 							game::MapFlags::HostageRescue,
 							[&] {
-							
+
 							}
 						},
 						{
 							game::MapFlags::Assassination,
 							[&] {
-							
+
 							}
 						},
 						{
@@ -225,7 +226,7 @@ namespace pokebot {
 						{
 							game::MapFlags::Escape,
 							[&] {
-							
+
 							}
 						}
 					};
@@ -256,7 +257,7 @@ namespace pokebot {
 			const bool Enemy_Has_Secondary = enemy_status.HasSecondaryWeapon();
 
 			int fighting_spirit = Max_Health + Max_Armor + (HasPrimaryWeapon() ? 50 : 0) + (HasSecondaryWeapon() ? 50 : 0);
-			if (!HasPrimaryWeapon() && !HasSecondaryWeapon() || 
+			if (!HasPrimaryWeapon() && !HasSecondaryWeapon() ||
 				(client_status.IsOutOfClip() && client_status.IsOutOfCurrentWeaponAmmo())) {
 				// If I have no guns.
 				if (Enemy_Has_Primary || Enemy_Has_Secondary) {
@@ -401,7 +402,7 @@ namespace pokebot {
 			if (bool(pressable_key & ActionKey::Move_Left)) {
 				strafe_speed = -game::Default_Max_Move_Speed;
 			}
-			
+
 			if (bool(pressable_key & ActionKey::Back)) {
 
 			}
@@ -482,7 +483,7 @@ namespace pokebot {
 			}
 			const auto Enemy_Distances = std::move(SortedDistances(Origin(), target_enemies));
 			const auto& Nearest_Enemy = game::game.GetClientStatus(target_enemies[Enemy_Distances.begin()->second]);
-			look_direction.view = Nearest_Enemy.origin()  - Vector(20.0f, 0, 0) + Manager::Instance().GetCompensation(Name().data());
+			look_direction.view = Nearest_Enemy.origin() - Vector(20.0f, 0, 0) + Manager::Instance().GetCompensation(Name().data());
 		}
 
 		bool Bot::HasEnemy() const POKEBOT_NOEXCEPT {
@@ -528,7 +529,7 @@ namespace pokebot {
 			return goal_node != node::Invalid_NodeID;
 		}
 
-		
+
 		bool Bot::IsInBuyzone() const POKEBOT_NOEXCEPT { return game::game.GetClientStatus(Name().data()).IsInBuyzone(); }
 
 		const Name& Bot::Name() const POKEBOT_NOEXCEPT { return name; }
@@ -570,131 +571,131 @@ namespace pokebot {
 		void Bot::OnRadioRecieved(const std::string& Sender_Name, const std::string& Radio_Sentence) POKEBOT_NOEXCEPT {
 			static bool is_sent{};
 			static const std::unordered_map<std::string, std::function<void()>> Radios{
-				{ 
+				{
 					"#Cover_me",
 					[] {
-						
-					} 
+
+					}
 				},
-				{ 
+				{
 					"#You_take_the_point",
 					[] {
-						
-					} 
+
+					}
 				},
-				{ 
+				{
 					"#Hold_this_position",
 					[] {
-				
-					} 
+
+					}
 				},
-				{ 
-					"#Regroup_team", 
+				{
+					"#Regroup_team",
 					[&] {
 #if !USE_NAVMESH
 						goal_queue.AddGoalQueue(node::world.GetNearest(game::game.clients.Get(Sender_Name)->origin));
 #else
 						goal_queue.AddGoalQueue(node::czworld.GetNearest(Origin())->m_id);
 #endif
-					} 
-				},
-				{ 
-					"#Follow_me", 
-					[] {
-				
-					} 
+					}
 				},
 				{
-					"#Taking_fire", 
+					"#Follow_me",
 					[] {
-				
-					} 
+
+					}
 				},
 				{
-					"#Go_go_go", 
+					"#Taking_fire",
+					[] {
+
+					}
+				},
+				{
+					"#Go_go_go",
 					[this] {
 						game::game.IssueCommand(Name().data(), std::format("radio3"));
 						game::game.IssueCommand(Name().data(), std::format("menuselect 1"));
-					} 
+					}
 				},
-				{ 
-					"#Team_fall_back", 
+				{
+					"#Team_fall_back",
 					[] {
-				
-					} 
+
+					}
 				},
-				{ 
-					"#Stick_together_team", 
+				{
+					"#Stick_together_team",
 					[] {
-				
-					} 
+
+					}
 				},
-				{ 
-					"#Get_in_position_and_wait", 
+				{
+					"#Get_in_position_and_wait",
 					[] {
-				
-					} 
+
+					}
 				},
-				{ 
+				{
 					"#Storm_the_front", [] {
-				
-					} 
+
+					}
 				},
-				{ 
+				{
 					"#Report_in_team", [] {
 
-					} 
+					}
 				},
 				{ "#Affirmative", [] {}},
 				{ "#Roger_that", [] {} },
 				{
 					"#Enemy_spotted", [] {
-				
-					} 
+
+					}
 				},
-				{ 
+				{
 					"#Need_backup", [] {
-				
-					} 
+
+					}
 				},
-				{ 
+				{
 					"#Sector_clear", [] {
-				
-					} 
+
+					}
 				},
-				{ 
+				{
 					"#In_position", [] {
-				
-					} 
+
+					}
 				},
-				{ 
+				{
 					"#Reporting_in", [] {
-				
-					} 
+
+					}
 				},
-				{ 
+				{
 					"#Get_out_of_there", [] {
-				
-					} 
+
+					}
 				},
-				{ 
+				{
 					"#Negative", [] {
-					
-					} 
+
+					}
 				},
-				{ 
+				{
 					"#Enemy_down", [] {
-					
-					} 
+
+					}
 				},
-				{ 
-					"#Fire_in_the_hole", [] {} 
+				{
+					"#Fire_in_the_hole", [] {}
 				}
 			};
 			Radios.at(Radio_Sentence)();
 		}
 
-		
+
 		void Bot::OnBombPlanted() POKEBOT_NOEXCEPT {
 			switch (JoinedTeam()) {
 				case common::Team::CT:
@@ -715,11 +716,11 @@ namespace pokebot {
 		PlatoonID Bot::JoinedPlatoon() const POKEBOT_NOEXCEPT {
 			return platoon;
 		}
-		
+
 		common::Team Bot::JoinedTeam() const POKEBOT_NOEXCEPT {
 			return team;
 		}
-		
+
 		void Bot::JoinPlatoon(const PlatoonID Target_Platoon) noexcept {
 			assert(Target_Platoon.has_value());
 			platoon = *Target_Platoon;
@@ -735,427 +736,6 @@ namespace pokebot {
 					break;
 			}
 			// SERVER_PRINT(std::format("[POKEBOT]New Goal ID:{}\n", goal_node).c_str());
-		}
-	
-
-		Manager::Manager() :
-			troops{
-				Troops(
-					[](const std::pair<std::string, Bot>& target) -> bool { return target.second.JoinedTeam() == common::Team::T; },
-					[](const std::pair<std::string, Bot>& target) -> bool { return target.second.JoinedTeam() == common::Team::T; },
-					common::Team::T),
-				Troops(
-					[](const std::pair<std::string, Bot>& target) -> bool { return target.second.JoinedTeam() == common::Team::CT; },
-					[](const std::pair<std::string, Bot>& target) -> bool { return target.second.JoinedTeam() == common::Team::CT; },
-					common::Team::CT)
-			}
-		{
-
-		}
-
-		void Manager::OnNewRoundPreparation() POKEBOT_NOEXCEPT {
-			for (auto& bot : bots) {
-				bot.second.OnNewRound();
-			}
-			c4_origin = std::nullopt;
-			initialization_stage = InitializationStage::Player_Action_Ready;
-			round_started_timer.SetTime(1.0f);
-		}
-		
-		void Manager::OnNewRoundReady() POKEBOT_NOEXCEPT {
-			if (!round_started_timer.IsRunning() && initialization_stage != InitializationStage::Player_Action_Ready) {
-				return;
-			}
-
-			for (auto& troop : troops) {
-				troop.DecideStrategy(&bots);
-				troop.Command(&bots);
-
-				for (auto& platoon : troop) {
-					platoon.DecideStrategy(&bots);
-					platoon.Command(&bots);
-				}
-			}
-			initialization_stage = InitializationStage::Completed;
-		}
-
-		bool Manager::IsExist(const std::string& Bot_Name) const POKEBOT_NOEXCEPT {
-			auto it = bots.find(Bot_Name);
-			return (it != bots.end());
-		}
-
-		void Manager::Assign(const std::string_view Bot_Name, Message message) POKEBOT_NOEXCEPT {
-			if (auto target = Get(Bot_Name.data()); target != nullptr) {
-				target->start_action = message;
-			}
-		}
-
-		void Manager::OnDied(const std::string& Bot_Name) POKEBOT_NOEXCEPT {
-			auto bot = Get(Bot_Name);
-			if (bot != nullptr) {
-				bot->current_weapon = game::Weapon::None;
-				bot->goal_queue.Clear();
-			}
-		}
-
-		void Manager::OnDamageTaken(const std::string_view Bot_Name, const edict_t* Inflictor, const int Damage, const int Armor, const int Bit) POKEBOT_NOEXCEPT {
-			if (decltype(auto) target = Get(Bot_Name.data()); target->Health() <= 0) {
-				OnDied(Bot_Name.data());
-			} else {
-				// TODO: Send the event message for a bot.
-			}
-		}
-
-		void Manager::OnJoinedTeam(const std::string&) POKEBOT_NOEXCEPT {
-
-		}
-
-		void Manager::OnChatRecieved(const std::string&) POKEBOT_NOEXCEPT {
-
-		}
-
-		void Manager::OnTeamChatRecieved(const std::string&) POKEBOT_NOEXCEPT{
-
-		}
-
-		void Manager::OnRadioRecieved(const std::string& Sender_Name, const std::string& Radio_Sentence) POKEBOT_NOEXCEPT {
-			// TODO: Get Sender's team
-			radio_message.team = game::game.GetClientStatus(Sender_Name).GetTeam();
-			radio_message.sender = Sender_Name;
-			radio_message.message = Radio_Sentence;
-		}
-
-		void Manager::Insert(std::string bot_name, const common::Team team, const common::Model model, const bot::Difficult Assigned_Diffcult) POKEBOT_NOEXCEPT {
-			if (auto spawn_result = game::game.Spawn(bot_name); std::get<bool>(spawn_result)) {
-				bot_name = std::get<std::string>(spawn_result);
-				auto insert_result = bots.insert({ bot_name, Bot(bot_name, team, model) });
-				assert(insert_result.second);
-
-				auto result = balancer.insert({ bot_name, BotBalancer{.gap = {} } });
-				assert(result.second);
-
-				switch (Assigned_Diffcult) {
-					case bot::Difficult::Easy:
-						result.first->second.gap.z = -10.0f;
-						break;
-					case bot::Difficult::Normal:
-						result.first->second.gap.z = -5.0f;
-						break;
-					case bot::Difficult::Hard:
-						break;
-					default:
-						assert(false);
-				}
-			}
-		}
-
-		void Manager::Update() POKEBOT_NOEXCEPT {
-			if (bots.empty())
-				return;
-
-			OnNewRoundReady();
-
-			if (!c4_origin.has_value()) {
-				edict_t* c4{};
-				while ((c4 = common::FindEntityByClassname(c4, "grenade")) != nullptr) {
-					if (std::string(STRING(c4->v.model)) == "models/w_c4.mdl") {
-						c4_origin = c4->v.origin;
-						break;
-					}
-				}
-				if (c4_origin.has_value()) {
-					OnBombPlanted();
-				}
-			}
-
-			for (auto& bot : bots) {
-				bot.second.Run();
-				if (!radio_message.sender.empty() && radio_message.team == bot.second.JoinedTeam()) {
-					bot.second.OnRadioRecieved(radio_message.sender, radio_message.message);
-					radio_message.sender.clear();
-				}
-			}
-		}
-
-		Bot* const Manager::Get(const std::string& Bot_Name) POKEBOT_NOEXCEPT {
-			auto bot_iterator = bots.find(Bot_Name);
-			return (bot_iterator != bots.end() ? &bot_iterator->second : nullptr);
-		}
-
-		void Manager::Kick(const std::string& Bot_Name) POKEBOT_NOEXCEPT {
-			(*g_engfuncs.pfnServerCommand)(std::format("kick \"{}\"", Bot_Name).c_str());
-		}
-
-		void Manager::Remove(const std::string& Bot_Name) POKEBOT_NOEXCEPT {
-			if (auto bot_iterator = bots.find(Bot_Name); bot_iterator != bots.end()) {
-				bots.erase(Bot_Name);
-				balancer.erase(Bot_Name);
-			}
-		}
-		
-		void Manager::OnBombPlanted() POKEBOT_NOEXCEPT {
-			for (auto& bot : bots) {
-				bot.second.OnBombPlanted();
-			}
-		}
-
-		void Manager::OnBombPickedUp(const std::string& Client_Name) POKEBOT_NOEXCEPT {
-			bomber_name = Client_Name;
-		}
-		
-		void Manager::OnBombDropped(const std::string& Client_Name) POKEBOT_NOEXCEPT {
-			bomber_name = "";
-		}
-
-		void Manager::OnBotJoinedCompletely(Bot* const completed_guy) POKEBOT_NOEXCEPT {
-			assert(completed_guy->JoinedTeam() == common::Team::T || completed_guy->JoinedTeam() == common::Team::CT);
-			const int Team_Index = static_cast<int>(completed_guy->JoinedTeam()) - 1;
-			
-			if (auto& troop = troops[Team_Index]; troop.NeedToDevise()) {
-				troop.DecideStrategy(&bots);
-				troop.Command(&bots);
-			}
-		}
-
-		node::NodeID Manager::GetGoalNode(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT {
-			auto& troop = troops[static_cast<int>(Target_Team) - 1];
-			if (!Index.has_value()) {
-				return troop.GetGoalNode();
-			} else {
-				return troop.at(*Index).GetGoalNode();
-			}
-		}
-
-		std::optional<Vector> Manager::GetLeaderOrigin(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT {
-			auto& troop = troops[static_cast<int>(Target_Team) - 1];
-			if (!Index.has_value()) {
-				return troop.CurrentLeaderOrigin();
-			} else {
-				return troop.at(*Index).CurrentLeaderOrigin();
-			}
-		}
-
-		bool Manager::IsFollowerPlatoon(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT {
-			if (!Index.has_value()) {
-				return false;
-			} else {
-				auto& troop = troops[static_cast<int>(Target_Team) - 1];
-				return troop.at(*Index).IsStrategyToFollow();
-			}
-		}
-	
-		bool Troops::HasGoalBeenDevised(const node::NodeID target_objective_node) const POKEBOT_NOEXCEPT {
-			return old_strategy.objective_goal_node == target_objective_node;
-			// return common::Distance(node::czworld.GetOrigin(old_strategy.objective_goal_node), node::czworld.GetOrigin(target_objective_node)) <= 500.0f;
-		}
-		bool Troops::HasGoalBeenDevisedByOtherPlatoon(const node::NodeID target_objective_node) const POKEBOT_NOEXCEPT {
-			for (auto& platoon : parent->platoons) {
-				if (&platoon == this)
-					continue;
-
-				if (platoon.strategy.objective_goal_node == target_objective_node) {
-					return true;
-				}
-			}
-			return false;
-		}
-		
-		bool Troops::NeedToDevise() const POKEBOT_NOEXCEPT {
-			return strategy.objective_goal_node == node::Invalid_NodeID;
-		}
-
-		Vector Troops::CurrentLeaderOrigin() const POKEBOT_NOEXCEPT {
-			assert(!strategy.leader_name.empty());
-			auto leader_status = game::game.GetClientStatus(strategy.leader_name);
-			return leader_status.origin();
-		}
-
-		int Troops::CreatePlatoon(decltype(condition) target_condition, decltype(condition) target_commander_condition) {
-			platoons.push_back({ target_condition, target_commander_condition, Team()});
-			platoons.back().parent = this;
-			return platoons.size() - 1;
-		}
-
-		bool Troops::DeletePlatoon(const int Index) {
-			return !platoons.empty() && platoons.erase(platoons.begin() + Index) != platoons.end();
-		}
-
-		void Troops::DecideStrategy(std::unordered_map<std::string, Bot>* const bots) {
-			if (bots->empty())
-				return;
-
-#if 1
-			TroopsStrategy new_strategy{};
-			auto selectGoal = [&](node::GoalKind kind)->node::NodeID {
-#if !USE_NAVMESH
-				auto goal = node::world.GetGoal(kind);
-#else
-				auto goal = node::czworld.GetGoal(kind);
-#endif
-				for (auto it = goal.first; it != goal.second; it++) {
-					if (IsRoot()) {
-						if (HasGoalBeenDevised(it->second)) {
-							continue;
-						}
-					} else {
-						if (HasGoalBeenDevisedByOtherPlatoon(it->second)) {
-							continue;
-						}
-					}
-					return it->second;
-				}
-			};
-
-			auto candidates = (*bots | std::views::filter(commander_condition));
-			if (candidates.empty())
-				return;
-
-			Bot* leader = &candidates.front().second;
-			node::GoalKind kind{};
-			if (game::game.IsCurrentMode(game::MapFlags::Demolition)) {
-				kind = node::GoalKind::Bombspot;
-
-				switch (leader->JoinedTeam()) {
-					case common::Team::T:
-					{
-						new_strategy.strategy = TroopsStrategy::Strategy::Plant_C4_Specific_Bombsite_Concentrative;
-						switch (new_strategy.strategy) {
-							case TroopsStrategy::Strategy::Plant_C4_Specific_Bombsite_Concentrative:
-							{
-								if (IsRoot()) {
-									// If the troop is the root, create new platoons.
-									while (DeletePlatoon(0));	// Delete all platoon.
-									
-									int platoon = CreatePlatoon(
-										[](const std::pair<std::string, Bot>& target) -> bool { return target.second.JoinedPlatoon() == 0; },
-										[](const std::pair<std::string, Bot>& target) -> bool { return target.second.HasWeapon(game::Weapon::C4); }
-									);
-
-                                    auto followers = (*bots | std::views::filter([](const std::pair<std::string, Bot>& target) -> bool { 
-										return target.second.JoinedTeam() == common::Team::T && !target.second.HasWeapon(game::Weapon::C4); }) | std::views::take(5)
-									);
-									for (auto& follower : followers) {
-										follower.second.JoinPlatoon(platoon);
-									}
-									new_strategy.objective_goal_node = selectGoal(kind);
-								} else {
-									// If the troop is a platoon
-									new_strategy.strategy = TroopsStrategy::Strategy::Follow;
-									new_strategy.leader_name = Manager::Instance().Bomber_Name;
-									assert(!new_strategy.leader_name.empty());
-								}
-								break;
-							}
-							default:
-								assert(false);
-								break;
-						}
-						break;
-					}
-					case common::Team::CT:
-					{
-						new_strategy.strategy = TroopsStrategy::Strategy::Defend_Bombsite_Divided;
-						switch (new_strategy.strategy) {
-							case TroopsStrategy::Strategy::Defend_Bombsite_Divided:
-							{
-								if (IsRoot()) {
-									// If the troop is the root, create new platoons.
-									while (DeletePlatoon(0));	// Delete all platoon.
-
-									const size_t Number_Of_Goals = node::czworld.GetNumberOfGoals(node::GoalKind::Bombspot);
-									assert(Number_Of_Goals > 0);
-									for (int i = 0; i < Number_Of_Goals; i++) {
-										CreatePlatoon(
-											[i](const std::pair<std::string, Bot>& target) -> bool {
-											return i == target.second.JoinedPlatoon();
-										},
-											[i](const std::pair<std::string, Bot>& target) -> bool {
-											return i == target.second.JoinedPlatoon();
-										}
-										);
-									}
-
-									auto cts = (*bots | std::views::filter([](const std::pair<std::string, Bot>& target) -> bool { return target.second.JoinedTeam() == common::Team::CT; }));
-									const size_t Number_Of_Cts = std::distance(cts.begin(), cts.end());
-									if (Number_Of_Cts > 1) {
-										const size_t Number_Of_Member_In_Squad = static_cast<size_t>(std::ceil(static_cast<common::Dec>(Number_Of_Cts) / static_cast<common::Dec>(Number_Of_Goals)));
-										auto member = cts.begin();
-										for (int squad = 0; squad < Number_Of_Goals; squad++) {
-											for (int j = 0; j < Number_Of_Member_In_Squad && member != cts.end(); j++, member++) {
-												member->second.JoinPlatoon(squad);
-											}
-										}
-									} else {
-										new_strategy.strategy = TroopsStrategy::Strategy::Defend_Bombsite_Divided;
-										new_strategy.objective_goal_node = selectGoal(kind);
-									}
-								} else {
-									// If the troop is a platoon
-									new_strategy.strategy = TroopsStrategy::Strategy::Defend_Bombsite_Divided;
-									new_strategy.objective_goal_node = selectGoal(kind);
-								}
-								break;
-							}
-							default:
-								assert(false);
-								break;
-						}
-						break;
-					}
-				}
-			} else if (game::game.IsCurrentMode(game::MapFlags::HostageRescue)) {
-				kind = node::GoalKind::Rescue_Zone;
-
-				switch (leader->JoinedTeam()) {
-					case common::Team::T:
-					{
-						strategy.strategy = TroopsStrategy::Strategy::Prevent_Hostages;
-						new_strategy.objective_goal_node = selectGoal(kind);
-						break;
-					}
-					case common::Team::CT:
-					{
-						strategy.strategy = TroopsStrategy::Strategy::Rush_And_Rescue;
-						new_strategy.objective_goal_node = selectGoal(kind);
-						break;
-					}
-				}
-			} else if (game::game.IsCurrentMode(game::MapFlags::Assassination)) {
-				kind = node::GoalKind::Vip_Safety;
-				new_strategy.objective_goal_node = selectGoal(kind);
-			} else if (game::game.IsCurrentMode(game::MapFlags::Escape)) {
-				kind = node::GoalKind::Escape_Zone;
-				new_strategy.objective_goal_node = selectGoal(kind);
-			}
-			SetNewStrategy(new_strategy);
-#else
-			auto candidates = (*bots | std::views::filter(commander_condition));
-			if (candidates.empty())
-				return;
-
-			switch (Bot* leader = &candidates.front().second; leader->JoinedTeam()) {
-				case common::Team::T:
-					DecideStrategyForT(bots);
-					break;
-				case common::Team::CT:
-					break;
-			}
-#endif
-		}
-
-		void Troops::Command(std::unordered_map<std::string, Bot>* bots) {
-			for (auto& individual : (*bots | std::views::filter(condition))) {
-				individual.second.ReceiveCommand(strategy);
-			}
-		}
-
-		void Troops::SetNewStrategy(const TroopsStrategy& New_Team_Strategy) {
-			old_strategy = strategy;
-			strategy = New_Team_Strategy;
-
-			for (auto& platoon : platoons) {
-				platoon.SetNewStrategy(strategy);
-			}
 		}
 	}
 }

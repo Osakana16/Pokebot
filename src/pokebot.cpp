@@ -1,6 +1,7 @@
 #include "plugin.hpp"
 #include "navmesh/navigation_map.h"
 
+#include "bot/manager.hpp"
 #include <iostream>
 #include <functional>
 

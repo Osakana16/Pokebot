@@ -372,4 +372,5 @@ namespace pokebot{
 
 #include "graph.hpp"
 #include "game.hpp"
-#include "bot.hpp"
+#include "bot/basic.hpp"
+#include "bot/bot.hpp"

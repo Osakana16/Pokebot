@@ -1,4 +1,5 @@
 #include "common.hpp"
+#include "bot/manager.hpp"
 
 namespace {
     int current_message{};

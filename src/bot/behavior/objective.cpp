@@ -1,4 +1,5 @@
 #include "behavior.hpp"
+#include "bot/manager.hpp"
 
 namespace pokebot::bot::behavior {
 	// - Rescue Behaviors -
@@ -38,6 +39,15 @@ namespace pokebot::bot::behavior {
 		}
 	}
 	
+	template<bool b>
+	bool IsTeamObjectiveSet(const Bot* const Self) POKEBOT_NOEXCEPT {
+		if constexpr (b) {
+			return Self->goal_node == Manager::Instance().GetGoalNode(Self->JoinedTeam(), Self->JoinedPlatoon());
+		} else {
+			return Self->goal_node != Manager::Instance().GetGoalNode(Self->JoinedTeam(), Self->JoinedPlatoon());
+		}
+	}
+
 	bool CanUseHostage(const Bot* const Self) POKEBOT_NOEXCEPT {
 		return game::game.GetClosedHostage(Self->Origin(), 83.0f) != nullptr;
 	}

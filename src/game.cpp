@@ -1,4 +1,5 @@
-﻿#include <unordered_set>
+﻿#include "bot/manager.hpp"
+#include <unordered_set>
 
 namespace pokebot {
 	namespace game {
