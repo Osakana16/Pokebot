@@ -154,7 +154,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
 
                         if (args.size() < 9)
                             return;
-                        DEBUG_PRINTF("WeaponList\n");
+                        
                     }
                 },
                 {
@@ -170,7 +170,6 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             { "SPECTATOR", common::Team::Spector }
                         };
 
-                        DEBUG_PRINTF("TeamInfo\n");
                         if (Menu_Cache.at(std::get<std::string>(args[1])) == common::Team::Spector) {
                             game::game.RegisterClient(const_cast<edict_t*>(engine_target_edict));
                         } else {
@@ -183,7 +182,6 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         if (args.size() < 5)
                             return;
                         
-                        DEBUG_PRINTF("ScoreInfo\n");
 
                     }
                 },
@@ -201,16 +199,12 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         };
 
                         if (bool(std::get<int>(args[1]) & ScoreStatus::VIP)) {
-                            DEBUG_PRINTF("ScoreAttrib: VIP\n");
                             pokebot::game::game.OnVIPChanged(STRING(INDEXENT(std::get<int>(args[0]))->v.netname));
                         } else if ((std::get<int>(args[1]) & ScoreStatus::Dead)) {
-                            DEBUG_PRINTF("ScoreAttrib: Dead\n");
 
                         } else if ((std::get<int>(args[1]) & ScoreStatus::Defuse_Kit)) {
-                            DEBUG_PRINTF("ScoreAttrib: Defuse_Kit\n");
 
                         } else if ((std::get<int>(args[1]) & ScoreStatus::Bomb)) {
-                            DEBUG_PRINTF("ScoreAttrib: Bomb\n");
                             // This calls when
                             //  1. the player picked up a weapon.
                             //  2. the bomber entered the bombsite.
@@ -243,7 +237,6 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             return;
                         }
                         
-                        DEBUG_PRINTF("AmmoX\n");
                         messages.at(GET_USER_MSG_ID(PLID, "AmmoPickup", nullptr))();
                     }
                 },
@@ -263,7 +256,6 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
 
                         using namespace pokebot;
                         game::game.OnAmmoPickedup(STRING(engine_target_edict->v.netname), static_cast<game::AmmoID>(Ammo_ID - 1), Amount);
-                        DEBUG_PRINTF("AmmoPickup\n");
                     }
                 },
                 {
@@ -273,7 +265,6 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         }
 
                         if (args.size() >= 1 && std::holds_alternative<int>(args[0])) {
-                            DEBUG_PRINTF("Money\n");
                             using namespace pokebot;
                             game::game.OnMoneyChanged(STRING(engine_target_edict->v.netname), std::clamp(std::get<int>(args[0]), 0, 16000));
                         }
@@ -297,7 +288,6 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         const int Bit = std::get<int>(args[2]);
                         game::game.OnDamageTaken(STRING(engine_target_edict->v.netname), engine_target_edict->v.dmg_inflictor, Health, Armor, Bit);
                         bot::Manager::Instance().OnDamageTaken(STRING(engine_target_edict->v.netname), engine_target_edict->v.dmg_inflictor,  Health, Armor, Bit);
-                        DEBUG_PRINTF("Damage\n");
                     }
                 },
                 {
@@ -319,7 +309,6 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         };
 
                         if (auto it = Icon_Cache.find(std::get<std::string>(args[1])); it != Icon_Cache.end()) {
-                            DEBUG_PRINTF("StatusIcon\n");
                             using namespace pokebot;
                             game::game.OnStatusIconShown(STRING(engine_target_edict->v.netname), it->second);
                         }
@@ -336,7 +325,6 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         }
 
                         using namespace pokebot;
-                        DEBUG_PRINTF("ItemStatus\n");
                         game::game.OnItemChanged(STRING(engine_target_edict->v.netname), static_cast<game::Item>(std::get<int>(args[0])));
                     }
                 },
@@ -487,7 +475,6 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                 },
                 {
                     GET_USER_MSG_ID(PLID, "StatusValue", nullptr), []() {
-                        DEBUG_PRINTF("StatusValue\n");
                     }
                 },
                 {
@@ -511,7 +498,6 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         }
 
                         if (std::get<int>(args[0]) == 0 && std::get<int>(args[1]) == 0) {
-                            DEBUG_PRINTF("HLTV\n");
                             pokebot::game::game.OnNewRound();
                         }
                     }
