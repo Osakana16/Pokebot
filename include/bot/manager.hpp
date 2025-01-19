@@ -11,9 +11,10 @@ namespace pokebot::bot {
 	};
 
 	struct RadioMessage {
-		common::Team team;
-		std::string sender;
-		std::string message;
+		common::Team team = common::Team::Spector;
+		std::string sender{};
+		std::string message{};
+		PlatoonID platoon{};
 	};
 
 	struct BotBalancer final {
@@ -179,7 +180,7 @@ namespace pokebot::bot {
 		*/
 		node::NodeID GetGoalNode(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
 
-		std::optional<Vector> GetLeaderOrigin(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
+		std::optional<game::ClientStatus> GetLeaderStatus(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
 		bool IsFollowerPlatoon(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
 
 		void AssertStrategy(const common::Team Target_Team, const PlatoonID Index, TroopsStrategy::Strategy strategy) {

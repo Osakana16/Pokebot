@@ -276,6 +276,7 @@ namespace pokebot {
 			float& idealpitch() { return client->v.idealpitch; }
 			int& flags() { return client->v.flags; }
 
+			const Vector& velocity() const { return client->v.velocity; }
 			const Vector& view_ofs() const { return client->v.view_ofs; }
 			const Vector& origin() const { return client->v.origin; }
 			const Vector& angles() const { return client->v.angles; }
@@ -352,11 +353,12 @@ namespace pokebot {
 			bool IsInVipSafety() const POKEBOT_NOEXCEPT { return bool(client->DisplayingStatusIcon() & StatusIcon::Vip_Safety); }
 			bool HasDefuser() const POKEBOT_NOEXCEPT { return bool(client->DisplayingStatusIcon() & StatusIcon::Defuser); }
 
-			bool IsDucking() const POKEBOT_NOEXCEPT { return (client->flags() & FL_DUCKING); }
-			bool IsInWater() const POKEBOT_NOEXCEPT { return (client->flags() & FL_INWATER); }
-			bool IsOnFloor() const POKEBOT_NOEXCEPT { return (client->flags() & (FL_ONGROUND | FL_PARTIALGROUND)) != 0; }
-			bool IsOnTrain() const POKEBOT_NOEXCEPT { return (client->flags() & FL_ONTRAIN); }
-			bool IsFiring() const POKEBOT_NOEXCEPT { return (client->Button() & IN_ATTACK); }
+			bool IsWalking() const noexcept { return bool(client->velocity().Length2D() <= 150.0f); }
+			bool IsDucking() const POKEBOT_NOEXCEPT { return bool(client->Button() & IN_DUCK); }
+			bool IsInWater() const POKEBOT_NOEXCEPT { return bool(client->flags() & FL_INWATER); }
+			bool IsOnFloor() const POKEBOT_NOEXCEPT { return bool(client->flags() & (FL_ONGROUND | FL_PARTIALGROUND)) != 0; }
+			bool IsOnTrain() const POKEBOT_NOEXCEPT { return bool(client->flags() & FL_ONTRAIN); }
+			bool IsFiring() const POKEBOT_NOEXCEPT { return bool(client->Button() & IN_ATTACK); }
 			bool IsReadyToThrowGrenade() const POKEBOT_NOEXCEPT { return IsFiring() && bool(client->weapons() & Grenade_Bit); }
 			bool IsPlantingBomb() const POKEBOT_NOEXCEPT { return IsFiring() && bool(client->weapons() & C4_Bit) && (client->sequence() == 63 || client->sequence() == 61); }
 			bool IsClimblingLadder() const POKEBOT_NOEXCEPT { return (client->movetype() & MOVETYPE_FLY); }
@@ -367,6 +369,7 @@ namespace pokebot {
 			const float& Speed() const { return client->Speed(); }
 			const int& Money() const { return client->Money(); }
 
+			const Vector& velocity() const { return client->velocity(); }
 			const Vector& view_ofs() const { return client->view_ofs(); }
 			const Vector& origin() const { return client->origin(); }
 			const Vector& angles() const { return client->angles(); }

@@ -332,44 +332,55 @@ namespace pokebot::bot {
 	}
 
 	void Bot::Follow() POKEBOT_NOEXCEPT {
-		const auto Leader_Origin = Manager::Instance().GetLeaderOrigin(JoinedTeam(), JoinedPlatoon());
-		const auto Leader_Area = node::czworld.GetNearest(*Leader_Origin);
-		if (Leader_Area == nullptr)
-			return;
-
-		if (goal_node == node::Invalid_NodeID) {
-			goal_node = Leader_Area->m_id;
-		}
-
-		if (!routes.Empty() && !routes.IsEnd()) {
-			const auto Current_Area = node::czworld.GetNearest(Origin());
-			if (Current_Area == nullptr || Current_Area == Leader_Area) {
-				return;
+		const auto Leader_Status = Manager::Instance().GetLeaderStatus(JoinedTeam(), JoinedPlatoon());
+		assert(Leader_Status.has_value());
+		const auto Leader_Origin = Leader_Status->origin();
+		if (const auto Leader_Area = node::czworld.GetNearest(Leader_Origin); Leader_Area != nullptr) {
+			if (goal_node == node::Invalid_NodeID) {
+				goal_node = Leader_Area->m_id;
 			}
 
-			// - Check -
-			const auto Current_Node_ID = Current_Area->m_id;
-			if (goal_node == Current_Node_ID) {
-				// The bot is already reached at the destination.
-				goal_queue.Clear();
-				routes.Clear();
-				goal_node = node::Invalid_NodeID;
-				return;
-			}
-
-			if (next_dest_node == node::Invalid_NodeID) {
-				next_dest_node = routes.Current();
-			} else if (node::czworld.IsOnNode(Origin(), next_dest_node)) {
-				if (!routes.IsEnd()) {
-					if (routes.Next()) {
-						next_dest_node = routes.Current();
+			if (!routes.Empty() && !routes.IsEnd()) {
+				if (const auto Current_Area = node::czworld.GetNearest(Origin()); Current_Area != nullptr && Current_Area != Leader_Area) {
+					// - Check -
+					const auto Current_Node_ID = Current_Area->m_id;
+					if (goal_node == Current_Node_ID) {
+						// The bot is already reached at the destination.
+						goal_queue.Clear();
+						routes.Clear();
+						goal_node = node::Invalid_NodeID;
+					} else {
+						if (next_dest_node == node::Invalid_NodeID) {
+							next_dest_node = routes.Current();
+						} else if (node::czworld.IsOnNode(Origin(), next_dest_node)) {
+							if (!routes.IsEnd()) {
+								if (routes.Next()) {
+									next_dest_node = routes.Current();
+								}
+							}
+						}
 					}
 				}
+			} else {
+				node::czworld.FindPath(&routes, Origin(), node::czworld.GetOrigin(goal_node), JoinedTeam());
+				if (routes.Empty()) {
+					goal_node = node::Invalid_NodeID;
+				}
 			}
-		} else {
-			node::czworld.FindPath(&routes, Origin(), node::czworld.GetOrigin(goal_node), JoinedTeam());
-			if (routes.Empty()) {
-				goal_node = node::Invalid_NodeID;
+
+			const auto Ditance_To_Leader = common::Distance(Origin(), Leader_Origin);
+			if (Ditance_To_Leader <= 275.0f) {
+				if (Ditance_To_Leader >= 75.0f) {
+					if (Leader_Status->IsDucking()) {
+						PressKey(ActionKey::Duck);
+					} else if (Leader_Status->IsWalking()) {
+						PressKey(ActionKey::Run | ActionKey::Shift);
+					} else {
+						PressKey(ActionKey::Run);
+					}
+				}
+			} else {
+				PressKey(ActionKey::Run);
 			}
 		}
 	}

@@ -58,7 +58,7 @@ namespace pokebot::bot {
 		bool DeletePlatoon(const int Index);
 		bool IsStrategyToFollow() const noexcept { return strategy.strategy == TroopsStrategy::Strategy::Follow; }
 
-		void DecideStrategy(std::unordered_map<std::string, Bot>* bots);
+		void DecideStrategy(std::unordered_map<std::string, Bot>* bots, const std::optional<RadioMessage>&);
 		void Command(std::unordered_map<std::string, Bot>* bots);
 		void SetNewStrategy(const TroopsStrategy&);
 		bool HasGoalBeenDevised(const node::NodeID) const POKEBOT_NOEXCEPT;
@@ -66,7 +66,7 @@ namespace pokebot::bot {
 		bool NeedToDevise() const POKEBOT_NOEXCEPT;
 
 		node::NodeID GetGoalNode() const POKEBOT_NOEXCEPT { return strategy.objective_goal_node; }
-		Vector CurrentLeaderOrigin() const POKEBOT_NOEXCEPT;
+		game::ClientStatus LeaderStatus() const POKEBOT_NOEXCEPT;
 
 		Troops& operator[](const int index) { return platoons[index]; }
 		const Troops& at(const int index) const { return platoons.at(index); }

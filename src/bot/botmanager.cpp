@@ -29,11 +29,11 @@ namespace pokebot::bot {
 		}
 
 		for (auto& troop : troops) {
-			troop.DecideStrategy(&bots);
+			troop.DecideStrategy(&bots, std::nullopt);
 			troop.Command(&bots);
 
 			for (auto& platoon : troop) {
-				platoon.DecideStrategy(&bots);
+				platoon.DecideStrategy(&bots, std::nullopt);
 				platoon.Command(&bots);
 			}
 		}
@@ -80,10 +80,28 @@ namespace pokebot::bot {
 	}
 
 	void Manager::OnRadioRecieved(const std::string& Sender_Name, const std::string& Radio_Sentence) POKEBOT_NOEXCEPT {
-		// TODO: Get Sender's team
-		radio_message.team = game::game.GetClientStatus(Sender_Name).GetTeam();
+		auto Leader_Status = game::game.GetClientStatus(Sender_Name);
+
+		radio_message.team = Leader_Status.GetTeam();
 		radio_message.sender = Sender_Name;
 		radio_message.message = Radio_Sentence;
+
+		auto& troop = troops[static_cast<int>(radio_message.team) - 1];
+
+		auto createLeaderPlatoon = [&]() -> PlatoonID {
+			return troop.CreatePlatoon(
+				[&](const std::pair<std::string, Bot>& Pair) { return common::Distance(Pair.second.Origin(), Leader_Status.origin()) <= 1000.0f; },
+				[&](const std::pair<std::string, Bot>& Pair) { return Pair.first == radio_message.sender; }
+			);
+		};
+
+		if (radio_message.message == "#Cover_me") {
+			radio_message.platoon = createLeaderPlatoon();
+		} else if (radio_message.message == "#Follow_me") {
+			radio_message.platoon = createLeaderPlatoon();
+		} else if (radio_message.message == "#Stick_together_team") {
+			radio_message.platoon = createLeaderPlatoon();
+		}
 	}
 
 	void Manager::Insert(std::string bot_name, const common::Team team, const common::Model model, const bot::Difficult Assigned_Diffcult) POKEBOT_NOEXCEPT {
@@ -131,12 +149,35 @@ namespace pokebot::bot {
 
 		for (auto& bot : bots) {
 			bot.second.Run();
-			if (!radio_message.sender.empty() && radio_message.team == bot.second.JoinedTeam()) {
-				bot.second.OnRadioRecieved(radio_message.sender, radio_message.message);
-				radio_message.sender.clear();
-			}
 		}
+
+#if 1
+		if (!radio_message.sender.empty()) {
+			auto followers = (bots | std::views::filter([&](const std::pair<std::string, Bot>& Pair) -> bool { return radio_message.team == Pair.second.JoinedTeam() && radio_message.sender != Pair.first; }));
+			for (auto& follower : followers) {
+				assert(follower.first != radio_message.sender);
+				follower.second.OnRadioRecieved(radio_message.sender, radio_message.message);
+			}
+
+			// NOTE: For unknown reasons, without using lambda function causes game freezing.
+			[&] {
+				if (radio_message.platoon.has_value()) {
+					for (auto& follower : followers) {
+						assert(follower.first != radio_message.sender);
+						follower.second.platoon = *radio_message.platoon;
+					}
+					auto& platoon = troops[static_cast<int>(radio_message.team) - 1][*radio_message.platoon];
+					platoon.DecideStrategy(&bots, radio_message);
+					platoon.Command(&bots);
+				}
+			}();
+			radio_message.sender.clear();
+			radio_message.platoon = std::nullopt;
+			radio_message.message.clear();
+		}
+#endif
 	}
+
 
 	Bot* const Manager::Get(const std::string& Bot_Name) POKEBOT_NOEXCEPT {
 		auto bot_iterator = bots.find(Bot_Name);
@@ -173,7 +214,7 @@ namespace pokebot::bot {
 		const int Team_Index = static_cast<int>(completed_guy->JoinedTeam()) - 1;
 
 		if (auto& troop = troops[Team_Index]; troop.NeedToDevise()) {
-			troop.DecideStrategy(&bots);
+			troop.DecideStrategy(&bots, std::nullopt);
 			troop.Command(&bots);
 		}
 	}
@@ -187,12 +228,12 @@ namespace pokebot::bot {
 		}
 	}
 
-	std::optional<Vector> Manager::GetLeaderOrigin(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT {
+	std::optional<game::ClientStatus> Manager::GetLeaderStatus(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT {
 		auto& troop = troops[static_cast<int>(Target_Team) - 1];
 		if (!Index.has_value()) {
-			return troop.CurrentLeaderOrigin();
+			return troop.LeaderStatus();
 		} else {
-			return troop.at(*Index).CurrentLeaderOrigin();
+			return troop.at(*Index).LeaderStatus();
 		}
 	}
 
