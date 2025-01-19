@@ -109,10 +109,10 @@ namespace pokebot::bot {
 			bot_name = std::get<std::string>(spawn_result);
 			auto insert_result = bots.insert({ bot_name, Bot(bot_name, team, model) });
 			assert(insert_result.second);
-
 			auto result = balancer.insert({ bot_name, BotBalancer{.gap = {} } });
 			assert(result.second);
 
+#if 0
 			switch (Assigned_Diffcult) {
 				case bot::Difficult::Easy:
 					result.first->second.gap.z = -10.0f;
@@ -125,6 +125,7 @@ namespace pokebot::bot {
 				default:
 					assert(false);
 			}
+#endif
 		}
 	}
 

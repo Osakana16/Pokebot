@@ -501,7 +501,7 @@ namespace pokebot::bot {
 		}
 		const auto Enemy_Distances = std::move(SortedDistances(Origin(), target_enemies));
 		const auto& Nearest_Enemy = game::game.GetClientStatus(target_enemies[Enemy_Distances.begin()->second]);
-		look_direction.view = Nearest_Enemy.origin() - Vector(20.0f, 0, 0) + Manager::Instance().GetCompensation(Name().data());
+		look_direction.view = Nearest_Enemy.origin() - Vector(20.0f, 0, 0);
 	}
 
 	bool Bot::HasEnemy() const POKEBOT_NOEXCEPT {
