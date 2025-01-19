@@ -583,7 +583,7 @@ namespace pokebot::bot {
 	bool Bot::IsEnabledNightvision() const POKEBOT_NOEXCEPT { return false; }
 
 	uint8_t Bot::ComputeMsec() POKEBOT_NOEXCEPT {
-		return static_cast<std::uint8_t>((gpGlobals->time - last_command_time) * 1000.0f);
+		return static_cast<std::uint8_t>(std::min({ static_cast<int>(std::roundf((gpGlobals->time - last_command_time) * 1000.0f)), 255 }));
 	}
 
 	void Bot::OnRadioRecieved(const std::string& Sender_Name, const std::string& Radio_Sentence) POKEBOT_NOEXCEPT {
