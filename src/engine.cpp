@@ -418,9 +418,13 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             { "#Spec_Mode4", nothingToDo },
                             { "#Spec_Mode5", nothingToDo },
                             { "#Spec_Mode6", nothingToDo },
-                            { "#Spec_NoTarget", nothingToDo }
+                            { "#Spec_NoTarget", nothingToDo },
+                            { "#Already_Have_One", nothingToDo },
+                            { "#Defusing_Bomb_With_Defuse_Kit", nothingToDo },
+                            { "#Defusing_Bomb_Without_Defuse_Kit", nothingToDo }
                         };
 
+                        
                         using namespace pokebot;
                         if (args.size() >= 5 && std::holds_alternative<std::string>(args[2])) {
                             auto it = Text_Message.find(std::get<std::string>(args[2]));
