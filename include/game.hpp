@@ -461,9 +461,9 @@ namespace pokebot {
 
 		POKEBOT_DEFINE_ENUM_WITH_BIT_OPERATOR(
 			MapFlags,
-			Assassination = 1 << 0,
+			Demolition = 1 << 0,
 			HostageRescue = 1 << 1,
-			Demolition = 1 << 2,
+			Assassination = 1 << 2,			
 			Escape = 1 << 3
 		);
 

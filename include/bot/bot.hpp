@@ -153,6 +153,7 @@ namespace pokebot::bot {
 
 		State state = State::Accomplishment;
 		void AccomplishMission() POKEBOT_NOEXCEPT, Combat() POKEBOT_NOEXCEPT, Follow() POKEBOT_NOEXCEPT;
+		void AccomplishTerroristMission() noexcept, AccomplishCTMission() noexcept;
 		std::string name{};
 
 		void JoinPlatoon(const PlatoonID Target_Platoon) noexcept;

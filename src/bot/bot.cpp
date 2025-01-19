@@ -24,8 +24,6 @@ namespace pokebot::bot {
 		move_speed = 0;
 	}
 
-#define ENABLE_NEW_TURN_ANGLE 1
-
 	void Bot::TurnViewAngle() {
 		auto client_status = game::game.GetClientStatus(Name().data());
 		auto destination = look_direction.view->ToAngleVector(Origin());
@@ -186,104 +184,99 @@ namespace pokebot::bot {
 	}
 
 	void Bot::AccomplishMission() POKEBOT_NOEXCEPT {
-		static const auto Do_Nothing_If_Mode_Is_Not_Applicable = std::make_pair<game::MapFlags, std::function<void()>>(static_cast<game::MapFlags>(0), [this] { /* Do nothing. */ });
+		
 		switch (JoinedTeam()) {
 			case common::Team::T:
 			{
-				std::unordered_map<game::MapFlags, std::function<void()>> modes{
-					Do_Nothing_If_Mode_Is_Not_Applicable,
-					{
-						game::MapFlags::Demolition,
-						[&] {
-							if (Manager::Instance().C4Origin().has_value()) {
-								behavior::demolition::t_planted_wary->Evaluate(this);
-							} else {
-								if (HasWeapon(game::Weapon::C4)) {
-									behavior::demolition::t_plant->Evaluate(this);
-								}
-							}
-						}
-					},
-					{
-						game::MapFlags::HostageRescue,
-						[&] {
-
-						}
-					},
-					{
-						game::MapFlags::Assassination,
-						[&] {
-
-						}
-					},
-					{
-						game::MapFlags::Escape,
-						[&] {
-							behavior::escape::t_take_point->Evaluate(this);
-						}
-					},
-				};
-				auto current_mode = game::game.GetMapFlag();
-				for (auto supported_mode : modes) {
-					modes[current_mode & supported_mode.first]();
-				}
+				AccomplishTerroristMission();
 				break;
 			}
 			case common::Team::CT:
 			{
-				std::unordered_map<game::MapFlags, std::function<void()>> modes{
-					Do_Nothing_If_Mode_Is_Not_Applicable,
-					{
-						game::MapFlags::Demolition,
-						[&] {
-							if (Manager::Instance().C4Origin().has_value()) {
-								if (common::Distance(Origin(), *Manager::Instance().C4Origin()) <= 50.0f) {
-									behavior::demolition::ct_defusing->Evaluate(this);
-								} else {
-									behavior::demolition::ct_planted->Evaluate(this);
-								}
-							} else {
-								behavior::demolition::ct_defend->Evaluate(this);
-							}
-						}
-					},
-					{
-						game::MapFlags::HostageRescue,
-						[&] {
-							auto client_status = game::game.GetClientStatus(Name().data());
-							if (!client_status.HasHostages()) {
-								behavior::rescue::ct_try->Evaluate(this);
-							} else {
-								behavior::rescue::ct_leave->Evaluate(this);
-							}
-						}
-					},
-					{
-						game::MapFlags::Assassination,
-						[&] {
-							auto client_status = game::game.GetClientStatus(Name().data());
-							if (client_status.IsVIP()) {
-								behavior::assist::ct_vip_escape->Evaluate(this);
-							} else {
-
-							}
-						}
-					},
-					{
-						game::MapFlags::Escape,
-						[&] {
-
-						}
-					}
-				};
-
-				auto current_mode = game::game.GetMapFlag();
-				for (auto supported_mode : modes) {
-					modes[current_mode & supported_mode.first]();
-				}
+				AccomplishCTMission();
 				break;
 			}
 		}
+	}
+
+	void Bot::AccomplishTerroristMission() noexcept {
+		std::function<void()> modes[]{
+			// Demolition
+			[&] {
+				if (Manager::Instance().C4Origin().has_value()) {
+					behavior::demolition::t_planted_wary->Evaluate(this);
+				} else {
+					if (HasWeapon(game::Weapon::C4)) {
+						behavior::demolition::t_plant->Evaluate(this);
+					}
+				}
+			},
+			// Hostage Rescue
+			[&] {
+				auto client_status = game::game.GetClientStatus(Name().data());
+				if (!client_status.HasHostages()) {
+					behavior::rescue::ct_try->Evaluate(this);
+				} else {
+					behavior::rescue::ct_leave->Evaluate(this);
+				}
+			},
+			// Assasination
+			[&] {
+				auto client_status = game::game.GetClientStatus(Name().data());
+				if (client_status.IsVIP()) {
+					behavior::assist::ct_vip_escape->Evaluate(this);
+				} else {
+
+				}
+			},
+			// Escape
+			[&] {
+
+			},
+		};
+		auto current_mode = game::game.GetMapFlag();
+		modes[static_cast<int>(std::log2(static_cast<float>(current_mode)))]();
+	}
+
+	void Bot::AccomplishCTMission() noexcept {
+		std::function<void()> modes[]{
+			// Demolition
+			[&] {
+				if (Manager::Instance().C4Origin().has_value()) {
+					if (common::Distance(Origin(), *Manager::Instance().C4Origin()) <= 50.0f) {
+						behavior::demolition::ct_defusing->Evaluate(this);
+					} else {
+						behavior::demolition::ct_planted->Evaluate(this);
+					}
+				} else {
+					behavior::demolition::ct_defend->Evaluate(this);
+				}
+			},
+			// Hostage Rescue
+			[&] {
+				auto client_status = game::game.GetClientStatus(Name().data());
+				if (!client_status.HasHostages()) {
+					behavior::rescue::ct_try->Evaluate(this);
+				} else {
+					behavior::rescue::ct_leave->Evaluate(this);
+				}
+			},
+			// Assasination
+			[&] {
+				auto client_status = game::game.GetClientStatus(Name().data());
+				if (client_status.IsVIP()) {
+					behavior::assist::ct_vip_escape->Evaluate(this);
+				} else {
+
+				}
+			},
+			// Escape
+			[&] {
+
+			},
+		};
+		auto current_mode = game::game.GetMapFlag();
+		modes[static_cast<int>(std::log2(static_cast<float>(current_mode)))]();
 	}
 
 	void Bot::Combat() POKEBOT_NOEXCEPT {
