@@ -5,40 +5,82 @@
 #include <iostream>
 #include <functional>
 
-
-// ラッパークラスを作成
-template <typename R, typename... Args>
-struct function_traits;
-
-template <typename R, typename... Args>
-struct function_traits<R(Args...)> {
-    using function_type = R(*)(Args...);
-};
-
-template <typename R, typename... Args>
-typename function_traits<R(Args...)>::function_type to_function_pointer(std::function<R(Args...)>& func) {
-    return *func.target<typename function_traits<R(Args...)>::function_type>();
-}
-
-class Command {
-public:
-    inline Command(const std::string_view& Command_Name, std::function<void()> command_function) POKEBOT_NOEXCEPT { REG_SVR_COMMAND(Command_Name.data(), command_function.target<void()>()); }
-};
-
 namespace pokebot::plugin {
-    void Pokebot::RegisterCommand() POKEBOT_NOEXCEPT {
-        static auto GetArgs = []() {
-            static std::vector<std::string> args{};
+    namespace {
+        void GetArgs(std::vector<std::string_view>* args) {
             for (int i = 1; ; i++) {
-                auto arg = CMD_ARGV(i);
+                const char* const arg = CMD_ARGV(i);
                 if (arg == nullptr || strlen(arg) <= 0) {
                     break;
                 }
-                args.push_back(arg);
+                args->push_back(arg);
             }
-            return std::move(args);
-        };
+        }
 
+        static void pk_add_team_specified(const common::Team Default_Team) {
+            std::vector<std::string_view> args{};
+            GetArgs(&args);
+
+            std::string_view name = "FirstBot";
+            pokebot::common::Team team = Default_Team;
+            pokebot::common::Model model = (pokebot::common::Model)(int)pokebot::common::Random<int>(1, 4);
+            bot::Difficult difficult = bot::Difficult::Normal;
+            if (args.size() >= 1) {
+                const size_t size = args[0].size();
+                name = args[0].substr(0, 32u).data();
+            }
+
+            if (args.size() >= 2) {
+                model = static_cast<decltype(model)>(std::strtol(args[1].data(), nullptr, 0) % 4);
+            }
+
+            if (args.size() >= 3) {
+                difficult = static_cast<decltype(difficult)>(std::strtol(args[2].data(), nullptr, 0) % 3);
+            }
+            pokebot::plugin::pokebot_plugin.AddBot(name.data(), team, model, difficult);
+        }
+
+        void pk_add() {
+            std::vector<std::string_view> args{};
+            GetArgs(&args);
+
+            std::string_view name = "FirstBot";
+            pokebot::common::Team team = (pokebot::common::Team)(int)pokebot::common::Random<int>(1, 2);
+            pokebot::common::Model model = (pokebot::common::Model)(int)pokebot::common::Random<int>(1, 4);
+            bot::Difficult difficult = bot::Difficult::Normal;
+            if (args.size() >= 1) {
+                assert(args[0].size() <= 64u);
+                name = args[0];
+            }
+
+            if (args.size() >= 2) {
+                if (args[1] == "1" || args[1] == "T" || args[1] == "t") {
+                    team = pokebot::common::Team::T;
+                } else if (args[1] == "2" || args[1] == "CT" || args[1] == "ct") {
+                    team = pokebot::common::Team::CT;
+                }
+            }
+
+            if (args.size() >= 3) {
+                model = static_cast<decltype(model)>(std::strtol(args[2].data(), nullptr, 0) % 4);
+            }
+
+            if (args.size() >= 4) {
+                difficult = static_cast<decltype(difficult)>(std::strtol(args[3].data(), nullptr, 0) % 4);
+            }
+            pokebot::plugin::pokebot_plugin.AddBot(name.data(), team, model, difficult);
+        }
+
+        void pk_add_ct() {
+            pk_add_team_specified(common::Team::CT);
+        }
+
+        void pk_add_t() {
+            pk_add_team_specified(common::Team::T);
+        }
+    }
+
+    void Pokebot::RegisterCommand() POKEBOT_NOEXCEPT {
         REG_SVR_COMMAND("pk_distance_bombsite", [] {
             edict_t* bombsites[2]{};
 
@@ -66,76 +108,9 @@ namespace pokebot::plugin {
             }
         });
 
-        REG_SVR_COMMAND("pk_add", [] {
-            auto args = GetArgs();
-
-            std::string name = "FirstBot";
-            pokebot::common::Team team = (pokebot::common::Team)(int)pokebot::common::Random<int>(1, 2);
-            pokebot::common::Model model = (pokebot::common::Model)(int)pokebot::common::Random<int>(1, 4);
-            bot::Difficult difficult = bot::Difficult::Normal;
-            if (args.size() >= 1) {
-                name = args[0];
-            }
-
-            if (args.size() >= 2) {
-                if (args[1] == "1" || args[1] == "T" || args[1] == "t") {
-                    team = pokebot::common::Team::T;
-                } else if (args[1] == "2" || args[1] == "CT" || args[1] == "ct") {
-                    team = pokebot::common::Team::CT;
-                }
-            }
-
-            if (args.size() >= 3) {
-                model = static_cast<decltype(model)>(std::strtol(args[2].c_str(), nullptr, 0) % 4);
-            }
-
-            if (args.size() >= 4) {
-                difficult = static_cast<decltype(difficult)>(std::strtol(args[3].c_str(), nullptr, 0) % 4);
-            }
-            pokebot::plugin::pokebot_plugin.AddBot(name, team, model, difficult);
-        });
-
-        REG_SVR_COMMAND("pk_add_ct", [] {
-            auto args = GetArgs();
-
-            std::string name = "FirstBot";
-            pokebot::common::Team team = pokebot::common::Team::CT;
-            pokebot::common::Model model = (pokebot::common::Model)(int)pokebot::common::Random<int>(1, 4);
-            bot::Difficult difficult = bot::Difficult::Normal;
-            if (args.size() >= 1) {
-                name = args[0];
-            }
-
-            if (args.size() >= 2) {
-                model = static_cast<decltype(model)>(std::strtol(args[1].c_str(), nullptr, 0) % 4);
-            }
-
-            if (args.size() >= 3) {
-                difficult = static_cast<decltype(difficult)>(std::strtol(args[2].c_str(), nullptr, 0) % 3);
-            }
-            pokebot::plugin::pokebot_plugin.AddBot(name, team, model, difficult);
-        });
-
-        REG_SVR_COMMAND("pk_add_t", [] {
-            auto args = GetArgs();
-
-            std::string name = "FirstBot";
-            pokebot::common::Team team = pokebot::common::Team::T;
-            pokebot::common::Model model = (pokebot::common::Model)(int)pokebot::common::Random<int>(1, 4);
-            bot::Difficult difficult = bot::Difficult::Normal;
-            if (args.size() >= 1) {
-                name = args[0];
-            }
-
-            if (args.size() >= 2) {
-                model = static_cast<decltype(model)>(std::strtol(args[1].c_str(), nullptr, 0) % 4);
-            }
-
-            if (args.size() >= 3) {
-                difficult = static_cast<decltype(difficult)>(std::strtol(args[2].c_str(), nullptr, 0) % 3);
-            }
-            pokebot::plugin::pokebot_plugin.AddBot(name, team, model, difficult);
-        });
+        REG_SVR_COMMAND("pk_add", pk_add);
+        REG_SVR_COMMAND("pk_add_ct", pk_add_ct);
+        REG_SVR_COMMAND("pk_add_t", pk_add_t);
 
         REG_SVR_COMMAND("pk_auto_waypoint", [] {
             pokebot::game::is_enabled_auto_waypoint = !pokebot::game::is_enabled_auto_waypoint;
@@ -146,9 +121,10 @@ namespace pokebot::plugin {
         });
 
         REG_SVR_COMMAND("pk_kill", [] {
-            auto args = GetArgs();
+            std::vector<std::string_view> args{};
+            GetArgs(&args);
             using namespace pokebot;
-            game::game.Kill(args[0]);
+            game::game.Kill(args[0].data());
         });
 
         REG_SVR_COMMAND("pk_kill_t",[] {
@@ -184,16 +160,15 @@ namespace pokebot::plugin {
         }
     }
 
-    void Pokebot::AddBot(const std::string& Bot_Name, const common::Team Selected_Team, const common::Model Selected_Model, const bot::Difficult Difficult) POKEBOT_NOEXCEPT {
-        pokebot::bot::Manager::Instance().Insert(Bot_Name, Selected_Team, Selected_Model, Difficult);
+    void Pokebot::AddBot(const std::string_view& Bot_Name, const common::Team Selected_Team, const common::Model Selected_Model, const bot::Difficult Difficult) POKEBOT_NOEXCEPT {
+        pokebot::bot::Manager::Instance().Insert(Bot_Name.data(), Selected_Team, Selected_Model, Difficult);
     }
     
     void Pokebot::OnEntitySpawned() {
-        std::string classname = STRING(spawned_entity->v.classname);
         if (spawned_entity->v.rendermode == kRenderTransTexture) {
             spawned_entity->v.flags &= ~FL_WORLDBRUSH; // clear the FL_WORLDBRUSH flag out of transparent ents
         }
-        if (classname == "worldspawn") {
+        if (std::string_view classname = STRING(spawned_entity->v.classname); classname == "worldspawn") {
             pWorldEntity = spawned_entity;
             beam_sprite = PRECACHE_MODEL("sprites/laserbeam.spr");
         }        

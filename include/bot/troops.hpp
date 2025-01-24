@@ -1,7 +1,7 @@
 #pragma once
 namespace pokebot::bot {
 	struct TroopsStrategy {
-		std::string leader_name{};	// The name of the player to follow.
+		common::PlayerName leader_name{};	// The name of the player to follow.
 		node::NodeID objective_goal_node = node::Invalid_NodeID;
 		enum class Strategy {
 			/*- Demolition -*/
@@ -44,8 +44,8 @@ namespace pokebot::bot {
 	class Troops final {
 		TroopsStrategy strategy;
 		TroopsStrategy old_strategy;
-		std::function<bool(const std::pair<std::string, Bot>& target)> commander_condition;	// The condition to become the commander.
-		std::function<bool(const std::pair<std::string, Bot>& target)> condition;
+		std::function<bool(const std::pair<common::PlayerName, Bot>& target)> commander_condition;	// The condition to become the commander.
+		std::function<bool(const std::pair<common::PlayerName, Bot>& target)> condition;
 
 		common::Team team{};
 		Troops* parent{};
@@ -58,8 +58,8 @@ namespace pokebot::bot {
 		bool DeletePlatoon(const int Index);
 		bool IsStrategyToFollow() const noexcept { return strategy.strategy == TroopsStrategy::Strategy::Follow; }
 
-		void DecideStrategy(std::unordered_map<std::string, Bot>* bots, const std::optional<RadioMessage>&);
-		void Command(std::unordered_map<std::string, Bot>* bots);
+		void DecideStrategy(std::unordered_map<common::PlayerName, Bot, common::PlayerName::Hash>* bots, const std::optional<RadioMessage>&);
+		void Command(std::unordered_map<common::PlayerName, Bot, common::PlayerName::Hash>* bots);
 		void SetNewStrategy(const TroopsStrategy&);
 		bool HasGoalBeenDevised(const node::NodeID) const POKEBOT_NOEXCEPT;
 		bool HasGoalBeenDevisedByOtherPlatoon(const node::NodeID) const POKEBOT_NOEXCEPT;

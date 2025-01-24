@@ -474,7 +474,7 @@ namespace pokebot::bot::behavior {
 				private:
 					float time{};
 				};
-				static std::unordered_map<std::string, Timer> timers{};
+				static std::unordered_map<common::PlayerName, Timer, common::PlayerName::Hash> timers{};
 				auto& timer = timers[self->Name().data()];
 
 				switch (timer.RunningStatus()) {

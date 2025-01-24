@@ -2,11 +2,7 @@
 #include "database.hpp"
 namespace pokebot {
 	namespace game {
-		namespace client {
-			using Name = std::string;
-		}
-		
-		using ClientCreationResult = std::tuple<bool, client::Name>;
+		using ClientCreationResult = std::tuple<bool, common::PlayerName>;
 
 		inline bool is_enabled_auto_waypoint = true;
 
@@ -201,8 +197,8 @@ namespace pokebot {
 
 		struct ConVarReg {
 			cvar_t reg;
-			std::string info;
-			std::string init;
+			common::fixed_string<64u> info;
+			common::fixed_string<64u> init;
 			const char* regval;
 			class ConVar* self;
 			float initial, min, max;
@@ -298,12 +294,12 @@ namespace pokebot {
 		class ClientStatus {
 			const Client* client;
 		public:
-			ClientStatus(const client::Name&);
+			ClientStatus(const common::PlayerName&);
 
 			common::Team GetTeam() const POKEBOT_NOEXCEPT;
 			bool CanSeeFriend() const POKEBOT_NOEXCEPT;
-			std::vector<client::Name> GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT;
-			std::vector<client::Name> GetEntityNamesInView() const POKEBOT_NOEXCEPT;
+			std::vector<common::PlayerName> GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT;
+			std::vector<common::PlayerName> GetEntityNamesInView() const POKEBOT_NOEXCEPT;
 			common::Team GetTeamFromModel() const POKEBOT_NOEXCEPT;
 						
 			/**
@@ -392,7 +388,7 @@ namespace pokebot {
 		*/
 		class ClientCommitter {
 			friend class Game;
-			std::vector<std::string> commands{};
+			std::vector<common::fixed_string<100u>> commands{};
 			int flags{};
 			int button{};
 
@@ -403,7 +399,7 @@ namespace pokebot {
 			* @brief Set the fake client flag for client.
 			*/
 			void SetFakeClientFlag();
-			void AddCommand(const std::string);
+			void AddCommand(const std::string_view& Command_Sentence);
 			void TurnViewAngle(common::AngleVector);
 			void PressKey(int);
 			void Clear() {
@@ -415,24 +411,24 @@ namespace pokebot {
 
 
 		class ClientManager {
-			std::unordered_map<std::string, Client> clients{};
+			std::unordered_map<common::PlayerName, Client, common::PlayerName::Hash> clients{};
 		public:
 			void OnNewRound();
-			ClientStatus GetClientStatus(std::string_view client_name);
-			ClientCreationResult Create(std::string client_name);
+			ClientStatus GetClientStatus(const std::string_view&  client_name);
+			ClientCreationResult Create(std::string_view client_name);
 			bool Register(edict_t*);
 			auto& GetAll() const POKEBOT_NOEXCEPT {
 				return clients;
 			}
 
-			const Client* Get(const std::string& Name) const POKEBOT_NOEXCEPT {
+			const Client* Get(const char* const Name) const POKEBOT_NOEXCEPT {
 				if (auto it = clients.find(Name); it != clients.end()) {
 					return &it->second;
 				}
 				return nullptr;
 			}
 						
-			Client* GetAsMutable(const std::string& Name) POKEBOT_NOEXCEPT {
+			Client* GetAsMutable(const char* const Name) POKEBOT_NOEXCEPT {
 				if (auto it = clients.find(Name); it != clients.end()) {
 					return &it->second;
 				}
@@ -475,13 +471,13 @@ namespace pokebot {
 			common::Time time{};
 
 			const edict_t* entity;
-			client::Name owner_name{};
+			common::PlayerName owner_name{};
 		public:
 			operator const edict_t* const () const POKEBOT_NOEXCEPT {
 				return entity;
 			}
 			void Update() POKEBOT_NOEXCEPT;
-			bool RecoginzeOwner(const client::Name&) POKEBOT_NOEXCEPT;
+			bool RecoginzeOwner(const std::string_view&) POKEBOT_NOEXCEPT;
 
 			bool IsUsed() const POKEBOT_NOEXCEPT;
 			bool IsOwnedBy(const std::string_view& Name) const POKEBOT_NOEXCEPT;
@@ -513,7 +509,7 @@ namespace pokebot {
 			database::Database database{};
 			std::vector<Hostage> hostages{};
 
-			std::vector<std::string> bot_args{};
+			std::vector<common::fixed_string<32u>> bot_args{};
 			MapFlags map_flags{};
 			uint32_t round{};
 			bool is_newround{};
@@ -521,11 +517,11 @@ namespace pokebot {
 			std::vector<ConVarReg> convars{};
 			ClientManager clients{};
 		public:
-			void RunPlayerMove(const client::Name&, Vector movement_angle, float move_speed, float strafe_speed, float forward_speed, const std::uint8_t, const ClientCommitter&);
+			void RunPlayerMove(const std::string_view&, Vector movement_angle, float move_speed, float strafe_speed, float forward_speed, const std::uint8_t, const ClientCommitter&);
 
-			bool Kill(const client::Name&);
+			bool Kill(const std::string_view&);
 
-			ClientCreationResult Spawn(std::string_view client_name) { return clients.Create(client_name.data()); }
+			ClientCreationResult Spawn(const std::string_view& client_name) { return clients.Create(client_name.data()); }
 			bool RegisterClient(edict_t* client) { return clients.Register(client); }
 
 			auto GetClientStatus(std::string_view client_name) { return clients.GetClientStatus(client_name); }
@@ -536,7 +532,7 @@ namespace pokebot {
 			bool IsHostageOwnedBy(const int Index, const std::string_view& Owner_Name);
 			const edict_t* const GetClosedHostage(const Vector& Origin, const float Base_Distance);
 
-			const std::string& GetBotArg(const size_t Index) const POKEBOT_NOEXCEPT;
+			const char* const GetBotArg(const size_t Index) const POKEBOT_NOEXCEPT;
 			size_t GetBotArgCount() const POKEBOT_NOEXCEPT;
 			bool IsBotCmd() const POKEBOT_NOEXCEPT;
 
@@ -544,13 +540,13 @@ namespace pokebot {
 			uint32_t CurrentRonud() const POKEBOT_NOEXCEPT;
 			bool IsCurrentMode(const MapFlags) const POKEBOT_NOEXCEPT;
 			MapFlags GetMapFlag() const POKEBOT_NOEXCEPT;
-			void IssueCommand(const client::Name&, const std::string& Sentence) POKEBOT_NOEXCEPT;
+			void IssueCommand(const std::string_view&, common::fixed_string<32u> sentence) POKEBOT_NOEXCEPT;
 
 			void Init(edict_t* entities, int max);
 			void PreUpdate();
 			void PostUpdate();
 
-			bool PlayerExists(const client::Name& Client_Name) const POKEBOT_NOEXCEPT { return clients.Get(Client_Name) != nullptr; }
+			bool PlayerExists(const char* const Client_Name) const POKEBOT_NOEXCEPT { return clients.Get(Client_Name) != nullptr; }
 
 			void AddCvar(const char *name, const char *value, const char *info, bool bounded, float min, float max, Var varType, bool missingAction, const char *regval, ConVar *self);
 			void RegisterCvars();

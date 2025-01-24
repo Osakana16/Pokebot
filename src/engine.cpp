@@ -4,7 +4,7 @@
 namespace {
     int current_message{};
 
-    std::vector<std::variant<int, float, std::string>> args{};
+    std::vector<std::variant<int, float, pokebot::common::fixed_string<100u>>> args{};
 }
 
 const edict_t* engine_target_edict = nullptr;
@@ -47,7 +47,7 @@ namespace pokebot::common {
 
     Team GetTeamFromModel(const edict_t* const Edict) {
         auto infobuffer = (*g_engfuncs.pfnGetInfoKeyBuffer)(const_cast<edict_t*>(Edict));
-        std::string model_name = (*g_engfuncs.pfnInfoKeyValue)(infobuffer, "model");
+        std::string_view model_name = (*g_engfuncs.pfnInfoKeyValue)(infobuffer, "model");
 
         if (model_name == "terror" ||        // Phoenix Connektion
             model_name == "arab" ||  // old L337 Krew
@@ -86,6 +86,7 @@ void UTIL_TraceHull(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTER
 
 C_DLLEXPORT int
 GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
+    using TextCache = pokebot::common::fixed_string<100u>;
     meta_engfuncs.pfnMessageBegin = [](int msg_dest, int msg_type, const float* pOrigin, edict_t* edict) {
         if (gpGlobals->deathmatch) {
             using namespace pokebot;
@@ -128,7 +129,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         }
 
                         if (args.size() >= 4) {
-                            static const std::unordered_map<std::string, pokebot::bot::Message> Menu_Cache {
+                            static const std::unordered_map<TextCache, pokebot::bot::Message, TextCache::Hash> Menu_Cache {
                                 { "#Team_Select", pokebot::bot::Message::Team_Select },
                                 { "#Team_Select_Spect", pokebot::bot::Message::Team_Select },
                                 { "#IG_Team_Select", pokebot::bot::Message::Team_Select },
@@ -139,7 +140,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                                 { "#CT_Select", pokebot::bot::Message::Model_Select }
                             };
 
-                            auto it = Menu_Cache.find(std::get<std::string>(args[3]));
+                            auto it = Menu_Cache.find(std::get<pokebot::common::fixed_string<100u>>(args[3]).c_str());
                             if (it != Menu_Cache.end()) {
                                 pokebot::bot::Manager::Instance().Assign(STRING(engine_target_edict->v.netname), it->second);
                             }
@@ -163,17 +164,17 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             return;
 
                         using namespace pokebot;
-                        static const std::unordered_map<std::string, pokebot::common::Team> Menu_Cache {
+                        static const std::unordered_map<TextCache, pokebot::common::Team, TextCache::Hash> Menu_Cache {
                             { "TERRORIST", common::Team::T },
                             { "CT", common::Team::CT },
                             { "UNASSIGNED", common::Team::Spector },
                             { "SPECTATOR", common::Team::Spector }
                         };
 
-                        if (Menu_Cache.at(std::get<std::string>(args[1])) == common::Team::Spector) {
+                        if (auto team = Menu_Cache.at(std::get<pokebot::common::fixed_string<100u>>(args[1]).c_str()); team == common::Team::Spector) {
                             game::game.RegisterClient(const_cast<edict_t*>(engine_target_edict));
                         } else {
-                            game::game.OnTeamAssigned(STRING(engine_target_edict->v.netname), Menu_Cache.at(std::get<std::string>(args[1])));
+                            game::game.OnTeamAssigned(STRING(engine_target_edict->v.netname), team);
                         }
                     }
                 },
@@ -296,19 +297,19 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             return;
                         }
 
-                        if (args.size() < 2 || !std::holds_alternative<int>(args[0]) || !std::holds_alternative<std::string>(args[1])) {
+                        if (args.size() < 2 || !std::holds_alternative<int>(args[0]) || !std::holds_alternative<pokebot::common::fixed_string<100u>>(args[1])) {
                             return;
                         }
 
                         using namespace pokebot::game;
-                        static const std::unordered_map<std::string, StatusIcon> Icon_Cache{
+                        static const std::unordered_map<TextCache, StatusIcon, TextCache::Hash> Icon_Cache{
                             { "c4", StatusIcon::C4 },
                             { "buyzone", StatusIcon::Buy_Zone },
                             { "rescue",  StatusIcon::Rescue_Zone },
                             { "vipsafety", StatusIcon::Vip_Safety },
                         };
 
-                        if (auto it = Icon_Cache.find(std::get<std::string>(args[1])); it != Icon_Cache.end()) {
+                        if (auto it = Icon_Cache.find(std::get<pokebot::common::fixed_string<100u>>(args[1]).data()); it != Icon_Cache.end()) {
                             using namespace pokebot;
                             game::game.OnStatusIconShown(STRING(engine_target_edict->v.netname), it->second);
                         }
@@ -359,7 +360,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         auto nothingToDo = [] {};
                         auto failIfBotDoes = [] { assert(!is_bot); };
 
-                        const std::unordered_map<std::string, std::function<void()>> Text_Message{
+                        const std::unordered_map<TextCache, std::function<void()>, TextCache::Hash> Text_Message{
                             { "#Game_connected", nothingToDo },
                             { "#Game_disconnected", nothingToDo },
                             { "#Game_scoring", nothingToDo },
@@ -400,7 +401,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             { "#Weapon_Not_Available", nothingToDo },
                             { "#Game_bomb_pickup", nothingToDo },
                             { "#Got_bomb", nothingToDo },
-                            { "#Game_bomb_drop", [] { pokebot::bot::Manager::Instance().OnBombDropped(std::get<std::string>(args[2])); }},
+                            { "#Game_bomb_drop", [] { pokebot::bot::Manager::Instance().OnBombDropped(std::get<pokebot::common::fixed_string<100u>>(args[2]).data()); }},
                             // TODO: These below should set failIfBotDoes
                             { "#Not_Enough_Money", nothingToDo },
                             { "#Cstrike_Already_Own_Weapon", nothingToDo },
@@ -421,23 +422,26 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             { "#Spec_NoTarget", nothingToDo },
                             { "#Already_Have_One", nothingToDo },
                             { "#Defusing_Bomb_With_Defuse_Kit", nothingToDo },
-                            { "#Defusing_Bomb_Without_Defuse_Kit", nothingToDo }
+                            { "#Defusing_Bomb_Without_Defuse_Kit", nothingToDo },
+                            { "#Cant_buy", nothingToDo },
+                            { "#Game_unknown_command", nothingToDo },
+                            { "#Name_change_at_respawn", nothingToDo }
                         };
 
                         
                         using namespace pokebot;
-                        if (args.size() >= 5 && std::holds_alternative<std::string>(args[2])) {
-                            auto it = Text_Message.find(std::get<std::string>(args[2]));
-                            auto& sender = std::get<std::string>(args[3]);
-                            auto& radio = std::get<std::string>(args[4]);
+                        if (args.size() >= 5 && std::holds_alternative<common::fixed_string<100u>>(args[2])) {
+                            auto it = Text_Message.find(std::get<common::fixed_string<100u>>(args[2]).data());
+                            std::string_view sender = std::get<common::fixed_string<100u>>(args[3]).data();
+                            std::string_view radio = std::get<common::fixed_string<100u>>(args[4]).data();
 
                             if (it == Text_Message.find("#Game_radio")) {
                                 bot::Manager::Instance().OnRadioRecieved(sender, radio);
                             }
-                        } else if (args.size() >= 3 && std::holds_alternative<std::string>(args[2])) {
-                            Text_Message.at(std::get<std::string>(args[1]))();
-                        } else if (args.size() >= 2 && std::holds_alternative<std::string>(args[1])) {
-                            Text_Message.at(std::get<std::string>(args[1]))();
+                        } else if (args.size() >= 3 && std::holds_alternative<common::fixed_string<100u>>(args[2])) {
+                            Text_Message.at(std::get<common::fixed_string<100u>>(args[1]).data())();
+                        } else if (args.size() >= 2 && std::holds_alternative<common::fixed_string<100u>>(args[1])) {
+                            Text_Message.at(std::get<common::fixed_string<100u>>(args[1]).data())();
                         }
                     }
                 },
@@ -508,10 +512,14 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                 }
             };
 
-            auto it = messages.find(current_message);
+
+            auto it = messages.find(current_message);            
             if (it != messages.end()) {
                 it->second();
             }
+
+
+
             args.clear();
         }
         RETURN_META(MRES_IGNORED);
@@ -523,8 +531,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
 
     meta_engfuncs.pfnFindEntityByString = [](edict_t* pEdictStartSearchAfter, const char* pszField, const char* pszValue) -> edict_t* {
         if (gpGlobals->deathmatch) {
-            std::string string_value = pszValue;
-            if (string_value == "info_map_parameters") {
+            if (std::string_view string_value = pszValue;string_value == "info_map_parameters") {
                 pokebot::game::game.OnNewRound();
             }
         }
@@ -605,14 +612,14 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
 
     meta_engfuncs.pfnCmd_Args = []() -> const char* {
         if (pokebot::game::game.IsBotCmd())
-            RETURN_META_VALUE(MRES_SUPERCEDE, pokebot::game::game.GetBotArg(0).c_str()); // returns the wanted argument
+            RETURN_META_VALUE(MRES_SUPERCEDE, pokebot::game::game.GetBotArg(0)); // returns the wanted argument
 
         RETURN_META_VALUE(MRES_IGNORED, nullptr);
     };
 
     meta_engfuncs.pfnCmd_Argv = [](int argc) -> const char* {
         if (pokebot::game::game.IsBotCmd()) {
-            RETURN_META_VALUE(MRES_SUPERCEDE, pokebot::game::game.GetBotArg(argc).c_str()); // returns the wanted argument
+            RETURN_META_VALUE(MRES_SUPERCEDE, pokebot::game::game.GetBotArg(argc)); // returns the wanted argument
         }
         RETURN_META_VALUE(MRES_IGNORED, nullptr);
     };

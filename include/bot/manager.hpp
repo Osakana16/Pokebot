@@ -12,14 +12,16 @@ namespace pokebot::bot {
 
 	struct RadioMessage {
 		common::Team team = common::Team::Spector;
-		std::string sender{};
-		std::string message{};
+		common::PlayerName sender{};
+		common::fixed_string<255u> message{};
 		PlatoonID platoon{};
 	};
 
 	struct BotBalancer final {
 		Vector gap{};
 	};
+
+	using BotPair = std::pair<common::PlayerName, Bot>;
 
 	/**
 	* @brief Manager class for Bot.
@@ -28,16 +30,15 @@ namespace pokebot::bot {
 		std::optional<Vector> c4_origin{};
 		common::Array<Troops, 2> troops;
 		friend class pokebot::message::MessageDispatcher;
-		std::unordered_map<std::string, Bot> bots{};
-		std::unordered_map<std::string, BotBalancer> balancer{};
+		std::unordered_map<common::PlayerName, Bot, common::PlayerName::Hash> bots{};
 
 		// The name of the player who has the bomb.
-		std::string bomber_name{};
+		common::PlayerName bomber_name{};
 
 		Timer round_started_timer{};
 		enum class InitializationStage { Preparation, Player_Action_Ready, Completed } initialization_stage{};
 
-		Bot* const Get(const std::string&) POKEBOT_NOEXCEPT;
+		Bot* const Get(const std::string_view&) POKEBOT_NOEXCEPT;
 		RadioMessage radio_message{};
 		Manager();
 	public:
@@ -61,12 +62,6 @@ namespace pokebot::bot {
 		*/
 		void OnNewRoundReady() POKEBOT_NOEXCEPT;
 
-		/**
-		* @brief Get the compensation vector for a bot.
-		* @param Bot_Name The name of the bot.
-		* @return The compensation vector.
-		*/
-		const Vector& GetCompensation(const std::string& Bot_Name) { return balancer[Bot_Name].gap; }
 
 		/**
 		* @brief Update the state of all bots.
@@ -80,39 +75,39 @@ namespace pokebot::bot {
 		* @param model The model of the bot.
 		* @param difficulty The difficulty level of the bot.
 		*/
-		void Insert(std::string bot_name, const common::Team team, const common::Model model, const bot::Difficult difficulty) POKEBOT_NOEXCEPT;
+		void Insert(common::PlayerName bot_name, const common::Team team, const common::Model model, const bot::Difficult difficulty) POKEBOT_NOEXCEPT;
 
 		/**
 		* @brief Kick a bot from the game.
 		* @param Bot_Name The name of the bot.
 		*/
-		void Kick(const std::string& Bot_Name) POKEBOT_NOEXCEPT;
+		void Kick(const std::string_view&  Bot_Name) POKEBOT_NOEXCEPT;
 
 		/**
 		* @brief Remove a bot from the game.
 		* @param Bot_Name The name of the bot.
 		*/
-		void Remove(const std::string& Bot_Name) POKEBOT_NOEXCEPT;
+		void Remove(const std::string_view&  Bot_Name) POKEBOT_NOEXCEPT;
 
 		/**
 		* @brief Check if a bot exists by name.
 		* @param Bot_Name The name of the bot.
 		* @return true if the bot exists, false otherwise.
 		*/
-		bool IsExist(const std::string& Bot_Name) const POKEBOT_NOEXCEPT;
+		bool IsExist(const std::string_view&  Bot_Name) const POKEBOT_NOEXCEPT;
 
 		/**
 		* @brief Assign an engine message to a bot.
 		* @param Bot_Name The name of the bot.
 		* @param message The message to assign.
 		*/
-		void Assign(const std::string_view Bot_Name, Message message) POKEBOT_NOEXCEPT;
+		void Assign(const std::string_view& Bot_Name, Message message) POKEBOT_NOEXCEPT;
 
 		/**
 		* @brief Called when a bot dies.
 		* @param Bot_Name The name of the bot.
 		*/
-		void OnDied(const std::string& Bot_Name) POKEBOT_NOEXCEPT;
+		void OnDied(const std::string_view& Bot_Name) POKEBOT_NOEXCEPT;
 
 		/**
 		* @brief Called when a bot takes damage.
@@ -128,26 +123,26 @@ namespace pokebot::bot {
 		* @brief Called when a bot joins a team.
 		* @param Bot_Name The name of the bot.
 		*/
-		void OnJoinedTeam(const std::string&) POKEBOT_NOEXCEPT;
+		void OnJoinedTeam(const std::string_view&) POKEBOT_NOEXCEPT;
 
 		/**
 		* @brief Called when a chat message is received.
 		* @param Bot_Name The name of the bot.
 		*/
-		void OnChatRecieved(const std::string&) POKEBOT_NOEXCEPT;
+		void OnChatRecieved(const std::string_view&) POKEBOT_NOEXCEPT;
 
 		/**
 		* @brief Called when a team chat message is received.
 		* @param Bot_Name The name of the bot.
 		*/
-		void OnTeamChatRecieved(const std::string&) POKEBOT_NOEXCEPT;
+		void OnTeamChatRecieved(const std::string_view&) POKEBOT_NOEXCEPT;
 
 		/**
 		* @brief Called when a radio message is received.
 		* @param Sender_Name The name of the sender.
 		* @param Radio_Sentence The radio message.
 		*/
-		void OnRadioRecieved(const std::string& Sender_Name, const std::string& Radio_Sentence) POKEBOT_NOEXCEPT;
+		void OnRadioRecieved(const std::string_view& Sender_Name, const std::string_view& Radio_Sentence) POKEBOT_NOEXCEPT;
 
 		/**
 		* @brief Called when the bomb is planted.
@@ -158,13 +153,13 @@ namespace pokebot::bot {
 		* @brief Called when th bomb is picked up by a player.
 		* @param Client_Name The name of the player who picked up the bomb.
 		*/
-		void OnBombPickedUp(const std::string& Client_Name) POKEBOT_NOEXCEPT;
+		void OnBombPickedUp(const std::string_view& Client_Name) POKEBOT_NOEXCEPT;
 
 		/**
 		* @brief Called when th bomb is dropped by a player.
 		* @param Client_Name The name of the player who picked up the bomb.
 		*/
-		void OnBombDropped(const std::string& Client_Name) POKEBOT_NOEXCEPT;
+		void OnBombDropped(const std::string_view& Client_Name) POKEBOT_NOEXCEPT;
 
 		/**
 		* @brief Called when a bot has completely joined the game.

@@ -23,7 +23,7 @@ namespace pokebot::bot {
 
 	game::ClientStatus Troops::LeaderStatus() const POKEBOT_NOEXCEPT {
 		assert(!strategy.leader_name.empty());
-		auto leader_status = game::game.GetClientStatus(strategy.leader_name);
+		auto leader_status = game::game.GetClientStatus(strategy.leader_name.c_str());
 		return leader_status;
 	}
 
@@ -37,7 +37,7 @@ namespace pokebot::bot {
 		return !platoons.empty() && platoons.erase(platoons.begin() + Index) != platoons.end();
 	}
 
-	void Troops::DecideStrategy(std::unordered_map<std::string, Bot>* const bots , const std::optional<RadioMessage>& radio_message) {
+	void Troops::DecideStrategy(std::unordered_map<common::PlayerName, Bot, common::PlayerName::Hash>* const bots , const std::optional<RadioMessage>& radio_message) {
 		if (bots->empty())
 			return;
 
@@ -68,7 +68,7 @@ namespace pokebot::bot {
 			[&] {
 				if (radio_message.has_value()) {
 					new_strategy.strategy = TroopsStrategy::Strategy::Follow;
-					new_strategy.leader_name = radio_message->sender;
+					new_strategy.leader_name = radio_message->sender.data();
 				}
 			}();
 		} else {
@@ -86,11 +86,11 @@ namespace pokebot::bot {
 									while (DeletePlatoon(0));	// Delete all platoon.
 
 									int platoon = CreatePlatoon(
-										[](const std::pair<std::string, Bot>& target) -> bool { return target.second.JoinedPlatoon() == 0; },
-										[](const std::pair<std::string, Bot>& target) -> bool { return target.second.HasWeapon(game::Weapon::C4); }
+										[](const BotPair& target) -> bool { return target.second.JoinedPlatoon() == 0; },
+										[](const BotPair& target) -> bool { return target.second.HasWeapon(game::Weapon::C4); }
 									);
 
-									auto followers = (*bots | std::views::filter([](const std::pair<std::string, Bot>& target) -> bool {
+									auto followers = (*bots | std::views::filter([](const BotPair& target) -> bool {
 										return target.second.JoinedTeam() == common::Team::T && !target.second.HasWeapon(game::Weapon::C4); }) | std::views::take(5)
 											);
 									for (auto& follower : followers) {
@@ -100,7 +100,7 @@ namespace pokebot::bot {
 								} else {
 									// If the troop is a platoon
 									new_strategy.strategy = TroopsStrategy::Strategy::Follow;
-									new_strategy.leader_name = Manager::Instance().Bomber_Name;
+									new_strategy.leader_name = Manager::Instance().Bomber_Name.data();
 									assert(!new_strategy.leader_name.empty());
 								}
 								break;
@@ -138,16 +138,16 @@ namespace pokebot::bot {
 									assert(Number_Of_Goals > 0);
 									for (int i = 0; i < Number_Of_Goals; i++) {
 										CreatePlatoon(
-											[i](const std::pair<std::string, Bot>& target) -> bool {
+											[i](const BotPair& target) -> bool {
 											return i == target.second.JoinedPlatoon();
 										},
-											[i](const std::pair<std::string, Bot>& target) -> bool {
+											[i](const BotPair& target) -> bool {
 											return i == target.second.JoinedPlatoon();
 										}
 										);
 									}
 
-									auto cts = (*bots | std::views::filter([](const std::pair<std::string, Bot>& target) -> bool { return target.second.JoinedTeam() == common::Team::CT; }));
+									auto cts = (*bots | std::views::filter([](const BotPair& target) -> bool { return target.second.JoinedTeam() == common::Team::CT; }));
 									const size_t Number_Of_Cts = std::distance(cts.begin(), cts.end());
 									if (Number_Of_Cts > 1) {
 										const size_t Number_Of_Member_In_Squad = static_cast<size_t>(std::ceil(static_cast<common::Dec>(Number_Of_Cts) / static_cast<common::Dec>(Number_Of_Goals)));
@@ -206,7 +206,7 @@ namespace pokebot::bot {
 #endif
 	}
 
-	void Troops::Command(std::unordered_map<std::string, Bot>* bots) {
+	void Troops::Command(std::unordered_map<common::PlayerName, Bot, common::PlayerName::Hash>* bots) {
 		for (auto& individual : (*bots | std::views::filter(condition))) {
 			individual.second.ReceiveCommand(strategy);
 		}

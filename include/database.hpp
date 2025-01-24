@@ -2,10 +2,10 @@
 namespace pokebot {
 	namespace database {
 		struct BotProfile final {
-			std::list<std::string> bases{};
-			std::list<std::string> weapon{};
-			std::list<std::string> map{};
-			std::list<std::string> skin{};
+			std::list<common::fixed_string<64u>> bases{};
+			std::list<common::fixed_string<64u>> weapon{};
+			std::list<common::fixed_string<64u>> map{};
+			std::list<common::fixed_string<64u>> skin{};
 			int brave{};
 			int coop{};
 			int light_level{};
@@ -19,8 +19,8 @@ namespace pokebot {
 		};
 
 		struct WeaponData final {
-			std::string id{};
-			std::string cartridge{};
+			common::fixed_string<64u> id{};
+			common::fixed_string<64u> cartridge{};
 			int capacity{};
 			int damage{};
 			float reload{};
@@ -31,8 +31,8 @@ namespace pokebot {
 			bool underwater{};
 			bool rapidfire{};
 
-			std::unordered_set<std::string> model{};
-			std::unordered_set<std::string> label{};
+			std::unordered_set<common::fixed_string<64u>, common::fixed_string<64u>::Hash> model{};
+			std::unordered_set<common::fixed_string<64u>, common::fixed_string<64u>::Hash> label{};
 			std::vector<int> menu[2]{};
 		};
 
@@ -44,9 +44,9 @@ namespace pokebot {
 
 
 		inline static class TEST_API Database {
-			std::unordered_map<std::string, BotProfile> bot_template_database{};
-			std::unordered_map<std::string, Cartridge> cartridges{};
-			std::unordered_map<std::string, WeaponData> weapons{};
+			std::unordered_map<common::fixed_string<64u>, BotProfile, common::fixed_string<64u>::Hash> bot_template_database{};
+			std::unordered_map<common::fixed_string<64u>, Cartridge, common::fixed_string<64u>::Hash> cartridges{};
+			std::unordered_map<common::fixed_string<64u>, WeaponData, common::fixed_string<64u>::Hash> weapons{};
 		public:
 			Database();
 

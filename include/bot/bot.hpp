@@ -113,6 +113,14 @@ namespace pokebot::bot {
 		friend class Manager;
 		friend class Troops;
 
+		void (Bot::*Update_Funcs[5])() = {
+			&Bot::NormalUpdate,
+			&Bot::BuyUpdate,
+			&Bot::SelectionUpdate, 
+			&Bot::SelectionUpdate, 
+			&Bot::OnSelectionCompleted 
+		};
+
 		game::ClientCommitter committer;
 		common::Time
 			frame_interval{},
@@ -149,12 +157,12 @@ namespace pokebot::bot {
 		ActionKey press_key{};
 		Timer danger_time{};
 
-		std::vector<std::string> target_enemies{};
+		std::vector<common::PlayerName> target_enemies{};
 
 		State state = State::Accomplishment;
 		void AccomplishMission() POKEBOT_NOEXCEPT, Combat() POKEBOT_NOEXCEPT, Follow() POKEBOT_NOEXCEPT;
 		void AccomplishTerroristMission() noexcept, AccomplishCTMission() noexcept;
-		std::string name{};
+		common::PlayerName name{};
 
 		void JoinPlatoon(const PlatoonID Target_Platoon) noexcept;
 		void LeavePlatoon() noexcept { platoon = Not_Joined_Any_Platoon; }
@@ -183,7 +191,7 @@ namespace pokebot::bot {
 		} look_direction{}, ideal_direction{};
 
 
-		Bot(const std::string&, const common::Team, const common::Model) POKEBOT_NOEXCEPT;
+		Bot(const std::string_view&, const common::Team, const common::Model) POKEBOT_NOEXCEPT;
 
 		void OnNewRound() POKEBOT_NOEXCEPT;
 		void Run() POKEBOT_NOEXCEPT;
@@ -197,7 +205,7 @@ namespace pokebot::bot {
 
 		inline bool IsGoodCondition() const POKEBOT_NOEXCEPT { return Health() >= 50; }
 
-		void OnRadioRecieved(const std::string& Sender_Name, const std::string& Radio_Sentence) POKEBOT_NOEXCEPT;
+		void OnRadioRecieved(const std::string_view& Sender_Name, const std::string_view& Radio_Sentence) POKEBOT_NOEXCEPT;
 
 		void OnBombPlanted() POKEBOT_NOEXCEPT;
 
@@ -210,7 +218,7 @@ namespace pokebot::bot {
 
 		// -- Getters --
 
-		const std::string& Name() const POKEBOT_NOEXCEPT;
+		const common::PlayerName& Name() const POKEBOT_NOEXCEPT;
 		Vector Origin() const POKEBOT_NOEXCEPT;
 		float Health() const POKEBOT_NOEXCEPT;
 
@@ -227,7 +235,7 @@ namespace pokebot::bot {
 		bool IsInBombTargetZone() const POKEBOT_NOEXCEPT;
 
 		bool IsFighting() const POKEBOT_NOEXCEPT { return danger_time.IsRunning(); }
-		std::vector<game::client::Name> GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT;
+		std::vector<common::PlayerName> GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT;
 		bool CanSeeEntity() const POKEBOT_NOEXCEPT;
 
 		PlatoonID JoinedPlatoon() const POKEBOT_NOEXCEPT;

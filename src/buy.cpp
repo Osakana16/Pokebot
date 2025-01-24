@@ -8,7 +8,7 @@ namespace pokebot {
 				return;
 			}
 			
-			auto client = game::game.GetClientStatus(Name().data());
+			auto client = game::game.GetClientStatus(name.c_str());
 			if (client.IsInBuyzone() && !buy_wait_timer.IsRunning()) {
 				auto ai = buy::BuyAI(client.Money());
 				auto node = ai.GetPattern(0, 0);
@@ -18,7 +18,7 @@ namespace pokebot {
 
 					game::game.IssueCommand(Name().data(), "buy");
 					for (auto menu : data->menu[JoinedTeam() == common::Team::CT]) {
-						game::game.IssueCommand(Name().data(), std::format("menuselect {}", menu));
+						game::game.IssueCommand(Name().data(), std::format("menuselect {}", menu).c_str());
 					}
 				}
 				
@@ -268,7 +268,7 @@ namespace pokebot {
 				assert(!result->empty());
 				std::vector<const database::WeaponData*> datas = std::move(*result);
 				for (auto data : datas) {
-					if (database::database.GetCartridge(data->cartridge)->max > filter->value.i)
+					if (database::database.GetCartridge(data->cartridge.c_str())->max > filter->value.i)
 						continue;
 
 					result->push_back(data);
@@ -279,7 +279,7 @@ namespace pokebot {
 				assert(!result->empty()); 
 				std::vector<const database::WeaponData*> datas = std::move(*result);
 				for (auto data : datas) {
-					if (database::database.GetCartridge(data->cartridge)->per > filter->value.i)
+					if (database::database.GetCartridge(data->cartridge.c_str())->per > filter->value.i)
 						continue;
 
 					result->push_back(data);

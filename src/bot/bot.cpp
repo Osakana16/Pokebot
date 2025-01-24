@@ -5,16 +5,7 @@
 
 namespace pokebot::bot {
 	void Bot::Run() POKEBOT_NOEXCEPT {
-		const static std::unordered_map<Message, std::function<void(Bot&)>> Update_Funcs{
-			{ Message::Team_Select, &Bot::SelectionUpdate },
-			{ Message::Model_Select, &Bot::SelectionUpdate },
-			{ Message::Buy, &Bot::BuyUpdate },
-			{ Message::Normal, &Bot::NormalUpdate },
-			{ Message::Selection_Completed, &Bot::OnSelectionCompleted }
-		};
-
-		auto update = Update_Funcs.at(start_action);
-		update(*this);
+		(this->*(Update_Funcs[static_cast<int>(start_action)]))();
 		frame_interval = gpGlobals->time - last_command_time;
 
 		const std::uint8_t Msec_Value = ComputeMsec();
@@ -30,6 +21,7 @@ namespace pokebot::bot {
 		if (destination.x > 180.0f) {
 			destination.x -= 360.0f;
 		}
+
 		auto v_angle = client_status.v_angle();
 		v_angle.x = destination.x;
 
@@ -95,7 +87,6 @@ namespace pokebot::bot {
 			if (state != State::Crisis && Manager::Instance().IsFollowerPlatoon(JoinedTeam(), JoinedPlatoon())) {
 				state = State::Follow;
 			}
-
 			// Do not do anything when freezing.
 			// Due to game engine specifications or bugs, 
 			// if we execute a heavy process immediately after the start of a round, 
@@ -291,7 +282,7 @@ namespace pokebot::bot {
 		constexpr int Max_Armor = 100;
 		constexpr int Base_Fearless = Max_Health / 2 + Max_Armor / 5;
 
-		auto enemy_status = game::game.GetClientStatus(target_enemies.front());
+		auto enemy_status = game::game.GetClientStatus(target_enemies.front().c_str());
 		const bool Enemy_Has_Primary = enemy_status.HasPrimaryWeapon();
 		const bool Enemy_Has_Secondary = enemy_status.HasSecondaryWeapon();
 
@@ -382,7 +373,7 @@ namespace pokebot::bot {
 	std::map<float, int> SortedDistances(const Vector& Base, const Array& list) {
 		std::map<float, int> result{};
 		for (int i = 0; i < list.size(); i++) {
-			result[common::Distance(Base, game::game.GetClientStatus(list[i]).origin())] = i;
+			result[common::Distance(Base, game::game.GetClientStatus(list[i].c_str()).origin())] = i;
 		}
 		return result;
 	}
@@ -412,7 +403,7 @@ namespace pokebot::bot {
 #if 1
 		if (game::poke_fight) {
 			auto status = game::game.GetClientStatus(Name().data());
-			std::string enemies_in_view[32]{};
+			common::PlayerName enemies_in_view[32]{};
 			int i{};
 			for (const auto& target : status.GetEnemyNamesWithinView()) {
 				enemies_in_view[i++] = target;
@@ -470,13 +461,13 @@ namespace pokebot::bot {
 				return;
 			}
 		}
-		game::game.IssueCommand(Name().data(), std::format("menuselect {}", value));
+		game::game.IssueCommand(Name().data(), std::format("menuselect {}", value).c_str());
 	}
 
 	void Bot::SelectWeapon(const game::Weapon Target_Weapon) {
 		if (HasWeapon(Target_Weapon)) {
 			current_weapon = Target_Weapon;
-			game::game.IssueCommand(Name().data(), std::format("{}", std::get<game::WeaponName>(game::Weapon_CVT[static_cast<int>(Target_Weapon) - 1])));
+			game::game.IssueCommand(Name().data(), std::format("{}", std::get<game::WeaponName>(game::Weapon_CVT[static_cast<int>(Target_Weapon) - 1])).c_str());
 		}
 	}
 
@@ -493,7 +484,7 @@ namespace pokebot::bot {
 			return;
 		}
 		const auto Enemy_Distances = std::move(SortedDistances(Origin(), target_enemies));
-		const auto& Nearest_Enemy = game::game.GetClientStatus(target_enemies[Enemy_Distances.begin()->second]);
+		const auto& Nearest_Enemy = game::game.GetClientStatus(target_enemies[Enemy_Distances.begin()->second].c_str());
 		look_direction.view = Nearest_Enemy.origin() - Vector(20.0f, 0, 0);
 	}
 
@@ -507,7 +498,7 @@ namespace pokebot::bot {
 		}
 
 		const auto Enemy_Distances = std::move(SortedDistances(Origin(), target_enemies));
-		const auto& Nearest_Enemy = game::game.GetClientStatus(target_enemies[Enemy_Distances.begin()->second]);
+		const auto& Nearest_Enemy = game::game.GetClientStatus(target_enemies[Enemy_Distances.begin()->second].c_str());
 		return IsLookingAt(Nearest_Enemy.origin(), 1.0f);
 	}
 
@@ -516,7 +507,7 @@ namespace pokebot::bot {
 			return false;
 		}
 		const auto Enemy_Distances = std::move(SortedDistances(Origin(), target_enemies));
-		const auto& Nearest_Enemy = game::game.GetClientStatus(target_enemies[Enemy_Distances.begin()->second]);
+		const auto& Nearest_Enemy = game::game.GetClientStatus(target_enemies[Enemy_Distances.begin()->second].c_str());
 		return common::Distance(Origin(), Nearest_Enemy.origin()) > 1000.0f;
 	}
 
@@ -531,7 +522,7 @@ namespace pokebot::bot {
 		return (result <= Range);
 	}
 
-	std::vector<game::client::Name> Bot::GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT {
+	std::vector<common::PlayerName> Bot::GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT {
 		const game::ClientStatus status{ Name().data() };
 		return status.GetEnemyNamesWithinView();
 	}
@@ -543,7 +534,7 @@ namespace pokebot::bot {
 
 	bool Bot::IsInBuyzone() const POKEBOT_NOEXCEPT { return game::game.GetClientStatus(Name().data()).IsInBuyzone(); }
 
-	const std::string& Bot::Name() const POKEBOT_NOEXCEPT { return name; }
+	const common::PlayerName& Bot::Name() const POKEBOT_NOEXCEPT { return name; }
 
 	Vector Bot::Origin() const POKEBOT_NOEXCEPT {
 		return game::game.GetClientStatus(Name().data()).origin();
@@ -579,9 +570,9 @@ namespace pokebot::bot {
 		return static_cast<std::uint8_t>(std::min({ static_cast<int>(std::roundf((gpGlobals->time - last_command_time) * 1000.0f)), 255 }));
 	}
 
-	void Bot::OnRadioRecieved(const std::string& Sender_Name, const std::string& Radio_Sentence) POKEBOT_NOEXCEPT {
+	void Bot::OnRadioRecieved(const std::string_view& Sender_Name, const std::string_view& Radio_Sentence) POKEBOT_NOEXCEPT {
 		static bool is_sent{};
-		static const std::unordered_map<std::string, std::function<void()>> Radios{
+		static const std::unordered_map<common::fixed_string<32u>, std::function<void()>, common::fixed_string<32u>::Hash> Radios{
 			{
 				"#Cover_me",
 				[] {
@@ -625,8 +616,8 @@ namespace pokebot::bot {
 				{
 					"#Go_go_go",
 					[this] {
-						game::game.IssueCommand(Name().data(), std::format("radio3"));
-						game::game.IssueCommand(Name().data(), std::format("menuselect 1"));
+						game::game.IssueCommand(Name().data(), "radio3");
+						game::game.IssueCommand(Name().data(), "menuselect 1");
 					}
 				},
 				{
@@ -703,7 +694,7 @@ namespace pokebot::bot {
 					"#Fire_in_the_hole", [] {}
 				}
 		};
-		Radios.at(Radio_Sentence)();
+		Radios.at(Radio_Sentence.data())();
 	}
 
 
@@ -715,11 +706,11 @@ namespace pokebot::bot {
 		}
 	}
 
-	Bot::Bot(const std::string& Bot_Name, const common::Team Join_Team, const common::Model Select_Model) POKEBOT_NOEXCEPT {
+	Bot::Bot(const std::string_view& Bot_Name, const common::Team Join_Team, const common::Model Select_Model) POKEBOT_NOEXCEPT {
 		team = Join_Team;
 		model = Select_Model;
 
-		name = Bot_Name;
+		name = Bot_Name.data();
 
 		OnNewRound();
 	}
