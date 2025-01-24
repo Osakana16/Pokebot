@@ -21,10 +21,10 @@ namespace pokebot::bot {
 		return strategy.objective_goal_node == node::Invalid_NodeID;
 	}
 
-	game::ClientStatus Troops::LeaderStatus() const POKEBOT_NOEXCEPT {
+	game::Client* Troops::GetLeader() const POKEBOT_NOEXCEPT {
 		assert(!strategy.leader_name.empty());
-		auto leader_status = game::game.GetClientStatus(strategy.leader_name.c_str());
-		return leader_status;
+		auto leader_client = game::game.clients.Get(strategy.leader_name.c_str());
+		return const_cast<game::Client*>(leader_client);
 	}
 
 	int Troops::CreatePlatoon(decltype(condition) target_condition, decltype(condition) target_commander_condition) {

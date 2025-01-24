@@ -24,8 +24,8 @@ namespace pokebot {
 		}
 
 		bool Hostage::RecoginzeOwner(const std::string_view& Client_Name) POKEBOT_NOEXCEPT {
-			auto client_status = game.GetClientStatus(Client_Name);
-			if (common::Distance(client_status.origin(), entity->v.origin) < 83.0f && client_status.GetTeam() == common::Team::CT) {
+			auto client = game.clients.Get(Client_Name.data());
+			if (client != nullptr && common::Distance(client->origin, entity->v.origin) < 83.0f && client->GetTeam() == common::Team::CT) {
 				if (owner_name.c_str() == Client_Name) {
 					owner_name.clear();
 				} else {
@@ -40,9 +40,9 @@ namespace pokebot {
 			if (owner_name.empty())
 				return;
 			
-			auto owner_status = game.GetClientStatus(owner_name.data());
-			const bool Is_Owner_Terrorist = owner_status.GetTeam() == common::Team::T;
-			if (IsReleased() || owner_status.GetTeam() == common::Team::T || common::Distance(owner_status.origin(), entity->v.origin) > 200.0f)
+			auto owner = game.clients.Get(owner_name.data());
+			const bool Is_Owner_Terrorist = owner->GetTeam() == common::Team::T;
+			if (IsReleased() || owner->GetTeam() == common::Team::T || common::Distance(owner->origin, entity->v.origin) > 200.0f)
 				owner_name.clear();
 		}
 
@@ -148,7 +148,7 @@ namespace pokebot {
 
 		void Game::PostUpdate() {
 			for (const auto& client : clients.GetAll()) {
-				if (clients.GetClientStatus(client.first.data()).IsFakeClient()) {
+				if (client.second.IsFakeClient()) {
 					const_cast<edict_t*>(static_cast<const edict_t*>(client.second))->v.button = 0;
 				}
 			}
@@ -185,29 +185,6 @@ namespace pokebot {
 			}
 
 			RegisterCvars();
-		}
-		
-		void Game::RunPlayerMove(const std::string_view& Client_Name, Vector movement_angle, float move_speed, float strafe_speed, float forward_speed, const std::uint8_t Msec_Value, const ClientCommitter& committer) {
-			auto client = game::game.clients.GetAsMutable(Client_Name.data());
-			client->PressKey(committer.button);
-			client->angles = committer.angles;
-			client->v_angle= committer.v_angle;
-			client->idealpitch = committer.idealpitch;
-			client->ideal_yaw = committer.idealyaw;
-
-			common::fixed_string<255u> a{};
-			a += "";
-
-			client->flags |= common::Third_Party_Bot_Flag;
-			g_engfuncs.pfnRunPlayerMove(client->Edict(),
-					movement_angle,
-					move_speed,
-					strafe_speed,
-					0.0f,
-					client->button,
-					client->impulse,
-					Msec_Value);
-			client->Edict()->v.button = 0;
 		}
 		
 		bool Game::Kill(const std::string_view& Client_Name) {
@@ -279,9 +256,9 @@ namespace pokebot {
 			bot_args.clear();
 		}
 
-		bool ClientStatus::HasHostages() const POKEBOT_NOEXCEPT {
+		bool Client::HasHostages() const POKEBOT_NOEXCEPT {
 			for (int i = 0; i < game::game.GetHostageNumber(); i++) {
-				if (game::game.IsHostageOwnedBy(i, client->Name())) {
+				if (game::game.IsHostageOwnedBy(i, Name())) {
 					return true;
 				}
 			}
@@ -310,42 +287,6 @@ namespace pokebot {
 #endif
 				}
 			}
-		}
-
-		
-		void ClientCommitter::SetFakeClientFlag() {
-			flags |= common::Third_Party_Bot_Flag;
-		}
-
-		void ClientCommitter::AddCommand(const std::string_view& Command_Sentence) {
-			commands.push_back(Command_Sentence.data());
-		}
-
-		void ClientCommitter::TurnViewAngle(common::AngleVector v) {
-			v_angle = v;
-			v_angle.z = 0.0f;
-			angles.x = v_angle.x / 3;
-			angles.y = v_angle.y;
-			v_angle.x = -v_angle.x;
-			angles.z = 0;
-			
-			idealyaw = v.y;
-			if (idealyaw > 180.0f) {
-				idealyaw -= 360.0f;
-			} else if (idealyaw < -180.0f) {
-				idealyaw += 360.0f;
-			}
-			
-			idealpitch = v.x;
-			if (idealpitch > 180.0f) {
-				idealpitch-= 360.0f;
-			} else if (idealpitch < -180.0f) {
-				idealpitch += 360.0f;
-			}
-		}
-
-		void ClientCommitter::PressKey(int key) {
-			button |= key;
 		}
 
 		void ClientManager::OnNewRound() {
@@ -466,39 +407,29 @@ namespace pokebot {
 			GetAsMutable(Client_Name.data())->item |= Item::Defuse_Kit;
 		}
 
-		ClientStatus ClientManager::GetClientStatus(const std::string_view& client_name) {
-			return ClientStatus{ client_name.data() };
-		}
-
-		ClientStatus::ClientStatus(const common::PlayerName& Client_Name) : client(game.clients.Get(Client_Name.data())) {}
-
-		common::Team ClientStatus::GetTeam() const POKEBOT_NOEXCEPT {
-			return client->GetTeam();
-		}
-
-		bool ClientStatus::CanSeeFriend() const POKEBOT_NOEXCEPT {
+		bool Client::CanSeeFriend() const POKEBOT_NOEXCEPT {
 			for (auto& other : game.clients.GetAll()) {
-				if (entity::CanSeeEntity(client->Edict(), other.second) && other.second.GetTeam() == GetTeam()) {
+				if (entity::CanSeeEntity(*this, other.second) && other.second.GetTeam() == GetTeam()) {
 					return true;
 				}
 			}
 			return false;
 		}
 
-		std::vector<common::PlayerName> ClientStatus::GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT {
+		std::vector<common::PlayerName> Client::GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT {
 			decltype(GetEnemyNamesWithinView()) result{};
 			for (const auto& other : game.clients.GetAll()) {
-				if (entity::CanSeeEntity(*client, other.second) && other.second.GetTeam() != common::Team::Spector && !other.second.IsDead() && other.second.GetTeam() != GetTeam()) {
+				if (entity::CanSeeEntity(*this, other.second) && other.second.GetTeam() != common::Team::Spector && !other.second.IsDead() && other.second.GetTeam() != GetTeam()) {
 					result.push_back(other.first.data());
 				}
 			}
 			return result;
 		}
 
-		std::vector<common::PlayerName> ClientStatus::GetEntityNamesInView() const POKEBOT_NOEXCEPT {
+		std::vector<common::PlayerName> Client::GetEntityNamesInView() const POKEBOT_NOEXCEPT {
 			decltype(GetEntityNamesInView()) result{};
 			for (auto& other : game.clients.GetAll()) {
-				if (entity::CanSeeEntity(*client, other.second)) {
+				if (entity::CanSeeEntity(*this, other.second)) {
 					result.push_back(other.first.data());
 				}
 			}
@@ -506,11 +437,11 @@ namespace pokebot {
 		}
 
 		
-		common::Team ClientStatus::GetTeamFromModel() const POKEBOT_NOEXCEPT {
-			return common::GetTeamFromModel(*client);
+		common::Team Client::GetTeamFromModel() const POKEBOT_NOEXCEPT {
+			return common::GetTeamFromModel(client);
 		}
 
-		bool ClientStatus::IsPlayerModelReloading() const POKEBOT_NOEXCEPT {
+		bool Client::IsPlayerModelReloading() const POKEBOT_NOEXCEPT {
 			// The value of entvars_t::sequence.
 			// sequence has two values. The value changes depending on whether the player is standing or not.
 			// 
@@ -550,12 +481,12 @@ namespace pokebot {
 			};
 
 			const bool Is_Model_Reloading = 
-				client->Edict()->v.sequence == sequence[static_cast<int>(client->CurrentWeapon()) - 1][0] || 
-				client->Edict()->v.sequence == sequence[static_cast<int>(client->CurrentWeapon()) - 1][1];
+				this->sequence == sequence[static_cast<int>(CurrentWeapon()) - 1][0] || 
+				this->sequence == sequence[static_cast<int>(CurrentWeapon()) - 1][1];
 			return (Is_Model_Reloading);
 		}
 
-		bool ClientStatus::IsViewModelReloading() const POKEBOT_NOEXCEPT {
+		bool Client::IsViewModelReloading() const POKEBOT_NOEXCEPT {
 			// The value of entvars_t::weapon_anim.
 			// weaponanim has two values, weapons with different animation values ​​are as follows:
 			//	1. Glock(This is the only weapon the reload animation changes randomly).
@@ -598,15 +529,12 @@ namespace pokebot {
 			};
 
 			const bool Is_View_Reloading =
-				client->Edict()->v.weaponanim == weaponanim[static_cast<int>(client->CurrentWeapon()) - 1][0] ||
-				client->Edict()->v.weaponanim == weaponanim[static_cast<int>(client->CurrentWeapon()) - 1][1];
+				this->weaponanim == weaponanim[static_cast<int>(CurrentWeapon()) - 1][0] ||
+				this->weaponanim == weaponanim[static_cast<int>(CurrentWeapon()) - 1][1];
 
 			return (Is_View_Reloading);
 		}
 
-		bool ClientStatus::IsFakeClient() const POKEBOT_NOEXCEPT {
-			return bool(client->Edict()->v.flags & common::Third_Party_Bot_Flag);
-		}
 
 	}
 

@@ -80,9 +80,9 @@ namespace pokebot::bot {
 	}
 
 	void Manager::OnRadioRecieved(const std::string_view& Sender_Name, const std::string_view& Radio_Sentence) POKEBOT_NOEXCEPT {
-		auto Leader_Status = game::game.GetClientStatus(Sender_Name);
+		const auto Leader_Client = game::game.clients.Get(Sender_Name.data());
 
-		radio_message.team = Leader_Status.GetTeam();
+		radio_message.team = Leader_Client->GetTeam();
 		radio_message.sender = Sender_Name.data();
 		radio_message.message = Radio_Sentence.data();
 
@@ -90,7 +90,7 @@ namespace pokebot::bot {
 
 		auto createLeaderPlatoon = [&]() -> PlatoonID {
 			return troop.CreatePlatoon(
-				[&](const BotPair& Pair) { return common::Distance(Pair.second.Origin(), Leader_Status.origin()) <= 1000.0f; },
+				[&](const BotPair& Pair) { return common::Distance(Pair.second.Origin(), Leader_Client->origin) <= 1000.0f; },
 				[&](const BotPair& Pair) { return Pair.first == radio_message.sender; }
 			);
 		};
@@ -211,12 +211,12 @@ namespace pokebot::bot {
 		}
 	}
 
-	std::optional<game::ClientStatus> Manager::GetLeaderStatus(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT {
+	game::Client* Manager::GetLeader(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT {
 		auto& troop = troops[static_cast<int>(Target_Team) - 1];
 		if (!Index.has_value()) {
-			return troop.LeaderStatus();
+			return troop.GetLeader();
 		} else {
-			return troop.at(*Index).LeaderStatus();
+			return troop.at(*Index).GetLeader();
 		}
 	}
 

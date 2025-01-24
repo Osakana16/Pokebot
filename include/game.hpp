@@ -252,26 +252,9 @@ namespace pokebot {
 				sequence(client->v.sequence),
 				button(client->v.button),
 				impulse(client->v.impulse),
+				weaponanim(client->v.weaponanim),
 				index(ENTINDEX(const_cast<edict_t*>(e)))
             {}
-
-			edict_t* Edict() POKEBOT_NOEXCEPT { return client; }
-			const edict_t* Edict() const POKEBOT_NOEXCEPT { return client; }
-			operator edict_t* () POKEBOT_NOEXCEPT { return Edict(); }
-			operator const edict_t* () const POKEBOT_NOEXCEPT { return client; }
-
-			const char* ClassName() const POKEBOT_NOEXCEPT { return STRING(client->v.classname); }
-			std::string_view Name() const POKEBOT_NOEXCEPT { return STRING(client->v.netname); }
-			void PressKey(const int Key) POKEBOT_NOEXCEPT { client->v.button |= Key; }
-			common::Team GetTeam() const POKEBOT_NOEXCEPT { return common::GetTeamFromModel(client); }
-
-			bool IsValid() const POKEBOT_NOEXCEPT { return IsValid(client); }
-			bool IsDead() const POKEBOT_NOEXCEPT { return IsDead(client); }
-
-
-			bool IsVIP() const POKEBOT_NOEXCEPT { return is_vip; }
-
-			int WeaponAmmo(const AmmoID Ammo_ID) const POKEBOT_NOEXCEPT { return weapon_ammo[static_cast<int>(Ammo_ID) - 1]; }
 
 			const int& index;
 			const float& health;
@@ -293,139 +276,79 @@ namespace pokebot {
 			int& flags;
 			int& movetype;
 			int& weapons;
+			int& weaponanim;
 			int& sequence;
 			const Vector& velocity;
 
 			StatusIcon DisplayingStatusIcon() const POKEBOT_NOEXCEPT { return status_icon; }
 			Weapon CurrentWeapon() const POKEBOT_NOEXCEPT { return current_weapon; }
 			int CurrentWeaponClip() const POKEBOT_NOEXCEPT { return weapon_clip; }
-		};
 
-		// The status in the game
-		class ClientStatus {
-			const Client* client;
-		public:
-			ClientStatus(const common::PlayerName&);
+			edict_t* Edict() POKEBOT_NOEXCEPT { return client; }
+			const edict_t* Edict() const POKEBOT_NOEXCEPT { return client; }
+			operator edict_t* () POKEBOT_NOEXCEPT { return Edict(); }
+			operator const edict_t* () const POKEBOT_NOEXCEPT { return client; }
 
-			common::Team GetTeam() const POKEBOT_NOEXCEPT;
-			bool CanSeeFriend() const POKEBOT_NOEXCEPT;
-			std::vector<common::PlayerName> GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT;
-			std::vector<common::PlayerName> GetEntityNamesInView() const POKEBOT_NOEXCEPT;
-			common::Team GetTeamFromModel() const POKEBOT_NOEXCEPT;
-						
-			/**
-			* @brief Check the p_model animation is reloading.
-			* @return True if player is reloading, false if the player is not reloading or is swimming.
-			*/
-			bool IsPlayerModelReloading() const POKEBOT_NOEXCEPT;
+			const char* const ClassName() const POKEBOT_NOEXCEPT { return STRING(client->v.classname); }
+			const char* const Name() const POKEBOT_NOEXCEPT { return STRING(client->v.netname); }
+			void PressKey(const int Key) POKEBOT_NOEXCEPT { client->v.button |= Key; }
+			common::Team GetTeam() const POKEBOT_NOEXCEPT { return common::GetTeamFromModel(client); }
 
-			/**
-			* @brief Check the v_model animation is reloading.
-			* @return True if player is reloading, false if the player is not reloading.
-			* @remarks This function does not work correctly if the player keeps holding a
-			*/
-			bool IsViewModelReloading() const POKEBOT_NOEXCEPT;
+			bool IsValid() const POKEBOT_NOEXCEPT { return IsValid(client); }
+			bool IsDead() const POKEBOT_NOEXCEPT { return IsDead(client); }
 
-			/**
-			* @brief Check the client is a fakeclient.
-			*/
-			bool IsFakeClient() const POKEBOT_NOEXCEPT;
-			auto Button() const { return client->button; }
-			auto Impulse() const { return client->impulse; }
-			
+			bool IsVIP() const POKEBOT_NOEXCEPT { return is_vip; }
+			int WeaponAmmo(const AmmoID Ammo_ID) const POKEBOT_NOEXCEPT { return weapon_ammo[static_cast<int>(Ammo_ID) - 1]; }
+
+			bool IsInBuyzone() const POKEBOT_NOEXCEPT { return bool(DisplayingStatusIcon() & StatusIcon::Buy_Zone); }
+			bool IsInEscapezone() const POKEBOT_NOEXCEPT { return bool(DisplayingStatusIcon() & StatusIcon::Escape_Zone); }
+			bool IsInRescuezone() const POKEBOT_NOEXCEPT { return bool(DisplayingStatusIcon() & StatusIcon::Rescue_Zone); }
+			bool IsInVipSafety() const POKEBOT_NOEXCEPT { return bool(DisplayingStatusIcon() & StatusIcon::Vip_Safety); }
+			bool HasDefuser() const POKEBOT_NOEXCEPT { return bool(DisplayingStatusIcon() & StatusIcon::Defuser); }
+
+			bool IsWalking() const noexcept { return bool(velocity.Length2D() <= 150.0f); }
+			bool IsDucking() const POKEBOT_NOEXCEPT { return bool(button & IN_DUCK); }
+			bool IsInWater() const POKEBOT_NOEXCEPT { return bool(flags & FL_INWATER); }
+			bool IsOnFloor() const POKEBOT_NOEXCEPT { return bool(flags & (FL_ONGROUND | FL_PARTIALGROUND)) != 0; }
+			bool IsOnTrain() const POKEBOT_NOEXCEPT { return bool(flags & FL_ONTRAIN); }
+			bool IsFiring() const POKEBOT_NOEXCEPT { return bool(button & IN_ATTACK); }
+			bool IsReadyToThrowGrenade() const POKEBOT_NOEXCEPT { return IsFiring() && bool(weapons & Grenade_Bit); }
+			bool IsPlantingBomb() const POKEBOT_NOEXCEPT { return IsFiring() && bool(weapons & C4_Bit) && (sequence == 63 || sequence == 61); }
+			bool IsClimblingLadder() const POKEBOT_NOEXCEPT { return (movetype & MOVETYPE_FLY); }
+
 			bool HasHostages() const POKEBOT_NOEXCEPT;
-			bool IsVIP() const POKEBOT_NOEXCEPT { return client->IsVIP(); }
-			bool IsDead() const POKEBOT_NOEXCEPT { return client->IsDead(); }
-			
-			bool HasWeapon(const Weapon Weapon_ID) const POKEBOT_NOEXCEPT { return bool(client->Edict()->v.weapons & common::ToBit<int>(Weapon_ID)); }
-			bool HasPrimaryWeapon() const POKEBOT_NOEXCEPT { return client->Edict()->v.weapons & game::Primary_Weapon_Bit; }
-			bool HasSecondaryWeapon() const POKEBOT_NOEXCEPT { return client->Edict()->v.weapons & game::Secondary_Weapon_Bit; }
+			bool HasWeapon(const Weapon Weapon_ID) const POKEBOT_NOEXCEPT { return bool(weapons & common::ToBit<int>(Weapon_ID)); }
+			bool HasPrimaryWeapon() const POKEBOT_NOEXCEPT { return weapons & game::Primary_Weapon_Bit; }
+			bool HasSecondaryWeapon() const POKEBOT_NOEXCEPT { return weapons & game::Secondary_Weapon_Bit; }
 
 			/**
 			* @brief Check the clip of current weapon remains or not
 			* @return 
 			*/
-			bool IsOutOfClip() const POKEBOT_NOEXCEPT { return (Weapon_Type[static_cast<int>(client->CurrentWeapon())] == WeaponType::Primary || Weapon_Type[static_cast<int>(client->CurrentWeapon())] == WeaponType::Secondary) && client->CurrentWeaponClip() <= 0; }
-			bool IsOutOfAmmo(const AmmoID Ammo_ID) const POKEBOT_NOEXCEPT { return client->WeaponAmmo(Ammo_ID) <= 0; }
+			bool IsOutOfClip() const POKEBOT_NOEXCEPT { return (Weapon_Type[static_cast<int>(CurrentWeapon())] == WeaponType::Primary || Weapon_Type[static_cast<int>(CurrentWeapon())] == WeaponType::Secondary) && CurrentWeaponClip() <= 0; }
+			bool IsOutOfAmmo(const AmmoID Ammo_ID) const POKEBOT_NOEXCEPT { return WeaponAmmo(Ammo_ID) <= 0; }
 			bool IsOutOfCurrentWeaponAmmo() const POKEBOT_NOEXCEPT { 
 				return 
-					(Weapon_Type[static_cast<int>(client->CurrentWeapon())] == WeaponType::Primary || 
-					 Weapon_Type[static_cast<int>(client->CurrentWeapon())] == WeaponType::Secondary) && 
-					IsOutOfAmmo(std::get<AmmoID>(Weapon_CVT[static_cast<int>(client->CurrentWeapon()) - 1])); 
+					(Weapon_Type[static_cast<int>(CurrentWeapon())] == WeaponType::Primary || 
+					 Weapon_Type[static_cast<int>(CurrentWeapon())] == WeaponType::Secondary) && 
+					IsOutOfAmmo(std::get<AmmoID>(Weapon_CVT[static_cast<int>(CurrentWeapon()) - 1])); 
 			}
 
-			bool IsInBuyzone() const POKEBOT_NOEXCEPT { return bool(client->DisplayingStatusIcon() & StatusIcon::Buy_Zone); }
-			bool IsInEscapezone() const POKEBOT_NOEXCEPT { return bool(client->DisplayingStatusIcon() & StatusIcon::Escape_Zone); }
-			bool IsInRescuezone() const POKEBOT_NOEXCEPT { return bool(client->DisplayingStatusIcon() & StatusIcon::Rescue_Zone); }
-			bool IsInVipSafety() const POKEBOT_NOEXCEPT { return bool(client->DisplayingStatusIcon() & StatusIcon::Vip_Safety); }
-			bool HasDefuser() const POKEBOT_NOEXCEPT { return bool(client->DisplayingStatusIcon() & StatusIcon::Defuser); }
+			bool IsViewModelReloading() const POKEBOT_NOEXCEPT;
+			bool IsPlayerModelReloading() const POKEBOT_NOEXCEPT;
 
-			bool IsWalking() const noexcept { return bool(client->velocity.Length2D() <= 150.0f); }
-			bool IsDucking() const POKEBOT_NOEXCEPT { return bool(client->button & IN_DUCK); }
-			bool IsInWater() const POKEBOT_NOEXCEPT { return bool(client->flags & FL_INWATER); }
-			bool IsOnFloor() const POKEBOT_NOEXCEPT { return bool(client->flags & (FL_ONGROUND | FL_PARTIALGROUND)) != 0; }
-			bool IsOnTrain() const POKEBOT_NOEXCEPT { return bool(client->flags & FL_ONTRAIN); }
-			bool IsFiring() const POKEBOT_NOEXCEPT { return bool(client->button & IN_ATTACK); }
-			bool IsReadyToThrowGrenade() const POKEBOT_NOEXCEPT { return IsFiring() && bool(client->weapons & Grenade_Bit); }
-			bool IsPlantingBomb() const POKEBOT_NOEXCEPT { return IsFiring() && bool(client->weapons & C4_Bit) && (client->sequence == 63 || client->sequence == 61); }
-			bool IsClimblingLadder() const POKEBOT_NOEXCEPT { return (client->movetype & MOVETYPE_FLY); }
+			bool CanSeeFriend() const POKEBOT_NOEXCEPT;
+			std::vector<common::PlayerName> GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT;
+			std::vector<common::PlayerName> GetEntityNamesInView() const POKEBOT_NOEXCEPT;
+			common::Team GetTeamFromModel() const POKEBOT_NOEXCEPT;
 
-			const float& Health() const { return client->health; }
-			const float& Armor() const { return client->armor; }
-			const float& MaxHealth() const { return client->max_health; }
-			const float& Speed() const { return client->speed; }
-			const int& Money() const { return client->Money; }
-
-			const Vector& velocity() const { return client->velocity; }
-			const Vector& view_ofs() const { return client->view_ofs; }
-			const Vector& origin() const { return client->origin; }
-			const Vector& angles() const { return client->angles; }
-			const Vector& avelocity() const { return client->avelocity; }
-			const Vector& punchangle() const { return client->punchangle; }
-			const Vector& v_angle() const { return client->v_angle; }
-			float ideal_yaw() const { return client->ideal_yaw; }
-			float idealpitch() const { return client->idealpitch; }
-			int flags() const { return client->flags; }
-			int movetype() const { return client->movetype; }
-			int weapons() const { return client->weapons; }
-			int sequence() const { return client->sequence; }
-			StatusIcon DisplayingStatusIcon() const POKEBOT_NOEXCEPT { return client->DisplayingStatusIcon(); }
-			Weapon CurrentWeapon() const POKEBOT_NOEXCEPT { return client->CurrentWeapon(); }
-			int CurrentWeaponClip() const POKEBOT_NOEXCEPT { return client->CurrentWeaponClip(); }
+			bool IsFakeClient() const POKEBOT_NOEXCEPT { return bool(flags & common::Third_Party_Bot_Flag); }
 		};
-		
-		/**
-		* 
-		*/
-		class ClientCommitter {
-			friend class Game;
-			std::vector<common::fixed_string<100u>> commands{};
-			int flags{};
-			int button{};
-
-			Vector v_angle, angles;
-			float idealpitch, idealyaw;
-		public:
-			/**
-			* @brief Set the fake client flag for client.
-			*/
-			void SetFakeClientFlag();
-			void AddCommand(const std::string_view& Command_Sentence);
-			void TurnViewAngle(common::AngleVector);
-			void PressKey(int);
-			void Clear() {
-				v_angle = angles = Vector();
-				flags = button = idealpitch = idealyaw = 0;
-				commands.clear();
-			}
-		};
-
 
 		class ClientManager {
 			std::unordered_map<common::PlayerName, Client, common::PlayerName::Hash> clients{};
 		public:
 			void OnNewRound();
-			ClientStatus GetClientStatus(const std::string_view&  client_name);
 			ClientCreationResult Create(std::string_view client_name);
 			bool Register(edict_t*);
 			auto& GetAll() const POKEBOT_NOEXCEPT {
@@ -516,7 +439,6 @@ namespace pokebot {
 		};
 
 		inline class Game {
-			friend class ClientStatus;
 			database::Database database{};
 			std::vector<Hostage> hostages{};
 
@@ -526,16 +448,14 @@ namespace pokebot {
 			bool is_newround{};
 
 			std::vector<ConVarReg> convars{};
-			ClientManager clients{};
 		public:
-			void RunPlayerMove(const std::string_view&, Vector movement_angle, float move_speed, float strafe_speed, float forward_speed, const std::uint8_t, const ClientCommitter&);
+			ClientManager clients{};
 
 			bool Kill(const std::string_view&);
 
 			ClientCreationResult Spawn(const std::string_view& client_name) { return clients.Create(client_name.data()); }
 			bool RegisterClient(edict_t* client) { return clients.Register(client); }
 
-			auto GetClientStatus(std::string_view client_name) { return clients.GetClientStatus(client_name); }
 			Host host{};
 
 			size_t GetHostageNumber() const POKEBOT_NOEXCEPT;

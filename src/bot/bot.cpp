@@ -10,19 +10,30 @@ namespace pokebot::bot {
 
 		const std::uint8_t Msec_Value = ComputeMsec();
 		last_command_time = gpGlobals->time;
-		game::game.RunPlayerMove(Name().data(), movement_angle, move_speed, strafe_speed, 0.0f, Msec_Value, committer);
-		committer.Clear();
+
+		game::Client* client = const_cast<game::Client*>(game::game.clients.Get(Name().data()));
+		client->flags |= common::Third_Party_Bot_Flag;
+		g_engfuncs.pfnRunPlayerMove(client->Edict(),
+				movement_angle,
+				move_speed,
+				strafe_speed,
+				0.0f,
+				client->button,
+				client->impulse,
+				Msec_Value);
+		client->Edict()->v.button = 0;
 		move_speed = 0;
 	}
 
 	void Bot::TurnViewAngle() {
-		auto client_status = game::game.GetClientStatus(Name().data());
+		auto client = game::game.clients.Get(Name().data());
+		assert(client != nullptr);
 		auto destination = look_direction.view->ToAngleVector(Origin());
 		if (destination.x > 180.0f) {
 			destination.x -= 360.0f;
 		}
 
-		auto v_angle = client_status.v_angle();
+		auto v_angle = client->v_angle;
 		v_angle.x = destination.x;
 
 		if (std::abs(destination.y - v_angle.y) <= 1.0f) {
@@ -48,7 +59,25 @@ namespace pokebot::bot {
 			v_angle.y = AngleClamp(v_angle.y, destination.y);
 		}
 		v_angle.z = 0.0f;
-		committer.TurnViewAngle(v_angle);
+		client->v_angle = v_angle;
+		client->angles.x = client->v_angle.x / 3;
+		client->angles.y = client->v_angle.y;
+		client->v_angle.x = -client->v_angle.x;
+		client->angles.z = 0;
+			
+		client->ideal_yaw = client->v_angle.y;
+		if (client->ideal_yaw > 180.0f) {
+			client->ideal_yaw -= 360.0f;
+		} else if (client->ideal_yaw < -180.0f) {
+			client->ideal_yaw += 360.0f;
+		}
+			
+		client->idealpitch = client->v_angle.x;
+		if (client->idealpitch > 180.0f) {
+			client->idealpitch-= 360.0f;
+		} else if (client->idealpitch < -180.0f) {
+			client->idealpitch += 360.0f;
+		}
 	}
 
 	void Bot::TurnMovementAngle() {
@@ -77,9 +106,10 @@ namespace pokebot::bot {
 	}
 
 	void Bot::NormalUpdate() POKEBOT_NOEXCEPT {
-		auto client_status = game::game.GetClientStatus(Name().data());
+		auto client = game::game.clients.Get(Name().data());
+		assert(client != nullptr);
 		assert(JoinedTeam() != common::Team::Spector && JoinedTeam() != common::Team::Random);
-		if (client_status.IsDead()) {
+		if (client->IsDead()) {
 			return;
 		}
 
@@ -120,7 +150,6 @@ namespace pokebot::bot {
 			}
 			look_direction.Clear();
 
-			auto client_status = game::game.GetClientStatus(Name().data());
 			if (bool(press_key & ActionKey::Run)) {
 				if (bool(press_key & ActionKey::Shift)) {
 					press_key &= ~ActionKey::Shift;
@@ -155,7 +184,7 @@ namespace pokebot::bot {
 			}
 
 			if (bool(press_key & ActionKey::Jump)) {
-				if (!client_status.IsOnFloor()) {
+				if (!client->IsOnFloor()) {
 					return;
 				}
 			}
@@ -164,7 +193,7 @@ namespace pokebot::bot {
 
 			}
 
-			committer.PressKey(static_cast<int>(press_key));
+			client->button |= static_cast<int>(press_key);
 			press_key = ActionKey::None;
 		}
 	}
@@ -204,8 +233,8 @@ namespace pokebot::bot {
 			},
 			// Hostage Rescue
 			[&] {
-				auto client_status = game::game.GetClientStatus(Name().data());
-				if (!client_status.HasHostages()) {
+				auto client = game::game.clients.Get(Name().data());
+				if (!client->HasHostages()) {
 					behavior::rescue::ct_try->Evaluate(this);
 				} else {
 					behavior::rescue::ct_leave->Evaluate(this);
@@ -213,8 +242,8 @@ namespace pokebot::bot {
 			},
 			// Assasination
 			[&] {
-				auto client_status = game::game.GetClientStatus(Name().data());
-				if (client_status.IsVIP()) {
+				auto client = game::game.clients.Get(Name().data());
+				if (client->IsVIP()) {
 					behavior::assist::ct_vip_escape->Evaluate(this);
 				} else {
 
@@ -245,8 +274,8 @@ namespace pokebot::bot {
 			},
 			// Hostage Rescue
 			[&] {
-				auto client_status = game::game.GetClientStatus(Name().data());
-				if (!client_status.HasHostages()) {
+				auto client = game::game.clients.Get(Name().data());
+				if (!client->HasHostages()) {
 					behavior::rescue::ct_try->Evaluate(this);
 				} else {
 					behavior::rescue::ct_leave->Evaluate(this);
@@ -254,8 +283,8 @@ namespace pokebot::bot {
 			},
 			// Assasination
 			[&] {
-				auto client_status = game::game.GetClientStatus(Name().data());
-				if (client_status.IsVIP()) {
+				auto client = game::game.clients.Get(Name().data());
+				if (client->IsVIP()) {
 					behavior::assist::ct_vip_escape->Evaluate(this);
 				} else {
 
@@ -271,7 +300,7 @@ namespace pokebot::bot {
 	}
 
 	void Bot::Combat() POKEBOT_NOEXCEPT {
-		auto client_status = game::game.GetClientStatus(Name().data());
+		auto client = game::game.clients.Get(Name().data());
 		assert(!target_enemies.empty() && "The bot has no enemies despite being in combat mode.");
 		/*
 			Choose to fight or to flee.
@@ -282,13 +311,13 @@ namespace pokebot::bot {
 		constexpr int Max_Armor = 100;
 		constexpr int Base_Fearless = Max_Health / 2 + Max_Armor / 5;
 
-		auto enemy_status = game::game.GetClientStatus(target_enemies.front().c_str());
-		const bool Enemy_Has_Primary = enemy_status.HasPrimaryWeapon();
-		const bool Enemy_Has_Secondary = enemy_status.HasSecondaryWeapon();
+		auto enemy_client = game::game.clients.Get(target_enemies.front().c_str());
+		const bool Enemy_Has_Primary = enemy_client->HasPrimaryWeapon();
+		const bool Enemy_Has_Secondary = enemy_client->HasSecondaryWeapon();
 
 		int fighting_spirit = Max_Health + Max_Armor + (HasPrimaryWeapon() ? 50 : 0) + (HasSecondaryWeapon() ? 50 : 0);
 		if (!HasPrimaryWeapon() && !HasSecondaryWeapon() ||
-			(client_status.IsOutOfClip() && client_status.IsOutOfCurrentWeaponAmmo())) {
+			(enemy_client->IsOutOfClip() && enemy_client->IsOutOfCurrentWeaponAmmo())) {
 			// If I have no guns.
 			if (Enemy_Has_Primary || Enemy_Has_Secondary) {
 				// The enemy has weapon so I should flee.
@@ -297,13 +326,13 @@ namespace pokebot::bot {
 				// This is the good chance to beat enemies.
 			}
 		} else {
-			if (IsReloading() || client_status.IsOutOfClip()) {
+			if (IsReloading() || enemy_client->IsOutOfClip()) {
 				// I'm reloading so I have to flee.
 				fighting_spirit = std::numeric_limits<decltype(fighting_spirit)>::min();
 			} else {
 				// If I have guns.
 				fighting_spirit -= (Max_Health - Health());
-				fighting_spirit -= (Max_Armor - client_status.Armor());
+				fighting_spirit -= (Max_Armor - enemy_client->armor);
 				// fighting_spirit -= (Enemy_Has_Primary ? 25 : 0);
 				// fighting_spirit -= (Enemy_Has_Secondary ? 25 : 0);
 			}
@@ -316,9 +345,9 @@ namespace pokebot::bot {
 	}
 
 	void Bot::Follow() POKEBOT_NOEXCEPT {
-		const auto Leader_Status = Manager::Instance().GetLeaderStatus(JoinedTeam(), JoinedPlatoon());
-		assert(Leader_Status.has_value());
-		const auto Leader_Origin = Leader_Status->origin();
+		const auto Leader_Client = Manager::Instance().GetLeader(JoinedTeam(), JoinedPlatoon());
+		assert(Leader_Client != nullptr);
+		const auto Leader_Origin = Leader_Client->origin;
 		if (const auto Leader_Area = node::czworld.GetNearest(Leader_Origin); Leader_Area != nullptr) {
 			if (goal_node == node::Invalid_NodeID) {
 				goal_node = Leader_Area->m_id;
@@ -355,9 +384,9 @@ namespace pokebot::bot {
 			const auto Ditance_To_Leader = common::Distance(Origin(), Leader_Origin);
 			if (Ditance_To_Leader <= 275.0f) {
 				if (Ditance_To_Leader >= 75.0f) {
-					if (Leader_Status->IsDucking()) {
+					if (Leader_Client->IsDucking()) {
 						PressKey(ActionKey::Duck);
-					} else if (Leader_Status->IsWalking()) {
+					} else if (Leader_Client->IsWalking()) {
 						PressKey(ActionKey::Run | ActionKey::Shift);
 					} else {
 						PressKey(ActionKey::Run);
@@ -373,7 +402,7 @@ namespace pokebot::bot {
 	std::map<float, int> SortedDistances(const Vector& Base, const Array& list) {
 		std::map<float, int> result{};
 		for (int i = 0; i < list.size(); i++) {
-			result[common::Distance(Base, game::game.GetClientStatus(list[i].c_str()).origin())] = i;
+			result[common::Distance(Base, game::game.clients.Get(list[i].c_str())->origin)] = i;
 		}
 		return result;
 	}
@@ -402,10 +431,10 @@ namespace pokebot::bot {
 		TurnMovementAngle();
 #if 1
 		if (game::poke_fight) {
-			auto status = game::game.GetClientStatus(Name().data());
+			auto client = game::game.clients.Get(Name().data());
 			common::PlayerName enemies_in_view[32]{};
 			int i{};
-			for (const auto& target : status.GetEnemyNamesWithinView()) {
+			for (const auto& target : client->GetEnemyNamesWithinView()) {
 				enemies_in_view[i++] = target;
 			}
 
@@ -435,8 +464,8 @@ namespace pokebot::bot {
 	}
 
 	bool Bot::IsPressingKey(const ActionKey Key) const POKEBOT_NOEXCEPT {
-		auto client_status = game::game.GetClientStatus(Name().data());
-		return (client_status.Button() & static_cast<int>(Key));
+		auto client = game::game.clients.Get(Name().data());
+		return (client->button & static_cast<int>(Key));
 	}
 
 	void Bot::SelectionUpdate() POKEBOT_NOEXCEPT {
@@ -472,11 +501,11 @@ namespace pokebot::bot {
 	}
 
 	void Bot::SelectPrimaryWeapon() {
-		SelectWeapon(static_cast<game::Weapon>(std::log2(game::game.GetClientStatus(Name().data()).weapons() & game::Primary_Weapon_Bit)));
+		SelectWeapon(static_cast<game::Weapon>(std::log2(game::game.clients.Get(Name().data())->weapons & game::Primary_Weapon_Bit)));
 	}
 
 	void Bot::SelectSecondaryWeapon() {
-		SelectWeapon(static_cast<game::Weapon>(std::log2(game::game.GetClientStatus(Name().data()).weapons() & game::Secondary_Weapon_Bit)));
+		SelectWeapon(static_cast<game::Weapon>(std::log2(game::game.clients.Get(Name().data())->weapons & game::Secondary_Weapon_Bit)));
 	}
 
 	void Bot::LookAtClosestEnemy() {
@@ -484,8 +513,8 @@ namespace pokebot::bot {
 			return;
 		}
 		const auto Enemy_Distances = std::move(SortedDistances(Origin(), target_enemies));
-		const auto& Nearest_Enemy = game::game.GetClientStatus(target_enemies[Enemy_Distances.begin()->second].c_str());
-		look_direction.view = Nearest_Enemy.origin() - Vector(20.0f, 0, 0);
+		const auto& Nearest_Enemy = game::game.clients.Get(target_enemies[Enemy_Distances.begin()->second].c_str());
+		look_direction.view = Nearest_Enemy->origin - Vector(20.0f, 0, 0);
 	}
 
 	bool Bot::HasEnemy() const POKEBOT_NOEXCEPT {
@@ -498,8 +527,8 @@ namespace pokebot::bot {
 		}
 
 		const auto Enemy_Distances = std::move(SortedDistances(Origin(), target_enemies));
-		const auto& Nearest_Enemy = game::game.GetClientStatus(target_enemies[Enemy_Distances.begin()->second].c_str());
-		return IsLookingAt(Nearest_Enemy.origin(), 1.0f);
+		const auto& Nearest_Enemy = game::game.clients.Get(target_enemies[Enemy_Distances.begin()->second].c_str());
+		return IsLookingAt(Nearest_Enemy->origin, 1.0f);
 	}
 
 	bool Bot::IsEnemyFar() const POKEBOT_NOEXCEPT {
@@ -507,8 +536,8 @@ namespace pokebot::bot {
 			return false;
 		}
 		const auto Enemy_Distances = std::move(SortedDistances(Origin(), target_enemies));
-		const auto& Nearest_Enemy = game::game.GetClientStatus(target_enemies[Enemy_Distances.begin()->second].c_str());
-		return common::Distance(Origin(), Nearest_Enemy.origin()) > 1000.0f;
+		const auto& Nearest_Enemy = game::game.clients.Get(target_enemies[Enemy_Distances.begin()->second].c_str());
+		return common::Distance(Origin(), Nearest_Enemy->origin) > 1000.0f;
 	}
 
 	bool Bot::IsLookingAt(const Vector& Dest, const float Range) const POKEBOT_NOEXCEPT {
@@ -518,13 +547,12 @@ namespace pokebot::bot {
 		if (vecout[0] > 180.0f)
 			vecout[0] -= 360.0f;
 		vecout[0] = -vecout[0];
-		auto result = common::Distance2D(Vector(vecout), game::game.GetClientStatus(Name().data()).v_angle());
+		auto result = common::Distance2D(Vector(vecout), game::game.clients.Get(Name().data())->v_angle);
 		return (result <= Range);
 	}
 
 	std::vector<common::PlayerName> Bot::GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT {
-		const game::ClientStatus status{ Name().data() };
-		return status.GetEnemyNamesWithinView();
+		return game::game.clients.Get(Name().data())->GetEnemyNamesWithinView();
 	}
 
 	bool Bot::HasGoalToHead() const POKEBOT_NOEXCEPT {
@@ -532,28 +560,28 @@ namespace pokebot::bot {
 	}
 
 
-	bool Bot::IsInBuyzone() const POKEBOT_NOEXCEPT { return game::game.GetClientStatus(Name().data()).IsInBuyzone(); }
+	bool Bot::IsInBuyzone() const POKEBOT_NOEXCEPT { return game::game.clients.Get(Name().data())->IsInBuyzone(); }
 
 	const common::PlayerName& Bot::Name() const POKEBOT_NOEXCEPT { return name; }
 
 	Vector Bot::Origin() const POKEBOT_NOEXCEPT {
-		return game::game.GetClientStatus(Name().data()).origin();
+		return game::game.clients.Get(Name().data())->origin;
 	}
 
 	float Bot::Health() const POKEBOT_NOEXCEPT {
-		return game::game.GetClientStatus(Name().data()).Health();
+		return game::game.clients.Get(Name().data())->health;
 	}
 
-	bool Bot::HasPrimaryWeapon() const POKEBOT_NOEXCEPT { return (game::game.GetClientStatus(Name().data()).HasPrimaryWeapon()); }
-	bool Bot::HasSecondaryWeapon() const POKEBOT_NOEXCEPT { return (game::game.GetClientStatus(Name().data()).HasSecondaryWeapon()); }
-	bool Bot::HasWeapon(const game::Weapon Weapon_ID) const POKEBOT_NOEXCEPT { return game::game.GetClientStatus(Name().data()).HasWeapon(Weapon_ID); }
-	bool Bot::IsDucking() const POKEBOT_NOEXCEPT { return (game::game.GetClientStatus(Name().data()).IsDucking()); }
-	bool Bot::IsDriving() const POKEBOT_NOEXCEPT { return (game::game.GetClientStatus(Name().data()).IsOnTrain()); }
-	bool Bot::IsInWater() const POKEBOT_NOEXCEPT { return (game::game.GetClientStatus(Name().data()).IsInWater()); }
-	bool Bot::IsSwimming() const POKEBOT_NOEXCEPT { return (game::game.GetClientStatus(Name().data()).IsInWater()); }
-	bool Bot::IsOnFloor() const POKEBOT_NOEXCEPT { return (game::game.GetClientStatus(Name().data()).IsOnFloor()); }
-	bool Bot::IsClimbingLadder() const POKEBOT_NOEXCEPT { return game::game.GetClientStatus(Name().data()).IsClimblingLadder(); }
-	bool Bot::IsReloading() const POKEBOT_NOEXCEPT { return game::game.GetClientStatus(Name().data()).IsPlayerModelReloading(); }
+	bool Bot::HasPrimaryWeapon() const POKEBOT_NOEXCEPT { return (game::game.clients.Get(Name().data())->HasPrimaryWeapon()); }
+	bool Bot::HasSecondaryWeapon() const POKEBOT_NOEXCEPT { return (game::game.clients.Get(Name().data())->HasSecondaryWeapon()); }
+	bool Bot::HasWeapon(const game::Weapon Weapon_ID) const POKEBOT_NOEXCEPT { return game::game.clients.Get(Name().data())->HasWeapon(Weapon_ID); }
+	bool Bot::IsDucking() const POKEBOT_NOEXCEPT { return (game::game.clients.Get(Name().data())->IsDucking()); }
+	bool Bot::IsDriving() const POKEBOT_NOEXCEPT { return (game::game.clients.Get(Name().data())->IsOnTrain()); }
+	bool Bot::IsInWater() const POKEBOT_NOEXCEPT { return (game::game.clients.Get(Name().data())->IsInWater()); }
+	bool Bot::IsSwimming() const POKEBOT_NOEXCEPT { return (game::game.clients.Get(Name().data())->IsInWater()); }
+	bool Bot::IsOnFloor() const POKEBOT_NOEXCEPT { return (game::game.clients.Get(Name().data())->IsOnFloor()); }
+	bool Bot::IsClimbingLadder() const POKEBOT_NOEXCEPT { return game::game.clients.Get(Name().data())->IsClimblingLadder(); }
+	bool Bot::IsReloading() const POKEBOT_NOEXCEPT { return game::game.clients.Get(Name().data())->IsPlayerModelReloading(); }
 	bool Bot::IsPlantingBomb() const POKEBOT_NOEXCEPT { return false; }
 	bool Bot::IsChangingWeapon() const POKEBOT_NOEXCEPT { return false; }
 	bool Bot::IsFalling() const POKEBOT_NOEXCEPT { return false; }

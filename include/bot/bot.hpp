@@ -121,7 +121,6 @@ namespace pokebot::bot {
 			&Bot::OnSelectionCompleted 
 		};
 
-		game::ClientCommitter committer;
 		common::Time
 			frame_interval{},
 			last_command_time{};

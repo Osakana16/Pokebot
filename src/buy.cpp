@@ -8,9 +8,9 @@ namespace pokebot {
 				return;
 			}
 			
-			auto client = game::game.GetClientStatus(name.c_str());
-			if (client.IsInBuyzone() && !buy_wait_timer.IsRunning()) {
-				auto ai = buy::BuyAI(client.Money());
+			auto client = game::game.clients.Get(name.c_str());
+			if (client->IsInBuyzone() && !buy_wait_timer.IsRunning()) {
+				auto ai = buy::BuyAI(client->Money);
 				auto node = ai.GetPattern(0, 0);
 				for (auto data : node->data) {
 					if (data == nullptr)

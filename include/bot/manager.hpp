@@ -175,7 +175,7 @@ namespace pokebot::bot {
 		*/
 		node::NodeID GetGoalNode(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
 
-		std::optional<game::ClientStatus> GetLeaderStatus(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
+		game::Client* GetLeader(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
 		bool IsFollowerPlatoon(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
 
 		void AssertStrategy(const common::Team Target_Team, const PlatoonID Index, TroopsStrategy::Strategy strategy) {
