@@ -129,13 +129,13 @@ namespace pokebot {
 			
 			for (const auto& client : clients.GetAll()) {
 				Sound produced_sound{};
-				if (bool(client.second.Button() & IN_ATTACK)) {
+				if (bool(client.second.button & IN_ATTACK)) {
 					produced_sound = Sound{ .origin = Vector{}, .volume = 100 };
 				}
 
-				if (bool(client.second.Button() & IN_USE)) {
+				if (bool(client.second.button & IN_USE)) {
 					// Sound occurs.
-					produced_sound = Sound{ .origin = client.second.origin(), .volume = 50 };
+					produced_sound = Sound{ .origin = client.second.origin, .volume = 50 };
 					// Recoginze the player as a owner.
 					for (auto& hostage : hostages) {
 						if (hostage.RecoginzeOwner(client.first.data())) {
@@ -190,22 +190,22 @@ namespace pokebot {
 		void Game::RunPlayerMove(const std::string_view& Client_Name, Vector movement_angle, float move_speed, float strafe_speed, float forward_speed, const std::uint8_t Msec_Value, const ClientCommitter& committer) {
 			auto client = game::game.clients.GetAsMutable(Client_Name.data());
 			client->PressKey(committer.button);
-			client->angles() = committer.angles;
-			client->v_angle() = committer.v_angle;
-			client->idealpitch() = committer.idealpitch;
-			client->ideal_yaw() = committer.idealyaw;
+			client->angles = committer.angles;
+			client->v_angle= committer.v_angle;
+			client->idealpitch = committer.idealpitch;
+			client->ideal_yaw = committer.idealyaw;
 
 			common::fixed_string<255u> a{};
 			a += "";
 
-			client->flags() |= common::Third_Party_Bot_Flag;
+			client->flags |= common::Third_Party_Bot_Flag;
 			g_engfuncs.pfnRunPlayerMove(client->Edict(),
 					movement_angle,
 					move_speed,
 					strafe_speed,
 					0.0f,
-					client->Button(),
-					client->Impulse(),
+					client->button,
+					client->impulse,
 					Msec_Value);
 			client->Edict()->v.button = 0;
 		}
@@ -411,7 +411,7 @@ namespace pokebot {
 
 		void ClientManager::OnDamageTaken(const std::string_view Client_Name, const edict_t* Inflictor, const int Health, const int Armor, const int Bit) POKEBOT_NOEXCEPT {
 			if (auto target = GetAsMutable(Client_Name.data()); target != nullptr) {
-				if (target->Health() - Health <= 0) {
+				if (target->health - Health <= 0) {
 					OnDeath(Client_Name);
 				} else {
 					// TODO: Send the event message for a bot.

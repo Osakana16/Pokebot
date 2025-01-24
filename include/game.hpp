@@ -211,7 +211,6 @@ namespace pokebot {
 			friend class ClientManager;
 
 			edict_t* const client{};
-			int& button() { return client->v.button; }
 
 			common::Team team{};
 			int money{};
@@ -226,23 +225,41 @@ namespace pokebot {
 		public:
 			static bool IsDead(const edict_t* const Target) POKEBOT_NOEXCEPT { return Target->v.deadflag == DEAD_DEAD || Target->v.health <= 0 || Target->v.movetype == MOVETYPE_NOCLIP; }
 			static bool IsValid(const edict_t* const Target) POKEBOT_NOEXCEPT { return (Target != nullptr && !Target->free); }
-			static int Index(const edict_t* const Target) POKEBOT_NOEXCEPT { return ENTINDEX(const_cast<edict_t*>(Target)); }
 
 			Client() = delete;
 			Client(const Client&) = delete;
 			Client& operator=(const Client&) = delete;
 		public:
-			Client(edict_t* e) POKEBOT_NOEXCEPT : client(e) {}
+            Client(edict_t* e) POKEBOT_NOEXCEPT : 
+				client(e),
+				health(client->v.health),
+				armor(client->v.armorvalue),
+				max_health(client->v.max_health),
+				speed(client->v.maxspeed),
+				Money(money),
+				view_ofs(client->v.view_ofs),
+				origin(client->v.origin),
+				angles(client->v.angles),
+				avelocity(client->v.avelocity),
+				punchangle(client->v.punchangle),
+				v_angle(client->v.v_angle),
+				ideal_yaw(client->v.ideal_yaw),
+				idealpitch(client->v.idealpitch),
+				flags(client->v.flags),
+				velocity(client->v.velocity),
+				movetype(client->v.movetype),
+				weapons(client->v.weapons),
+				sequence(client->v.sequence),
+				button(client->v.button),
+				impulse(client->v.impulse),
+				index(ENTINDEX(const_cast<edict_t*>(e)))
+            {}
 
 			edict_t* Edict() POKEBOT_NOEXCEPT { return client; }
 			const edict_t* Edict() const POKEBOT_NOEXCEPT { return client; }
 			operator edict_t* () POKEBOT_NOEXCEPT { return Edict(); }
 			operator const edict_t* () const POKEBOT_NOEXCEPT { return client; }
 
-			int Index() const POKEBOT_NOEXCEPT { return Index(client); }
-
-			auto Button() const POKEBOT_NOEXCEPT { return client->v.button; }
-			auto Impulse() const POKEBOT_NOEXCEPT { return client->v.impulse; }
 			const char* ClassName() const POKEBOT_NOEXCEPT { return STRING(client->v.classname); }
 			std::string_view Name() const POKEBOT_NOEXCEPT { return STRING(client->v.netname); }
 			void PressKey(const int Key) POKEBOT_NOEXCEPT { client->v.button |= Key; }
@@ -256,35 +273,29 @@ namespace pokebot {
 
 			int WeaponAmmo(const AmmoID Ammo_ID) const POKEBOT_NOEXCEPT { return weapon_ammo[static_cast<int>(Ammo_ID) - 1]; }
 
-			const float& Health() const { return client->v.health; }
-			const float& Armor() const { return client->v.armorvalue; }
-			const float& MaxHealth() const { return client->v.max_health; }
-			const float& Speed() const { return client->v.speed; }
-			const int& Money() const { return money; }
+			const int& index;
+			const float& health;
+			const float& armor;
+			const float& max_health;
+			const float& speed;
+			const int& Money;
+			const Vector& origin;
 
-			Vector& view_ofs() { return client->v.view_ofs; }
-			Vector& origin() { return client->v.origin; }
-			Vector& angles() { return client->v.angles; }
-			Vector& avelocity() { return client->v.avelocity; }
-			Vector& punchangle() { return client->v.punchangle; }
-			Vector& v_angle() { return client->v.v_angle; }
-			float& ideal_yaw() { return client->v.ideal_yaw; }
-			float& idealpitch() { return client->v.idealpitch; }
-			int& flags() { return client->v.flags; }
+			int& button;
+			int& impulse;
+			Vector& view_ofs;
+			Vector& angles;
+			Vector& avelocity;
+			Vector& punchangle;
+			Vector& v_angle;
+			float& ideal_yaw;
+			float& idealpitch;
+			int& flags;
+			int& movetype;
+			int& weapons;
+			int& sequence;
+			const Vector& velocity;
 
-			const Vector& velocity() const { return client->v.velocity; }
-			const Vector& view_ofs() const { return client->v.view_ofs; }
-			const Vector& origin() const { return client->v.origin; }
-			const Vector& angles() const { return client->v.angles; }
-			const Vector& avelocity() const { return client->v.avelocity; }
-			const Vector& punchangle() const { return client->v.punchangle; }
-			const Vector& v_angle() const { return client->v.v_angle; }
-			float ideal_yaw() const { return client->v.ideal_yaw; }
-			float idealpitch() const { return client->v.idealpitch; }
-			int flags() const { return client->v.flags; }
-			int movetype() const { return client->v.movetype; }
-			int weapons() const { return client->v.weapons; }
-			int sequence() const { return client->v.sequence; }
 			StatusIcon DisplayingStatusIcon() const POKEBOT_NOEXCEPT { return status_icon; }
 			Weapon CurrentWeapon() const POKEBOT_NOEXCEPT { return current_weapon; }
 			int CurrentWeaponClip() const POKEBOT_NOEXCEPT { return weapon_clip; }
@@ -319,8 +330,8 @@ namespace pokebot {
 			* @brief Check the client is a fakeclient.
 			*/
 			bool IsFakeClient() const POKEBOT_NOEXCEPT;
-			auto Button() const { return client->Button(); }
-			auto Impulse() const { return client->Impulse(); }
+			auto Button() const { return client->button; }
+			auto Impulse() const { return client->impulse; }
 			
 			bool HasHostages() const POKEBOT_NOEXCEPT;
 			bool IsVIP() const POKEBOT_NOEXCEPT { return client->IsVIP(); }
@@ -349,35 +360,35 @@ namespace pokebot {
 			bool IsInVipSafety() const POKEBOT_NOEXCEPT { return bool(client->DisplayingStatusIcon() & StatusIcon::Vip_Safety); }
 			bool HasDefuser() const POKEBOT_NOEXCEPT { return bool(client->DisplayingStatusIcon() & StatusIcon::Defuser); }
 
-			bool IsWalking() const noexcept { return bool(client->velocity().Length2D() <= 150.0f); }
-			bool IsDucking() const POKEBOT_NOEXCEPT { return bool(client->Button() & IN_DUCK); }
-			bool IsInWater() const POKEBOT_NOEXCEPT { return bool(client->flags() & FL_INWATER); }
-			bool IsOnFloor() const POKEBOT_NOEXCEPT { return bool(client->flags() & (FL_ONGROUND | FL_PARTIALGROUND)) != 0; }
-			bool IsOnTrain() const POKEBOT_NOEXCEPT { return bool(client->flags() & FL_ONTRAIN); }
-			bool IsFiring() const POKEBOT_NOEXCEPT { return bool(client->Button() & IN_ATTACK); }
-			bool IsReadyToThrowGrenade() const POKEBOT_NOEXCEPT { return IsFiring() && bool(client->weapons() & Grenade_Bit); }
-			bool IsPlantingBomb() const POKEBOT_NOEXCEPT { return IsFiring() && bool(client->weapons() & C4_Bit) && (client->sequence() == 63 || client->sequence() == 61); }
-			bool IsClimblingLadder() const POKEBOT_NOEXCEPT { return (client->movetype() & MOVETYPE_FLY); }
+			bool IsWalking() const noexcept { return bool(client->velocity.Length2D() <= 150.0f); }
+			bool IsDucking() const POKEBOT_NOEXCEPT { return bool(client->button & IN_DUCK); }
+			bool IsInWater() const POKEBOT_NOEXCEPT { return bool(client->flags & FL_INWATER); }
+			bool IsOnFloor() const POKEBOT_NOEXCEPT { return bool(client->flags & (FL_ONGROUND | FL_PARTIALGROUND)) != 0; }
+			bool IsOnTrain() const POKEBOT_NOEXCEPT { return bool(client->flags & FL_ONTRAIN); }
+			bool IsFiring() const POKEBOT_NOEXCEPT { return bool(client->button & IN_ATTACK); }
+			bool IsReadyToThrowGrenade() const POKEBOT_NOEXCEPT { return IsFiring() && bool(client->weapons & Grenade_Bit); }
+			bool IsPlantingBomb() const POKEBOT_NOEXCEPT { return IsFiring() && bool(client->weapons & C4_Bit) && (client->sequence == 63 || client->sequence == 61); }
+			bool IsClimblingLadder() const POKEBOT_NOEXCEPT { return (client->movetype & MOVETYPE_FLY); }
 
-			const float& Health() const { return client->Health(); }
-			const float& Armor() const { return client->Armor(); }
-			const float& MaxHealth() const { return client->MaxHealth(); }
-			const float& Speed() const { return client->Speed(); }
-			const int& Money() const { return client->Money(); }
+			const float& Health() const { return client->health; }
+			const float& Armor() const { return client->armor; }
+			const float& MaxHealth() const { return client->max_health; }
+			const float& Speed() const { return client->speed; }
+			const int& Money() const { return client->Money; }
 
-			const Vector& velocity() const { return client->velocity(); }
-			const Vector& view_ofs() const { return client->view_ofs(); }
-			const Vector& origin() const { return client->origin(); }
-			const Vector& angles() const { return client->angles(); }
-			const Vector& avelocity() const { return client->avelocity(); }
-			const Vector& punchangle() const { return client->punchangle(); }
-			const Vector& v_angle() const { return client->v_angle(); }
-			float ideal_yaw() const { return client->ideal_yaw(); }
-			float idealpitch() const { return client->idealpitch(); }
-			int flags() const { return client->flags(); }
-			int movetype() const { return client->movetype(); }
-			int weapons() const { return client->weapons(); }
-			int sequence() const { return client->sequence(); }
+			const Vector& velocity() const { return client->velocity; }
+			const Vector& view_ofs() const { return client->view_ofs; }
+			const Vector& origin() const { return client->origin; }
+			const Vector& angles() const { return client->angles; }
+			const Vector& avelocity() const { return client->avelocity; }
+			const Vector& punchangle() const { return client->punchangle; }
+			const Vector& v_angle() const { return client->v_angle; }
+			float ideal_yaw() const { return client->ideal_yaw; }
+			float idealpitch() const { return client->idealpitch; }
+			int flags() const { return client->flags; }
+			int movetype() const { return client->movetype; }
+			int weapons() const { return client->weapons; }
+			int sequence() const { return client->sequence; }
 			StatusIcon DisplayingStatusIcon() const POKEBOT_NOEXCEPT { return client->DisplayingStatusIcon(); }
 			Weapon CurrentWeapon() const POKEBOT_NOEXCEPT { return client->CurrentWeapon(); }
 			int CurrentWeaponClip() const POKEBOT_NOEXCEPT { return client->CurrentWeaponClip(); }
