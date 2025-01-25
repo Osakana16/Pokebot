@@ -2,12 +2,10 @@
 #include "plugin.hpp"
 
 namespace pokebot::common {
-	AngleVector PositionVector::ToAngleVector(const Vector& Origin) const POKEBOT_NOEXCEPT {
-		float vecout[3]{};
-		Vector angle = *this - Origin;
-		VEC_TO_ANGLES(angle, vecout);
-		auto result = AngleVector(vecout);
-		return result;
+	void OriginToAngle(Vector* destination, const Vector& Target, const Vector& Origin) {
+		// float vecout[3]{};
+		Vector angle = Target - Origin;
+		VEC_TO_ANGLES(angle, *destination);
 	}
 
 

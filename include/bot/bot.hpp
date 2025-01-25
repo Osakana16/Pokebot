@@ -140,7 +140,7 @@ namespace pokebot::bot {
 
 		game::Weapon current_weapon = game::Weapon::Knife;
 
-		common::AngleVector movement_angle{};
+		Vector movement_angle{};
 		float move_speed{}, strafe_speed{};
 
 		std::uint8_t ComputeMsec() POKEBOT_NOEXCEPT;
@@ -186,7 +186,7 @@ namespace pokebot::bot {
 		bool IsHelpingMate() const POKEBOT_NOEXCEPT { return false; }
 
 		struct {
-			std::optional<common::PositionVector> view{}, movement{};
+			std::optional<Vector> view{}, movement{};
 			void Clear() POKEBOT_NOEXCEPT { view = movement = std::nullopt; }
 		} look_direction{}, ideal_direction{};
 

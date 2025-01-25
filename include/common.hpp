@@ -71,160 +71,10 @@ namespace pokebot{
 			}
 		};
 
-		template<typename T> struct Point { T x{}, y{}, z{}; };
-
-		template<typename T>
-		concept XY = requires(T & v) {
-			v.x;
-			v.y;
-		};
-
-		template<typename T>
-		concept XYZ = requires(T &v) {
-			v.x;
-			v.y;
-			v.z;
-		};
-
 		template<typename ReturnType, typename EnumType>
 		inline constexpr ReturnType ToBit(const EnumType E) POKEBOT_NOEXCEPT {
 			return 1 << static_cast<ReturnType>(E);
 		}
-
-		template<typename T>
-		class Vec {
-			Point<T> point{};
-		public:
-			T& x = point.x;
-			T& y = point.y;
-			T& z = point.z;
-
-			Vec() POKEBOT_NOEXCEPT : Vec(0, 0, 0) {}
-			Vec(const T V[3]) POKEBOT_NOEXCEPT : Vec(V[0], V[1], V[2]) {}
-			Vec(const T x, const T y, const T z) POKEBOT_NOEXCEPT : Vec(Point<T>{ x, y, z }) {}
-			template<XYZ ElementClass> Vec(ElementClass p) POKEBOT_NOEXCEPT { x = p.x; y = p.y; z = p.z; }
-
-			template<typename Castable>
-			operator Castable() const POKEBOT_NOEXCEPT {
-				Castable casted{};
-				casted.x = x; casted.y = y; casted.z = z;
-				return casted;
-			}
-
-			operator const float*() const POKEBOT_NOEXCEPT {
-				return &x;
-			}
-
-			template<XYZ ElementClass>
-			Vec<T>& operator=(const ElementClass& V) POKEBOT_NOEXCEPT {
-				x = V.x; y = V.y; z = V.z;
-				return *this;
-			}
-
-			template<XYZ ElementClass>
-			Vec<T> operator+(const ElementClass& V) const POKEBOT_NOEXCEPT {
-				return Vec<T>(x + V.x, y + V.y, z + V.z);
-			}
-
-			template<XYZ ElementClass>
-			Vec<T> operator-(const ElementClass& V) const POKEBOT_NOEXCEPT {
-				return Vec<T>(x - V.x, y - V.y, z - V.z);
-			}
-
-			template<typename Numeric>
-			Vec<T> operator*(const Numeric V) const POKEBOT_NOEXCEPT {
-				static_assert(std::is_arithmetic_v<Numeric>);
-				return Vec<T>(x * V, y * V, z * V);
-			}
-
-			template<typename Numeric>
-			Vec<T> operator/(const Numeric V) const POKEBOT_NOEXCEPT {
-				static_assert(std::is_arithmetic_v<Numeric>);
-				return Vec<T>(x / V, y / V, z / V);
-			}
-
-			template<XYZ ElementClass>
-			Vec<T>& operator+=(const ElementClass& V) POKEBOT_NOEXCEPT {
-				x += V.x; y += V.y; z += V.z;
-				return *this;
-			}
-
-			template<XYZ ElementClass>
-			Vec<T>& operator-=(const ElementClass& V) POKEBOT_NOEXCEPT {
-				x -= V.x; y -= V.y; z -= V.z;
-				return *this;
-			}
-
-			template<XYZ Numeric>
-			Vec<T>& operator*=(const Numeric V) POKEBOT_NOEXCEPT {
-				static_assert(std::is_arithmetic_v<Numeric>);
-				x *= V; y *= V; z *= V;
-				return *this;
-			}
-
-			template<XYZ Numeric>
-			Vec<T>& operator/=(const Numeric V) POKEBOT_NOEXCEPT {
-				static_assert(std::is_arithmetic_v<Numeric>);
-				x /= V; y /= V; z /= V;
-				return *this;
-			}
-
-			T& operator[](const int I) {
-				switch (I) {
-					case 0:
-						return point.x;
-					case 1:
-						return point.y;
-					case 2:
-						return point.z;
-					default:
-						assert(0);
-				}
-			}
-		};
-
-		class PositionVector;
-		class AngleVector;
-
-		class PositionVector final : public Vec<float> {
-		public:
-			using Vec<float>::Vec;
-			using Vec<float>::operator=;
-
-			PositionVector& operator=(const Vec<float>& V) POKEBOT_NOEXCEPT {
-				x = V.x; y = V.y; z = V.z;
-				return *this;
-			}
-
-			PositionVector& operator=(const PositionVector& V) POKEBOT_NOEXCEPT {
-				x = V.x; y = V.y; z = V.z;
-				return *this;
-			}
-
-			PositionVector& operator=(const AngleVector& V) = delete;
-
-			AngleVector ToAngleVector(const Vector& Origin) const POKEBOT_NOEXCEPT;
-		};
-
-		class AngleVector final : public Vec<float> {
-		public:
-			using Vec<float>::Vec;
-			using Vec<float>::operator=;
-
-			inline AngleVector& operator=(const Vec<float>& V) POKEBOT_NOEXCEPT {
-				x = V.x; y = V.y; z = V.z;
-				return *this;
-			}
-
-			AngleVector& operator=(const AngleVector& V) POKEBOT_NOEXCEPT {
-				x = V.x; y = V.y; z = V.z;
-				return *this;
-			}
-
-			AngleVector& operator=(const PositionVector& V) = delete;
-
-		};
-
 		class Tracer final : public TraceResult {
 			Vector start_position{}, dest_position{};
 		public:
@@ -283,40 +133,6 @@ namespace pokebot{
 				return &Instance();
 			}
 		};
-
-		template<XYZ V>
-		float Length(const V& Source) POKEBOT_NOEXCEPT {
-			return std::sqrt((Source.x * Source.x) + (Source.y * Source.y) + (Source.z * Source.z));
-		}
-
-		template<XY V>
-		float Length2D(const V& Source) POKEBOT_NOEXCEPT {
-			return std::sqrt((Source.x * Source.x) + (Source.y * Source.y));
-		}
-
-		template<XYZ V1, XYZ V2>
-		float Distance(const V1& S1, const V2& S2) POKEBOT_NOEXCEPT {
-			return Length(S1 - S2);
-		}
-
-
-		template<XYZ V1, XYZ V2>
-		float Distance2D(const V1& S1, const V2& S2) POKEBOT_NOEXCEPT {
-			return Length2D(S1 - S2);
-		}
-
-		template<XYZ V>
-		std::optional<V> Normalize(const V& Source) POKEBOT_NOEXCEPT {
-			V result{};
-			float flLen = Length(Source);
-			if (flLen == 0) return std::nullopt;
-			flLen = 1 / flLen;
-			result.x = Source.x * flLen;
-			result.y = Source.y * flLen;
-			result.z = Source.z * flLen;
-			return result;
-		}
-
 
 		template<typename T>
 		class Random {};
@@ -444,6 +260,10 @@ namespace pokebot{
 		// Maximum player length is 32.
 		using PlayerName = fixed_string<32u>;
 
+		inline float Distance(const Vector& S1, const Vector& S2) POKEBOT_NOEXCEPT { return (S1 - S2).Length(); }
+		inline float Distance2D(const Vector& S1, const Vector& S2) POKEBOT_NOEXCEPT { return (S1 - S2).Length2D(); }
+
+		void OriginToAngle(Vector* destination, const Vector& Target, const Vector& Origin);
 		edict_t* FindEntityInSphere(edict_t* pentStart, const Vector& vecCenter, float flRadius);
 		edict_t* FindEntityByString(edict_t* pentStart, const char* szKeyword, const char* szValue);
 		edict_t* FindEntityByClassname(edict_t* pentStart, const char* szName);

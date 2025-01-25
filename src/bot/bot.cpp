@@ -28,7 +28,8 @@ namespace pokebot::bot {
 	void Bot::TurnViewAngle() {
 		auto client = game::game.clients.Get(Name().data());
 		assert(client != nullptr);
-		auto destination = look_direction.view->ToAngleVector(Origin());
+		Vector destination{};
+		common::OriginToAngle(&destination, *look_direction.view, Origin());
 		if (destination.x > 180.0f) {
 			destination.x -= 360.0f;
 		}
@@ -49,7 +50,7 @@ namespace pokebot::bot {
 
 			constexpr float Base_Frame = 30.0f;
 			constexpr float Sensitivity = 1.0f;
-			const common::AngleVector Next_Angle = {
+			const Vector Next_Angle = {
 				CalculateNextAngle(destination.x, v_angle.x) / (Base_Frame - Sensitivity),
 				CalculateNextAngle(destination.y, v_angle.y) / (Base_Frame - Sensitivity),
 				0.0
@@ -81,7 +82,7 @@ namespace pokebot::bot {
 	}
 
 	void Bot::TurnMovementAngle() {
-		movement_angle = look_direction.movement->ToAngleVector(Origin());
+		common::OriginToAngle(&movement_angle, *look_direction.movement, Origin());
 	}
 
 	void Bot::OnNewRound() POKEBOT_NOEXCEPT {
@@ -144,7 +145,6 @@ namespace pokebot::bot {
 
 			if (!routes.Empty() && next_dest_node != node::Invalid_NodeID) {
 				if (look_direction.view.has_value() && look_direction.movement.has_value()) {
-					auto r = look_direction.movement->ToAngleVector(Origin()) - look_direction.view->ToAngleVector(Origin());
 					PressKey(ActionKey::Run);
 				}
 			}
