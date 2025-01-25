@@ -65,12 +65,10 @@ namespace pokebot::bot {
 
 		auto candidates = (*bots | std::views::filter(commander_condition));
 		if (candidates.empty()) {
-			[&] {
-				if (radio_message.has_value()) {
-					new_strategy.strategy = TroopsStrategy::Strategy::Follow;
-					new_strategy.leader_name = radio_message->sender.data();
-				}
-			}();
+			if (radio_message.has_value()) {
+				new_strategy.strategy = TroopsStrategy::Strategy::Follow;
+				new_strategy.leader_name = radio_message->sender.data();
+			}
 		} else {
 			switch (team) {
 				case common::Team::T:

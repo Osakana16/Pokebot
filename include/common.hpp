@@ -11,9 +11,11 @@
 #endif
 #define DEBUG_PRINTF(...) SERVER_PRINT(std::format(__VA_ARGS__).c_str())
 
+#define USE_STDARRAY false
+
 namespace pokebot{
 	namespace common {
-#ifndef NDEBUG
+#ifndef USE_STDARRAY
 		template<typename T, size_t N>
 		using Array = std::array<T, N>;
 #else

@@ -142,18 +142,16 @@ namespace pokebot::bot {
 				follower.second.OnRadioRecieved(radio_message.sender.c_str(), radio_message.message.c_str());
 			}
 
-			// NOTE: For unknown reasons, without using lambda function causes game freezing.
-			[&] {
-				if (radio_message.platoon.has_value()) {
-					for (auto& follower : followers) {
-						assert(follower.first != radio_message.sender);
-						follower.second.platoon = *radio_message.platoon;
-					}
-					auto& platoon = troops[static_cast<int>(radio_message.team) - 1][*radio_message.platoon];
-					platoon.DecideStrategy(&bots, radio_message);
-					platoon.Command(&bots);
+			if (radio_message.platoon.has_value()) {
+				for (auto& follower : followers) {
+					assert(follower.first != radio_message.sender);
+					follower.second.platoon = *radio_message.platoon;
 				}
-			}();
+				auto& platoon = troops[static_cast<int>(radio_message.team) - 1][*radio_message.platoon];
+				platoon.DecideStrategy(&bots, radio_message);
+				platoon.Command(&bots);
+			}
+
 			radio_message.sender.clear();
 			radio_message.platoon = std::nullopt;
 			radio_message.message.clear();
