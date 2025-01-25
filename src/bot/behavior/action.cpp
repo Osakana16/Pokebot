@@ -57,16 +57,23 @@ namespace pokebot::bot::behavior {
 			return Status::Failed;
 		}
 	}
+	
+	template<node::GoalKind kind>
+	Status BotSetsGoal(Bot* const self) {
+		return SetGoal<kind>(self);
+	}
+
+	template<game::Weapon weapon>
+	Status BotChangesIfNotSelected(Bot* const self) {
+		if (!self->IsCurrentWeapon(weapon)) {
+			self->SelectWeapon(weapon);
+			return Status::Success;
+		} else {
+			return Status::Failed;
+		}
+	}
 
 	void DefineAction() {
-		auto changeIfNotSelected = [](Bot* const self, const game::Weapon Target_Weapon) POKEBOT_NOEXCEPT -> Status {
-			if (!self->IsCurrentWeapon(Target_Weapon)) {
-				self->SelectWeapon(Target_Weapon);
-				return Status::Success;
-			} else {
-				return Status::Failed;
-			}
-		};
 
 		reset_goal->Define([](Bot* const self) -> Status {
 			if (self->goal_node == node::Invalid_NodeID && self->next_dest_node == node::Invalid_NodeID)
@@ -96,25 +103,11 @@ namespace pokebot::bot::behavior {
 			}
 		});
 
-		change_melee->Define([changeIfNotSelected](Bot* const self) -> Status {
-			return changeIfNotSelected(self, game::Weapon::Knife);
-		});
-
-		change_grenade->Define([changeIfNotSelected](Bot* const self) -> Status {
-			return changeIfNotSelected(self, game::Weapon::Flashbang);
-		});
-
-		change_flashbang->Define([changeIfNotSelected](Bot* const self) -> Status {
-			return changeIfNotSelected(self, game::Weapon::Flashbang);
-		});
-
-		change_smoke->Define([changeIfNotSelected](Bot* const self) -> Status {
-			return changeIfNotSelected(self, game::Weapon::Smoke);
-		});
-
-		change_c4->Define([changeIfNotSelected](Bot* const self) -> Status {
-			return changeIfNotSelected(self, game::Weapon::C4);
-		});
+		change_melee->Define(BotChangesIfNotSelected<game::Weapon::Knife>);
+		change_grenade->Define(BotChangesIfNotSelected<game::Weapon::HEGrenade>);
+		change_flashbang->Define(BotChangesIfNotSelected<game::Weapon::Flashbang>);
+		change_smoke->Define(BotChangesIfNotSelected<game::Weapon::Smoke>);
+		change_c4->Define(BotChangesIfNotSelected<game::Weapon::C4>);
 
 		look_c4->Define([](Bot* const self) -> Status {
 			return LookAt(self, *Manager::Instance().C4Origin() - Vector{ 0, 0, 36 }, 1.0f);
@@ -314,29 +307,12 @@ namespace pokebot::bot::behavior {
 #endif
 		});
 
-		set_goal_bombspot->Define([](Bot* const self) -> Status {
-			return SetGoal<node::GoalKind::Bombspot>(self);
-		});
-
-		set_goal_rescuezone->Define([](Bot* const self) -> Status {
-			return SetGoal<node::GoalKind::Rescue_Zone>(self);
-		});
-
-		set_goal_escapezone->Define([](Bot* const self) -> Status {
-			return SetGoal<node::GoalKind::Escape_Zone>(self);
-		});
-
-		set_goal_vipsafety->Define([](Bot* const self) -> Status {
-			return SetGoal<node::GoalKind::Vip_Safety>(self);
-		});
-
-		set_goal_tspawn->Define([](Bot* const self) -> Status {
-			return SetGoal<node::GoalKind::Terrorist_Spawn>(self);
-		});
-
-		set_goal_ctspawn->Define([](Bot* const self) -> Status {
-			return SetGoal<node::GoalKind::CT_Spawn>(self);
-		});
+		set_goal_bombspot->Define(BotSetsGoal<node::GoalKind::Bombspot>);
+		set_goal_rescuezone->Define(BotSetsGoal<node::GoalKind::Rescue_Zone>);
+		set_goal_escapezone->Define(BotSetsGoal<node::GoalKind::Escape_Zone>);
+		set_goal_vipsafety->Define(BotSetsGoal<node::GoalKind::Vip_Safety>);
+		set_goal_tspawn->Define(BotSetsGoal<node::GoalKind::Terrorist_Spawn>);
+		set_goal_ctspawn->Define(BotSetsGoal<node::GoalKind::CT_Spawn>);
 
 		find_goal->Define([](Bot* const self) -> Status {
 			if (self->routes.Empty() || self->routes.IsEnd()) {
