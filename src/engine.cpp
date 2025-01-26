@@ -385,6 +385,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             { "#Game_will_restart_in", nothingToDo },
                             { "#Switch_To_BurstFire", nothingToDo },
                             { "#Switch_To_SemiAuto", nothingToDo },
+                            { "#Switch_To_FullAuto", nothingToDo },
                             { "#Game_radio", nothingToDo },
                             { "#Killed_Teammate", nothingToDo },
                             { "#C4_Plant_Must_Be_On_Ground", nothingToDo },
