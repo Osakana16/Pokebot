@@ -3,8 +3,9 @@
 
 namespace {
     int current_message{};
-
-    std::vector<std::variant<int, float, pokebot::common::fixed_string<100u>>> args{};
+    
+    using TextCache = pokebot::common::fixed_string<60u>;
+    std::vector<std::variant<int, float, TextCache>> args{};
 }
 
 const edict_t* engine_target_edict = nullptr;
@@ -46,27 +47,22 @@ namespace pokebot::common {
     }
 
     Team GetTeamFromModel(const edict_t* const Edict) {
+        static std::unordered_map<pokebot::common::fixed_string<11u>, common::Team, pokebot::common::fixed_string<11u>::Hash> Model_And_Teams{
+            { "terror", common::Team::T },
+			{ "arab", common::Team::T },
+			{ "leet", common::Team::T },
+			{ "artic", common::Team::T },
+			{ "arctic", common::Team::T },
+			{ "guerilla", common::Team::T },
+			{ "urban", common::Team::CT },
+			{ "gsg9", common::Team::CT },
+			{ "sas", common::Team::CT },
+			{ "gign", common::Team::CT },
+			{ "vip", common::Team::CT },
+			{ "spetsnatz", common::Team::CT }
+        };
         auto infobuffer = (*g_engfuncs.pfnGetInfoKeyBuffer)(const_cast<edict_t*>(Edict));
-        std::string_view model_name = (*g_engfuncs.pfnInfoKeyValue)(infobuffer, "model");
-
-        if (model_name == "terror" ||        // Phoenix Connektion
-            model_name == "arab" ||  // old L337 Krew
-            model_name == "leet" ||  // L337 Krew
-            model_name == "artic" || // Artic Avenger
-            model_name == "arctic" ||        // Artic Avenger - fix for arctic? - seemed a typo?
-            model_name == "guerilla")        // Gorilla Warfare
-        {
-            return Team::T; // team Terrorists
-        } else if (model_name == "urban" ||  // Seal Team 6
-            model_name == "gsg9" ||   // German GSG-9
-            model_name == "sas" ||    // UK SAS
-            model_name == "gign" ||   // French GIGN
-            model_name == "vip" ||    // VIP
-            model_name == "spetsnatz")        // CZ Spetsnatz
-        {
-            return Team::CT; // team Counter-Terrorists
-        }
-        return Team::Random;
+        return Model_And_Teams.at((*g_engfuncs.pfnInfoKeyValue)(infobuffer, "model"));
     }
 }
 
@@ -86,7 +82,6 @@ void UTIL_TraceHull(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTER
 
 C_DLLEXPORT int
 GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
-    using TextCache = pokebot::common::fixed_string<100u>;
     meta_engfuncs.pfnMessageBegin = [](int msg_dest, int msg_type, const float* pOrigin, edict_t* edict) {
         if (gpGlobals->deathmatch) {
             using namespace pokebot;
@@ -140,7 +135,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                                 { "#CT_Select", pokebot::bot::Message::Model_Select }
                             };
 
-                            auto it = Menu_Cache.find(std::get<pokebot::common::fixed_string<100u>>(args[3]).c_str());
+                            auto it = Menu_Cache.find(std::get<TextCache>(args[3]).c_str());
                             if (it != Menu_Cache.end()) {
                                 pokebot::bot::Manager::Instance().Assign(STRING(engine_target_edict->v.netname), it->second);
                             }
@@ -171,7 +166,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             { "SPECTATOR", common::Team::Spector }
                         };
 
-                        if (auto team = Menu_Cache.at(std::get<pokebot::common::fixed_string<100u>>(args[1]).c_str()); team == common::Team::Spector) {
+                        if (auto team = Menu_Cache.at(std::get<TextCache>(args[1]).c_str()); team == common::Team::Spector) {
                             game::game.RegisterClient(const_cast<edict_t*>(engine_target_edict));
                         } else {
                             game::game.OnTeamAssigned(STRING(engine_target_edict->v.netname), team);
@@ -297,7 +292,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             return;
                         }
 
-                        if (args.size() < 2 || !std::holds_alternative<int>(args[0]) || !std::holds_alternative<pokebot::common::fixed_string<100u>>(args[1])) {
+                        if (args.size() < 2 || !std::holds_alternative<int>(args[0]) || !std::holds_alternative<TextCache>(args[1])) {
                             return;
                         }
 
@@ -309,7 +304,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             { "vipsafety", StatusIcon::Vip_Safety },
                         };
 
-                        if (auto it = Icon_Cache.find(std::get<pokebot::common::fixed_string<100u>>(args[1]).data()); it != Icon_Cache.end()) {
+                        if (auto it = Icon_Cache.find(std::get<TextCache>(args[1]).data()); it != Icon_Cache.end()) {
                             using namespace pokebot;
                             game::game.OnStatusIconShown(STRING(engine_target_edict->v.netname), it->second);
                         }
@@ -401,7 +396,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             { "#Weapon_Not_Available", nothingToDo },
                             { "#Game_bomb_pickup", nothingToDo },
                             { "#Got_bomb", nothingToDo },
-                            { "#Game_bomb_drop", [] { pokebot::bot::Manager::Instance().OnBombDropped(std::get<pokebot::common::fixed_string<100u>>(args[2]).data()); }},
+                            { "#Game_bomb_drop", [] { pokebot::bot::Manager::Instance().OnBombDropped(std::get<TextCache>(args[2]).data()); }},
                             // TODO: These below should set failIfBotDoes
                             { "#Not_Enough_Money", nothingToDo },
                             { "#Cstrike_Already_Own_Weapon", nothingToDo },
@@ -430,18 +425,18 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
 
                         
                         using namespace pokebot;
-                        if (args.size() >= 5 && std::holds_alternative<common::fixed_string<100u>>(args[2])) {
-                            auto it = Text_Message.find(std::get<common::fixed_string<100u>>(args[2]).data());
-                            std::string_view sender = std::get<common::fixed_string<100u>>(args[3]).data();
-                            std::string_view radio = std::get<common::fixed_string<100u>>(args[4]).data();
+                        if (args.size() >= 5 && std::holds_alternative<TextCache>(args[2])) {
+                            auto it = Text_Message.find(std::get<TextCache>(args[2]).data());
+                            std::string_view sender = std::get<TextCache>(args[3]).data();
+                            std::string_view radio = std::get<TextCache>(args[4]).data();
 
                             if (it == Text_Message.find("#Game_radio")) {
                                 bot::Manager::Instance().OnRadioRecieved(sender, radio);
                             }
-                        } else if (args.size() >= 3 && std::holds_alternative<common::fixed_string<100u>>(args[2])) {
-                            Text_Message.at(std::get<common::fixed_string<100u>>(args[1]).data())();
-                        } else if (args.size() >= 2 && std::holds_alternative<common::fixed_string<100u>>(args[1])) {
-                            Text_Message.at(std::get<common::fixed_string<100u>>(args[1]).data())();
+                        } else if (args.size() >= 3 && std::holds_alternative<TextCache>(args[2])) {
+                            Text_Message.at(std::get<TextCache>(args[1]).data())();
+                        } else if (args.size() >= 2 && std::holds_alternative<TextCache>(args[1])) {
+                            Text_Message.at(std::get<TextCache>(args[1]).data())();
                         }
                     }
                 },

@@ -41,6 +41,8 @@ namespace pokebot::bot {
 		} strategy;
 	};
 
+	using Bots = std::unordered_map<common::PlayerName, Bot, common::PlayerName::Hash>;
+
 	class Troops final {
 		TroopsStrategy strategy;
 		TroopsStrategy old_strategy;
@@ -50,6 +52,12 @@ namespace pokebot::bot {
 		common::Team team{};
 		Troops* parent{};
 		std::vector<Troops> platoons{};
+
+		void DeleteAllPlatoon() noexcept;
+		node::NodeID SelectGoal(node::GoalKind kind);
+
+		void DecideStrategyToPlantC4Concentrative(Bots* bots, TroopsStrategy* new_strategy);
+		void DecideStrategyToDefendBombsite(Bots* bots, TroopsStrategy* new_strategy);
 	public:
 		common::Team Team() { return team; }
 		Troops(decltype(condition) target_condition, decltype(commander_condition) target_commander_condition, decltype(team) target_team) : condition(target_condition), commander_condition(target_commander_condition), team(target_team) {}
@@ -58,8 +66,8 @@ namespace pokebot::bot {
 		bool DeletePlatoon(const int Index);
 		bool IsStrategyToFollow() const noexcept { return strategy.strategy == TroopsStrategy::Strategy::Follow; }
 
-		void DecideStrategy(std::unordered_map<common::PlayerName, Bot, common::PlayerName::Hash>* bots, const std::optional<RadioMessage>&);
-		void Command(std::unordered_map<common::PlayerName, Bot, common::PlayerName::Hash>* bots);
+		void DecideStrategy(Bots* bots, const std::optional<RadioMessage>&);
+		void Command(Bots* bots);
 		void SetNewStrategy(const TroopsStrategy&);
 		bool HasGoalBeenDevised(const node::NodeID) const POKEBOT_NOEXCEPT;
 		bool HasGoalBeenDevisedByOtherPlatoon(const node::NodeID) const POKEBOT_NOEXCEPT;

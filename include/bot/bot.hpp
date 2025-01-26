@@ -113,14 +113,6 @@ namespace pokebot::bot {
 		friend class Manager;
 		friend class Troops;
 
-		void (Bot::*Update_Funcs[5])() = {
-			&Bot::NormalUpdate,
-			&Bot::BuyUpdate,
-			&Bot::SelectionUpdate, 
-			&Bot::SelectionUpdate, 
-			&Bot::OnSelectionCompleted 
-		};
-
 		common::Time
 			frame_interval{},
 			last_command_time{};
@@ -160,12 +152,50 @@ namespace pokebot::bot {
 
 		State state = State::Accomplishment;
 		void AccomplishMission() POKEBOT_NOEXCEPT, Combat() POKEBOT_NOEXCEPT, Follow() POKEBOT_NOEXCEPT;
-		void AccomplishTerroristMission() noexcept, AccomplishCTMission() noexcept;
+		void (Bot::*doObjective[3])() = {
+			// Basic
+			&Bot::AccomplishMission,
+			&Bot::Combat,
+			&Bot::Follow
+		};
+
+		void OnTerroristDemolition() noexcept, 
+			OnTerroristHostage() noexcept, 
+			OnTerroristAssasination() noexcept, 
+			OnTerroristEscape() noexcept;
+
+		void OnCTDemolition() noexcept, 
+			OnCTHostage() noexcept, 
+			OnCTAssasination() noexcept, 
+			OnCTEscape() noexcept;
+		void (Bot::*accomplishState[2][5])() = {
+			{
+				&Bot::OnTerroristDemolition,
+				&Bot::OnTerroristHostage,
+				&Bot::OnTerroristAssasination,
+				&Bot::OnTerroristEscape
+			},
+			{
+				&Bot::OnCTDemolition,
+				&Bot::OnCTHostage,
+				&Bot::OnCTAssasination,
+				&Bot::OnCTEscape
+			}
+		};
 
 		common::PlayerName name{};
 
 		void JoinPlatoon(const PlatoonID Target_Platoon) noexcept;
 		void LeavePlatoon() noexcept { platoon = Not_Joined_Any_Platoon; }
+
+		void (Bot::*updateFuncs[5])() = {
+			&Bot::NormalUpdate,
+			&Bot::BuyUpdate,
+			&Bot::SelectionUpdate,	// Team Select
+			&Bot::SelectionUpdate,	// Model Select
+			&Bot::OnSelectionCompleted 
+		};
+
 	public:
 		void ReceiveCommand(const TroopsStrategy&);
 
@@ -235,7 +265,6 @@ namespace pokebot::bot {
 		bool IsInBombTargetZone() const POKEBOT_NOEXCEPT;
 
 		bool IsFighting() const POKEBOT_NOEXCEPT { return danger_time.IsRunning(); }
-		std::vector<common::PlayerName> GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT;
 		bool CanSeeEntity() const POKEBOT_NOEXCEPT;
 
 		PlatoonID JoinedPlatoon() const POKEBOT_NOEXCEPT;

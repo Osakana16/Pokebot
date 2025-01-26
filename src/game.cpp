@@ -416,24 +416,22 @@ namespace pokebot {
 			return false;
 		}
 
-		std::vector<common::PlayerName> Client::GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT {
-			decltype(GetEnemyNamesWithinView()) result{};
+		void Client::GetEnemyNamesWithinView(common::PlayerName player_names[32]) const POKEBOT_NOEXCEPT {
+			int i = 0;
 			for (const auto& other : game.clients.GetAll()) {
 				if (entity::CanSeeEntity(*this, other.second) && other.second.GetTeam() != common::Team::Spector && !other.second.IsDead() && other.second.GetTeam() != GetTeam()) {
-					result.push_back(other.first.data());
+					player_names[i++] = other.first.data();
 				}
 			}
-			return result;
 		}
 
-		std::vector<common::PlayerName> Client::GetEntityNamesInView() const POKEBOT_NOEXCEPT {
-			decltype(GetEntityNamesInView()) result{};
+		void Client::GetEntityNamesInView(common::PlayerName player_names[32]) const POKEBOT_NOEXCEPT {
+			int i = 0;
 			for (auto& other : game.clients.GetAll()) {
 				if (entity::CanSeeEntity(*this, other.second)) {
-					result.push_back(other.first.data());
+					player_names[i++] = other.first.data();
 				}
 			}
-			return result;
 		}
 
 		

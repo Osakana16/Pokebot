@@ -338,8 +338,8 @@ namespace pokebot {
 			bool IsPlayerModelReloading() const POKEBOT_NOEXCEPT;
 
 			bool CanSeeFriend() const POKEBOT_NOEXCEPT;
-			std::vector<common::PlayerName> GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT;
-			std::vector<common::PlayerName> GetEntityNamesInView() const POKEBOT_NOEXCEPT;
+			void GetEnemyNamesWithinView(common::PlayerName player_names[32]) const POKEBOT_NOEXCEPT;
+			void GetEntityNamesInView(common::PlayerName player_names[32]) const POKEBOT_NOEXCEPT;
 			common::Team GetTeamFromModel() const POKEBOT_NOEXCEPT;
 
 			bool IsFakeClient() const POKEBOT_NOEXCEPT { return bool(flags & common::Third_Party_Bot_Flag); }

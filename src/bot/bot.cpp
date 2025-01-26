@@ -5,7 +5,7 @@
 
 namespace pokebot::bot {
 	void Bot::Run() POKEBOT_NOEXCEPT {
-		(this->*(Update_Funcs[static_cast<int>(start_action)]))();
+		(this->*(updateFuncs[static_cast<int>(start_action)]))();
 		frame_interval = gpGlobals->time - last_command_time;
 
 		const std::uint8_t Msec_Value = ComputeMsec();
@@ -122,18 +122,8 @@ namespace pokebot::bot {
 			// Due to game engine specifications or bugs, 
 			// if we execute a heavy process immediately after the start of a round, 
 			// the game will freeze.
-
-			switch (state) {
-				case State::Accomplishment:
-					AccomplishMission();
-					break;
-				case State::Crisis:
-					Combat();
-					break;
-				case State::Follow:
-					Follow();
-					break;
-			}
+			
+			(this->*(doObjective[static_cast<int>(state)]))();
 			CheckAround();
 
 			for (auto& vector : { Vector(0.0f, 0.0f, 0.0f), Vector(50.0f, 0.0f, 0.0f), Vector(-50.0f, 0.0f, 0.0f), Vector(0.0f, 50.0f, 0.0f), Vector(0.0f, -50.0f, 0.0f) }) {
@@ -204,99 +194,74 @@ namespace pokebot::bot {
 	}
 
 	void Bot::AccomplishMission() POKEBOT_NOEXCEPT {
-		
-		switch (JoinedTeam()) {
-			case common::Team::T:
-			{
-				AccomplishTerroristMission();
-				break;
-			}
-			case common::Team::CT:
-			{
-				AccomplishCTMission();
-				break;
+		auto current_mode = game::game.GetMapFlag();
+		(this->*(accomplishState[static_cast<int>(JoinedTeam()) - 1][static_cast<int>(std::log2(static_cast<float>(current_mode)))]))();
+	}
+
+	void Bot::OnTerroristDemolition() noexcept {
+		if (Manager::Instance().C4Origin().has_value()) {
+			behavior::demolition::t_planted_wary->Evaluate(this);
+		} else {
+			if (HasWeapon(game::Weapon::C4)) {
+				behavior::demolition::t_plant->Evaluate(this);
 			}
 		}
 	}
 
-	void Bot::AccomplishTerroristMission() noexcept {
-		std::function<void()> modes[]{
-			// Demolition
-			[&] {
-				if (Manager::Instance().C4Origin().has_value()) {
-					behavior::demolition::t_planted_wary->Evaluate(this);
-				} else {
-					if (HasWeapon(game::Weapon::C4)) {
-						behavior::demolition::t_plant->Evaluate(this);
-					}
-				}
-			},
-			// Hostage Rescue
-			[&] {
-				auto client = game::game.clients.Get(Name().data());
-				if (!client->HasHostages()) {
-					behavior::rescue::ct_try->Evaluate(this);
-				} else {
-					behavior::rescue::ct_leave->Evaluate(this);
-				}
-			},
-			// Assasination
-			[&] {
-				auto client = game::game.clients.Get(Name().data());
-				if (client->IsVIP()) {
-					behavior::assist::ct_vip_escape->Evaluate(this);
-				} else {
-
-				}
-			},
-			// Escape
-			[&] {
-
-			},
-		};
-		auto current_mode = game::game.GetMapFlag();
-		modes[static_cast<int>(std::log2(static_cast<float>(current_mode)))]();
+	void Bot::OnTerroristHostage() noexcept {
+		auto client = game::game.clients.Get(Name().data());
+		if (!client->HasHostages()) {
+			behavior::rescue::ct_try->Evaluate(this);
+		} else {
+			behavior::rescue::ct_leave->Evaluate(this);
+		}
 	}
 
-	void Bot::AccomplishCTMission() noexcept {
-		std::function<void()> modes[]{
-			// Demolition
-			[&] {
-				if (Manager::Instance().C4Origin().has_value()) {
-					if (common::Distance(Origin(), *Manager::Instance().C4Origin()) <= 50.0f) {
-						behavior::demolition::ct_defusing->Evaluate(this);
-					} else {
-						behavior::demolition::ct_planted->Evaluate(this);
-					}
-				} else {
-					behavior::demolition::ct_defend->Evaluate(this);
-				}
-			},
-			// Hostage Rescue
-			[&] {
-				auto client = game::game.clients.Get(Name().data());
-				if (!client->HasHostages()) {
-					behavior::rescue::ct_try->Evaluate(this);
-				} else {
-					behavior::rescue::ct_leave->Evaluate(this);
-				}
-			},
-			// Assasination
-			[&] {
-				auto client = game::game.clients.Get(Name().data());
-				if (client->IsVIP()) {
-					behavior::assist::ct_vip_escape->Evaluate(this);
-				} else {
+	void Bot::OnTerroristAssasination() noexcept {
+		auto client = game::game.clients.Get(Name().data());
+		if (client->IsVIP()) {
+			behavior::assist::ct_vip_escape->Evaluate(this);
+		} else {
 
-				}
-			},
-			// Escape
-			[&] {
+		}
+	}
 
-			},
-		};
-		auto current_mode = game::game.GetMapFlag();
-		modes[static_cast<int>(std::log2(static_cast<float>(current_mode)))]();
+	void Bot::OnTerroristEscape() noexcept {
+
+	}
+
+	void Bot::OnCTDemolition() noexcept {
+		if (Manager::Instance().C4Origin().has_value()) {
+			if (common::Distance(Origin(), *Manager::Instance().C4Origin()) <= 50.0f) {
+				behavior::demolition::ct_defusing->Evaluate(this);
+			} else {
+				behavior::demolition::ct_planted->Evaluate(this);
+			}
+		} else {
+			behavior::demolition::ct_defend->Evaluate(this);
+		}
+	}
+
+	void Bot::OnCTHostage() noexcept {
+		auto client = game::game.clients.Get(Name().data());
+		if (!client->HasHostages()) {
+			behavior::rescue::ct_try->Evaluate(this);
+		} else {
+			behavior::rescue::ct_leave->Evaluate(this);
+		}
+	}
+
+	void Bot::OnCTAssasination() noexcept {
+		auto client = game::game.clients.Get(Name().data());
+		if (client->IsVIP()) {
+			behavior::assist::ct_vip_escape->Evaluate(this);
+		} else {
+
+		}
+	}
+
+	void Bot::OnCTEscape() noexcept {
+
 	}
 
 	void Bot::Combat() POKEBOT_NOEXCEPT {
@@ -434,10 +399,8 @@ namespace pokebot::bot {
 			auto client = game::game.clients.Get(Name().data());
 			common::PlayerName enemies_in_view[32]{};
 			int i{};
-			for (const auto& target : client->GetEnemyNamesWithinView()) {
-				enemies_in_view[i++] = target;
-			}
 
+			client->GetEnemyNamesWithinView(enemies_in_view);
 			if (!enemies_in_view[0].empty()) {
 				for (auto& enemy : enemies_in_view) {
 					if (enemy.empty()) {
@@ -549,10 +512,6 @@ namespace pokebot::bot {
 		vecout[0] = -vecout[0];
 		auto result = common::Distance2D(Vector(vecout), game::game.clients.Get(Name().data())->v_angle);
 		return (result <= Range);
-	}
-
-	std::vector<common::PlayerName> Bot::GetEnemyNamesWithinView() const POKEBOT_NOEXCEPT {
-		return game::game.clients.Get(Name().data())->GetEnemyNamesWithinView();
 	}
 
 	bool Bot::HasGoalToHead() const POKEBOT_NOEXCEPT {

@@ -37,32 +37,12 @@ namespace pokebot::bot {
 		return !platoons.empty() && platoons.erase(platoons.begin() + Index) != platoons.end();
 	}
 
-	void Troops::DecideStrategy(std::unordered_map<common::PlayerName, Bot, common::PlayerName::Hash>* const bots , const std::optional<RadioMessage>& radio_message) {
+	void Troops::DecideStrategy(std::unordered_map<common::PlayerName, Bot, common::PlayerName::Hash>* const bots, const std::optional<RadioMessage>& radio_message) {
 		if (bots->empty())
 			return;
 
 #if 1
 		TroopsStrategy new_strategy{};
-		auto selectGoal = [&](node::GoalKind kind)->node::NodeID {
-#if !USE_NAVMESH
-			auto goal = node::world.GetGoal(kind);
-#else
-			auto goal = node::czworld.GetGoal(kind);
-#endif
-			for (auto it = goal.first; it != goal.second; it++) {
-				if (IsRoot()) {
-					if (HasGoalBeenDevised(it->second)) {
-						continue;
-					}
-				} else {
-					if (HasGoalBeenDevisedByOtherPlatoon(it->second)) {
-						continue;
-					}
-				}
-				return it->second;
-			}
-		};
-
 		auto candidates = (*bots | std::views::filter(commander_condition));
 		if (candidates.empty()) {
 			if (radio_message.has_value()) {
@@ -74,33 +54,11 @@ namespace pokebot::bot {
 				case common::Team::T:
 				{
 					if (game::game.IsCurrentMode(game::MapFlags::Demolition)) {
-						auto kind = node::GoalKind::Bombspot;
 						new_strategy.strategy = TroopsStrategy::Strategy::Plant_C4_Specific_Bombsite_Concentrative;
 						switch (new_strategy.strategy) {
 							case TroopsStrategy::Strategy::Plant_C4_Specific_Bombsite_Concentrative:
 							{
-								if (IsRoot()) {
-									// If the troop is the root, create new platoons.
-									while (DeletePlatoon(0));	// Delete all platoon.
-
-									int platoon = CreatePlatoon(
-										[](const BotPair& target) -> bool { return target.second.JoinedPlatoon() == 0; },
-										[](const BotPair& target) -> bool { return target.second.HasWeapon(game::Weapon::C4); }
-									);
-
-									auto followers = (*bots | std::views::filter([](const BotPair& target) -> bool {
-										return target.second.JoinedTeam() == common::Team::T && !target.second.HasWeapon(game::Weapon::C4); }) | std::views::take(5)
-											);
-									for (auto& follower : followers) {
-										follower.second.JoinPlatoon(platoon);
-									}
-									new_strategy.objective_goal_node = selectGoal(kind);
-								} else {
-									// If the troop is a platoon
-									new_strategy.strategy = TroopsStrategy::Strategy::Follow;
-									new_strategy.leader_name = Manager::Instance().Bomber_Name.data();
-									assert(!new_strategy.leader_name.empty());
-								}
+								DecideStrategyToPlantC4Concentrative(bots, &new_strategy);
 								break;
 							}
 							default:
@@ -110,60 +68,24 @@ namespace pokebot::bot {
 					} else if (game::game.IsCurrentMode(game::MapFlags::HostageRescue)) {
 						auto kind = node::GoalKind::Rescue_Zone;
 						strategy.strategy = TroopsStrategy::Strategy::Prevent_Hostages;
-						new_strategy.objective_goal_node = selectGoal(kind);
+						new_strategy.objective_goal_node = SelectGoal(kind);
 					} else if (game::game.IsCurrentMode(game::MapFlags::Assassination)) {
 						auto kind = node::GoalKind::Vip_Safety;
-						new_strategy.objective_goal_node = selectGoal(kind);
+						new_strategy.objective_goal_node = SelectGoal(kind);
 					} else if (game::game.IsCurrentMode(game::MapFlags::Escape)) {
 						auto kind = node::GoalKind::Escape_Zone;
-						new_strategy.objective_goal_node = selectGoal(kind);
+						new_strategy.objective_goal_node = SelectGoal(kind);
 					}
 					break;
 				}
 				case common::Team::CT:
 				{
 					if (game::game.IsCurrentMode(game::MapFlags::Demolition)) {
-						auto kind = node::GoalKind::Bombspot;
 						new_strategy.strategy = TroopsStrategy::Strategy::Defend_Bombsite_Divided;
 						switch (new_strategy.strategy) {
 							case TroopsStrategy::Strategy::Defend_Bombsite_Divided:
 							{
-								if (IsRoot()) {
-									// If the troop is the root, create new platoons.
-									while (DeletePlatoon(0));	// Delete all platoon.
-
-									const size_t Number_Of_Goals = node::czworld.GetNumberOfGoals(node::GoalKind::Bombspot);
-									assert(Number_Of_Goals > 0);
-									for (int i = 0; i < Number_Of_Goals; i++) {
-										CreatePlatoon(
-											[i](const BotPair& target) -> bool {
-											return i == target.second.JoinedPlatoon();
-										},
-											[i](const BotPair& target) -> bool {
-											return i == target.second.JoinedPlatoon();
-										}
-										);
-									}
-
-									auto cts = (*bots | std::views::filter([](const BotPair& target) -> bool { return target.second.JoinedTeam() == common::Team::CT; }));
-									const size_t Number_Of_Cts = std::distance(cts.begin(), cts.end());
-									if (Number_Of_Cts > 1) {
-										const size_t Number_Of_Member_In_Squad = static_cast<size_t>(std::ceil(static_cast<common::Dec>(Number_Of_Cts) / static_cast<common::Dec>(Number_Of_Goals)));
-										auto member = cts.begin();
-										for (int squad = 0; squad < Number_Of_Goals; squad++) {
-											for (int j = 0; j < Number_Of_Member_In_Squad && member != cts.end(); j++, member++) {
-												member->second.JoinPlatoon(squad);
-											}
-										}
-									} else {
-										new_strategy.strategy = TroopsStrategy::Strategy::Defend_Bombsite_Divided;
-										new_strategy.objective_goal_node = selectGoal(kind);
-									}
-								} else {
-									// If the troop is a platoon
-									new_strategy.strategy = TroopsStrategy::Strategy::Defend_Bombsite_Divided;
-									new_strategy.objective_goal_node = selectGoal(kind);
-								}
+								DecideStrategyToDefendBombsite(bots, &new_strategy);
 								break;
 							}
 							default:
@@ -173,13 +95,13 @@ namespace pokebot::bot {
 					} else if (game::game.IsCurrentMode(game::MapFlags::HostageRescue)) {
 						auto kind = node::GoalKind::Rescue_Zone;
 						strategy.strategy = TroopsStrategy::Strategy::Rush_And_Rescue;
-						new_strategy.objective_goal_node = selectGoal(kind);
+						new_strategy.objective_goal_node = SelectGoal(kind);
 					} else if (game::game.IsCurrentMode(game::MapFlags::Assassination)) {
 						auto kind = node::GoalKind::Vip_Safety;
-						new_strategy.objective_goal_node = selectGoal(kind);
+						new_strategy.objective_goal_node = SelectGoal(kind);
 					} else if (game::game.IsCurrentMode(game::MapFlags::Escape)) {
 						auto kind = node::GoalKind::Escape_Zone;
-						new_strategy.objective_goal_node = selectGoal(kind);
+						new_strategy.objective_goal_node = SelectGoal(kind);
 					}
 					break;
 				}
@@ -216,6 +138,98 @@ namespace pokebot::bot {
 
 		for (auto& platoon : platoons) {
 			platoon.SetNewStrategy(strategy);
+		}
+	}
+
+	void Troops::DeleteAllPlatoon() noexcept {
+		while (DeletePlatoon(0));	// Delete all platoon.
+	}
+
+	node::NodeID Troops::SelectGoal(node::GoalKind kind) {
+#if !USE_NAVMESH
+		auto goal = node::world.GetGoal(kind);
+#else
+		auto goal = node::czworld.GetGoal(kind);
+#endif
+		for (auto it = goal.first; it != goal.second; it++) {
+			if (IsRoot()) {
+				if (HasGoalBeenDevised(it->second)) {
+					continue;
+				}
+			} else {
+				if (HasGoalBeenDevisedByOtherPlatoon(it->second)) {
+					continue;
+				}
+			}
+			// 
+			return it->second;
+		}
+	}
+
+	namespace filter {
+		template<common::Team team> bool ByTeam(const BotPair& target) noexcept { return target.second.JoinedTeam() == team; }
+		template<game::Weapon weapon> bool ByHavingWeapon(const BotPair& target) noexcept { return target.second.HasWeapon(weapon); }
+		template<game::Weapon weapon> bool ByNotHavingWeapon(const BotPair& target) noexcept { return !target.second.HasWeapon(weapon); }
+	}
+
+	void Troops::DecideStrategyToPlantC4Concentrative(Bots* bots, TroopsStrategy* new_strategy) {
+		auto kind = node::GoalKind::Bombspot;
+		if (IsRoot()) {
+			// If the troop is the root, create new platoons.
+			DeleteAllPlatoon();
+
+			int platoon = CreatePlatoon(
+				[](const BotPair& target) -> bool { return target.second.JoinedPlatoon() == 0; },
+				filter::ByHavingWeapon<game::Weapon::C4>
+			);
+
+			auto followers = (*bots | std::views::filter(filter::ByTeam<common::Team::T>) | std::views::filter(filter::ByNotHavingWeapon<game::Weapon::C4>) | std::views::take(5));
+
+			for (auto& follower : followers) {
+				follower.second.JoinPlatoon(platoon);
+			}
+			new_strategy->objective_goal_node = SelectGoal(kind);
+		} else {
+			// If the troop is a platoon
+			new_strategy->strategy = TroopsStrategy::Strategy::Follow;
+			new_strategy->leader_name = Manager::Instance().Bomber_Name.data();
+			assert(!new_strategy->leader_name.empty());
+		}
+	}
+
+	void Troops::DecideStrategyToDefendBombsite(Bots* bots, TroopsStrategy* new_strategy) {
+		auto kind = node::GoalKind::Bombspot;
+		if (IsRoot()) {
+			// If the troop is the root, create new platoons.
+			DeleteAllPlatoon();
+
+			auto cts = (*bots | std::views::filter(filter::ByTeam<common::Team::CT>));
+			const size_t Number_Of_Cts = std::distance(cts.begin(), cts.end());
+			if (Number_Of_Cts > 1) {
+				const size_t Number_Of_Goals = node::czworld.GetNumberOfGoals(node::GoalKind::Bombspot);
+				assert(Number_Of_Goals > 0);
+				for (int i = 0; i < Number_Of_Goals; i++) {
+					CreatePlatoon(
+						[i](const BotPair& target) -> bool { return i == target.second.JoinedPlatoon(); },
+						[i](const BotPair& target) -> bool { return i == target.second.JoinedPlatoon(); }
+					);
+				}
+
+				const size_t Number_Of_Member_In_Squad = static_cast<size_t>(std::ceil(static_cast<common::Dec>(Number_Of_Cts) / static_cast<common::Dec>(Number_Of_Goals)));
+				auto member = cts.begin();
+				for (int squad = 0; squad < Number_Of_Goals; squad++) {
+					for (int j = 0; j < Number_Of_Member_In_Squad && member != cts.end(); j++, member++) {
+						member->second.JoinPlatoon(squad);
+					}
+				}
+			} else {
+				new_strategy->strategy = TroopsStrategy::Strategy::Defend_Bombsite_Divided;
+				new_strategy->objective_goal_node = SelectGoal(kind);
+			}
+		} else {
+			// If the troop is a platoon
+			new_strategy->strategy = TroopsStrategy::Strategy::Defend_Bombsite_Divided;
+			new_strategy->objective_goal_node = SelectGoal(kind);
 		}
 	}
 }
