@@ -48,6 +48,13 @@ namespace pokebot::bot {
 			if (radio_message.has_value()) {
 				new_strategy.strategy = TroopsStrategy::Strategy::Follow;
 				new_strategy.leader_name = radio_message->sender.data();
+			} else {
+				if (!IsRoot()) {
+					if (team == common::Team::T) {
+						new_strategy.strategy = TroopsStrategy::Strategy::Follow;
+						new_strategy.leader_name = Manager::Instance().Bomber_Name.data();
+					}
+				}
 			}
 		} else {
 			switch (team) {
@@ -183,11 +190,13 @@ namespace pokebot::bot {
 				filter::ByHavingWeapon<game::Weapon::C4>
 			);
 
-			auto followers = (*bots | std::views::filter(filter::ByTeam<common::Team::T>) | std::views::filter(filter::ByNotHavingWeapon<game::Weapon::C4>) | std::views::take(5));
-
+			auto terrorists = (*bots | std::views::filter(filter::ByTeam<common::Team::T>));
+			auto bomber = (terrorists | std::views::filter(filter::ByHavingWeapon<game::Weapon::C4>));
+			auto followers = (terrorists | std::views::filter(filter::ByNotHavingWeapon<game::Weapon::C4>) | std::views::take(5));
 			for (auto& follower : followers) {
 				follower.second.JoinPlatoon(platoon);
 			}
+			// If the bot has a C4.
 			new_strategy->objective_goal_node = SelectGoal(kind);
 		} else {
 			// If the troop is a platoon

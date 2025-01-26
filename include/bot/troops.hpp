@@ -4,6 +4,7 @@ namespace pokebot::bot {
 		common::PlayerName leader_name{};	// The name of the player to follow.
 		node::NodeID objective_goal_node = node::Invalid_NodeID;
 		enum class Strategy {
+			None,
 			/*- Demolition -*/
 
 			/*

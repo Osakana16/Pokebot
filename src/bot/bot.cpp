@@ -721,6 +721,7 @@ namespace pokebot::bot {
 				assert(!Received_Strategy.leader_name.empty());
 				break;
 			default:
+				assert(Received_Strategy.leader_name.empty());
 				goal_queue.AddGoalQueue(Received_Strategy.objective_goal_node, 1);
 				break;
 		}
