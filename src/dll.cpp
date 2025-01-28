@@ -131,6 +131,8 @@ C_DLLEXPORT int Meta_Detach(PLUG_LOADTIME now, PL_UNLOAD_REASON reason) {
     return (TRUE); // returning TRUE enables metamod to unload this plugin
 }
 
+edict_t* worldspawn = NULL;
+
 C_DLLEXPORT void WINAPI
 GiveFnptrsToDll(enginefuncs_t* pengfuncsFromEngine, globalvars_t* pGlobals) {
     // get the engine functions from the engine...
@@ -221,9 +223,11 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
 
 C_DLLEXPORT int GetEntityAPI2_Post(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersion) {
     gFunctionTable_Post.pfnSpawn = [](edict_t* entity) -> int {
-        if (FStrEq(STRING(entity->v.classname), "trigger_multiple")) {
+        if (std::string_view(STRING(entity->v.classname)) == "trigger_multiple") {
             entity->v.flags |= FL_WORLDBRUSH;   // make it detectable!
             entity->v.rendermode = kRenderNormal;
+        } else if (std::string_view(STRING(entity->v.classname)) == "worldspawn") {
+            worldspawn = entity;
         }
         RETURN_META_VALUE(MRES_IGNORED, 0);
     };

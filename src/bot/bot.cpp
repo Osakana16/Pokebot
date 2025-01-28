@@ -21,8 +21,9 @@ namespace pokebot::bot {
 				client->button,
 				client->impulse,
 				Msec_Value);
+
 		client->Edict()->v.button = 0;
-		move_speed = 0;
+		move_speed = strafe_speed = 0.0f;
 	}
 
 	void Bot::TurnViewAngle() {
@@ -125,6 +126,7 @@ namespace pokebot::bot {
 			
 			(this->*(doObjective[static_cast<int>(state)]))();
 			CheckAround();
+			CheckBlocking();
 
 			for (auto& vector : { Vector(0.0f, 0.0f, 0.0f), Vector(50.0f, 0.0f, 0.0f), Vector(-50.0f, 0.0f, 0.0f), Vector(0.0f, 50.0f, 0.0f), Vector(0.0f, -50.0f, 0.0f) }) {
 				if (auto area = node::czworld.GetNearest(Origin() + vector); area != nullptr && node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Jump)) {
@@ -392,6 +394,7 @@ namespace pokebot::bot {
 #endif
 		}
 
+
 		TurnViewAngle();
 		TurnMovementAngle();
 #if 1
@@ -419,6 +422,19 @@ namespace pokebot::bot {
 			state = State::Accomplishment;
 		} else {
 			state = State::Crisis;
+		}
+	}
+
+	void Bot::CheckBlocking() noexcept {
+		// Check if the player is blocking and avoid it.
+		edict_t* entity{};
+		while ((entity = common::FindEntityInSphere(entity, Origin(), 90.0f)) != nullptr) {
+			if (std::string_view(STRING(entity->v.classname)) == "player") {
+				if (auto client = game::game.clients.Get(Name().data()); client->CanSeeEntity(entity)) {
+					PressKey(ActionKey::Move_Left);
+					break;
+				}
+			}
 		}
 	}
 
@@ -720,6 +736,11 @@ namespace pokebot::bot {
 			case TroopsStrategy::Strategy::Follow:
 				assert(!Received_Strategy.leader_name.empty());
 				break;
+			case TroopsStrategy::Strategy::Defend_Bombsite_Divided:
+				if (Received_Strategy.objective_goal_node == node::Invalid_NodeID) {
+					return;
+				}
+				[[fallthrough]];
 			default:
 				assert(Received_Strategy.leader_name.empty());
 				goal_queue.AddGoalQueue(Received_Strategy.objective_goal_node, 1);

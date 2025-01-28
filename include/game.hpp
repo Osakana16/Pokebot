@@ -337,6 +337,7 @@ namespace pokebot {
 			bool IsViewModelReloading() const POKEBOT_NOEXCEPT;
 			bool IsPlayerModelReloading() const POKEBOT_NOEXCEPT;
 
+			bool CanSeeEntity(const edict_t*) const noexcept;
 			bool CanSeeFriend() const POKEBOT_NOEXCEPT;
 			void GetEnemyNamesWithinView(common::PlayerName player_names[32]) const POKEBOT_NOEXCEPT;
 			void GetEntityNamesInView(common::PlayerName player_names[32]) const POKEBOT_NOEXCEPT;

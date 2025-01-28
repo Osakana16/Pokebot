@@ -143,6 +143,8 @@ namespace pokebot::bot {
 		void OnSelectionCompleted() POKEBOT_NOEXCEPT;
 		void CheckAround();
 
+		void CheckBlocking() noexcept;
+
 		void TurnViewAngle(), TurnMovementAngle();
 
 		ActionKey press_key{};

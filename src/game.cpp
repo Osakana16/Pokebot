@@ -407,6 +407,10 @@ namespace pokebot {
 			GetAsMutable(Client_Name.data())->item |= Item::Defuse_Kit;
 		}
 
+		bool Client::CanSeeEntity(const edict_t* const Target) const noexcept {
+			return entity::CanSeeEntity(Edict(), Target);
+		}
+
 		bool Client::CanSeeFriend() const POKEBOT_NOEXCEPT {
 			for (auto& other : game.clients.GetAll()) {
 				if (entity::CanSeeEntity(*this, other.second) && other.second.GetTeam() == GetTeam()) {
