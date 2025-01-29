@@ -48,6 +48,10 @@ namespace pokebot::node {
 		std::list<NodeIdentity> nodes{};
 		std::list<NodeIdentity>::const_iterator cursor{};
 	public:
+		bool Contains(const NodeIdentity n) const noexcept {
+			return std::find(nodes.cbegin(), nodes.cend(), n) != nodes.cend();
+		}
+
 		size_t Size() const {
 			return nodes.size();
 		}

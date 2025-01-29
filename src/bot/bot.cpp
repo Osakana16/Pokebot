@@ -116,14 +116,21 @@ namespace pokebot::bot {
 		}
 
 		if (!freeze_time.IsRunning() && !spawn_cooldown_time.IsRunning()) {
-			if (state != State::Crisis && Manager::Instance().IsFollowerPlatoon(JoinedTeam(), JoinedPlatoon())) {
-				state = State::Follow;
-			}
 			// Do not do anything when freezing.
 			// Due to game engine specifications or bugs, 
 			// if we execute a heavy process immediately after the start of a round, 
 			// the game will freeze.
 			
+			if (state != State::Crisis && Manager::Instance().IsFollowerPlatoon(JoinedTeam(), JoinedPlatoon())) {
+				state = State::Follow;
+			}
+
+			// If the bot is not in the route, reset it.
+			if (auto current_id = node::czworld.GetNearest(Origin()); current_id != nullptr) {
+				if (!routes.Contains(current_id->m_id)) {
+					routes.Clear();
+				}
+			}
 			(this->*(doObjective[static_cast<int>(state)]))();
 
 			// - Bot Navigation -
@@ -137,7 +144,7 @@ namespace pokebot::bot {
 				if (auto area = node::czworld.GetNearest(vector); area != nullptr) {
 					// Jump if it is specified.
 					if (!node::czworld.HasFlag(area->m_id, node::NavmeshFlag::No_Jump) && node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Jump)) {
-					PressKey(ActionKey::Jump);
+						PressKey(ActionKey::Jump);
 					}
 					// Duck if it is specified.
 					if (node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Crouch)) {
