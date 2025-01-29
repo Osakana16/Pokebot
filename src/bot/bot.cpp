@@ -125,22 +125,36 @@ namespace pokebot::bot {
 			// the game will freeze.
 			
 			(this->*(doObjective[static_cast<int>(state)]))();
-			CheckAround();
-			CheckBlocking();
 
-			for (auto& vector : { Vector(0.0f, 0.0f, 0.0f), Vector(50.0f, 0.0f, 0.0f), Vector(-50.0f, 0.0f, 0.0f), Vector(0.0f, 50.0f, 0.0f), Vector(0.0f, -50.0f, 0.0f) }) {
-				if (auto area = node::czworld.GetNearest(Origin() + vector); area != nullptr && node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Jump)) {
+			// - Bot Navigation -
+
+			CheckAround();		// Update the entity's viewment.
+			CheckBlocking();	// Check the something is blocking myself.
+
+			// Check the forward navarea
+			for (auto& vector : { Origin(), Origin() + gpGlobals->v_forward * 90.0f }) {
+				// 
+				if (auto area = node::czworld.GetNearest(vector); area != nullptr) {
+					// Jump if it is specified.
+					if (!node::czworld.HasFlag(area->m_id, node::NavmeshFlag::No_Jump) && node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Jump)) {
 					PressKey(ActionKey::Jump);
-					break;
+					}
+					// Duck if it is specified.
+					if (node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Crouch)) {
+						PressKey(ActionKey::Duck);
+					}
 				}
 			}
 
+			// Move forward if the bot has the route.
 			if (!routes.Empty() && next_dest_node != node::Invalid_NodeID) {
 				if (look_direction.view.has_value() && look_direction.movement.has_value()) {
 					PressKey(ActionKey::Run);
 				}
 			}
 			look_direction.Clear();
+
+			// - Update Key -
 
 			if (bool(press_key & ActionKey::Run)) {
 				if (bool(press_key & ActionKey::Shift)) {
