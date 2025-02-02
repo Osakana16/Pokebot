@@ -24,6 +24,7 @@ namespace pokebot::bot {
 
 		client->Edict()->v.button = 0;
 		move_speed = strafe_speed = 0.0f;
+		UnlockByBomb();
 	}
 
 	void Bot::TurnViewAngle() {
@@ -138,23 +139,19 @@ namespace pokebot::bot {
 			CheckAround();		// Update the entity's viewment.
 			CheckBlocking();	// Check the something is blocking myself.
 
-			// Check the forward navarea
-			for (auto& vector : { Origin(), Origin() + gpGlobals->v_forward * 90.0f }) {
-				// 
-				if (auto area = node::czworld.GetNearest(vector); area != nullptr) {
-					// Jump if it is specified.
-					if (!node::czworld.HasFlag(area->m_id, node::NavmeshFlag::No_Jump) && node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Jump)) {
-						PressKey(ActionKey::Jump);
-					}
-					// Duck if it is specified.
-					if (node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Crouch)) {
-						PressKey(ActionKey::Duck);
-					}
-				}
-			}
 
 			// Move forward if the bot has the route.
 			if (!routes.Empty() && next_dest_node != node::Invalid_NodeID) {
+#if 0
+				if (!stuck_check_interval_timer.IsRunning()) {
+					if (common::Distance(Origin(), stuck_check_origin) <= 5.0f) {
+						// Stuck detected.
+						routes.Clear();
+					}
+					stuck_check_origin = Origin();
+					stuck_check_interval_timer.SetTime(1.0f);
+				}
+#endif
 				if (look_direction.view.has_value() && look_direction.movement.has_value()) {
 					PressKey(ActionKey::Run);
 				}
@@ -447,6 +444,9 @@ namespace pokebot::bot {
 	}
 
 	void Bot::CheckBlocking() noexcept {
+		if (is_locked_by_bomb)
+			return;
+
 		// Check if the player is blocking and avoid it.
 		for (edict_t* entity{}; (entity = common::FindEntityInSphere(entity, Origin(), 90.0f)) != nullptr;) {
 			if (std::string_view(STRING(entity->v.classname)) == "player") {
@@ -459,6 +459,7 @@ namespace pokebot::bot {
 
 		// Check if the worldspawn is blocking:
 		const auto Head = Origin() + game::game.clients.Get(Name().data())->view_ofs;
+		const auto Foot = Head - Vector(.0f, .0f, 30.0f);
 		common::Tracer tracer{};
 		tracer.MoveStart(Head).MoveDest(Head + gpGlobals->v_forward * 90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Ignore, nullptr);
 		if (tracer.IsHit()) {
@@ -471,6 +472,27 @@ namespace pokebot::bot {
 				tracer.MoveDest(Head + gpGlobals->v_right * 90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Ignore, nullptr);
 				if (tracer.IsHit()) {
 					PressKey(ActionKey::Move_Left);
+				}
+			}
+		} else {
+			// Jump if the bot's foot stucks
+			tracer.MoveStart(Foot).MoveDest(Head + gpGlobals->v_forward * 90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Ignore, nullptr);
+			if (tracer.IsHit()) {
+				PressKey(ActionKey::Jump);
+			}
+		}
+
+		// Check the forward navarea
+		for (auto& vector : { Origin(), Origin() + gpGlobals->v_forward * 90.0f }) {
+			// 
+			if (auto area = node::czworld.GetNearest(vector); area != nullptr) {
+				// Jump if it is specified.
+				if (!node::czworld.HasFlag(area->m_id, node::NavmeshFlag::No_Jump) && node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Jump)) {
+					PressKey(ActionKey::Jump);
+				}
+				// Duck if it is specified.
+				if (node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Crouch)) {
+					PressKey(ActionKey::Duck);
 				}
 			}
 		}

@@ -165,6 +165,11 @@ namespace pokebot::bot::behavior {
 			}
 		});
 
+		lock->Define([](Bot* const self) -> Status {
+			self->LockByBomb();
+			return Status::Success;
+		});
+
 		set_goal_c4_node->Define([](Bot* const self) -> Status {
 #if !USE_NAVMESH
 			node::NodeID id = node::world.GetNearest(*manager.C4Origin());

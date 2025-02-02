@@ -39,8 +39,7 @@ namespace pokebot::bot {
 	};
 
 
-	POKEBOT_DEFINE_ENUM_WITH_BIT_OPERATOR(
-		ActionKey,
+	POKEBOT_DEFINE_ENUM_WITH_BIT_OPERATOR(ActionKey,
 		None = 0,
 		Run = IN_RUN,
 		Attack = IN_ATTACK,
@@ -122,7 +121,16 @@ namespace pokebot::bot {
 
 		// Make the bot to do nothing except buying while round freeze.
 		Timer freeze_time{};
+		// 
 		Timer buy_wait_timer{};
+
+		// - Stuck Checker -
+		// 
+		Timer stuck_check_interval_timer{};
+		Vector stuck_check_origin{};
+
+		// - Lock -
+		bool is_locked_by_bomb{};
 
 		Message start_action{};
 
@@ -197,8 +205,10 @@ namespace pokebot::bot {
 			&Bot::SelectionUpdate,	// Model Select
 			&Bot::OnSelectionCompleted 
 		};
-
 	public:
+		void LockByBomb() { is_locked_by_bomb = true; }
+		void UnlockByBomb() { is_locked_by_bomb = false; }
+
 		void ReceiveCommand(const TroopsStrategy&);
 
 		Mood personality{};

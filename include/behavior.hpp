@@ -170,6 +170,7 @@ namespace pokebot::bot {
 		BEHAVIOR_CREATE_INLINE(Action, set_goal_c4_node);
 		BEHAVIOR_CREATE_INLINE(Action, set_goal_c4_vector);
 		BEHAVIOR_CREATE_INLINE(Action, rapid_fire);
+		BEHAVIOR_CREATE_INLINE(Action, lock);
 		BEHAVIOR_CREATE_INLINE(Action, move_vector);
 		BEHAVIOR_CREATE_INLINE(Action, set_goal_from_team_objective_within_range);
 

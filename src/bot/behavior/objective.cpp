@@ -2,6 +2,11 @@
 #include "bot/manager.hpp"
 
 namespace pokebot::bot::behavior {
+	namespace demolition {
+		std::shared_ptr<Sequence> plant = Sequence::Create("demolition::plant");
+		std::shared_ptr<Sequence> defuse = Sequence::Create("demolition::defuse");
+	}
+
 	// - Rescue Behaviors -
 	namespace rescue {
 		std::shared_ptr<Sequence> ct_try = Sequence::Create("rescue::ct_try");
@@ -86,8 +91,20 @@ namespace pokebot::bot::behavior {
 			find_goal,
 			head_to_goal,
 			change_c4,
-			rapid_fire
+			demolition::plant
 		});
+
+		demolition::plant->Define
+		({
+			lock,
+			rapid_fire
+		 });
+		
+		demolition::defuse->Define
+		({
+			lock,
+			use
+		 });
 
 		demolition::t_planted_wary->Define
 		({
@@ -128,7 +145,7 @@ namespace pokebot::bot::behavior {
 		demolition::ct_defusing->Define
 		({
 			look_c4,
-			use
+			demolition::defuse
 		});
 
 		demolition::ct_planted->Define
