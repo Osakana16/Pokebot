@@ -119,10 +119,6 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             return;
                         }
 
-                        if (is_host) {
-                            pokebot::game::game.RegisterClient(const_cast<edict_t*>(engine_target_edict));
-                        }
-
                         if (args.size() >= 4) {
                             static const std::unordered_map<TextCache, pokebot::bot::Message, TextCache::Hash> Menu_Cache {
                                 { "#Team_Select", pokebot::bot::Message::Team_Select },
