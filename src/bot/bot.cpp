@@ -448,12 +448,29 @@ namespace pokebot::bot {
 
 	void Bot::CheckBlocking() noexcept {
 		// Check if the player is blocking and avoid it.
-		edict_t* entity{};
-		while ((entity = common::FindEntityInSphere(entity, Origin(), 90.0f)) != nullptr) {
+		for (edict_t* entity{}; (entity = common::FindEntityInSphere(entity, Origin(), 90.0f)) != nullptr;) {
 			if (std::string_view(STRING(entity->v.classname)) == "player") {
 				if (auto client = game::game.clients.Get(Name().data()); client->CanSeeEntity(entity)) {
 					PressKey(ActionKey::Move_Left);
-					break;
+					return;
+				}
+			}
+		}
+
+		// Check if the worldspawn is blocking:
+		const auto Head = Origin() + game::game.clients.Get(Name().data())->view_ofs;
+		common::Tracer tracer{};
+		tracer.MoveStart(Head).MoveDest(Head + gpGlobals->v_forward * 90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Ignore, nullptr);
+		if (tracer.IsHit()) {
+			// Check left
+			tracer.MoveDest(Head + gpGlobals->v_right * -90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Ignore, nullptr);
+			if (tracer.IsHit()) {
+				PressKey(ActionKey::Move_Right);
+			} else {
+				// Check right
+				tracer.MoveDest(Head + gpGlobals->v_right * 90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Ignore, nullptr);
+				if (tracer.IsHit()) {
+					PressKey(ActionKey::Move_Left);
 				}
 			}
 		}
