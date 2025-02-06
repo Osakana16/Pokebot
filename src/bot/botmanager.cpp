@@ -1,15 +1,14 @@
 #include "bot/manager.hpp"
 namespace pokebot::bot {
+	namespace {
+		bool IsTerrorist(const BotPair& target) noexcept { return target.second.JoinedTeam() == common::Team::T; }
+		bool IsCounterTerrorist(const BotPair& target) noexcept { return target.second.JoinedTeam() == common::Team::CT; }
+	}
+
 	Manager::Manager() :
 		troops{
-			Troops(
-				[](const BotPair& target) -> bool { return target.second.JoinedTeam() == common::Team::T; },
-				[](const BotPair& target) -> bool { return target.second.JoinedTeam() == common::Team::T; },
-				common::Team::T),
-			Troops(
-				[](const BotPair& target) -> bool { return target.second.JoinedTeam() == common::Team::CT; },
-				[](const BotPair& target) -> bool { return target.second.JoinedTeam() == common::Team::CT; },
-				common::Team::CT)
+			Troops(IsTerrorist, IsTerrorist, common::Team::T),
+			Troops(IsCounterTerrorist, IsCounterTerrorist, common::Team::CT)
 	} {
 
 	}
@@ -117,23 +116,44 @@ namespace pokebot::bot {
 			return;
 
 		OnNewRoundReady();
+		if (game::game.IsCurrentMode(game::MapFlags::Demolition)) {
+			if (!c4_origin.has_value()) {
+				if (bomber_name.empty()) {
+					// When the bomb is dropped:
+					// 
+					if (backpack != nullptr) {
 
-		if (!c4_origin.has_value()) {
-			edict_t* c4{};
-			while ((c4 = common::FindEntityByClassname(c4, "grenade")) != nullptr) {
-				if (std::string_view(STRING(c4->v.model)) == "models/w_c4.mdl") {
-					c4_origin = c4->v.origin;
-					break;
+					} else {
+						edict_t* dropped_bomb{};
+						while ((dropped_bomb = common::FindEntityByClassname(dropped_bomb, "weaponbox")) != NULL) {
+							if (std::string_view(STRING(dropped_bomb->v.model)) == "models/w_backpack.mdl") {
+								backpack = dropped_bomb;
+								terrorist_troop.DecideStrategy(&bots, RadioMessage{ .team=common::Team::T, .message="#Take_Bomb"  });
+								break;
+							}
+						}
+					}
+				}
+
+				edict_t* c4{};
+				while ((c4 = common::FindEntityByClassname(c4, "grenade")) != nullptr) {
+					if (std::string_view(STRING(c4->v.model)) == "models/w_c4.mdl") {
+						c4_origin = c4->v.origin;
+						break;
+					}
+				}
+
+				if (c4_origin.has_value()) {
+					OnBombPlanted();
 				}
 			}
-			if (c4_origin.has_value()) {
-				OnBombPlanted();
-			}
 		}
+
 
 		for (auto& bot : bots) {
 			bot.second.Run();
 		}
+
 
 		if (!radio_message.sender.empty()) {
 			auto followers = (bots | std::views::filter([&](const std::pair<common::PlayerName, Bot>& Pair) -> bool { return radio_message.team == Pair.second.JoinedTeam() && radio_message.sender != Pair.first; }));
@@ -182,6 +202,7 @@ namespace pokebot::bot {
 
 	void Manager::OnBombPickedUp(const std::string_view& Client_Name) POKEBOT_NOEXCEPT {
 		bomber_name = Client_Name.data();
+		backpack = nullptr;
 	}
 
 	void Manager::OnBombDropped(const std::string_view& Client_Name) POKEBOT_NOEXCEPT {

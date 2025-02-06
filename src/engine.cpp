@@ -391,7 +391,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             { "#Too_Many_Terrorists", nothingToDo },
                             { "#Too_Many_CTs", nothingToDo },
                             { "#Weapon_Not_Available", nothingToDo },
-                            { "#Game_bomb_pickup", nothingToDo },
+                            { "#Game_bomb_pickup", [] {}  },
                             { "#Got_bomb", nothingToDo },
                             { "#Game_bomb_drop", [] { pokebot::bot::Manager::Instance().OnBombDropped(std::get<TextCache>(args[2]).data()); }},
                             // TODO: These below should set failIfBotDoes

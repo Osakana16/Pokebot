@@ -2,23 +2,11 @@
 #include "bot/troops.hpp"
 
 namespace pokebot::bot {
-	enum class Policy {
-		Elimination,
-		Survival,		// Survive until the round ends.
-		Defense,
-		Offense,
-		Player
-	};
-
 	struct RadioMessage {
 		common::Team team = common::Team::Spector;
 		common::PlayerName sender{};
 		common::fixed_string<255u> message{};
 		PlatoonID platoon{};
-	};
-
-	struct BotBalancer final {
-		Vector gap{};
 	};
 
 	using BotPair = std::pair<common::PlayerName, Bot>;
@@ -28,7 +16,11 @@ namespace pokebot::bot {
 	*/
 	class Manager final : private common::Singleton<Manager> {
 		std::optional<Vector> c4_origin{};
+		edict_t* backpack{};
 		common::Array<Troops, 2> troops;
+		Troops& terrorist_troop = troops[0];
+		Troops& counter_terrorist_troop = troops[1];
+
 		friend class pokebot::message::MessageDispatcher;
 		std::unordered_map<common::PlayerName, Bot, common::PlayerName::Hash> bots{};
 
@@ -192,5 +184,11 @@ namespace pokebot::bot {
 		* @return The origin of the C4 bomb.
 		*/
 		const std::optional<Vector>& C4Origin() const POKEBOT_NOEXCEPT { return c4_origin; }
+
+		/**
+		* @brief Get the origin of the C4 bomb.
+		* @return The origin of the C4 bomb.
+		*/
+		std::optional<Vector> BackpackOrigin() const POKEBOT_NOEXCEPT { return (backpack != nullptr ? std::make_optional(backpack->v.origin) : std::nullopt); }
 	};
 }

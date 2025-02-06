@@ -181,7 +181,15 @@ namespace pokebot::bot::behavior {
 			} else
 				return Status::Failed;
 #else
-			node::NodeID id = node::czworld.GetNearest(*Manager::Instance().C4Origin())->m_id;
+			auto area = node::czworld.GetNearest(*Manager::Instance().C4Origin());
+			for (const auto& Another_Origin : { Vector{}, Vector{50.0f, 0.0f, 0.0f}, Vector{ -50.0f, 0.0f, 0.0f }, Vector{0.0f, 50.0f, 0.0f}, Vector{0.0f, -50.0f, 0.0f} }) {
+				if ((area = node::czworld.GetNearest(*Manager::Instance().C4Origin() + Another_Origin)) != nullptr) {
+					break;
+				}
+			}
+
+			assert(area != nullptr);
+			node::NodeID id = area->m_id;
 			if (node::czworld.IsOnNode(self->Origin(), id))
 				return Status::Failed;
 
@@ -196,7 +204,7 @@ namespace pokebot::bot::behavior {
 			if (!self->goal_vector.has_value())
 				return Status::Failed;
 
-			if (common::Distance(self->Origin(), *self->goal_vector) <= 75.0f) {
+			if (common::Distance(self->Origin(), *self->goal_vector) >= 5.0f) {
 				self->look_direction.view = *self->goal_vector;
 				self->look_direction.movement = *self->goal_vector;
 				self->PressKey(ActionKey::Run);
@@ -209,6 +217,26 @@ namespace pokebot::bot::behavior {
 				return Status::Failed;
 
 			self->goal_vector = *Manager::Instance().C4Origin();
+			return Status::Success;
+		});
+
+		set_goal_backpack_node->Define([](Bot* const self) -> Status {
+			node::NodeID id = node::czworld.GetNearest(*Manager::Instance().BackpackOrigin())->m_id;
+			if (node::czworld.IsOnNode(self->Origin(), id))
+				return Status::Failed;
+
+			if (id != node::Invalid_NodeID && !node::czworld.IsOnNode(self->Origin(), id) && self->goal_queue.AddGoalQueue(id, 1)) {
+				return Status::Success;
+			} else
+				return Status::Failed;
+			return Status::Success;
+		});
+
+		set_goal_backpack_vector->Define([](Bot* const self) -> Status {
+			if (!Manager::Instance().BackpackOrigin().has_value() || self->goal_vector.has_value())
+				return Status::Failed;
+
+			self->goal_vector = *Manager::Instance().BackpackOrigin();
 			return Status::Success;
 		});
 

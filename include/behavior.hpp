@@ -169,6 +169,8 @@ namespace pokebot::bot {
 		BEHAVIOR_CREATE_INLINE(Action, reset_goal);
 		BEHAVIOR_CREATE_INLINE(Action, set_goal_c4_node);
 		BEHAVIOR_CREATE_INLINE(Action, set_goal_c4_vector);
+		BEHAVIOR_CREATE_INLINE(Action, set_goal_backpack_node);
+		BEHAVIOR_CREATE_INLINE(Action, set_goal_backpack_vector);
 		BEHAVIOR_CREATE_INLINE(Action, rapid_fire);
 		BEHAVIOR_CREATE_INLINE(Action, lock);
 		BEHAVIOR_CREATE_INLINE(Action, move_vector);
@@ -190,6 +192,8 @@ namespace pokebot::bot {
 
 			BEHAVIOR_CREATE_INLINE(Priority, t_planted_wary);	// Terrorists make the rounds to defend the bomb.
 			BEHAVIOR_CREATE_INLINE(Priority, t_planted_camp);	// Terrorirts camp around c4 to defend the bomb.
+			BEHAVIOR_CREATE_INLINE(Priority, t_pick_up_bomb);	// Terrorirts try to pick up the bomb.
+
 			BEHAVIOR_CREATE_INLINE(Priority, t_defusing);
 			
 			BEHAVIOR_CREATE_INLINE(Priority, ct_defend);

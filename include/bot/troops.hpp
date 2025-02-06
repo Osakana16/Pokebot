@@ -12,11 +12,14 @@ namespace pokebot::bot {
 				Terrorists never split the team. All members defend one bombsite.
 			*/
 			Plant_C4_Specific_Bombsite_Concentrative,
-
 			/*
 				Divide the team into the bomber and the no-bomber.
 			*/
 			Plant_C4_And_Deceive,
+			/*
+				The bomb is dropped, take it hurry!
+			*/
+			Take_Backpack,
 			/*
 				Stick together and defend the specific bombsite.
 				CTs never split the team. All members defend one bombsite.
@@ -27,6 +30,10 @@ namespace pokebot::bot {
 				CTs splits into teams based on number of bombing sites and defend bombsites.
 			*/
 			Defend_Bombsite_Divided,
+			/*
+				I found the backpack, help me defend it!			
+			*/
+			Defend_Backpack,
 			/*- Hostage Rescue -*/
 			Prevent_Hostages,
 			Prevent_Rescuezones,

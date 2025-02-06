@@ -178,6 +178,7 @@ namespace pokebot::bot {
 			OnCTHostage() noexcept, 
 			OnCTAssasination() noexcept, 
 			OnCTEscape() noexcept;
+
 		void (Bot::*accomplishState[2][5])() = {
 			{
 				&Bot::OnTerroristDemolition,

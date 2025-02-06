@@ -100,6 +100,15 @@ namespace pokebot::bot::behavior {
 			rapid_fire
 		 });
 		
+		demolition::t_pick_up_bomb->Define
+		({
+			set_goal_backpack_node,
+			find_goal,
+			head_to_goal,
+			set_goal_backpack_vector,
+			move_vector
+		});
+
 		demolition::defuse->Define
 		({
 			lock,

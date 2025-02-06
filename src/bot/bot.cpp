@@ -221,6 +221,8 @@ namespace pokebot::bot {
 	void Bot::OnTerroristDemolition() noexcept {
 		if (Manager::Instance().C4Origin().has_value()) {
 			behavior::demolition::t_planted_wary->Evaluate(this);
+		} else if (Manager::Instance().BackpackOrigin().has_value()) {
+			behavior::demolition::t_pick_up_bomb->Evaluate(this);
 		} else {
 			if (HasWeapon(game::Weapon::C4)) {
 				behavior::demolition::t_plant->Evaluate(this);

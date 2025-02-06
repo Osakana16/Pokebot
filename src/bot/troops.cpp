@@ -46,8 +46,14 @@ namespace pokebot::bot {
 		auto candidates = (*bots | std::views::filter(commander_condition));
 		if (candidates.empty()) {
 			if (radio_message.has_value()) {
-				new_strategy.strategy = TroopsStrategy::Strategy::Follow;
-				new_strategy.leader_name = radio_message->sender.data();
+				if (radio_message->message == "#Take_Bomb") {
+					assert(Team() == common::Team::T);
+					new_strategy.strategy = TroopsStrategy::Strategy::Take_Backpack;
+					new_strategy.leader_name.clear();
+				} else {
+					new_strategy.strategy = TroopsStrategy::Strategy::Follow;
+					new_strategy.leader_name = radio_message->sender.data();
+				}
 			} else {
 				if (!IsRoot()) {
 					if (team == common::Team::T) {
