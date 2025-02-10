@@ -74,7 +74,6 @@ namespace pokebot::bot::behavior {
 	}
 
 	void DefineAction() {
-
 		reset_goal->Define([](Bot* const self) -> Status {
 			if (self->goal_node == node::Invalid_NodeID && self->next_dest_node == node::Invalid_NodeID)
 				return Status::Failed;

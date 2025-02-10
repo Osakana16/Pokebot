@@ -242,7 +242,7 @@ namespace pokebot::bot {
 	void Bot::OnTerroristAssasination() noexcept {
 		auto client = game::game.clients.Get(Name().data());
 		if (client->IsVIP()) {
-			behavior::assist::ct_vip_escape->Evaluate(this);
+			behavior::assassination::ct_vip_escape->Evaluate(this);
 		} else {
 
 		}
@@ -276,7 +276,7 @@ namespace pokebot::bot {
 	void Bot::OnCTAssasination() noexcept {
 		auto client = game::game.clients.Get(Name().data());
 		if (client->IsVIP()) {
-			behavior::assist::ct_vip_escape->Evaluate(this);
+			behavior::assassination::ct_vip_escape->Evaluate(this);
 		} else {
 
 		}

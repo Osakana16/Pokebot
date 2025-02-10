@@ -210,8 +210,8 @@ namespace pokebot::bot {
 			extern std::shared_ptr<Sequence> lead_hostage;
 		}
 
-		// - ASsasination Behaviors -
-		namespace assist {
+		// - ASsassination Behaviors -
+		namespace assassination {
 			extern std::shared_ptr<Sequence> ct_cover;
 			extern std::shared_ptr<Sequence> ct_take_point;
 			extern std::shared_ptr<Sequence> ct_vip_escape;

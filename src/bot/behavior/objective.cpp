@@ -15,10 +15,10 @@ namespace pokebot::bot::behavior {
 	}
 
 	// - ASsasination Behaviors -
-	namespace assist {
-		std::shared_ptr<Sequence> ct_cover = Sequence::Create("assist::ct_cover");
-		std::shared_ptr<Sequence> ct_take_point = Sequence::Create("assist::ct_take_point");
-		std::shared_ptr<Sequence> ct_vip_escape = Sequence::Create("assist::ct_vip_escape");
+	namespace assassination {
+		std::shared_ptr<Sequence> ct_cover = Sequence::Create("assassination::ct_cover");
+		std::shared_ptr<Sequence> ct_take_point = Sequence::Create("assassination::ct_take_point");
+		std::shared_ptr<Sequence> ct_vip_escape = Sequence::Create("assassination::ct_vip_escape");
 	}
 	
 	// - EScape Behaviors -
@@ -181,19 +181,19 @@ namespace pokebot::bot::behavior {
 			Condition::If(CanUseHostage, rescue::lead_hostage)
 		 });
 
-		assist::ct_cover->Define
+		assassination::ct_cover->Define
 		({
 
 		 });
 
-		assist::ct_take_point->Define
+		assassination::ct_take_point->Define
 		({
 			set_goal_vipsafety,
 			find_goal,
 			head_to_goal
 		 });
 
-		assist::ct_vip_escape->Define
+		assassination::ct_vip_escape->Define
 		({
 			set_goal_vipsafety,
 			find_goal,
