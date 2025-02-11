@@ -22,7 +22,6 @@ namespace pokebot::bot {
 				client->impulse,
 				Msec_Value);
 
-		client->Edict()->v.button = 0;
 		move_speed = strafe_speed = 0.0f;
 		UnlockByBomb();
 	}
@@ -109,7 +108,7 @@ namespace pokebot::bot {
 	}
 
 	void Bot::NormalUpdate() POKEBOT_NOEXCEPT {
-		auto client = game::game.clients.Get(Name().data());
+		auto client = game::game.clients.GetAsMutable(Name().data());
 		assert(client != nullptr);
 		assert(JoinedTeam() != common::Team::Spector && JoinedTeam() != common::Team::Random);
 		if (client->IsDead()) {
@@ -139,6 +138,9 @@ namespace pokebot::bot {
 			CheckAround();		// Update the entity's viewment.
 			CheckBlocking();	// Check the something is blocking myself.
 
+			if (IsJumping()) {
+				PressKey(ActionKey::Duck);
+			}
 
 			// Move forward if the bot has the route.
 			if (!routes.Empty() && next_dest_node != node::Invalid_NodeID) {
@@ -203,7 +205,7 @@ namespace pokebot::bot {
 
 			}
 
-			client->button |= static_cast<int>(press_key);
+			client->PressKey(static_cast<int>(press_key));
 			press_key = ActionKey::None;
 		}
 	}

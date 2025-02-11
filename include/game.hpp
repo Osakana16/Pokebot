@@ -219,6 +219,8 @@ namespace pokebot {
 			bool is_nvg_on{};
 			bool is_vip{};
 
+			common::Time use_reset_time{};
+
 			common::Array<int, 10> weapon_ammo{};
 			int weapon_clip{};
 			Weapon current_weapon{};
@@ -291,7 +293,10 @@ namespace pokebot {
 
 			const char* const ClassName() const POKEBOT_NOEXCEPT { return STRING(client->v.classname); }
 			const char* const Name() const POKEBOT_NOEXCEPT { return STRING(client->v.netname); }
-			void PressKey(const int Key) POKEBOT_NOEXCEPT { client->v.button |= Key; }
+
+			void PressKey(const int Key) noexcept;
+			void ResetKey() noexcept;
+
 			common::Team GetTeam() const POKEBOT_NOEXCEPT { return common::GetTeamFromModel(client); }
 
 			bool IsValid() const POKEBOT_NOEXCEPT { return IsValid(client); }

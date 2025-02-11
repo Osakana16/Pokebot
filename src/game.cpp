@@ -146,13 +146,14 @@ namespace pokebot {
 			}
 		}
 
-		void Game::PostUpdate() {
-			for (const auto& client : clients.GetAll()) {
+		void Game::PostUpdate() noexcept {
+			for (auto& client : clients.GetAll()) {
 				if (client.second.IsFakeClient()) {
-					const_cast<edict_t*>(static_cast<const edict_t*>(client.second))->v.button = 0;
+					const_cast<Client&>(client.second).ResetKey();
 				}
 			}
 		}
+
 
 		void Game::Init(edict_t* entities, int max) {
 			hostages.clear();
@@ -286,6 +287,21 @@ namespace pokebot {
 					pokebot::node::world.Add(pokebot::game::game.host.Origin(), pokebot::node::GoalKind::None);
 #endif
 				}
+			}
+		}
+
+		void Client::PressKey(const int Key) noexcept {
+			if (bool(Key & IN_USE)) {
+				use_reset_time = gpGlobals->time + 1.0f;
+			}
+			client->v.button |= Key;
+		}
+
+		void Client::ResetKey() noexcept {
+			if (use_reset_time > gpGlobals->time) {
+				client->v.button &= IN_USE;
+			} else {
+				client->v.button = 0;
 			}
 		}
 
