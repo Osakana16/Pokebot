@@ -537,6 +537,7 @@ namespace pokebot::node {
 		> route_queue{};
 		route_queue.push(start_node_id);
 
+		bool has_another_jump{};
 		routes[start_node_id].state = RouteState::Open;
 		routes[start_node_id].f = common::Distance(source->m_center, destination->m_center);
 		routes[start_node_id].g = common::Distance(source->m_center, destination->m_center);
@@ -577,7 +578,8 @@ namespace pokebot::node {
 					float base_cost{};
 #if 1
 					if (bool(current_node->m_attributeFlags & navmesh::NavAttributeType::NAV_JUMP)) {
-						base_cost += 3000.0f;
+						base_cost += 9000.0f * (has_another_jump ? 3 : 1);
+						has_another_jump = true;
 					}
 					if (bool(current_node->m_attributeFlags & navmesh::NavAttributeType::NAV_CROUCH)) {
 						base_cost += 3000.0f;
