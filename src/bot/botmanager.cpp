@@ -30,7 +30,7 @@ namespace pokebot::bot {
 		for (auto& troop : troops) {
 			troop.DecideStrategy(&bots, std::nullopt);
 			troop.Command(&bots);
-
+			
 			for (auto& platoon : troop) {
 				platoon.DecideStrategy(&bots, std::nullopt);
 				platoon.Command(&bots);
@@ -227,6 +227,16 @@ namespace pokebot::bot {
 			return troop.GetGoalNode();
 		} else {
 			return troop.at(*Index).GetGoalNode();
+		}
+	}
+
+	std::optional<int> Manager::GetTroopTargetedHostage(const common::Team Target_Team, const PlatoonID Index) const noexcept {
+		assert(Target_Team == common::Team::CT);
+		auto& troop = troops[static_cast<int>(Target_Team) - 1];
+		if (!Index.has_value()) {
+			return troop.GetTargetHostageIndex();
+		} else {
+			return troop.at(*Index).GetTargetHostageIndex();
 		}
 	}
 

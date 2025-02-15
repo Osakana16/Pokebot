@@ -3,6 +3,8 @@ namespace pokebot::bot {
 	struct TroopsStrategy {
 		common::PlayerName leader_name{};	// The name of the player to follow.
 		node::NodeID objective_goal_node = node::Invalid_NodeID;
+		std::optional<int> hostage_id{};
+
 		enum class Strategy {
 			None,
 			/*- Demolition -*/
@@ -54,35 +56,117 @@ namespace pokebot::bot {
 	class Troops final {
 		TroopsStrategy strategy;
 		TroopsStrategy old_strategy;
+
 		std::function<bool(const std::pair<common::PlayerName, Bot>& target)> commander_condition;	// The condition to become the commander.
 		std::function<bool(const std::pair<common::PlayerName, Bot>& target)> condition;
 
-		common::Team team{};
-		Troops* parent{};
-		std::vector<Troops> platoons{};
+		common::Team team{};			// The team of the platoon.
 
-		void DeleteAllPlatoon() noexcept;
+		Troops* parent{};				// My parent troop.
+
+		std::vector<Troops> platoons{};	// The children of troops.
+
+		/**
+		* @brief Delete all platoons.
+		*/
+		inline void DeleteAllPlatoon() noexcept { while (DeletePlatoon(0)); }
+
 		node::NodeID SelectGoal(node::GoalKind kind);
 
+
+		/**
+		* 
+		*/
+		void DecideSpecialStrategy(Bots* bots, TroopsStrategy* new_strategy, const std::optional<RadioMessage>& radio_message);
+
+		void DecideStrategyToRescueHostageSplit(Bots* bots, TroopsStrategy* new_strategy);
 		void DecideStrategyToPlantC4Concentrative(Bots* bots, TroopsStrategy* new_strategy);
 		void DecideStrategyToDefendBombsite(Bots* bots, TroopsStrategy* new_strategy);
 	public:
 		common::Team Team() { return team; }
 		Troops(decltype(condition) target_condition, decltype(commander_condition) target_commander_condition, decltype(team) target_team) : condition(target_condition), commander_condition(target_commander_condition), team(target_team) {}
-		bool IsRoot() const POKEBOT_NOEXCEPT { return parent == nullptr; }
-		int CreatePlatoon(decltype(condition) target_condition, decltype(condition) target_commander_condition);
-		bool DeletePlatoon(const int Index);
+
+		/**
+		* @brief Check the troop is the root.
+		* @return True if the troop is the root, false if not.
+		*/
+		inline bool IsRoot() const POKEBOT_NOEXCEPT { return parent == nullptr; }
+
+		/**
+		* @brief Delete the specified platoon.
+		* @param Index The index of the platoon.
+		*/
+		inline bool DeletePlatoon(const int Index) { return !platoons.empty() && platoons.erase(platoons.begin() + Index) != platoons.end(); }
+
+		/**
+		* @brief Create new platoon.
+		* @param target_condition 
+		* @param target_commander_condition 
+		* @return Platoon index.
+		*/
+		int CreatePlatoon(decltype(condition) target_condition, decltype(condition) target_commander_condition) noexcept;
+		
+		/**
+		* @brief 
+		* @return 
+		*/
 		bool IsStrategyToFollow() const noexcept { return strategy.strategy == TroopsStrategy::Strategy::Follow; }
 
-		void DecideStrategy(Bots* bots, const std::optional<RadioMessage>&);
+		/**
+		* @brief 
+		* @param bots
+		* @param radio_message
+		*/
+		void DecideStrategy(Bots* bots, const std::optional<RadioMessage>& radio_message);
+
+		/**
+		* @brief 
+		* @param 
+		*/
 		void Command(Bots* bots);
-		void SetNewStrategy(const TroopsStrategy&);
+
+		/**
+		* @brief Set the new strategy and apply it to own platoons.
+		* @param TroopStrategy The new strategy.
+		*/
+		void SetNewStrategy(const TroopsStrategy&) noexcept;
+
+		/**
+		* @brief 
+		* @param 
+		*/
 		bool HasGoalBeenDevised(const node::NodeID) const POKEBOT_NOEXCEPT;
+		
+		/**
+		* @brief 
+		* @param 
+		*/
 		bool HasGoalBeenDevisedByOtherPlatoon(const node::NodeID) const POKEBOT_NOEXCEPT;
+		
+		/**
+		* @brief Check the troop has not decided the strategy yet.
+		* @param 
+		*/
 		bool NeedToDevise() const POKEBOT_NOEXCEPT;
 
-		node::NodeID GetGoalNode() const POKEBOT_NOEXCEPT { return strategy.objective_goal_node; }
+		/**
+		* @brief Get tartet hostage index.
+		* @return Target hostage index.
+		*/
+		std::optional<int> GetTargetHostageIndex() const noexcept { return strategy.hostage_id; }
+		
+		/**
+		* @brief 
+		* @return 
+		*/
+		node::NodeID GetGoalNode() const noexcept { return strategy.objective_goal_node; }
+
+		/**
+		* @brief 
+		* @return 
+		*/
 		game::Client* GetLeader() const POKEBOT_NOEXCEPT;
+
 
 		Troops& operator[](const int index) { return platoons[index]; }
 		const Troops& at(const int index) const { return platoons.at(index); }

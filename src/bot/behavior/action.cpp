@@ -189,8 +189,6 @@ namespace pokebot::bot::behavior {
 
 			assert(area != nullptr);
 			node::NodeID id = area->m_id;
-			if (node::czworld.IsOnNode(self->Origin(), id))
-				return Status::Failed;
 
 			if (id != node::Invalid_NodeID && !node::czworld.IsOnNode(self->Origin(), id) && self->goal_queue.AddGoalQueue(id, 1)) {
 				return Status::Success;
@@ -219,6 +217,23 @@ namespace pokebot::bot::behavior {
 			return Status::Success;
 		});
 
+		set_goal_hostage_vector->Define([](Bot* const self) -> Status {
+			if (self->goal_vector.has_value())
+				return Status::Failed;
+
+			auto hostage_id = Manager::Instance().GetTroopTargetedHostage(self->JoinedTeam(), self->JoinedPlatoon());
+			if (!hostage_id.has_value()) {
+				return Status::Failed;
+			}
+			
+			auto origin = game::game.GetHostageOrigin(*hostage_id);
+			if (!origin.has_value()) {
+				return Status::Failed;
+			}
+			self->goal_vector = *origin;
+			return Status::Success;
+		});
+
 		set_goal_backpack_node->Define([](Bot* const self) -> Status {
 			node::NodeID id = node::czworld.GetNearest(*Manager::Instance().BackpackOrigin())->m_id;
 			if (node::czworld.IsOnNode(self->Origin(), id))
@@ -228,7 +243,6 @@ namespace pokebot::bot::behavior {
 				return Status::Success;
 			} else
 				return Status::Failed;
-			return Status::Success;
 		});
 
 		set_goal_backpack_vector->Define([](Bot* const self) -> Status {
@@ -303,7 +317,7 @@ namespace pokebot::bot::behavior {
 			return Status::Failed;
 		});
 
-		set_goal_hostage->Define([](Bot* const self) -> Status {
+		set_goal_hostage_node->Define([](Bot* const self) -> Status {
 #if !USE_NAVMESH
 			edict_t* entity{};
 			float min_distance = std::numeric_limits<float>::max();
@@ -321,21 +335,23 @@ namespace pokebot::bot::behavior {
 			} else
 				return Status::Failed;
 #else
+			assert(self->JoinedTeam() == common::Team::CT);
+
 			edict_t* entity{};
 			float min_distance = std::numeric_limits<float>::max();
-			node::NodeID id = node::Invalid_NodeID;
-			while ((entity = common::FindEntityByClassname(entity, "hostage_entity")) != nullptr) {
-				if (float distance = common::Distance(self->Origin(), entity->v.origin);  id == node::Invalid_NodeID || min_distance > distance) {
-					min_distance = distance;
-					id = node::czworld.GetNearest(entity->v.origin)->m_id;
-				}
-			}
+			auto hostage_id = Manager::Instance().GetTroopTargetedHostage(self->JoinedTeam(), self->JoinedPlatoon());
+			assert(hostage_id.has_value());
 
-			if (id != node::Invalid_NodeID) {
-				self->goal_queue.AddGoalQueue(id, 1);
+			auto origin = game::game.GetHostageOrigin(*hostage_id);
+			assert(origin.has_value());
+
+			auto area = node::czworld.GetNearest(*origin);
+			auto id = area->m_id;
+			if (id != node::Invalid_NodeID && !node::czworld.IsOnNode(self->Origin(), id) && self->goal_queue.AddGoalQueue(id, 1)) {
 				return Status::Success;
-			} else
+			} else {
 				return Status::Failed;
+			}
 #endif
 		});
 

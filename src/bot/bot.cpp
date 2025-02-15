@@ -233,12 +233,7 @@ namespace pokebot::bot {
 	}
 
 	void Bot::OnTerroristHostage() noexcept {
-		auto client = game::game.clients.Get(Name().data());
-		if (!client->HasHostages()) {
-			behavior::rescue::ct_try->Evaluate(this);
-		} else {
-			behavior::rescue::ct_leave->Evaluate(this);
-		}
+		
 	}
 
 	void Bot::OnTerroristAssasination() noexcept {
@@ -625,7 +620,7 @@ namespace pokebot::bot {
 	bool Bot::IsChangingWeapon() const POKEBOT_NOEXCEPT { return false; }
 	bool Bot::IsFalling() const POKEBOT_NOEXCEPT { return false; }
 	bool Bot::Jumped() const POKEBOT_NOEXCEPT { return false; }
-	bool Bot::IsJumping() const POKEBOT_NOEXCEPT { return false; }
+	bool Bot::IsJumping() const POKEBOT_NOEXCEPT { return !game::game.clients.Get(Name().data())->IsOnFloor(); }
 	bool Bot::IsLeadingHostages() const POKEBOT_NOEXCEPT { return false; }
 	bool Bot::IsLookingThroughScope() const POKEBOT_NOEXCEPT { return false; }
 	bool Bot::IsLookingThroughCamera() const POKEBOT_NOEXCEPT { return false; }
@@ -639,7 +634,7 @@ namespace pokebot::bot {
 
 	void Bot::OnRadioRecieved(const std::string_view& Sender_Name, const std::string_view& Radio_Sentence) POKEBOT_NOEXCEPT {
 		static bool is_sent{};
-		static const std::unordered_map<common::fixed_string<32u>, std::function<void()>, common::fixed_string<32u>::Hash> Radios{
+		const std::unordered_map<common::fixed_string<32u>, std::function<void()>, common::fixed_string<32u>::Hash> Radios{
 			{
 				"#Cover_me",
 				[] {
@@ -798,17 +793,28 @@ namespace pokebot::bot {
 	void Bot::ReceiveCommand(const TroopsStrategy& Received_Strategy) {
 		switch (Received_Strategy.strategy) {
 			case TroopsStrategy::Strategy::Follow:
+			{
 				assert(!Received_Strategy.leader_name.empty());
 				break;
+			}
+			case TroopsStrategy::Strategy::Rush_And_Rescue:
+			{
+				break;
+			}
 			case TroopsStrategy::Strategy::Defend_Bombsite_Divided:
+			{
 				if (Received_Strategy.objective_goal_node == node::Invalid_NodeID) {
 					return;
 				}
-				[[fallthrough]];
+				goto set_goal;
+			}
 			default:
+			set_goal:
+			{
 				assert(Received_Strategy.leader_name.empty());
 				goal_queue.AddGoalQueue(Received_Strategy.objective_goal_node, 1);
 				break;
+			}
 		}
 		// SERVER_PRINT(std::format("[POKEBOT]New Goal ID:{}\n", goal_node).c_str());
 	}

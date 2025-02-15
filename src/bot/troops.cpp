@@ -27,42 +27,37 @@ namespace pokebot::bot {
 		return const_cast<game::Client*>(leader_client);
 	}
 
-	int Troops::CreatePlatoon(decltype(condition) target_condition, decltype(condition) target_commander_condition) {
+	int Troops::CreatePlatoon(decltype(condition) target_condition, decltype(condition) target_commander_condition) noexcept {
 		platoons.push_back({ target_condition, target_commander_condition, Team() });
 		platoons.back().parent = this;
 		return platoons.size() - 1;
 	}
 
-	bool Troops::DeletePlatoon(const int Index) {
-		return !platoons.empty() && platoons.erase(platoons.begin() + Index) != platoons.end();
-	}
 
 	void Troops::DecideStrategy(std::unordered_map<common::PlayerName, Bot, common::PlayerName::Hash>* const bots, const std::optional<RadioMessage>& radio_message) {
 		if (bots->empty())
 			return;
 
-#if 1
 		TroopsStrategy new_strategy{};
 		auto candidates = (*bots | std::views::filter(commander_condition));
 		if (candidates.empty()) {
-			if (radio_message.has_value()) {
-				if (radio_message->message == "#Take_Bomb") {
-					assert(Team() == common::Team::T);
-					new_strategy.strategy = TroopsStrategy::Strategy::Take_Backpack;
-					new_strategy.leader_name.clear();
-				} else {
-					new_strategy.strategy = TroopsStrategy::Strategy::Follow;
-					new_strategy.leader_name = radio_message->sender.data();
-				}
-			} else {
-				if (!IsRoot()) {
-					if (team == common::Team::T) {
-						new_strategy.strategy = TroopsStrategy::Strategy::Follow;
-						new_strategy.leader_name = Manager::Instance().Bomber_Name.data();
-					}
-				}
-			}
+			DecideSpecialStrategy(bots, &new_strategy, radio_message);
 		} else {
+			/*
+				Decide the new strategy based below:
+				  1. Offender, Defender, or Neither
+				  2. The important role such as a V.I.P or a bomber exists or not
+
+				Then, 
+				  1. Split or Stick
+			*/
+
+			enum class Role {
+				Offender,	// The team is the offender(Terrorist in de maps, CT in cs maps).
+				Defender,	// The team is the defender(Terrorist in cs maps, CT in de maps).
+				Neither		// The team is neither the offender or the defender.
+			} role = Role::Neither;
+			
 			switch (team) {
 				case common::Team::T:
 				{
@@ -107,8 +102,8 @@ namespace pokebot::bot {
 						}
 					} else if (game::game.IsCurrentMode(game::MapFlags::HostageRescue)) {
 						auto kind = node::GoalKind::Rescue_Zone;
-						strategy.strategy = TroopsStrategy::Strategy::Rush_And_Rescue;
-						new_strategy.objective_goal_node = SelectGoal(kind);
+						new_strategy.strategy = TroopsStrategy::Strategy::Rush_And_Rescue;
+						DecideStrategyToRescueHostageSplit(bots, &new_strategy);
 					} else if (game::game.IsCurrentMode(game::MapFlags::Assassination)) {
 						auto kind = node::GoalKind::Vip_Safety;
 						new_strategy.objective_goal_node = SelectGoal(kind);
@@ -122,21 +117,27 @@ namespace pokebot::bot {
 					assert(false);
 			}
 		}
-
 		SetNewStrategy(new_strategy);
-#else
-		auto candidates = (*bots | std::views::filter(commander_condition));
-		if (candidates.empty())
-			return;
+	}
 
-		switch (Bot* leader = &candidates.front().second; leader->JoinedTeam()) {
-			case common::Team::T:
-				DecideStrategyForT(bots);
-				break;
-			case common::Team::CT:
-				break;
+	void Troops::DecideSpecialStrategy(Bots* bots, TroopsStrategy* new_strategy, const std::optional<RadioMessage>& radio_message) {
+		if (radio_message.has_value()) {
+			if (radio_message->message == "#Take_Bomb") {
+				assert(Team() == common::Team::T);
+				new_strategy->strategy = TroopsStrategy::Strategy::Take_Backpack;
+				new_strategy->leader_name.clear();
+			} else {
+				new_strategy->strategy = TroopsStrategy::Strategy::Follow;
+				new_strategy->leader_name = radio_message->sender.data();
+			}
+		} else {
+			if (!IsRoot()) {
+				if (team == common::Team::T) {
+					new_strategy->strategy = TroopsStrategy::Strategy::Follow;
+					new_strategy->leader_name = Manager::Instance().Bomber_Name.data();
+				}
+			}
 		}
-#endif
 	}
 
 	void Troops::Command(std::unordered_map<common::PlayerName, Bot, common::PlayerName::Hash>* bots) {
@@ -145,17 +146,15 @@ namespace pokebot::bot {
 		}
 	}
 
-	void Troops::SetNewStrategy(const TroopsStrategy& New_Team_Strategy) {
+	void Troops::SetNewStrategy(const TroopsStrategy& New_Team_Strategy) noexcept {
 		old_strategy = strategy;
 		strategy = New_Team_Strategy;
 
-		for (auto& platoon : platoons) {
-			platoon.SetNewStrategy(strategy);
+		// Apply the strategy to platoons if they exist.
+		for (int i = 0; i < platoons.size(); i++) {
+			if (strategy.hostage_id.has_value()) strategy.hostage_id = i;
+			platoons[i].SetNewStrategy(strategy);
 		}
-	}
-
-	void Troops::DeleteAllPlatoon() noexcept {
-		while (DeletePlatoon(0));	// Delete all platoon.
 	}
 
 	node::NodeID Troops::SelectGoal(node::GoalKind kind) {
@@ -245,6 +244,44 @@ namespace pokebot::bot {
 			// If the troop is a platoon
 			new_strategy->strategy = TroopsStrategy::Strategy::Defend_Bombsite_Divided;
 			new_strategy->objective_goal_node = SelectGoal(kind);
+		}
+	}
+
+	void Troops::DecideStrategyToRescueHostageSplit(Bots* bots, TroopsStrategy* new_strategy) {
+		new_strategy->strategy = TroopsStrategy::Strategy::Rush_And_Rescue;
+		if (IsRoot()) {
+			// If the troop is the root, create new platoons.
+			DeleteAllPlatoon();
+
+			auto cts = (*bots | std::views::filter(filter::ByTeam<common::Team::CT>));
+			if (const size_t Number_Of_Cts = std::distance(cts.begin(), cts.end()); Number_Of_Cts > 1) {
+				const size_t Number_Of_Hostages = game::game.GetNumberOfHostages();
+				assert(Number_Of_Hostages > 0);
+
+				// Found the platoons equal to the number of hostages.
+				for (size_t i = 0u; i < Number_Of_Hostages; i++) {
+					CreatePlatoon(
+						[i](const BotPair& target) -> bool { return i == target.second.JoinedPlatoon(); },
+						[i](const BotPair& target) -> bool { return i == target.second.JoinedPlatoon(); }
+					);
+				}
+
+				// Let bots join the platoons.
+				const size_t Number_Of_Member_In_Squad = static_cast<size_t>(std::ceil(static_cast<common::Dec>(Number_Of_Cts) / static_cast<common::Dec>(Number_Of_Hostages)));
+				auto member = cts.begin();
+				for (int j = 0; j < Number_Of_Member_In_Squad && member != cts.end(); j++, member++) {
+					const int Squad = j % 4;
+					member->second.JoinPlatoon(Squad);
+				}
+				// Allow to assign hostage id for platoons.
+				new_strategy->hostage_id = -1;
+			} else {
+				// Allow to assign hostage id for platoons.
+				new_strategy->hostage_id = 1;
+			}
+		} else {
+			// If the platoon executes the member function.
+			new_strategy->hostage_id = strategy.hostage_id;
 		}
 	}
 }

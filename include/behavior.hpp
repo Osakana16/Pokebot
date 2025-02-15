@@ -154,7 +154,8 @@ namespace pokebot::bot {
 		BEHAVIOR_CREATE_INLINE(Action, walk);
 		BEHAVIOR_CREATE_INLINE(Action, change_silencer);
 		BEHAVIOR_CREATE_INLINE(Action, adjust_scope);
-		BEHAVIOR_CREATE_INLINE(Action, set_goal_hostage);
+		BEHAVIOR_CREATE_INLINE(Action, set_goal_hostage_node);
+		BEHAVIOR_CREATE_INLINE(Action, set_goal_hostage_vector);
 		BEHAVIOR_CREATE_INLINE(Action, set_goal_bombspot);
 		BEHAVIOR_CREATE_INLINE(Action, set_goal_rescuezone);
 		BEHAVIOR_CREATE_INLINE(Action, set_goal_escapezone);
@@ -205,9 +206,9 @@ namespace pokebot::bot {
 
 		// - Rescue Behaviors -
 		namespace rescue {
-			extern std::shared_ptr<Sequence> ct_try;
-			extern std::shared_ptr<Sequence> ct_leave;
-			extern std::shared_ptr<Sequence> lead_hostage;
+			BEHAVIOR_CREATE_INLINE(Priority, ct_try);
+			BEHAVIOR_CREATE_INLINE(Priority, ct_leave);
+			BEHAVIOR_CREATE_INLINE(Priority, lead_hostage);
 		}
 
 		// - ASsassination Behaviors -

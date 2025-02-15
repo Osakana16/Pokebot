@@ -167,6 +167,12 @@ namespace pokebot::bot {
 		*/
 		node::NodeID GetGoalNode(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
 
+		/**
+		* @brief
+		* @return
+		*/
+		std::optional<int> GetTroopTargetedHostage(const common::Team Target_Team, const PlatoonID Index) const noexcept;
+
 		game::Client* GetLeader(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
 		bool IsFollowerPlatoon(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
 

@@ -9,9 +9,9 @@ namespace pokebot::bot::behavior {
 
 	// - Rescue Behaviors -
 	namespace rescue {
-		std::shared_ptr<Sequence> ct_try = Sequence::Create("rescue::ct_try");
-		std::shared_ptr<Sequence> ct_leave = Sequence::Create("rescue::ct_leave");
-		std::shared_ptr<Sequence> lead_hostage = Sequence::Create("rescue::lead_hostage");
+		std::shared_ptr<Sequence> head_to_hostage = Sequence::Create("head_to_hostage");
+		auto get_closer_to_hostage = Priority::Create("use_to_rescue");
+		auto use_to_rescue = Sequence::Create("use_to_rescue");
 	}
 
 	// - ASsasination Behaviors -
@@ -164,7 +164,11 @@ namespace pokebot::bot::behavior {
 			head_to_goal,
 			set_goal_c4_vector,
 			move_vector
-		});
+		 });
+
+		/*
+			Hostage Rescue
+		*/
 
 		rescue::ct_leave->Define
 		({
@@ -173,13 +177,36 @@ namespace pokebot::bot::behavior {
 			head_to_goal
 		 });
 
+		/* 
+			CT: Try to rescue a hostage.
+
+
+		*/
 		rescue::ct_try->Define
 		({
-			set_goal_hostage,
+			set_goal_hostage_node,
 			find_goal,
 			head_to_goal,
+			rescue::use_to_rescue
+		 });
+
+		rescue::use_to_rescue->Define
+		({
+			rescue::get_closer_to_hostage,
 			Condition::If(CanUseHostage, rescue::lead_hostage)
 		 });
+
+		rescue::get_closer_to_hostage->Define
+		({
+			set_goal_hostage_vector,
+			move_vector
+		 });
+		
+		rescue::lead_hostage->Define
+		({
+			look_hostage,
+			use
+		});
 
 		assassination::ct_cover->Define
 		({
@@ -213,12 +240,6 @@ namespace pokebot::bot::behavior {
 			find_goal,
 			head_to_goal	 
 		 });
-
-		rescue::lead_hostage->Define
-		({
-			look_hostage,
-			use
-		});
 
 		t_ordinary->Define
 		({
