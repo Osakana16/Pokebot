@@ -464,8 +464,46 @@ namespace pokebot {
 
 			Host host{};
 
-			size_t GetHostageNumber() const POKEBOT_NOEXCEPT;
+			// - Hostage -
+
+			/**
+			* @brief Get the number of hostages.
+			* @return Number of hostages.
+			*/
+			size_t GetNumberOfHostages() const noexcept;
+
+			/**
+			* @brief Get the number of hostages who are not dead.
+			* @return Number of living hostages.
+			*/
+			size_t GetNumberOfLivingHostages() const noexcept;
+			
+			/**
+			* @brief Get the number of hostages who are not dead.
+			* @return Number of living hostages.
+			*/
+			size_t GetNumberOfRescuedHostages() const noexcept;
+
+			/**
+			* @brief Get the hostage origin.
+			* @param Index The hostage index
+			* @return The origin of a hostage. If the specified hostage doesn't exist, return nullopt.
+			*/
+			std::optional<Vector> GetHostageOrigin(const int Index) const noexcept;
+
+			/**
+			* @brief Check the hostage is used or not.
+			* @param Index The hostage index
+			* @return True if the hostage is leading by a player, false if it's not.
+			*/
 			bool IsHostageUsed(const int Index) const POKEBOT_NOEXCEPT;
+
+			/**
+			* @brief Check the hostage is used by the specified player.
+			* @param Index The hostage index
+			* @param Owner_Name The player name
+			* @return True if the hostage owned by the specified player, false if it's not.
+			*/
 			bool IsHostageOwnedBy(const int Index, const std::string_view& Owner_Name);
 			const edict_t* const GetClosedHostage(const Vector& Origin, const float Base_Distance);
 
@@ -481,7 +519,7 @@ namespace pokebot {
 
 			void Init(edict_t* entities, int max);
 			void PreUpdate();
-			void PostUpdate();
+			void PostUpdate() noexcept;
 
 			bool PlayerExists(const char* const Client_Name) const POKEBOT_NOEXCEPT { return clients.Get(Client_Name) != nullptr; }
 

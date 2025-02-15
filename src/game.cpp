@@ -197,8 +197,25 @@ namespace pokebot {
 			}
 		}
 
-		size_t Game::GetHostageNumber() const POKEBOT_NOEXCEPT {
+		size_t Game::GetNumberOfHostages() const noexcept {
 			return hostages.size();
+		}
+
+		size_t Game::GetNumberOfLivingHostages() const noexcept {
+			auto&& living_hostages = (hostages | std::views::filter([](const Hostage& Target) -> bool { return static_cast<const edict_t*>(Target)->v.health > 0; }));
+			return std::distance(living_hostages.begin(), living_hostages.end());
+		}
+		
+		size_t Game::GetNumberOfRescuedHostages() const noexcept {
+			auto&& living_hostages = (hostages | std::views::filter([](const Hostage& Target) -> bool { return bool(static_cast<const edict_t*>(Target)->v.effects & EF_NODRAW); }));
+			return std::distance(living_hostages.begin(), living_hostages.end());
+		}
+
+		std::optional<Vector> Game::GetHostageOrigin(const int Index) const noexcept {
+			if (Index < 0 || Index >= hostages.size())
+				return std::nullopt;
+
+			return hostages[Index].Origin();
 		}
 
 		bool Game::IsHostageUsed(const int Index) const POKEBOT_NOEXCEPT {
@@ -258,7 +275,7 @@ namespace pokebot {
 		}
 
 		bool Client::HasHostages() const POKEBOT_NOEXCEPT {
-			for (int i = 0; i < game::game.GetHostageNumber(); i++) {
+			for (int i = 0; i < game::game.GetNumberOfHostages(); i++) {
 				if (game::game.IsHostageOwnedBy(i, Name())) {
 					return true;
 				}
