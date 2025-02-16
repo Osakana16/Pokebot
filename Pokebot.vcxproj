@@ -75,7 +75,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>./pokebot.def</ModuleDefinitionFile>
-      <AdditionalDependencies>CZNavmesh-Lib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Debug/CZNavmesh-Lib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(TargetPath)" "D:\SteamLibrary\steamapps\common\Half-Life\cstrike\addons\pokebot\$(TargetFileName)"</Command>
@@ -108,7 +108,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>./pokebot.def</ModuleDefinitionFile>
-      <AdditionalDependencies>CZNavmesh-Lib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Release/CZNavmesh-Lib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(TargetPath)" "D:\SteamLibrary\steamapps\common\Half-Life\cstrike\addons\pokebot\$(TargetFileName)"</Command>
