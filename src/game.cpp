@@ -156,6 +156,7 @@ namespace pokebot {
 
 
 		void Game::Init(edict_t* entities, int max) {
+			map_flags = static_cast<MapFlags>(0);
 			hostages.clear();
 
 			for (int i = 0; i < max; ++i) {
