@@ -375,6 +375,10 @@ namespace pokebot {
 				return nullptr;
 			}
 
+			bool Disconnect(const char* const Name) noexcept {
+				return clients.erase(Name) > 0;
+			}
+
 			void OnVIPChanged(const std::string_view Client_Name) POKEBOT_NOEXCEPT;
 			void OnDefuseKitEquiped(const std::string_view Client_Name) POKEBOT_NOEXCEPT;
 			void OnDeath(const std::string_view Client_Name) POKEBOT_NOEXCEPT;

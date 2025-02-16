@@ -180,5 +180,6 @@ namespace pokebot::plugin {
 
     void Pokebot::OnClientDisconnect(const edict_t* const disconnected_client) {
         pokebot::bot::Manager::Instance().Remove(STRING(disconnected_client->v.netname));
+        pokebot::game::game.clients.Disconnect(STRING(disconnected_client->v.netname));
     }
 }
