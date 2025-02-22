@@ -346,6 +346,9 @@ namespace pokebot::bot::behavior {
 			assert(origin.has_value());
 
 			auto area = node::czworld.GetNearest(*origin);
+			if (area == nullptr)
+				return Status::Failed;
+
 			auto id = area->m_id;
 			if (id != node::Invalid_NodeID && !node::czworld.IsOnNode(self->Origin(), id) && self->goal_queue.AddGoalQueue(id, 1)) {
 				return Status::Success;
