@@ -461,13 +461,16 @@ namespace pokebot::bot {
 		}
 
 		// Check if the worldspawn is blocking:
-		const auto Head = Origin() + game::game.clients.Get(Name().data())->view_ofs;
-		const auto Foot = Head - Vector(.0f, .0f, 30.0f);
+		const auto Foot = Origin();
+		const auto Head = Foot + game::game.clients.Get(Name().data())->view_ofs;
 
 		common::Tracer tracer{};
-		// tracer.MoveStart(Head).MoveDest(Head + gpGlobals->v_forward * 90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr);
-		tracer.MoveStart(Head).MoveDest(Head + gpGlobals->v_forward * 90.0f).TraceHull(common::Tracer::Monsters::Ignore, common::Tracer::HullType::Human, nullptr);
-		if (tracer.IsHit()) {
+		const bool Is_Head_Forward_Center_Hit = tracer.MoveStart(Head).MoveDest(Head + gpGlobals->v_forward * 90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
+		const bool Is_Head_Forward_Left_Hit = tracer.MoveDest(Head + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * -45.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
+		const bool Is_Head_Forward_Right_Hit = tracer.MoveDest(Head + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * 45.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
+		const bool Is_Head_Forward_Hit = Is_Head_Forward_Center_Hit || Is_Head_Forward_Left_Hit || Is_Head_Forward_Right_Hit;
+
+		if (Is_Head_Forward_Hit) {
 			// Check left
 			tracer.MoveDest(Head + gpGlobals->v_right * -90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr);
 			if (tracer.IsHit()) {
@@ -480,9 +483,11 @@ namespace pokebot::bot {
 				}
 			}
 		} else {
-			// Jump if the bot's foot stucks
-			tracer.MoveStart(Foot).MoveDest(Head + gpGlobals->v_forward * 90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr);
-			if (tracer.IsHit()) {
+			const bool Is_Foot_Forward_Center_Hit = tracer.MoveStart(Foot).MoveDest(Foot + gpGlobals->v_forward * 90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
+			const bool Is_Foot_Forward_Left_Hit = tracer.MoveDest(Foot + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * -45.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
+			const bool Is_Foot_Forward_Right_Hit = tracer.MoveDest(Foot + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * 45.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
+			const bool Is_Foot_Forward_Hit = Is_Foot_Forward_Center_Hit || Is_Foot_Forward_Left_Hit || Is_Foot_Forward_Right_Hit;
+			if (Is_Foot_Forward_Hit) {
 				PressKey(ActionKey::Jump);
 			} else {
 				// Check the forward navarea
