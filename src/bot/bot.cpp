@@ -125,12 +125,16 @@ namespace pokebot::bot {
 				state = State::Follow;
 			}
 
+#if 0
+			// NOTE: This code makes the game laggy so it is temporary disabled.
+			// 
 			// If the bot is not in the route, reset it.
 			if (auto current_id = node::czworld.GetNearest(Origin()); current_id != nullptr) {
 				if (!routes.Contains(current_id->m_id)) {
 					routes.Clear();
 				}
 			}
+#endif
 			(this->*(doObjective[static_cast<int>(state)]))();
 
 			// - Bot Navigation -
@@ -459,39 +463,41 @@ namespace pokebot::bot {
 		// Check if the worldspawn is blocking:
 		const auto Head = Origin() + game::game.clients.Get(Name().data())->view_ofs;
 		const auto Foot = Head - Vector(.0f, .0f, 30.0f);
+
 		common::Tracer tracer{};
-		tracer.MoveStart(Head).MoveDest(Head + gpGlobals->v_forward * 90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Ignore, nullptr);
+		// tracer.MoveStart(Head).MoveDest(Head + gpGlobals->v_forward * 90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr);
+		tracer.MoveStart(Head).MoveDest(Head + gpGlobals->v_forward * 90.0f).TraceHull(common::Tracer::Monsters::Ignore, common::Tracer::HullType::Human, nullptr);
 		if (tracer.IsHit()) {
 			// Check left
-			tracer.MoveDest(Head + gpGlobals->v_right * -90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Ignore, nullptr);
+			tracer.MoveDest(Head + gpGlobals->v_right * -90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr);
 			if (tracer.IsHit()) {
 				PressKey(ActionKey::Move_Right);
 			} else {
 				// Check right
-				tracer.MoveDest(Head + gpGlobals->v_right * 90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Ignore, nullptr);
+				tracer.MoveDest(Head + gpGlobals->v_right * 90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr);
 				if (tracer.IsHit()) {
 					PressKey(ActionKey::Move_Left);
 				}
 			}
 		} else {
 			// Jump if the bot's foot stucks
-			tracer.MoveStart(Foot).MoveDest(Head + gpGlobals->v_forward * 90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Ignore, nullptr);
+			tracer.MoveStart(Foot).MoveDest(Head + gpGlobals->v_forward * 90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr);
 			if (tracer.IsHit()) {
 				PressKey(ActionKey::Jump);
-			}
-		}
-
-		// Check the forward navarea
-		for (auto& vector : { Origin(), Origin() + gpGlobals->v_forward * 90.0f }) {
-			// 
-			if (auto area = node::czworld.GetNearest(vector); area != nullptr) {
-				// Jump if it is specified.
-				if (!node::czworld.HasFlag(area->m_id, node::NavmeshFlag::No_Jump) && node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Jump)) {
-					PressKey(ActionKey::Jump);
-				}
-				// Duck if it is specified.
-				if (node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Crouch)) {
-					PressKey(ActionKey::Duck);
+			} else {
+				// Check the forward navarea
+				for (auto& vector : { Origin(), Origin() + gpGlobals->v_forward * 90.0f }) {
+					// 
+					if (auto area = node::czworld.GetNearest(vector); area != nullptr) {
+						// Jump if it is specified.
+						if (!node::czworld.HasFlag(area->m_id, node::NavmeshFlag::No_Jump) && node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Jump)) {
+							PressKey(ActionKey::Jump);
+						}
+						// Duck if it is specified.
+						if (node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Crouch)) {
+							PressKey(ActionKey::Duck);
+						}
+					}
 				}
 			}
 		}
