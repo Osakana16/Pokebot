@@ -57,7 +57,6 @@ namespace pokebot::bot {
 		TroopsStrategy strategy;
 		TroopsStrategy old_strategy;
 
-		std::function<bool(const std::pair<common::PlayerName, Bot>& target)> commander_condition;	// The condition to become the commander.
 		std::function<bool(const std::pair<common::PlayerName, Bot>& target)> condition;
 
 		common::Team team{};			// The team of the platoon.
@@ -84,7 +83,7 @@ namespace pokebot::bot {
 		void DecideStrategyToDefendBombsite(Bots* bots, TroopsStrategy* new_strategy);
 	public:
 		common::Team Team() { return team; }
-		Troops(decltype(condition) target_condition, decltype(commander_condition) target_commander_condition, decltype(team) target_team) : condition(target_condition), commander_condition(target_commander_condition), team(target_team) {}
+		Troops(decltype(condition) target_condition, decltype(team) target_team) : condition(target_condition), team(target_team) {}
 
 		/**
 		* @brief Check the troop is the root.
@@ -104,7 +103,7 @@ namespace pokebot::bot {
 		* @param target_commander_condition 
 		* @return Platoon index.
 		*/
-		int CreatePlatoon(decltype(condition) target_condition, decltype(condition) target_commander_condition) noexcept;
+		int CreatePlatoon(decltype(condition) target_condition) noexcept;
 		
 		/**
 		* @brief 

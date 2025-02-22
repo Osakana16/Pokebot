@@ -27,8 +27,8 @@ namespace pokebot::bot {
 		return const_cast<game::Client*>(leader_client);
 	}
 
-	int Troops::CreatePlatoon(decltype(condition) target_condition, decltype(condition) target_commander_condition) noexcept {
-		platoons.push_back({ target_condition, target_commander_condition, Team() });
+	int Troops::CreatePlatoon(decltype(condition) target_condition) noexcept {
+		platoons.push_back({ target_condition,  Team() });
 		platoons.back().parent = this;
 		return platoons.size() - 1;
 	}
@@ -39,8 +39,7 @@ namespace pokebot::bot {
 			return;
 
 		TroopsStrategy new_strategy{};
-		auto candidates = (*bots | std::views::filter(commander_condition));
-		if (candidates.empty()) {
+		if (radio_message.has_value()) {
 			DecideSpecialStrategy(bots, &new_strategy, radio_message);
 		} else {
 			/*
@@ -191,8 +190,7 @@ namespace pokebot::bot {
 			DeleteAllPlatoon();
 
 			int platoon = CreatePlatoon(
-				[](const BotPair& target) -> bool { return target.second.JoinedPlatoon() == 0; },
-				filter::ByHavingWeapon<game::Weapon::C4>
+				[](const BotPair& target) -> bool { return target.second.JoinedPlatoon() == 0; }
 			);
 
 			auto terrorists = (*bots | std::views::filter(filter::ByTeam<common::Team::T>));
@@ -223,10 +221,7 @@ namespace pokebot::bot {
 				const size_t Number_Of_Goals = node::czworld.GetNumberOfGoals(node::GoalKind::Bombspot);
 				assert(Number_Of_Goals > 0);
 				for (int i = 0; i < Number_Of_Goals; i++) {
-					CreatePlatoon(
-						[i](const BotPair& target) -> bool { return i == target.second.JoinedPlatoon(); },
-						[i](const BotPair& target) -> bool { return i == target.second.JoinedPlatoon(); }
-					);
+					CreatePlatoon([i](const BotPair& target) -> bool { return i == target.second.JoinedPlatoon(); });
 				}
 
 				const size_t Number_Of_Member_In_Squad = static_cast<size_t>(std::ceil(static_cast<common::Dec>(Number_Of_Cts) / static_cast<common::Dec>(Number_Of_Goals)));
@@ -260,10 +255,7 @@ namespace pokebot::bot {
 
 				// Found the platoons equal to the number of hostages.
 				for (size_t i = 0u; i < Number_Of_Hostages; i++) {
-					CreatePlatoon(
-						[i](const BotPair& target) -> bool { return i == target.second.JoinedPlatoon(); },
-						[i](const BotPair& target) -> bool { return i == target.second.JoinedPlatoon(); }
-					);
+					CreatePlatoon([i](const BotPair& target) -> bool { return i == target.second.JoinedPlatoon(); });
 				}
 
 				// Let bots join the platoons.

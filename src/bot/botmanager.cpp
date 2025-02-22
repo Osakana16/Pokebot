@@ -7,8 +7,8 @@ namespace pokebot::bot {
 
 	Manager::Manager() :
 		troops{
-			Troops(IsTerrorist, IsTerrorist, common::Team::T),
-			Troops(IsCounterTerrorist, IsCounterTerrorist, common::Team::CT)
+			Troops(IsTerrorist, common::Team::T),
+			Troops(IsCounterTerrorist, common::Team::CT)
 	} {
 
 	}
@@ -88,10 +88,7 @@ namespace pokebot::bot {
 		auto& troop = troops[static_cast<int>(radio_message.team) - 1];
 
 		auto createLeaderPlatoon = [&]() -> PlatoonID {
-			return troop.CreatePlatoon(
-				[&](const BotPair& Pair) { return common::Distance(Pair.second.Origin(), Leader_Client->origin) <= 1000.0f; },
-				[&](const BotPair& Pair) { return Pair.first == radio_message.sender; }
-			);
+			return troop.CreatePlatoon([&](const BotPair& Pair) { return common::Distance(Pair.second.Origin(), Leader_Client->origin) <= 1000.0f; });
 		};
 
 		if (radio_message.message == "#Cover_me") {
