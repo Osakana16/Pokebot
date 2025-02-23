@@ -170,6 +170,14 @@ namespace pokebot::bot::behavior {
 			Hostage Rescue
 		*/
 
+		rescue::t_defend_hostage->Define
+		({
+			Condition::If(IsFarFromMainGoal<true>, set_goal_team_objective),
+			Condition::If(IsFarFromMainGoal<false>, set_goal_from_team_objective_within_range),
+			find_goal,
+			head_to_goal,
+		 });
+
 		rescue::ct_leave->Define
 		({
 			set_goal_rescuezone,

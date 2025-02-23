@@ -237,7 +237,7 @@ namespace pokebot::bot {
 	}
 
 	void Bot::OnTerroristHostage() noexcept {
-		
+		behavior::rescue::t_defend_hostage->Evaluate(this);
 	}
 
 	void Bot::OnTerroristAssasination() noexcept {
@@ -343,8 +343,8 @@ namespace pokebot::bot {
 		}
 
 		if (CanSeeEntity(enemy_client->Edict())) {
-		behavior::fight::beat_enemies->Evaluate(this);
-	}
+			behavior::fight::beat_enemies->Evaluate(this);
+		}
 	}
 
 	void Bot::Follow() POKEBOT_NOEXCEPT {

@@ -276,4 +276,48 @@ namespace pokebot::bot {
 			new_strategy->hostage_id = strategy.hostage_id;
 		}
 	}
+
+	void Troops::DecideStrategyToPreventRescue(Bots* bots, TroopsStrategy* new_strategy) {
+		new_strategy->strategy = TroopsStrategy::Strategy::Prevent_Hostages;
+		if (IsRoot()) {
+			// If the troop is the root, create new platoons.
+			DeleteAllPlatoon();
+
+			auto terrorists = (*bots | std::views::filter(filter::ByTeam<common::Team::T>));
+			const size_t Number_Of_Terrorists = std::distance(terrorists.begin(), terrorists.end());
+			if (Number_Of_Terrorists > 1) {
+				const size_t Number_Of_Goals = game::game.GetNumberOfHostages();
+				assert(Number_Of_Goals > 0);
+				for (int i = 0; i < Number_Of_Goals; i++) {
+					CreatePlatoon([i](const BotPair& target) -> bool { return i == target.second.JoinedPlatoon(); });
+				}
+
+				const size_t Number_Of_Member_In_Squad = static_cast<size_t>(std::ceil(static_cast<common::Dec>(Number_Of_Terrorists) / static_cast<common::Dec>(Number_Of_Goals)));
+				auto member = terrorists.begin();
+				for (int squad = 0; squad < Number_Of_Goals; squad++) {
+					for (int j = 0; j < Number_Of_Member_In_Squad && member != terrorists.end(); j++, member++) {
+						member->second.JoinPlatoon(squad);
+					}
+				}
+			} else {
+				new_strategy->strategy = TroopsStrategy::Strategy::Prevent_Hostages;
+				edict_t* hostage = nullptr;
+				while ((hostage = common::FindEntityByClassname(hostage, "hostage_entity")) != nullptr) {
+					if (auto area = node::czworld.GetNearest(hostage->v.origin); area != nullptr) {
+						if (IsRoot()) {
+							if (HasGoalBeenDevised(area->m_id)) {
+								continue;
+							}
+						} else {
+							if (HasGoalBeenDevisedByOtherPlatoon(area->m_id)) {
+								continue;
+							}
+						}
+						new_strategy->objective_goal_node = area->m_id;
+						break;
+					}
+				}
+			}
+		}
+	}
 }

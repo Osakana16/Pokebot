@@ -206,6 +206,8 @@ namespace pokebot::bot {
 
 		// - Rescue Behaviors -
 		namespace rescue {
+			BEHAVIOR_CREATE_INLINE(Priority, t_defend_hostage);
+
 			BEHAVIOR_CREATE_INLINE(Priority, ct_try);
 			BEHAVIOR_CREATE_INLINE(Priority, ct_leave);
 			BEHAVIOR_CREATE_INLINE(Priority, lead_hostage);

@@ -79,6 +79,8 @@ namespace pokebot::bot {
 		void DecideSpecialStrategy(Bots* bots, TroopsStrategy* new_strategy, const std::optional<RadioMessage>& radio_message);
 
 		void DecideStrategyToRescueHostageSplit(Bots* bots, TroopsStrategy* new_strategy);
+		void DecideStrategyToPreventRescue(Bots* bots, TroopsStrategy* new_strategy);
+
 		void DecideStrategyToPlantC4Concentrative(Bots* bots, TroopsStrategy* new_strategy);
 		void DecideStrategyToDefendBombsite(Bots* bots, TroopsStrategy* new_strategy);
 	public:
