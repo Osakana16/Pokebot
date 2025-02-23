@@ -30,11 +30,9 @@ namespace pokebot::bot::behavior {
 		bool IsPlayingGame(const Bot* const Self) {
 			return false;
 		}
-
+		
 		template<bool b>
-		bool HasEnemy(const Bot* const Self) {
-			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->IsFighting());
-		}
+		bool CanSeeEnemy(const Bot* const Self) { RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->IsLookingAtEnemy()); }
 
 		template<bool b>
 		bool IsBombPlanted(const Bot* const Self) {
@@ -158,6 +156,7 @@ namespace pokebot::bot::behavior {
 
 	namespace {
 		BEHAVIOR_CREATE(Sequence, reset_goal_to_retreat);
+		BEHAVIOR_CREATE(Priority, change_shotting_by_distance);
 
 		bool HasGuns(const bot::Bot* const Self) POKEBOT_NOEXCEPT {
 			return Self->HasPrimaryWeapon() || Self->HasSecondaryWeapon();
@@ -222,10 +221,15 @@ namespace pokebot::bot::behavior {
 			change_secondary
 		});
 
-		fight::decide_firing->Define
+		change_shotting_by_distance->Define
 		({
 			Condition::If(IsEnemyFar<true>, fight::one_tap_fire),
 			Condition::If(IsEnemyFar<false>, fight::full_burst_fire)
+		 });
+
+		fight::decide_firing->Define
+		({
+			change_shotting_by_distance
 		});
 
 		fight::one_tap_fire->Define

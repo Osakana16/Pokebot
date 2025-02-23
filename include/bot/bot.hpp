@@ -278,7 +278,7 @@ namespace pokebot::bot {
 		bool IsInBombTargetZone() const POKEBOT_NOEXCEPT;
 
 		bool IsFighting() const POKEBOT_NOEXCEPT { return danger_time.IsRunning(); }
-		bool CanSeeEntity() const POKEBOT_NOEXCEPT;
+		bool CanSeeEntity(const edict_t*) const POKEBOT_NOEXCEPT;
 
 		PlatoonID JoinedPlatoon() const POKEBOT_NOEXCEPT;
 		common::Team JoinedTeam() const POKEBOT_NOEXCEPT;

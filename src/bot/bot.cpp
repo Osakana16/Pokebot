@@ -299,7 +299,19 @@ namespace pokebot::bot {
 		constexpr int Max_Armor = 100;
 		constexpr int Base_Fearless = Max_Health / 2 + Max_Armor / 5;
 
-		auto enemy_client = game::game.clients.Get(target_enemies.front().c_str());
+		const game::Client *enemy_client{};
+		for (auto& target_name : target_enemies) {
+			auto target_client = game::game.clients.Get(target_name.c_str());
+			if (!target_client->IsDead()) {
+				enemy_client = target_client;
+				break;
+			}
+		}
+		if (enemy_client == nullptr) {
+			danger_time.SetTime(0.0f);
+			return;
+		}
+
 		const bool Enemy_Has_Primary = enemy_client->HasPrimaryWeapon();
 		const bool Enemy_Has_Secondary = enemy_client->HasSecondaryWeapon();
 
@@ -329,7 +341,10 @@ namespace pokebot::bot {
 		if (fighting_spirit <= Base_Fearless) {
 			behavior::fight::retreat->Evaluate(this);
 		}
+
+		if (CanSeeEntity(enemy_client->Edict())) {
 		behavior::fight::beat_enemies->Evaluate(this);
+	}
 	}
 
 	void Bot::Follow() POKEBOT_NOEXCEPT {
@@ -453,7 +468,7 @@ namespace pokebot::bot {
 		// Check if the player is blocking and avoid it.
 		for (edict_t* entity{}; (entity = common::FindEntityInSphere(entity, Origin(), 90.0f)) != nullptr;) {
 			if (std::string_view(STRING(entity->v.classname)) == "player") {
-				if (auto client = game::game.clients.Get(Name().data()); client->CanSeeEntity(entity)) {
+				if (CanSeeEntity(entity)) {
 					PressKey(ActionKey::Move_Left);
 					return;
 				}
@@ -508,6 +523,12 @@ namespace pokebot::bot {
 		}
 	}
 
+	
+	bool Bot::CanSeeEntity(const edict_t* entity) const POKEBOT_NOEXCEPT {
+		auto client = game::game.clients.Get(Name().data()); client->CanSeeEntity(entity);
+		return client->CanSeeEntity(entity);
+	}
+	
 	void Bot::PressKey(ActionKey pressable_key) {
 		press_key |= pressable_key;
 	}

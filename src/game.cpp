@@ -457,7 +457,11 @@ namespace pokebot {
 		void Client::GetEnemyNamesWithinView(common::PlayerName player_names[32]) const POKEBOT_NOEXCEPT {
 			int i = 0;
 			for (const auto& other : game.clients.GetAll()) {
-				if (entity::CanSeeEntity(*this, other.second) && other.second.GetTeam() != common::Team::Spector && !other.second.IsDead() && other.second.GetTeam() != GetTeam()) {
+				if (other.second.IsDead() || other.second.GetTeam() == GetTeam()) {
+					continue;
+				}
+
+				if (entity::CanSeeEntity(*this, other.second)) {
 					player_names[i++] = other.first.data();
 				}
 			}
