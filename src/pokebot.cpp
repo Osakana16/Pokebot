@@ -127,14 +127,6 @@ namespace pokebot::plugin {
             game::game.Kill(args[0].data());
         });
 
-        REG_SVR_COMMAND("pk_kill_t",[] {
-
-        });
-
-        REG_SVR_COMMAND("pk_kill_ct", [] {
-
-        });
-
         REG_SVR_COMMAND("pk_navload", [] {
                 pokebot::node::czworld.OnMapLoaded();
         });
