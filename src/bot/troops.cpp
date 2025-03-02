@@ -18,7 +18,7 @@ namespace pokebot::bot {
 	}
 
 	bool Troops::NeedToDevise() const POKEBOT_NOEXCEPT {
-		return strategy.objective_goal_node == node::Invalid_NodeID;
+		return strategy.objective_goal_node == node::Invalid_NodeID && platoons.empty();
 	}
 
 	game::Client* Troops::GetLeader() const POKEBOT_NOEXCEPT {
@@ -33,89 +33,92 @@ namespace pokebot::bot {
 		return platoons.size() - 1;
 	}
 
+	void Troops::DecideStrategy(Bots* const bots, game::MapFlags map_flags) {
+		/*
+			Decide the new strategy based below:
+				1. Offender, Defender, or Neither
+				2. The important role such as a V.I.P or a bomber exists or not
 
-	void Troops::DecideStrategy(std::unordered_map<common::PlayerName, Bot, common::PlayerName::Hash>* const bots, const std::optional<RadioMessage>& radio_message) {
+			Then,
+				1. Split or Stick
+		*/
+		if (bots->empty())
+			return;
+
+		enum class Role {
+			Offender,	// The team is the offender(Terrorist in de maps, CT in cs maps).
+			Defender,	// The team is the defender(Terrorist in cs maps, CT in de maps).
+			Neither		// The team is neither the offender or the defender.
+		} role = Role::Neither;
+		
+		TroopsStrategy new_strategy{};
+		switch (team) {
+			case common::Team::T:
+			{
+				if (game::game.IsCurrentMode(game::MapFlags::Demolition)) {
+					new_strategy.strategy = TroopsStrategy::Strategy::Plant_C4_Specific_Bombsite_Concentrative;
+					switch (new_strategy.strategy) {
+						case TroopsStrategy::Strategy::Plant_C4_Specific_Bombsite_Concentrative:
+						{
+							DecideStrategyToPlantC4Concentrative(bots, &new_strategy);
+							break;
+						}
+						default:
+							assert(false);
+							break;
+					}
+				} else if (game::game.IsCurrentMode(game::MapFlags::HostageRescue)) {
+					auto kind = node::GoalKind::Rescue_Zone;
+					strategy.strategy = TroopsStrategy::Strategy::Prevent_Hostages;
+					new_strategy.objective_goal_node = SelectGoal(kind);
+				} else if (game::game.IsCurrentMode(game::MapFlags::Assassination)) {
+					auto kind = node::GoalKind::Vip_Safety;
+					new_strategy.objective_goal_node = SelectGoal(kind);
+				} else if (game::game.IsCurrentMode(game::MapFlags::Escape)) {
+					auto kind = node::GoalKind::Escape_Zone;
+					new_strategy.objective_goal_node = SelectGoal(kind);
+				}
+				break;
+			}
+			case common::Team::CT:
+			{
+				if (game::game.IsCurrentMode(game::MapFlags::Demolition)) {
+					new_strategy.strategy = TroopsStrategy::Strategy::Defend_Bombsite_Divided;
+					switch (new_strategy.strategy) {
+						case TroopsStrategy::Strategy::Defend_Bombsite_Divided:
+						{
+							DecideStrategyToDefendBombsite(bots, &new_strategy);
+							break;
+						}
+						default:
+							assert(false);
+							break;
+					}
+				} else if (game::game.IsCurrentMode(game::MapFlags::HostageRescue)) {
+					auto kind = node::GoalKind::Rescue_Zone;
+					new_strategy.strategy = TroopsStrategy::Strategy::Rush_And_Rescue;
+					DecideStrategyToRescueHostageSplit(bots, &new_strategy);
+				} else if (game::game.IsCurrentMode(game::MapFlags::Assassination)) {
+					auto kind = node::GoalKind::Vip_Safety;
+					new_strategy.objective_goal_node = SelectGoal(kind);
+				} else if (game::game.IsCurrentMode(game::MapFlags::Escape)) {
+					auto kind = node::GoalKind::Escape_Zone;
+					new_strategy.objective_goal_node = SelectGoal(kind);
+				}
+				break;
+			}
+			default:
+				assert(false);
+		}
+		SetNewStrategy(new_strategy);
+	}
+
+	void Troops::DecideStrategyFromRadio(Bots* const bots, const std::optional<RadioMessage>& radio_message) {
 		if (bots->empty())
 			return;
 
 		TroopsStrategy new_strategy{};
-		if (radio_message.has_value()) {
-			DecideSpecialStrategy(bots, &new_strategy, radio_message);
-		} else {
-			/*
-				Decide the new strategy based below:
-				  1. Offender, Defender, or Neither
-				  2. The important role such as a V.I.P or a bomber exists or not
-
-				Then, 
-				  1. Split or Stick
-			*/
-
-			enum class Role {
-				Offender,	// The team is the offender(Terrorist in de maps, CT in cs maps).
-				Defender,	// The team is the defender(Terrorist in cs maps, CT in de maps).
-				Neither		// The team is neither the offender or the defender.
-			} role = Role::Neither;
-			
-			switch (team) {
-				case common::Team::T:
-				{
-					if (game::game.IsCurrentMode(game::MapFlags::Demolition)) {
-						new_strategy.strategy = TroopsStrategy::Strategy::Plant_C4_Specific_Bombsite_Concentrative;
-						switch (new_strategy.strategy) {
-							case TroopsStrategy::Strategy::Plant_C4_Specific_Bombsite_Concentrative:
-							{
-								DecideStrategyToPlantC4Concentrative(bots, &new_strategy);
-								break;
-							}
-							default:
-								assert(false);
-								break;
-						}
-					} else if (game::game.IsCurrentMode(game::MapFlags::HostageRescue)) {
-						auto kind = node::GoalKind::Rescue_Zone;
-						strategy.strategy = TroopsStrategy::Strategy::Prevent_Hostages;
-						new_strategy.objective_goal_node = SelectGoal(kind);
-					} else if (game::game.IsCurrentMode(game::MapFlags::Assassination)) {
-						auto kind = node::GoalKind::Vip_Safety;
-						new_strategy.objective_goal_node = SelectGoal(kind);
-					} else if (game::game.IsCurrentMode(game::MapFlags::Escape)) {
-						auto kind = node::GoalKind::Escape_Zone;
-						new_strategy.objective_goal_node = SelectGoal(kind);
-					}
-					break;
-				}
-				case common::Team::CT:
-				{
-					if (game::game.IsCurrentMode(game::MapFlags::Demolition)) {
-						new_strategy.strategy = TroopsStrategy::Strategy::Defend_Bombsite_Divided;
-						switch (new_strategy.strategy) {
-							case TroopsStrategy::Strategy::Defend_Bombsite_Divided:
-							{
-								DecideStrategyToDefendBombsite(bots, &new_strategy);
-								break;
-							}
-							default:
-								assert(false);
-								break;
-						}
-					} else if (game::game.IsCurrentMode(game::MapFlags::HostageRescue)) {
-						auto kind = node::GoalKind::Rescue_Zone;
-						new_strategy.strategy = TroopsStrategy::Strategy::Rush_And_Rescue;
-						DecideStrategyToRescueHostageSplit(bots, &new_strategy);
-					} else if (game::game.IsCurrentMode(game::MapFlags::Assassination)) {
-						auto kind = node::GoalKind::Vip_Safety;
-						new_strategy.objective_goal_node = SelectGoal(kind);
-					} else if (game::game.IsCurrentMode(game::MapFlags::Escape)) {
-						auto kind = node::GoalKind::Escape_Zone;
-						new_strategy.objective_goal_node = SelectGoal(kind);
-					}
-					break;
-				}
-				default:
-					assert(false);
-			}
-		}
+		DecideSpecialStrategy(bots, &new_strategy, radio_message);
 		SetNewStrategy(new_strategy);
 	}
 
@@ -141,8 +144,12 @@ namespace pokebot::bot {
 
 	void Troops::Command(std::unordered_map<common::PlayerName, Bot, common::PlayerName::Hash>* bots) {
 		for (auto& individual : (*bots | std::views::filter(condition))) {
-			individual.second.ReceiveCommand(strategy);
+			Command(&individual.second);
 		}
+	}
+
+	void Troops::Command(bot::Bot* const bot) {
+		bot->ReceiveCommand(strategy);
 	}
 
 	void Troops::SetNewStrategy(const TroopsStrategy& New_Team_Strategy) noexcept {
@@ -182,7 +189,7 @@ namespace pokebot::bot {
 		template<game::Weapon weapon> bool ByHavingWeapon(const BotPair& target) noexcept { return target.second.HasWeapon(weapon); }
 		template<game::Weapon weapon> bool ByNotHavingWeapon(const BotPair& target) noexcept { return !target.second.HasWeapon(weapon); }
 	}
-
+	
 	void Troops::DecideStrategyToPlantC4Concentrative(Bots* bots, TroopsStrategy* new_strategy) {
 		auto kind = node::GoalKind::Bombspot;
 		if (IsRoot()) {

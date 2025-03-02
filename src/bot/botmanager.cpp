@@ -28,11 +28,11 @@ namespace pokebot::bot {
 		}
 
 		for (auto& troop : troops) {
-			troop.DecideStrategy(&bots, std::nullopt);
+			troop.DecideStrategy(&bots, game::game.GetMapFlag());
 			troop.Command(&bots);
 			
 			for (auto& platoon : troop) {
-				platoon.DecideStrategy(&bots, std::nullopt);
+				platoon.DecideStrategy(&bots, game::game.GetMapFlag());
 				platoon.Command(&bots);
 			}
 		}
@@ -125,7 +125,7 @@ namespace pokebot::bot {
 						while ((dropped_bomb = common::FindEntityByClassname(dropped_bomb, "weaponbox")) != NULL) {
 							if (std::string_view(STRING(dropped_bomb->v.model)) == "models/w_backpack.mdl") {
 								backpack = dropped_bomb;
-								terrorist_troop.DecideStrategy(&bots, RadioMessage{ .team=common::Team::T, .message="#Take_Bomb"  });
+								terrorist_troop.DecideStrategyFromRadio(&bots, RadioMessage{ .team=common::Team::T, .message="#Take_Bomb"  });
 								break;
 							}
 						}
@@ -165,7 +165,7 @@ namespace pokebot::bot {
 					follower.second.platoon = *radio_message.platoon;
 				}
 				auto& platoon = troops[static_cast<int>(radio_message.team) - 1][*radio_message.platoon];
-				platoon.DecideStrategy(&bots, radio_message);
+				platoon.DecideStrategyFromRadio(&bots, radio_message);
 				platoon.Command(&bots);
 			}
 
@@ -212,8 +212,15 @@ namespace pokebot::bot {
 		const int Team_Index = static_cast<int>(completed_guy->JoinedTeam()) - 1;
 
 		if (auto& troop = troops[Team_Index]; troop.NeedToDevise()) {
-			troop.DecideStrategy(&bots, std::nullopt);
+			troop.DecideStrategy(&bots, game::game.GetMapFlag());
 			troop.Command(&bots);
+
+			// troop.CreatePlatoon([](const BotPair& target) -> bool { return target.second.JoinedPlatoon() == -1; });
+		} else {
+			if (!completed_guy->JoinedPlatoon().has_value()) {
+				completed_guy->platoon = common::Random<int>(0, troop.GetPlatoonSize() - 1);
+				troop.Command(completed_guy);
+			}
 		}
 #endif
 	}

@@ -54,6 +54,7 @@ namespace pokebot::bot {
 	using Bots = std::unordered_map<common::PlayerName, Bot, common::PlayerName::Hash>;
 
 	class Troops final {
+
 		TroopsStrategy strategy;
 		TroopsStrategy old_strategy;
 
@@ -114,17 +115,25 @@ namespace pokebot::bot {
 		bool IsStrategyToFollow() const noexcept { return strategy.strategy == TroopsStrategy::Strategy::Follow; }
 
 		/**
-		* @brief 
+		* @brief Decide the strategy for the troop.
 		* @param bots
 		* @param radio_message
 		*/
-		void DecideStrategy(Bots* bots, const std::optional<RadioMessage>& radio_message);
+		void DecideStrategyFromRadio(Bots* bots, const std::optional<RadioMessage>& radio_message);
+
+		/**
+		* @brief Decide the strategy for the troop.
+		* @param bots
+		* @param radio_message
+		*/
+		void DecideStrategy(Bots* bots, game::MapFlags map_flag);
 
 		/**
 		* @brief 
 		* @param 
 		*/
 		void Command(Bots* bots);
+		void Command(bot::Bot* const bot);
 
 		/**
 		* @brief Set the new strategy and apply it to own platoons.
