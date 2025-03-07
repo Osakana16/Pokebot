@@ -235,6 +235,10 @@ namespace pokebot::bot::behavior {
 		});
 
 		set_goal_backpack_node->Define([](Bot* const self) -> Status {
+			auto area = node::czworld.GetNearest(*Manager::Instance().BackpackOrigin());
+			if (area == nullptr) {
+				return Status::Failed;
+			}
 			node::NodeID id = node::czworld.GetNearest(*Manager::Instance().BackpackOrigin())->m_id;
 			if (node::czworld.IsOnNode(self->Origin(), id))
 				return Status::Failed;
