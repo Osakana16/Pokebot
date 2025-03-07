@@ -207,7 +207,6 @@ namespace pokebot::bot {
 	}
 
 	void Manager::OnBotJoinedCompletely(Bot* const completed_guy) POKEBOT_NOEXCEPT {
-#if 1
 		assert(completed_guy->JoinedTeam() == common::Team::T || completed_guy->JoinedTeam() == common::Team::CT);
 		const int Team_Index = static_cast<int>(completed_guy->JoinedTeam()) - 1;
 
@@ -218,11 +217,10 @@ namespace pokebot::bot {
 			// troop.CreatePlatoon([](const BotPair& target) -> bool { return target.second.JoinedPlatoon() == -1; });
 		} else {
 			if (!completed_guy->JoinedPlatoon().has_value()) {
-				completed_guy->platoon = common::Random<int>(0, troop.GetPlatoonSize() - 1);
+				completed_guy->JoinPlatoon((int)common::Random<int>(0, troop.GetPlatoonSize() - 1));
 				troop.Command(completed_guy);
 			}
 		}
-#endif
 	}
 
 	node::NodeID Manager::GetGoalNode(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT {
