@@ -17,7 +17,7 @@ namespace pokebot::plugin {
             }
         }
 
-        static void pk_add_team_specified(const common::Team Default_Team) {            
+        static void pk_add_team_specified(const common::Team Default_Team) {
             if (!node::czworld.IsNavFileLoaded()) {
                 SERVER_PRINT("[POKEBOT] Error: Cannot add bots because the .nav file is not loaded. Please generate it in CS:CZ.\n");
                 return;
@@ -138,7 +138,7 @@ namespace pokebot::plugin {
         });
 
         REG_SVR_COMMAND("pk_navload", [] {
-                pokebot::node::czworld.OnMapLoaded();
+            pokebot::node::czworld.OnMapLoaded();
         });
 
         REG_SVR_COMMAND("pk_what_my_node", [] {
@@ -154,7 +154,7 @@ namespace pokebot::plugin {
         pokebot::game::game.PreUpdate();
         pokebot::bot::Manager::Instance().Update();
         pokebot::game::game.PostUpdate();
-        
+
         if (draw_node) {
 #if !USE_NAVMESH
             pokebot::node::world.Draw();
@@ -165,7 +165,7 @@ namespace pokebot::plugin {
     void Pokebot::AddBot(const std::string_view& Bot_Name, const common::Team Selected_Team, const common::Model Selected_Model, const bot::Difficult Difficult) POKEBOT_NOEXCEPT {
         pokebot::bot::Manager::Instance().Insert(Bot_Name.data(), Selected_Team, Selected_Model, Difficult);
     }
-    
+
     void Pokebot::OnEntitySpawned() {
         if (spawned_entity->v.rendermode == kRenderTransTexture) {
             spawned_entity->v.flags &= ~FL_WORLDBRUSH; // clear the FL_WORLDBRUSH flag out of transparent ents
@@ -173,7 +173,7 @@ namespace pokebot::plugin {
         if (std::string_view classname = STRING(spawned_entity->v.classname); classname == "worldspawn") {
             pWorldEntity = spawned_entity;
             beam_sprite = PRECACHE_MODEL("sprites/laserbeam.spr");
-        }        
+        }
     }
 
     void Pokebot::OnClientConnect() {
@@ -183,5 +183,15 @@ namespace pokebot::plugin {
     void Pokebot::OnClientDisconnect(const edict_t* const disconnected_client) {
         pokebot::bot::Manager::Instance().Remove(STRING(disconnected_client->v.netname));
         pokebot::game::game.clients.Disconnect(STRING(disconnected_client->v.netname));
+    }
+
+
+    void Pokebot::OnMapLoaded() {
+#if !USE_NAVMESH
+        pokebot::node::world.OnMapLoaded();
+#else
+        pokebot::node::czworld.OnMapLoaded();
+#endif
+        pokebot::bot::Manager::Instance().OnMapLoaded();
     }
 }

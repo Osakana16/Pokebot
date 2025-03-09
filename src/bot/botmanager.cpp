@@ -223,6 +223,19 @@ namespace pokebot::bot {
 		}
 	}
 
+	void Manager::OnMapLoaded() {
+		bots.clear();
+		bomber_name.clear();
+		backpack = nullptr;
+		c4_origin = std::nullopt;
+		memset(&radio_message, 0, sizeof(radio_message));
+		round_started_timer.SetTime(0.0f);
+
+		for (auto& troop : troops) {
+			troop.Init();
+		}
+	}
+
 	node::NodeID Manager::GetGoalNode(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT {
 		auto& troop = troops[static_cast<int>(Target_Team) - 1];
 		if (!Index.has_value()) {

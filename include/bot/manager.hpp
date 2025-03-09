@@ -159,6 +159,8 @@ namespace pokebot::bot {
 		*/
 		void OnBotJoinedCompletely(Bot* const) POKEBOT_NOEXCEPT;
 
+		void OnMapLoaded();
+
 		/**
 		* @brief Get the goal node ID for a troop or platoon.
 		* @param Target_Team The team of the troop.

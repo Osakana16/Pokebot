@@ -54,7 +54,6 @@ namespace pokebot::bot {
 	using Bots = std::unordered_map<common::PlayerName, Bot, common::PlayerName::Hash>;
 
 	class Troops final {
-
 		TroopsStrategy strategy;
 		TroopsStrategy old_strategy;
 
@@ -73,7 +72,6 @@ namespace pokebot::bot {
 
 		node::NodeID SelectGoal(node::GoalKind kind);
 
-
 		/**
 		* 
 		*/
@@ -85,6 +83,8 @@ namespace pokebot::bot {
 		void DecideStrategyToPlantC4Concentrative(Bots* bots, TroopsStrategy* new_strategy);
 		void DecideStrategyToDefendBombsite(Bots* bots, TroopsStrategy* new_strategy);
 	public:
+		void Init();
+
 		common::Team Team() { return team; }
 		Troops(decltype(condition) target_condition, decltype(team) target_team) : condition(target_condition), team(target_team) {}
 

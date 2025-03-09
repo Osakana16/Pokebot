@@ -1,6 +1,11 @@
 #include "bot/manager.hpp"
 
 namespace pokebot::bot {
+	void Troops::Init() {
+		strategy = old_strategy = TroopsStrategy();
+		platoons.clear();
+	}
+
 	bool Troops::HasGoalBeenDevised(const node::NodeID target_objective_node) const POKEBOT_NOEXCEPT {
 		return old_strategy.objective_goal_node == target_objective_node;
 		// return common::Distance(node::czworld.GetOrigin(old_strategy.objective_goal_node), node::czworld.GetOrigin(target_objective_node)) <= 500.0f;

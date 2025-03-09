@@ -25,5 +25,6 @@ namespace pokebot::plugin {
 		void OnEntitySpawned();
 		void OnClientConnect();
 		void OnClientDisconnect(const edict_t* const disconnected_client);
+		void OnMapLoaded();
 	} pokebot_plugin{};
 }

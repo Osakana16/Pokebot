@@ -184,11 +184,8 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
                 // REMOVED: We cannot get the player's name at this timing.
                 // pokebot::game::game.clients.Register(entity);
                 is_game_completely_initialized = true;
-#if !USE_NAVMESH
-                pokebot::node::world.OnMapLoaded();
-#else
-                pokebot::node::czworld.OnMapLoaded();
-#endif
+
+                pokebot::plugin::pokebot_plugin.OnMapLoaded();
             }
             SERVER_PRINT(std::format("POKEBOT: {} is connected.\n", STRING(entity->v.netname)).c_str());
         }
