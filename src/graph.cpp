@@ -603,10 +603,15 @@ namespace pokebot::node {
 		}
 	}
 
+	bool CZBotGraph::IsNavFileLoaded() const noexcept {
+		return is_nav_loaded;
+	}
+
 	void CZBotGraph::OnMapLoaded() {
         if (!navigation_map.Load(std::format("cstrike/maps/{}.nav", STRING(gpGlobals->mapname)))) {
             if (!navigation_map.Load(std::format("czero/maps/{}.nav", STRING(gpGlobals->mapname)))) {
                 SERVER_PRINT("[POKEBOT]Failed to load the nav file.\n");
+				is_nav_loaded = false;
 				return;
             } else {
                 SERVER_PRINT("[POKEBOT]Loaded the nav file from czero.\n");
@@ -615,6 +620,7 @@ namespace pokebot::node {
             SERVER_PRINT("[POKEBOT]Loaded the nav file from cstrike.\n");
         }
 
+		is_nav_loaded = true;
 		auto addGoal = [this](const GoalKind kind, const char* class_name, Vector(*originFunction)(edict_t*)) {
 			edict_t* entity = nullptr;
 			while ((entity = common::FindEntityByClassname(entity, class_name)) != nullptr) {

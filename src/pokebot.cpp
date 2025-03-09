@@ -17,7 +17,12 @@ namespace pokebot::plugin {
             }
         }
 
-        static void pk_add_team_specified(const common::Team Default_Team) {
+        static void pk_add_team_specified(const common::Team Default_Team) {            
+            if (!node::czworld.IsNavFileLoaded()) {
+                SERVER_PRINT("[POKEBOT] Error: Cannot add bots because the .nav file is not loaded. Please generate it in CS:CZ.\n");
+                return;
+            }
+
             std::vector<std::string_view> args{};
             GetArgs(&args);
 
@@ -41,6 +46,11 @@ namespace pokebot::plugin {
         }
 
         void pk_add() {
+            if (!node::czworld.IsNavFileLoaded()) {
+                SERVER_PRINT("[POKEBOT] Error: Cannot add bots because the .nav file is not loaded. Please generate it in CS:CZ.\n");
+                return;
+            }
+
             std::vector<std::string_view> args{};
             GetArgs(&args);
 

@@ -190,6 +190,7 @@ namespace pokebot::node {
 	inline class CZBotGraph {
 		std::unordered_multimap<GoalKind, NodeID> goals{};
 		common::Array<Danger, 2> danger;
+		bool is_nav_loaded{};
 	public:
 		size_t GetNumberOfGoals(GoalKind) const POKEBOT_NOEXCEPT;
 
@@ -211,6 +212,8 @@ namespace pokebot::node {
 		void FindPath(PathWalk<std::uint32_t>* const, const Vector&, const Vector&, const common::Team);
 		
 		bool HasFlag(const NodeID, NavmeshFlag) const POKEBOT_NOEXCEPT;
+
+		bool IsNavFileLoaded() const noexcept;
 	} czworld;
 #endif
 	void AStarSearch(std::pair<const Vector&, const Vector&>);
