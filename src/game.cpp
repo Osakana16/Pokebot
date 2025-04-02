@@ -237,7 +237,11 @@ namespace pokebot {
 		}
 
 		const char* const Game::GetBotArg(const size_t Index) const POKEBOT_NOEXCEPT {
-			return bot_args.at(Index).c_str();
+			if (bot_args.size() == Index) {
+				return bot_args.at(Index - 1).c_str();
+			} else {
+				return bot_args.at(Index).c_str();
+			}
 		}
 
 		size_t Game::GetBotArgCount() const POKEBOT_NOEXCEPT {
