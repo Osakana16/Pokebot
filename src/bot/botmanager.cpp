@@ -216,7 +216,7 @@ namespace pokebot::bot {
 
 			// troop.CreatePlatoon([](const BotPair& target) -> bool { return target.second.JoinedPlatoon() == -1; });
 		} else {
-			if (!completed_guy->JoinedPlatoon().has_value()) {
+			if (!completed_guy->JoinedPlatoon().has_value() && troop.GetPlatoonSize() > 0) {
 				completed_guy->JoinPlatoon((int)common::Random<int>(0, troop.GetPlatoonSize() - 1));
 				troop.Command(completed_guy);
 			}
