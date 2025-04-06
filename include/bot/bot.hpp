@@ -104,7 +104,7 @@ namespace pokebot::bot {
 		friend class Manager;
 		friend class Troops;
 
-		common::Time
+		util::Time
 			frame_interval{},
 			last_command_time{};
 

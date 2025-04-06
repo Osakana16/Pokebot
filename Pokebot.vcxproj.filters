@@ -128,9 +128,6 @@
     <ClCompile Include="include\bot\basic.hpp">
       <Filter>include\bot</Filter>
     </ClCompile>
-    <ClCompile Include="processor.ixx">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\global_time_provider.cpp">
       <Filter>src\util</Filter>
     </ClCompile>

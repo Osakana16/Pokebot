@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "database.hpp"
+#include "util/timer.hpp"
+
 namespace pokebot {
 	namespace game {
 		using ClientCreationResult = std::tuple<bool, util::PlayerName>;
@@ -219,7 +221,7 @@ namespace pokebot {
 			bool is_nvg_on{};
 			bool is_vip{};
 
-			common::Time use_reset_time{};
+			util::Time use_reset_time{};
 
 			common::Array<int, 10> weapon_ammo{};
 			int weapon_clip{};
@@ -412,7 +414,7 @@ namespace pokebot {
 			Hostage(const Hostage&);
 			Hostage& operator=(const Hostage&) = delete;
 
-			common::Time time{};
+			util::Time time{};
 
 			const edict_t* entity;
 			util::PlayerName owner_name{};

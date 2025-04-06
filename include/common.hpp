@@ -24,7 +24,6 @@ namespace pokebot{
 #endif
 
 		using Dec = float;
-		using Time = Dec;
 
 		constexpr auto Third_Party_Bot_Flag = 1 << 27;
 

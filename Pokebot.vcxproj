@@ -134,7 +134,6 @@
     <ClInclude Include="include\graph.hpp" />
     <ClInclude Include="include\stdafx.h" />
     <ClCompile Include="include\bot\basic.hpp" />
-    <ClCompile Include="processor.ixx" />
     <ClCompile Include="src\bot\behavior\action.cpp" />
     <ClCompile Include="src\bot\behavior\behavior.cpp" />
     <ClCompile Include="src\bot\behavior\combat.cpp" />
