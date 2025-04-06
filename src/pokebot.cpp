@@ -5,6 +5,8 @@
 #include <iostream>
 #include <functional>
 
+import pokebot.util.random;
+
 namespace pokebot::plugin {
     namespace {
         void GetArgs(std::vector<std::string_view>* args) {
@@ -28,7 +30,7 @@ namespace pokebot::plugin {
 
             std::string_view name = "FirstBot";
             pokebot::common::Team team = Default_Team;
-            pokebot::common::Model model = (pokebot::common::Model)(int)pokebot::common::Random<int>(1, 4);
+            pokebot::common::Model model = (pokebot::common::Model)(int)pokebot::util::Random<int>(1, 4);
             bot::Difficult difficult = bot::Difficult::Normal;
             if (args.size() >= 1) {
                 const size_t size = args[0].size();
@@ -55,8 +57,8 @@ namespace pokebot::plugin {
             GetArgs(&args);
 
             std::string_view name = "FirstBot";
-            pokebot::common::Team team = (pokebot::common::Team)(int)pokebot::common::Random<int>(1, 2);
-            pokebot::common::Model model = (pokebot::common::Model)(int)pokebot::common::Random<int>(1, 4);
+            pokebot::common::Team team = (pokebot::common::Team)(int)pokebot::util::Random<int>(1, 2);
+            pokebot::common::Model model = (pokebot::common::Model)(int)pokebot::util::Random<int>(1, 4);
             bot::Difficult difficult = bot::Difficult::Normal;
             if (args.size() >= 1) {
                 assert(args[0].size() <= 64u);

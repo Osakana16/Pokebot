@@ -147,7 +147,7 @@ namespace pokebot::bot {
 		}
 	}
 
-	void Troops::Command(std::unordered_map<common::PlayerName, Bot, common::PlayerName::Hash>* bots) {
+	void Troops::Command(std::unordered_map<util::PlayerName, Bot, util::PlayerName::Hash>* bots) {
 		for (auto& individual : (*bots | std::views::filter(condition))) {
 			Command(&individual.second);
 		}

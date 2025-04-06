@@ -14,7 +14,7 @@ namespace pokebot::database {
 				}
 
 				for (const auto item : data["template"].items()) {
-					auto ArrayPushBack = [](std::list<common::fixed_string<64u>>* const target, const nlohmann::json_abi_v3_11_2::json& Datas) POKEBOT_NOEXCEPT {
+					auto ArrayPushBack = [](std::list<util::fixed_string<64u>>* const target, const nlohmann::json_abi_v3_11_2::json& Datas) POKEBOT_NOEXCEPT {
 						for (int i = 0; i < Datas.size(); i++) {
 							target->push_back(Datas[i].get<std::string>().c_str());
 						}
@@ -75,7 +75,7 @@ namespace pokebot::database {
 
 				std::function<nlohmann::json& (std::string_view)> GetWeapon = std::bind(GetItem, "weapon", std::placeholders::_1);
 				for (const auto item : data["weapon"].items()) {
-					common::fixed_string<64u> id{};
+					util::fixed_string<64u> id{};
 					if (data["weapon"][item.key()].contains("id")) {
 						id = GetWeapon(item.key())["id"].get<std::string>().c_str();
 					} else {

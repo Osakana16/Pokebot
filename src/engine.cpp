@@ -4,7 +4,7 @@
 namespace {
     int current_message{};
     
-    using TextCache = pokebot::common::fixed_string<60u>;
+    using TextCache = pokebot::util::fixed_string<60u>;
     std::vector<std::variant<int, float, TextCache>> args{};
 }
 
@@ -47,7 +47,7 @@ namespace pokebot::common {
     }
 
     Team GetTeamFromModel(const edict_t* const Edict) {
-        static std::unordered_map<pokebot::common::fixed_string<11u>, common::Team, pokebot::common::fixed_string<11u>::Hash> Model_And_Teams{
+        static std::unordered_map<pokebot::util::fixed_string<11u>, common::Team, pokebot::util::fixed_string<11u>::Hash> Model_And_Teams{
             { "terror", common::Team::T },
 			{ "arab", common::Team::T },
 			{ "leet", common::Team::T },

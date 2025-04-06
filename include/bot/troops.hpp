@@ -1,7 +1,7 @@
 #pragma once
 namespace pokebot::bot {
 	struct TroopsStrategy {
-		common::PlayerName leader_name{};	// The name of the player to follow.
+		util::PlayerName leader_name{};	// The name of the player to follow.
 		node::NodeID objective_goal_node = node::Invalid_NodeID;
 		std::optional<int> hostage_id{};
 
@@ -51,13 +51,13 @@ namespace pokebot::bot {
 		} strategy;
 	};
 
-	using Bots = std::unordered_map<common::PlayerName, Bot, common::PlayerName::Hash>;
+	using Bots = std::unordered_map<util::PlayerName, Bot, util::PlayerName::Hash>;
 
 	class Troops final {
 		TroopsStrategy strategy;
 		TroopsStrategy old_strategy;
 
-		std::function<bool(const std::pair<common::PlayerName, Bot>& target)> condition;
+		std::function<bool(const std::pair<util::PlayerName, Bot>& target)> condition;
 
 		common::Team team{};			// The team of the platoon.
 

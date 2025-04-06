@@ -3,6 +3,8 @@
 
 #include <thread>
 
+import pokebot.util.tracer;
+
 namespace pokebot::bot {
 	void Bot::Run() POKEBOT_NOEXCEPT {
 		(this->*(updateFuncs[static_cast<int>(start_action)]))();
@@ -436,7 +438,7 @@ namespace pokebot::bot {
 #if 1
 		if (game::poke_fight) {
 			auto client = game::game.clients.Get(Name().data());
-			common::PlayerName enemies_in_view[32]{};
+			util::PlayerName enemies_in_view[32]{};
 			int i{};
 
 			client->GetEnemyNamesWithinView(enemies_in_view);
@@ -479,28 +481,28 @@ namespace pokebot::bot {
 		const auto Foot = Origin();
 		const auto Head = Foot + game::game.clients.Get(Name().data())->view_ofs;
 
-		common::Tracer tracer{};
-		const bool Is_Head_Forward_Center_Hit = tracer.MoveStart(Head).MoveDest(Head + gpGlobals->v_forward * 90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
-		const bool Is_Head_Forward_Left_Hit = tracer.MoveDest(Head + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * -45.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
-		const bool Is_Head_Forward_Right_Hit = tracer.MoveDest(Head + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * 45.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
+		util::Tracer tracer{};
+		const bool Is_Head_Forward_Center_Hit = tracer.MoveStart(Head).MoveDest(Head + gpGlobals->v_forward * 90.0f).TraceLine(util::Tracer::Monsters::Ignore, util::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
+		const bool Is_Head_Forward_Left_Hit = tracer.MoveDest(Head + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * -45.0f).TraceLine(util::Tracer::Monsters::Ignore, util::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
+		const bool Is_Head_Forward_Right_Hit = tracer.MoveDest(Head + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * 45.0f).TraceLine(util::Tracer::Monsters::Ignore, util::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
 		const bool Is_Head_Forward_Hit = Is_Head_Forward_Center_Hit || Is_Head_Forward_Left_Hit || Is_Head_Forward_Right_Hit;
 
 		if (Is_Head_Forward_Hit) {
 			// Check left
-			tracer.MoveDest(Head + gpGlobals->v_right * -90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr);
+			tracer.MoveDest(Head + gpGlobals->v_right * -90.0f).TraceLine(util::Tracer::Monsters::Ignore, util::Tracer::Glass::Dont_Ignore, nullptr);
 			if (tracer.IsHit()) {
 				PressKey(ActionKey::Move_Right);
 			} else {
 				// Check right
-				tracer.MoveDest(Head + gpGlobals->v_right * 90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr);
+				tracer.MoveDest(Head + gpGlobals->v_right * 90.0f).TraceLine(util::Tracer::Monsters::Ignore, util::Tracer::Glass::Dont_Ignore, nullptr);
 				if (tracer.IsHit()) {
 					PressKey(ActionKey::Move_Left);
 				}
 			}
 		} else {
-			const bool Is_Foot_Forward_Center_Hit = tracer.MoveStart(Foot).MoveDest(Foot + gpGlobals->v_forward * 90.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
-			const bool Is_Foot_Forward_Left_Hit = tracer.MoveDest(Foot + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * -45.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
-			const bool Is_Foot_Forward_Right_Hit = tracer.MoveDest(Foot + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * 45.0f).TraceLine(common::Tracer::Monsters::Ignore, common::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
+			const bool Is_Foot_Forward_Center_Hit = tracer.MoveStart(Foot).MoveDest(Foot + gpGlobals->v_forward * 90.0f).TraceLine(util::Tracer::Monsters::Ignore, util::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
+			const bool Is_Foot_Forward_Left_Hit = tracer.MoveDest(Foot + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * -45.0f).TraceLine(util::Tracer::Monsters::Ignore, util::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
+			const bool Is_Foot_Forward_Right_Hit = tracer.MoveDest(Foot + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * 45.0f).TraceLine(util::Tracer::Monsters::Ignore, util::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
 			const bool Is_Foot_Forward_Hit = Is_Foot_Forward_Center_Hit || Is_Foot_Forward_Left_Hit || Is_Foot_Forward_Right_Hit;
 			if (Is_Foot_Forward_Hit) {
 				PressKey(ActionKey::Jump);
@@ -628,7 +630,7 @@ namespace pokebot::bot {
 
 	bool Bot::IsInBuyzone() const POKEBOT_NOEXCEPT { return game::game.clients.Get(Name().data())->IsInBuyzone(); }
 
-	const common::PlayerName& Bot::Name() const POKEBOT_NOEXCEPT { return name; }
+	const util::PlayerName& Bot::Name() const POKEBOT_NOEXCEPT { return name; }
 
 	Vector Bot::Origin() const POKEBOT_NOEXCEPT {
 		return game::game.clients.Get(Name().data())->origin;
@@ -666,7 +668,7 @@ namespace pokebot::bot {
 
 	void Bot::OnRadioRecieved(const std::string_view& Sender_Name, const std::string_view& Radio_Sentence) POKEBOT_NOEXCEPT {
 		static bool is_sent{};
-		const std::unordered_map<common::fixed_string<32u>, std::function<void()>, common::fixed_string<32u>::Hash> Radios{
+		const std::unordered_map<util::fixed_string<32u>, std::function<void()>, util::fixed_string<32u>::Hash> Radios{
 			{
 				"#Cover_me",
 				[] {

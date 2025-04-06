@@ -4,12 +4,12 @@
 namespace pokebot::bot {
 	struct RadioMessage {
 		common::Team team = common::Team::Spector;
-		common::PlayerName sender{};
-		common::fixed_string<255u> message{};
+		util::PlayerName sender{};
+		util::fixed_string<255u> message{};
 		PlatoonID platoon{};
 	};
 
-	using BotPair = std::pair<common::PlayerName, Bot>;
+	using BotPair = std::pair<util::PlayerName, Bot>;
 
 	/**
 	* @brief Manager class for Bot.
@@ -22,12 +22,12 @@ namespace pokebot::bot {
 		Troops& counter_terrorist_troop = troops[1];
 
 		friend class pokebot::message::MessageDispatcher;
-		std::unordered_map<common::PlayerName, Bot, common::PlayerName::Hash> bots{};
+		std::unordered_map<util::PlayerName, Bot, util::PlayerName::Hash> bots{};
 
 		// The name of the player who has the bomb.
-		common::PlayerName bomber_name{};
+		util::PlayerName bomber_name{};
 
-		Timer round_started_timer{};
+		util::Timer round_started_timer{ util::GetRealGlobalTime };
 		enum class InitializationStage { Preparation, Player_Action_Ready, Completed } initialization_stage{};
 
 		Bot* const Get(const std::string_view&) POKEBOT_NOEXCEPT;
@@ -67,7 +67,7 @@ namespace pokebot::bot {
 		* @param model The model of the bot.
 		* @param difficulty The difficulty level of the bot.
 		*/
-		void Insert(common::PlayerName bot_name, const common::Team team, const common::Model model, const bot::Difficult difficulty) POKEBOT_NOEXCEPT;
+		void Insert(util::PlayerName bot_name, const common::Team team, const common::Model model, const bot::Difficult difficulty) POKEBOT_NOEXCEPT;
 
 		/**
 		* @brief Kick a bot from the game.

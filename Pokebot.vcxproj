@@ -70,6 +70,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ExceptionHandling>Async</ExceptionHandling>
       <EnableModules>true</EnableModules>
+      <AdditionalBMIDirectories>
+      </AdditionalBMIDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -101,6 +103,8 @@
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <EnableModules>true</EnableModules>
+      <AdditionalBMIDirectories>
+      </AdditionalBMIDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -115,6 +119,9 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="module\pokebot_random.ixx" />
+    <ClCompile Include="module\tracer.ixx" />
+    <ClCompile Include="src\global_time_provider.cpp" />
     <ClInclude Include="include\behavior.hpp" />
     <ClInclude Include="include\bot\manager.hpp" />
     <ClInclude Include="include\bot\bot.hpp" />
@@ -138,6 +145,9 @@
     <ClCompile Include="src\bot\troops.cpp" />
     <ClCompile Include="src\buy.cpp" />
     <ClCompile Include="src\common.cpp" />
+    <ClInclude Include="include\util\fixed_string.hpp" />
+    <ClInclude Include="include\util\global_time_provider.hpp" />
+    <ClInclude Include="include\util\timer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\database.cpp" />

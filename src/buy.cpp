@@ -1,6 +1,8 @@
 #include "database.hpp"
 #include "buy.hpp"
 
+import pokebot.util.random;
+
 namespace pokebot {
 	namespace bot {
 		void Bot::BuyUpdate() POKEBOT_NOEXCEPT {
@@ -289,7 +291,7 @@ namespace pokebot {
 			void FilterWeaponByRandom(const Filter* filter, std::vector<const database::WeaponData*>* result) {
 				assert(!result->empty());
 				std::vector<const database::WeaponData*> datas = std::move(*result);
-				result->push_back(datas[common::Random<int>(0, datas.size() - 1)]);
+				result->push_back(datas[util::Random<int>(0, datas.size() - 1)]);
 			}
 
 			static void PrepareData(std::vector<const database::WeaponData*>* datas) {

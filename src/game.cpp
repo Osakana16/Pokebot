@@ -268,7 +268,7 @@ namespace pokebot {
 			return map_flags;
 		}
 
-		void Game::IssueCommand(const std::string_view& Client_Name, common::fixed_string<32u> sentence) POKEBOT_NOEXCEPT {
+		void Game::IssueCommand(const std::string_view& Client_Name, util::fixed_string<32u> sentence) POKEBOT_NOEXCEPT {
 			bot_args.clear();
 			char* arg = strtok(sentence.data(), " ");
 			bot_args.push_back(arg);
@@ -458,7 +458,7 @@ namespace pokebot {
 			return false;
 		}
 
-		void Client::GetEnemyNamesWithinView(common::PlayerName player_names[32]) const POKEBOT_NOEXCEPT {
+		void Client::GetEnemyNamesWithinView(util::PlayerName player_names[32]) const POKEBOT_NOEXCEPT {
 			int i = 0;
 			for (const auto& other : game.clients.GetAll()) {
 				if (other.second.IsDead() || other.second.GetTeam() == GetTeam()) {
@@ -471,7 +471,7 @@ namespace pokebot {
 			}
 		}
 
-		void Client::GetEntityNamesInView(common::PlayerName player_names[32]) const POKEBOT_NOEXCEPT {
+		void Client::GetEntityNamesInView(util::PlayerName player_names[32]) const POKEBOT_NOEXCEPT {
 			int i = 0;
 			for (auto& other : game.clients.GetAll()) {
 				if (entity::CanSeeEntity(*this, other.second)) {

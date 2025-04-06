@@ -8,31 +8,6 @@ namespace pokebot::common {
 		VEC_TO_ANGLES(angle, *destination);
 	}
 
-
-	Tracer& Tracer::MoveStart(const Vector& Start) {
-		start_position = Start;
-		return *this;
-	}
-
-	Tracer& Tracer::MoveDest(const Vector& Dest) {
-		dest_position = Dest;
-		return *this;
-	}
-
-	Tracer& Tracer::TraceHull(Monsters monsters, HullType hull, edict_t* ignore_entity) {
-		TRACE_HULL(start_position, dest_position, static_cast<IGNORE_MONSTERS>(monsters), static_cast<HULL_TYPE>(hull), ignore_entity, this);
-		return *this;
-	}
-
-	Tracer& Tracer::TraceLine(Monsters monsters, Glass glass, edict_t* ignore_entity) {
-		TRACE_LINE(start_position, dest_position, static_cast<IGNORE_MONSTERS>(monsters) | static_cast<IGNORE_GLASS>(glass), ignore_entity, this);
-		return *this;
-	}
-
-	bool Tracer::IsHit() const POKEBOT_NOEXCEPT {
-		return flFraction < 1.0;
-	}
-
 	void Draw(edict_t* ent, const Vector& start, const Vector& end, int width, int noise, const Color& color, int brightness, int speed, int life) {
 		MESSAGE_BEGIN(MSG_ONE, SVC_TEMPENTITY, nullptr, ent);
 		WRITE_BYTE(TE_BEAMPOINTS);

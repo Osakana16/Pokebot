@@ -1,4 +1,7 @@
 #include "bot/manager.hpp"
+
+import pokebot.util.random;
+
 namespace pokebot::bot {
 	namespace {
 		bool IsTerrorist(const BotPair& target) noexcept { return target.second.JoinedTeam() == common::Team::T; }
@@ -100,9 +103,9 @@ namespace pokebot::bot {
 		}
 	}
 
-	void Manager::Insert(common::PlayerName bot_name, const common::Team team, const common::Model model, const bot::Difficult Assigned_Diffcult) POKEBOT_NOEXCEPT {
+	void Manager::Insert(util::PlayerName bot_name, const common::Team team, const common::Model model, const bot::Difficult Assigned_Diffcult) POKEBOT_NOEXCEPT {
 		if (auto spawn_result = game::game.Spawn(bot_name.c_str()); std::get<bool>(spawn_result)) {
-			bot_name = std::get<common::PlayerName>(spawn_result).c_str();
+			bot_name = std::get<util::PlayerName>(spawn_result).c_str();
 			auto insert_result = bots.insert({ bot_name.c_str(), Bot(bot_name.c_str(), team, model) });
 			assert(insert_result.second);
 		}
@@ -153,7 +156,7 @@ namespace pokebot::bot {
 
 
 		if (!radio_message.sender.empty()) {
-			auto followers = (bots | std::views::filter([&](const std::pair<common::PlayerName, Bot>& Pair) -> bool { return radio_message.team == Pair.second.JoinedTeam() && radio_message.sender != Pair.first; }));
+			auto followers = (bots | std::views::filter([&](const std::pair<util::PlayerName, Bot>& Pair) -> bool { return radio_message.team == Pair.second.JoinedTeam() && radio_message.sender != Pair.first; }));
 			for (auto& follower : followers) {
 				assert(follower.first != radio_message.sender);
 				follower.second.OnRadioRecieved(radio_message.sender.c_str(), radio_message.message.c_str());
@@ -217,7 +220,7 @@ namespace pokebot::bot {
 			// troop.CreatePlatoon([](const BotPair& target) -> bool { return target.second.JoinedPlatoon() == -1; });
 		} else {
 			if (!completed_guy->JoinedPlatoon().has_value() && troop.GetPlatoonSize() > 0) {
-				completed_guy->JoinPlatoon((int)common::Random<int>(0, troop.GetPlatoonSize() - 1));
+				completed_guy->JoinPlatoon((int)util::Random<int>(0, troop.GetPlatoonSize() - 1));
 				troop.Command(completed_guy);
 			}
 		}

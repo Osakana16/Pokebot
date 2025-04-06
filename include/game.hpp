@@ -2,7 +2,7 @@
 #include "database.hpp"
 namespace pokebot {
 	namespace game {
-		using ClientCreationResult = std::tuple<bool, common::PlayerName>;
+		using ClientCreationResult = std::tuple<bool, util::PlayerName>;
 
 		inline bool is_enabled_auto_waypoint = true;
 
@@ -197,8 +197,8 @@ namespace pokebot {
 
 		struct ConVarReg {
 			cvar_t reg;
-			common::fixed_string<64u> info;
-			common::fixed_string<64u> init;
+			util::fixed_string<64u> info;
+			util::fixed_string<64u> init;
 			const char* regval;
 			class ConVar* self;
 			float initial, min, max;
@@ -344,15 +344,15 @@ namespace pokebot {
 
 			bool CanSeeEntity(const edict_t*) const noexcept;
 			bool CanSeeFriend() const POKEBOT_NOEXCEPT;
-			void GetEnemyNamesWithinView(common::PlayerName player_names[32]) const POKEBOT_NOEXCEPT;
-			void GetEntityNamesInView(common::PlayerName player_names[32]) const POKEBOT_NOEXCEPT;
+			void GetEnemyNamesWithinView(util::PlayerName player_names[32]) const POKEBOT_NOEXCEPT;
+			void GetEntityNamesInView(util::PlayerName player_names[32]) const POKEBOT_NOEXCEPT;
 			common::Team GetTeamFromModel() const POKEBOT_NOEXCEPT;
 
 			bool IsFakeClient() const POKEBOT_NOEXCEPT { return bool(flags & common::Third_Party_Bot_Flag); }
 		};
 
 		class ClientManager {
-			std::unordered_map<common::PlayerName, Client, common::PlayerName::Hash> clients{};
+			std::unordered_map<util::PlayerName, Client, util::PlayerName::Hash> clients{};
 		public:
 			void OnNewRound();
 			ClientCreationResult Create(std::string_view client_name);
@@ -415,7 +415,7 @@ namespace pokebot {
 			common::Time time{};
 
 			const edict_t* entity;
-			common::PlayerName owner_name{};
+			util::PlayerName owner_name{};
 		public:
 			operator const edict_t* const () const POKEBOT_NOEXCEPT {
 				return entity;
@@ -452,7 +452,7 @@ namespace pokebot {
 			database::Database database{};
 			std::vector<Hostage> hostages{};
 
-			std::vector<common::fixed_string<32u>> bot_args{};
+			std::vector<util::fixed_string<32u>> bot_args{};
 			MapFlags map_flags{};
 			uint32_t round{};
 			bool is_newround{};
@@ -519,7 +519,7 @@ namespace pokebot {
 			uint32_t CurrentRonud() const POKEBOT_NOEXCEPT;
 			bool IsCurrentMode(const MapFlags) const POKEBOT_NOEXCEPT;
 			MapFlags GetMapFlag() const POKEBOT_NOEXCEPT;
-			void IssueCommand(const std::string_view&, common::fixed_string<32u> sentence) POKEBOT_NOEXCEPT;
+			void IssueCommand(const std::string_view&, util::fixed_string<32u> sentence) POKEBOT_NOEXCEPT;
 
 			void Init(edict_t* entities, int max);
 			void PreUpdate();

@@ -1,4 +1,6 @@
 #pragma once
+#include "util/timer.hpp"
+
 namespace pokebot::message {
 	class MessageDispatcher;
 }
@@ -28,16 +30,6 @@ namespace pokebot::bot {
 		Model_Select,
 		Selection_Completed
 	};
-
-	class Timer final {
-		common::Time time{};
-
-		const common::Time& Base_Time = gpGlobals->time;
-	public:
-		bool IsRunning() const POKEBOT_NOEXCEPT { return time >= Base_Time; }
-		void SetTime(const common::Time t) POKEBOT_NOEXCEPT { time = t + Base_Time; }
-	};
-
 
 	POKEBOT_DEFINE_ENUM_WITH_BIT_OPERATOR(ActionKey,
 		None = 0,
@@ -117,16 +109,16 @@ namespace pokebot::bot {
 			last_command_time{};
 
 		// This variable is used to prevent freezing the whole game.
-		Timer spawn_cooldown_time{};
+		util::Timer spawn_cooldown_time{ util::GetRealGlobalTime };
 
 		// Make the bot to do nothing except buying while round freeze.
-		Timer freeze_time{};
+		util::Timer freeze_time{ util::GetRealGlobalTime };
 		// 
-		Timer buy_wait_timer{};
+		util::Timer buy_wait_timer{ util::GetRealGlobalTime };
 
 		// - Stuck Checker -
 		// 
-		Timer stuck_check_interval_timer{};
+		util::Timer stuck_check_interval_timer{ util::GetRealGlobalTime };
 		Vector stuck_check_origin{};
 
 		// - Lock -
@@ -156,9 +148,9 @@ namespace pokebot::bot {
 		void TurnViewAngle(), TurnMovementAngle();
 
 		ActionKey press_key{};
-		Timer danger_time{};
+		util::Timer danger_time{ util::GetRealGlobalTime };
 
-		std::vector<common::PlayerName> target_enemies{};
+		std::vector<util::PlayerName> target_enemies{};
 
 		State state = State::Accomplishment;
 		void AccomplishMission() POKEBOT_NOEXCEPT, Combat() POKEBOT_NOEXCEPT, Follow() POKEBOT_NOEXCEPT;
@@ -194,7 +186,7 @@ namespace pokebot::bot {
 			}
 		};
 
-		common::PlayerName name{};
+		util::PlayerName name{};
 
 		void JoinPlatoon(const PlatoonID Target_Platoon) noexcept;
 		void LeavePlatoon() noexcept { platoon = Not_Joined_Any_Platoon; }
@@ -214,7 +206,7 @@ namespace pokebot::bot {
 
 		Mood personality{};
 		Mood mood{};
-		Timer behavior_wait_timer{};
+		util::Timer behavior_wait_timer{ util::GetRealGlobalTime };
 
 		GoalQueue goal_queue{};
 #if !USE_NAVMESH
@@ -261,7 +253,7 @@ namespace pokebot::bot {
 
 		// -- Getters --
 
-		const common::PlayerName& Name() const POKEBOT_NOEXCEPT;
+		const util::PlayerName& Name() const POKEBOT_NOEXCEPT;
 		Vector Origin() const POKEBOT_NOEXCEPT;
 		float Health() const POKEBOT_NOEXCEPT;
 
