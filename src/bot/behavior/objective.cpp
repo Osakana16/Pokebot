@@ -72,9 +72,9 @@ namespace pokebot::bot::behavior {
 		auto id = Manager::Instance().GetGoalNode(Self->JoinedTeam(), Self->JoinedPlatoon());
 		auto origin = node::czworld.GetOrigin(id);
 		if constexpr (b) {
-			return common::Distance(Self->Origin(), origin) > 100.0f;
+			return common::Distance(Self->Origin(), origin) > 200.0f;
 		} else {
-			return common::Distance(Self->Origin(), origin) <= 100.0f;
+			return common::Distance(Self->Origin(), origin) <= 200.0f;
 		}
 	}
 

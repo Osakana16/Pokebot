@@ -142,8 +142,12 @@ namespace pokebot::bot::behavior {
 		adjust_scope->Define(BotPressesKey<bot::ActionKey::Attack2>);
 
 		set_goal_team_objective->Define([](Bot* const self) -> Status {
-			assert(Manager::Instance().GetGoalNode(self->JoinedTeam(), self->JoinedPlatoon()) != node::Invalid_NodeID);
-			node::NodeID id = Manager::Instance().GetGoalNode(self->JoinedTeam(), self->JoinedPlatoon());
+			const bot::PlatoonID Joined_Platoon = self->JoinedPlatoon();
+			const common::Team Joined_Team = self->JoinedTeam();
+			const node::NodeID Node = Manager::Instance().GetGoalNode(Joined_Team, Joined_Platoon);
+			assert(Node != node::Invalid_NodeID);
+
+			node::NodeID id = Node;
 			if (node::czworld.IsOnNode(self->Origin(), id))
 				return Status::Failed;
 
@@ -260,7 +264,7 @@ namespace pokebot::bot::behavior {
 			auto findCircleLine = [self](const Vector& Origin, const float Distance) POKEBOT_NOEXCEPT -> node::NodeID {
 				node::NodeID id = node::Invalid_NodeID;
 				for (const auto& Line : { Vector(Distance, .0f, .0f), Vector(-Distance, .0f, .0f), Vector(.0f, Distance, .0f), Vector(.0f, -Distance, .0f) }) {
-					auto area = node::czworld.GetNearest(node::czworld.GetOrigin(bot::Manager::Instance().GetGoalNode(self->JoinedTeam(), self->JoinedPlatoon())) + Line);
+					auto area = node::czworld.GetNearest(node::czworld.GetOrigin(bot::Manager::Instance().GetGoalNode(self->JoinedTeam(), self->JoinedPlatoon())) + Line, FLT_MAX);
 					if (area == nullptr)
 						continue;
 
@@ -274,7 +278,11 @@ namespace pokebot::bot::behavior {
 			std::queue<std::future<node::NodeID>> results{};
 			results.push(std::async(std::launch::async, findCircleLine, self->Origin(), 2000.0f));
 			results.push(std::async(std::launch::async, findCircleLine, self->Origin(), 1500.0f));
+			results.push(std::async(std::launch::async, findCircleLine, self->Origin(), 1000.0f));
+			results.push(std::async(std::launch::async, findCircleLine, self->Origin(), 3000.0f));
 			results.push(std::async(std::launch::async, findCircleLine, self->Origin(), 2500.0f));
+
+			assert(!results.empty());
 
 			while (!results.empty()) {
 				auto id_result = results.front().get();
@@ -292,7 +300,7 @@ namespace pokebot::bot::behavior {
 			auto findCircleLine = [](const Vector& Origin, const float Distance) POKEBOT_NOEXCEPT -> node::NodeID {
 				node::NodeID id = node::Invalid_NodeID;
 				for (const auto& Line : { Vector(Distance, .0f, .0f), Vector(-Distance, .0f, .0f), Vector(.0f, Distance, .0f), Vector(.0f, -Distance, .0f) }) {
-					auto area = node::czworld.GetNearest(*Manager::Instance().C4Origin() + Line);
+					auto area = node::czworld.GetNearest(*Manager::Instance().C4Origin() + Line, FLT_MAX);
 					if (area == nullptr)
 						continue;
 
@@ -306,7 +314,11 @@ namespace pokebot::bot::behavior {
 			std::queue<std::future<node::NodeID>> results{};
 			results.push(std::async(std::launch::async, findCircleLine, self->Origin(), 2000.0f));
 			results.push(std::async(std::launch::async, findCircleLine, self->Origin(), 1500.0f));
+			results.push(std::async(std::launch::async, findCircleLine, self->Origin(), 1000.0f));
+			results.push(std::async(std::launch::async, findCircleLine, self->Origin(), 3000.0f));
 			results.push(std::async(std::launch::async, findCircleLine, self->Origin(), 2500.0f));
+			
+			assert(!results.empty());
 
 			while (!results.empty()) {
 				auto id_result = results.front().get();
