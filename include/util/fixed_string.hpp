@@ -16,8 +16,10 @@ namespace pokebot::util {
 		fixed_string(const char* const a) { operator=(a); }
 
 		char* begin() noexcept { return &str[0]; }
+		const char* begin() const noexcept { return &str[0]; }
 		const char* cbegin() const noexcept { return &str[0]; }
 		char* end() noexcept { return &str[N - 1]; }
+		const char* end() const noexcept { return &str[N - 1]; }
 		const char* cend() const noexcept { return &str[N - 1]; }
 		void clear() noexcept { memset(str, '\0', N); }
 
