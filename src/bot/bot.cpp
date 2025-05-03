@@ -479,32 +479,42 @@ namespace pokebot::bot {
 
 		// Check if the worldspawn is blocking:
 		const auto Foot = Origin();
+		const auto Knee = Origin() + Vector(.0f, .0f, 36.0f);
 		const auto Head = Foot + game::game.clients.Get(Name().data())->view_ofs;
 
+		auto CheckHead = [&] () -> bool {
 		util::Tracer tracer{};
-		const bool Is_Head_Forward_Center_Hit = tracer.MoveStart(Head).MoveDest(Head + gpGlobals->v_forward * 90.0f).TraceLine(util::Tracer::Monsters::Ignore, util::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
-		const bool Is_Head_Forward_Left_Hit = tracer.MoveDest(Head + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * -45.0f).TraceLine(util::Tracer::Monsters::Ignore, util::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
-		const bool Is_Head_Forward_Right_Hit = tracer.MoveDest(Head + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * 45.0f).TraceLine(util::Tracer::Monsters::Ignore, util::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
+			const bool Is_Head_Forward_Center_Hit = tracer.MoveStart(Head).MoveDest(Head + gpGlobals->v_forward * 90.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
+			const bool Is_Head_Forward_Left_Hit = tracer.MoveDest(Head + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * -45.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
+			const bool Is_Head_Forward_Right_Hit = tracer.MoveDest(Head + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * 45.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
 		const bool Is_Head_Forward_Hit = Is_Head_Forward_Center_Hit || Is_Head_Forward_Left_Hit || Is_Head_Forward_Right_Hit;
 
 		if (Is_Head_Forward_Hit) {
 			// Check left
-			tracer.MoveDest(Head + gpGlobals->v_right * -90.0f).TraceLine(util::Tracer::Monsters::Ignore, util::Tracer::Glass::Dont_Ignore, nullptr);
+				tracer.MoveDest(Head + gpGlobals->v_right * -90.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr);
 			if (tracer.IsHit()) {
 				PressKey(ActionKey::Move_Right);
 			} else {
 				// Check right
-				tracer.MoveDest(Head + gpGlobals->v_right * 90.0f).TraceLine(util::Tracer::Monsters::Ignore, util::Tracer::Glass::Dont_Ignore, nullptr);
+					tracer.MoveDest(Head + gpGlobals->v_right * 90.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr);
 				if (tracer.IsHit()) {
 					PressKey(ActionKey::Move_Left);
 				}
 			}
-		} else {
-			const bool Is_Foot_Forward_Center_Hit = tracer.MoveStart(Foot).MoveDest(Foot + gpGlobals->v_forward * 90.0f).TraceLine(util::Tracer::Monsters::Ignore, util::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
-			const bool Is_Foot_Forward_Left_Hit = tracer.MoveDest(Foot + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * -45.0f).TraceLine(util::Tracer::Monsters::Ignore, util::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
-			const bool Is_Foot_Forward_Right_Hit = tracer.MoveDest(Foot + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * 45.0f).TraceLine(util::Tracer::Monsters::Ignore, util::Tracer::Glass::Dont_Ignore, nullptr).IsHit();
+				return true;
+			}
+			return false;
+		};
+
+		auto CheckBody = [&] () {
+			util::Tracer tracer{};
+
+			const bool Is_Knee_Forward_Center_Hit = tracer.MoveStart(Foot).MoveDest(Knee + gpGlobals->v_forward * 90.0f).TraceHull(util::Tracer::Monsters::Ignore, util::Tracer::HullType::Head, nullptr).IsHit();
+			const bool Is_Foot_Forward_Center_Hit = tracer.MoveStart(Foot).MoveDest(Foot + gpGlobals->v_forward * 90.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
+			const bool Is_Foot_Forward_Left_Hit = tracer.MoveDest(Foot + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * -45.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
+			const bool Is_Foot_Forward_Right_Hit = tracer.MoveDest(Foot + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * 45.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
 			const bool Is_Foot_Forward_Hit = Is_Foot_Forward_Center_Hit || Is_Foot_Forward_Left_Hit || Is_Foot_Forward_Right_Hit;
-			if (Is_Foot_Forward_Hit) {
+			if (Is_Knee_Forward_Center_Hit) {
 				PressKey(ActionKey::Jump);
 			} else {
 				// Check the forward navarea
@@ -522,9 +532,20 @@ namespace pokebot::bot {
 					}
 				}
 			}
+		};
+		
+		if (!CheckHead()) {
+			CheckBody();
 		}
+
+		if (!game::game.clients.Get(Name().c_str())->IsStopping()) {
+			stopping_time = gpGlobals->time + 1.0f;
 	}
 
+		if (stopping_time < gpGlobals->time) {
+			state = State::Stuck;
+		}
+	}
 	
 	bool Bot::CanSeeEntity(const edict_t* entity) const POKEBOT_NOEXCEPT {
 		auto client = game::game.clients.Get(Name().data()); client->CanSeeEntity(entity);

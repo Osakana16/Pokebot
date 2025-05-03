@@ -42,8 +42,8 @@ namespace pokebot::util {
 			return *this;
 		}
 
-		Tracer& TraceLine(Monsters monsters, Glass glass, edict_t* ignore_entity) noexcept {
-			TRACE_LINE(start_position, dest_position, static_cast<IGNORE_MONSTERS>(monsters) | static_cast<IGNORE_GLASS>(glass), ignore_entity, this);
+		Tracer& TraceLine(Monsters monsters, edict_t* ignore_entity) noexcept {
+			TRACE_LINE(start_position, dest_position, static_cast<IGNORE_MONSTERS>(monsters), ignore_entity, this);
 			return *this;
 		}
 
