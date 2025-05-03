@@ -214,7 +214,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             return;
 
                         if (std::get<int>(args[1]) < 32) {
-                            DEBUG_PRINTF("CurWeapon\n");
+                            // DEBUG_PRINTF("CurWeapon\n");
                             using namespace pokebot;
                             if (std::get<int>(args[0]) != 0) {
                                 game::game.OnWeaponChanged(STRING(engine_target_edict->v.netname), (game::Weapon)std::get<int>(args[1]));
@@ -463,7 +463,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         }
 
                         // Flashbang message.
-                        DEBUG_PRINTF("ScreenFade\n");
+                        // DEBUG_PRINTF("ScreenFade\n");
 
                         if (args.size() < 7 || !std::holds_alternative<int>(args[3]) || !std::holds_alternative<int>(args[4]) || !std::holds_alternative<int>(args[5]) || !std::holds_alternative<int>(args[6]))
                             return;
