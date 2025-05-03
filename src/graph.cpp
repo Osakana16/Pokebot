@@ -492,8 +492,8 @@ namespace pokebot::node {
 		return true;
 	}
 #else
-	navmesh::NavArea* CZBotGraph::GetNearest(const Vector& Destination) const POKEBOT_NOEXCEPT {
-		return navigation_map.GetNavArea(&Destination);
+	navmesh::NavArea* CZBotGraph::GetNearest(const Vector& Destination, const float Beneath_Limit) const POKEBOT_NOEXCEPT {
+		return navigation_map.GetNavArea(&Destination, Beneath_Limit);
 	}
 
 	void CZBotGraph::FindPath(PathWalk<std::uint32_t>* const walk_routes, const Vector& Source, const Vector& Destination, const common::Team Joined_Team) {

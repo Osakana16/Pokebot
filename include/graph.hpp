@@ -205,7 +205,7 @@ namespace pokebot::node {
 		navmesh::NavigationMap navigation_map{};
 		std::vector<Route<navmesh::NavArea*>> routes{};
 
-		navmesh::NavArea* GetNearest(const Vector& Destination) const POKEBOT_NOEXCEPT;
+		navmesh::NavArea* GetNearest(const Vector& Destination, const float Beneath_Limit = 120.0f) const POKEBOT_NOEXCEPT;
 		
 		decltype(static_cast<const decltype(goals)>(goals).equal_range(GoalKind::None)) GetGoal(const GoalKind kind) const POKEBOT_NOEXCEPT;
 
