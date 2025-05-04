@@ -210,7 +210,7 @@ namespace pokebot::bot {
 
 			BEHAVIOR_CREATE_INLINE(Priority, ct_try);
 			BEHAVIOR_CREATE_INLINE(Priority, ct_leave);
-			BEHAVIOR_CREATE_INLINE(Priority, lead_hostage);
+			BEHAVIOR_CREATE_INLINE(Sequence, lead_hostage);
 		}
 
 		// - ASsassination Behaviors -

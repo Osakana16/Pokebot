@@ -213,6 +213,7 @@ namespace pokebot::bot::behavior {
 		rescue::lead_hostage->Define
 		({
 			look_hostage,
+			wait(1, .0f),
 			use
 		});
 

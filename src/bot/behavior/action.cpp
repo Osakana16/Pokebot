@@ -112,7 +112,10 @@ namespace pokebot::bot::behavior {
 		});
 
 		look_hostage->Define([](Bot* const self) -> Status {
-			return Status::Failed;
+			auto hostage_id = Manager::Instance().GetTroopTargetedHostage(self->JoinedTeam(), self->JoinedPlatoon());
+			assert(hostage_id.has_value());
+
+			return LookAt(self, *game::game.GetHostageOrigin(*hostage_id), 1.0f);
 		});
 
 		look_enemy->Define([](Bot* const self) -> Status {
