@@ -49,7 +49,7 @@ namespace pokebot::plugin {
 
         void pk_add() {
             if (!node::czworld.IsNavFileLoaded()) {
-                SERVER_PRINT("[POKEBOT] Error: Cannot add bots because the .nav file is not loaded. Please generate it in CS:CZ.\n");
+                SERVER_PRINT("[POKEBOT] Error: Cannot add bots because the .nav file does not exist. Please generate it in CS:CZ.\n");
                 return;
             }
 
