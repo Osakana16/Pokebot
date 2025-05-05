@@ -14,7 +14,7 @@ namespace pokebot::bot {
 		last_command_time = gpGlobals->time;
 
 		game::Client* client = const_cast<game::Client*>(game::game.clients.Get(Name().data()));
-		client->flags |= common::Third_Party_Bot_Flag;
+		client->flags |= game::Third_Party_Bot_Flag;
 		g_engfuncs.pfnRunPlayerMove(client->Edict(),
 				movement_angle,
 				move_speed,
@@ -32,7 +32,7 @@ namespace pokebot::bot {
 		auto client = game::game.clients.Get(Name().data());
 		assert(client != nullptr);
 		Vector destination{};
-		common::OriginToAngle(&destination, *look_direction.view, Origin());
+		game::OriginToAngle(&destination, *look_direction.view, Origin());
 		if (destination.x > 180.0f) {
 			destination.x -= 360.0f;
 		}
@@ -85,7 +85,7 @@ namespace pokebot::bot {
 	}
 
 	void Bot::TurnMovementAngle() {
-		common::OriginToAngle(&movement_angle, *look_direction.movement, Origin());
+		game::OriginToAngle(&movement_angle, *look_direction.movement, Origin());
 	}
 
 	void Bot::OnNewRound() POKEBOT_NOEXCEPT {
@@ -112,7 +112,7 @@ namespace pokebot::bot {
 	void Bot::NormalUpdate() POKEBOT_NOEXCEPT {
 		auto client = game::game.clients.GetAsMutable(Name().data());
 		assert(client != nullptr);
-		assert(JoinedTeam() != common::Team::Spector && JoinedTeam() != common::Team::Random);
+		assert(JoinedTeam() != game::Team::Spector && JoinedTeam() != game::Team::Random);
 		if (client->IsDead()) {
 			return;
 		}
@@ -260,7 +260,7 @@ namespace pokebot::bot {
 
 	void Bot::OnCTDemolition() noexcept {
 		if (Manager::Instance().C4Origin().has_value()) {
-			if (common::Distance(Origin(), *Manager::Instance().C4Origin()) <= 50.0f) {
+			if (game::Distance(Origin(), *Manager::Instance().C4Origin()) <= 50.0f) {
 				behavior::demolition::ct_defusing->Evaluate(this);
 			} else {
 				behavior::demolition::ct_planted->Evaluate(this);
@@ -389,7 +389,7 @@ namespace pokebot::bot {
 				}
 			}
 
-			const auto Ditance_To_Leader = common::Distance(Origin(), Leader_Origin);
+			const auto Ditance_To_Leader = game::Distance(Origin(), Leader_Origin);
 			if (Ditance_To_Leader <= 275.0f) {
 				if (Ditance_To_Leader >= 75.0f) {
 					if (Leader_Client->IsDucking()) {
@@ -429,7 +429,7 @@ namespace pokebot::bot {
 	std::map<float, int> SortedDistances(const Vector& Base, const Array& list) {
 		std::map<float, int> result{};
 		for (int i = 0; i < list.size(); i++) {
-			result[common::Distance(Base, game::game.clients.Get(list[i].c_str())->origin)] = i;
+			result[game::Distance(Base, game::game.clients.Get(list[i].c_str())->origin)] = i;
 		}
 		return result;
 	}
@@ -490,7 +490,7 @@ namespace pokebot::bot {
 			return;
 
 		// Check if the player is blocking and avoid it.
-		for (edict_t* entity{}; (entity = common::FindEntityInSphere(entity, Origin(), 90.0f)) != nullptr;) {
+		for (edict_t* entity{}; (entity = game::FindEntityInSphere(entity, Origin(), 90.0f)) != nullptr;) {
 			if (std::string_view(STRING(entity->v.classname)) == "player") {
 				if (CanSeeEntity(entity)) {
 					PressKey(ActionKey::Move_Left);
@@ -594,7 +594,7 @@ namespace pokebot::bot {
 			}
 			case Message::Model_Select:
 			{
-				assert(JoinedTeam() != common::Team::Spector && JoinedTeam() != common::Team::Random);
+				assert(JoinedTeam() != game::Team::Spector && JoinedTeam() != game::Team::Random);
 				start_action = Message::Selection_Completed;
 				value = static_cast<int>(model);
 				break;
@@ -652,7 +652,7 @@ namespace pokebot::bot {
 		}
 		const auto Enemy_Distances = std::move(SortedDistances(Origin(), target_enemies));
 		const auto& Nearest_Enemy = game::game.clients.Get(target_enemies[Enemy_Distances.begin()->second].c_str());
-		return common::Distance(Origin(), Nearest_Enemy->origin) > 1000.0f;
+		return game::Distance(Origin(), Nearest_Enemy->origin) > 1000.0f;
 	}
 
 	bool Bot::IsLookingAt(const Vector& Dest, const float Range) const POKEBOT_NOEXCEPT {
@@ -662,7 +662,7 @@ namespace pokebot::bot {
 		if (vecout[0] > 180.0f)
 			vecout[0] -= 360.0f;
 		vecout[0] = -vecout[0];
-		auto result = common::Distance2D(Vector(vecout), game::game.clients.Get(Name().data())->v_angle);
+		auto result = game::Distance2D(Vector(vecout), game::game.clients.Get(Name().data())->v_angle);
 		return (result <= Range);
 	}
 
@@ -777,13 +777,13 @@ namespace pokebot::bot {
 
 	void Bot::OnBombPlanted() POKEBOT_NOEXCEPT {
 		switch (JoinedTeam()) {
-			case common::Team::CT:
+			case game::Team::CT:
 				goal_queue.Clear();
 				break;
 		}
 	}
 
-	Bot::Bot(const std::string_view& Bot_Name, const common::Team Join_Team, const common::Model Select_Model) POKEBOT_NOEXCEPT {
+	Bot::Bot(const std::string_view& Bot_Name, const game::Team Join_Team, const game::Model Select_Model) POKEBOT_NOEXCEPT {
 		team = Join_Team;
 		model = Select_Model;
 
@@ -796,7 +796,7 @@ namespace pokebot::bot {
 		return platoon;
 	}
 
-	common::Team Bot::JoinedTeam() const POKEBOT_NOEXCEPT {
+	game::Team Bot::JoinedTeam() const POKEBOT_NOEXCEPT {
 		return team;
 	}
 

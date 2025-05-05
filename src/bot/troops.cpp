@@ -58,7 +58,7 @@ namespace pokebot::bot {
 		
 		TroopsStrategy new_strategy{};
 		switch (team) {
-			case common::Team::T:
+			case game::Team::T:
 			{
 				if (game::game.IsCurrentMode(game::MapFlags::Demolition)) {
 					new_strategy.strategy = TroopsStrategy::Strategy::Plant_C4_Specific_Bombsite_Concentrative;
@@ -85,7 +85,7 @@ namespace pokebot::bot {
 				}
 				break;
 			}
-			case common::Team::CT:
+			case game::Team::CT:
 			{
 				if (game::game.IsCurrentMode(game::MapFlags::Demolition)) {
 					new_strategy.strategy = TroopsStrategy::Strategy::Defend_Bombsite_Divided;
@@ -130,7 +130,7 @@ namespace pokebot::bot {
 	void Troops::DecideSpecialStrategy(Bots* bots, TroopsStrategy* new_strategy, const std::optional<RadioMessage>& radio_message) {
 		if (radio_message.has_value()) {
 			if (radio_message->message == "#Take_Bomb") {
-				assert(Team() == common::Team::T);
+				assert(Team() == game::Team::T);
 				new_strategy->strategy = TroopsStrategy::Strategy::Take_Backpack;
 				new_strategy->leader_name.clear();
 			} else {
@@ -139,7 +139,7 @@ namespace pokebot::bot {
 			}
 		} else {
 			if (!IsRoot()) {
-				if (team == common::Team::T) {
+				if (team == game::Team::T) {
 					new_strategy->strategy = TroopsStrategy::Strategy::Follow;
 					new_strategy->leader_name = Manager::Instance().Bomber_Name.data();
 				}
@@ -190,7 +190,7 @@ namespace pokebot::bot {
 	}
 
 	namespace filter {
-		template<common::Team team> bool ByTeam(const BotPair& target) noexcept { return target.second.JoinedTeam() == team; }
+		template<game::Team team> bool ByTeam(const BotPair& target) noexcept { return target.second.JoinedTeam() == team; }
 		template<game::Weapon weapon> bool ByHavingWeapon(const BotPair& target) noexcept { return target.second.HasWeapon(weapon); }
 		template<game::Weapon weapon> bool ByNotHavingWeapon(const BotPair& target) noexcept { return !target.second.HasWeapon(weapon); }
 	}
@@ -205,7 +205,7 @@ namespace pokebot::bot {
 				[](const BotPair& target) -> bool { return target.second.JoinedPlatoon() == 0; }
 			);
 
-			auto terrorists = (*bots | std::views::filter(filter::ByTeam<common::Team::T>));
+			auto terrorists = (*bots | std::views::filter(filter::ByTeam<game::Team::T>));
 			auto bomber = (terrorists | std::views::filter(filter::ByHavingWeapon<game::Weapon::C4>));
 			auto followers = (terrorists | std::views::filter(filter::ByNotHavingWeapon<game::Weapon::C4>) | std::views::take(5));
 			for (auto& follower : followers) {
@@ -227,7 +227,7 @@ namespace pokebot::bot {
 			// If the troop is the root, create new platoons.
 			DeleteAllPlatoon();
 
-			auto cts = (*bots | std::views::filter(filter::ByTeam<common::Team::CT>));
+			auto cts = (*bots | std::views::filter(filter::ByTeam<game::Team::CT>));
 			const size_t Number_Of_Cts = std::distance(cts.begin(), cts.end());
 			if (Number_Of_Cts > 1) {
 				const size_t Number_Of_Goals = node::czworld.GetNumberOfGoals(node::GoalKind::Bombspot);
@@ -236,7 +236,7 @@ namespace pokebot::bot {
 					CreatePlatoon([i](const BotPair& target) -> bool { return i == target.second.JoinedPlatoon(); });
 				}
 
-				const size_t Number_Of_Member_In_Squad = static_cast<size_t>(std::ceil(static_cast<common::Dec>(Number_Of_Cts) / static_cast<common::Dec>(Number_Of_Goals)));
+				const size_t Number_Of_Member_In_Squad = static_cast<size_t>(std::ceil(static_cast<game::Dec>(Number_Of_Cts) / static_cast<game::Dec>(Number_Of_Goals)));
 				auto member = cts.begin();
 				for (int squad = 0; squad < Number_Of_Goals; squad++) {
 					for (int j = 0; j < Number_Of_Member_In_Squad && member != cts.end(); j++, member++) {
@@ -260,7 +260,7 @@ namespace pokebot::bot {
 			// If the troop is the root, create new platoons.
 			DeleteAllPlatoon();
 
-			auto cts = (*bots | std::views::filter(filter::ByTeam<common::Team::CT>));
+			auto cts = (*bots | std::views::filter(filter::ByTeam<game::Team::CT>));
 			if (const size_t Number_Of_Cts = std::distance(cts.begin(), cts.end()); Number_Of_Cts > 1) {
 				const size_t Number_Of_Hostages = game::game.GetNumberOfHostages();
 				assert(Number_Of_Hostages > 0);
@@ -271,7 +271,7 @@ namespace pokebot::bot {
 				}
 
 				// Let bots join the platoons.
-				const size_t Number_Of_Member_In_Squad = static_cast<size_t>(std::ceil(static_cast<common::Dec>(Number_Of_Cts) / static_cast<common::Dec>(Number_Of_Hostages)));
+				const size_t Number_Of_Member_In_Squad = static_cast<size_t>(std::ceil(static_cast<game::Dec>(Number_Of_Cts) / static_cast<game::Dec>(Number_Of_Hostages)));
 				auto member = cts.begin();
 				for (int j = 0; j < Number_Of_Member_In_Squad && member != cts.end(); j++, member++) {
 					const int Squad = j % 4;
@@ -295,7 +295,7 @@ namespace pokebot::bot {
 			// If the troop is the root, create new platoons.
 			DeleteAllPlatoon();
 
-			auto terrorists = (*bots | std::views::filter(filter::ByTeam<common::Team::T>));
+			auto terrorists = (*bots | std::views::filter(filter::ByTeam<game::Team::T>));
 			const size_t Number_Of_Terrorists = std::distance(terrorists.begin(), terrorists.end());
 			if (Number_Of_Terrorists > 1) {
 				const size_t Number_Of_Goals = game::game.GetNumberOfHostages();
@@ -304,7 +304,7 @@ namespace pokebot::bot {
 					CreatePlatoon([i](const BotPair& target) -> bool { return i == target.second.JoinedPlatoon(); });
 				}
 
-				const size_t Number_Of_Member_In_Squad = static_cast<size_t>(std::ceil(static_cast<common::Dec>(Number_Of_Terrorists) / static_cast<common::Dec>(Number_Of_Goals)));
+				const size_t Number_Of_Member_In_Squad = static_cast<size_t>(std::ceil(static_cast<game::Dec>(Number_Of_Terrorists) / static_cast<game::Dec>(Number_Of_Goals)));
 				auto member = terrorists.begin();
 				for (int squad = 0; squad < Number_Of_Goals; squad++) {
 					for (int j = 0; j < Number_Of_Member_In_Squad && member != terrorists.end(); j++, member++) {
@@ -314,7 +314,7 @@ namespace pokebot::bot {
 			} else {
 				new_strategy->strategy = TroopsStrategy::Strategy::Prevent_Hostages;
 				edict_t* hostage = nullptr;
-				while ((hostage = common::FindEntityByClassname(hostage, "hostage_entity")) != nullptr) {
+				while ((hostage = game::FindEntityByClassname(hostage, "hostage_entity")) != nullptr) {
 					if (auto area = node::czworld.GetNearest(hostage->v.origin); area != nullptr) {
 						if (IsRoot()) {
 							if (HasGoalBeenDevised(area->m_id)) {

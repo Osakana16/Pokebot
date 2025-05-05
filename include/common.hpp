@@ -14,7 +14,7 @@
 #define USE_STDARRAY false
 
 namespace pokebot{
-	namespace common {
+	namespace game {
 #ifndef USE_STDARRAY
 		template<typename T, size_t N>
 		using Array = std::array<T, N>;

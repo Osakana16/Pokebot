@@ -19,7 +19,7 @@ namespace pokebot {
 						continue;
 
 					game::game.IssueCommand(Name().data(), "buy");
-					for (auto menu : data->menu[JoinedTeam() == common::Team::CT]) {
+					for (auto menu : data->menu[JoinedTeam() == game::Team::CT]) {
 						game::game.IssueCommand(Name().data(), std::format("menuselect {}", menu).c_str());
 					}
 				}

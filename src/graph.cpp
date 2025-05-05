@@ -496,7 +496,7 @@ namespace pokebot::node {
 		return navigation_map.GetNavArea(&Destination, Beneath_Limit);
 	}
 
-	void CZBotGraph::FindPath(PathWalk<std::uint32_t>* const walk_routes, const Vector& Source, const Vector& Destination, const common::Team Joined_Team) {
+	void CZBotGraph::FindPath(PathWalk<std::uint32_t>* const walk_routes, const Vector& Source, const Vector& Destination, const game::Team Joined_Team) {
 		const int Joined_Team_Index = static_cast<int>(Joined_Team) - 1;
 		assert(Joined_Team_Index >= 0 && Joined_Team_Index <= 1);
 		auto source = navigation_map.GetNavArea(&Source);
@@ -539,8 +539,8 @@ namespace pokebot::node {
 
 		bool has_another_jump{};
 		routes[start_node_id].state = RouteState::Open;
-		routes[start_node_id].f = common::Distance(source->m_center, destination->m_center);
-		routes[start_node_id].g = common::Distance(source->m_center, destination->m_center);
+		routes[start_node_id].f = game::Distance(source->m_center, destination->m_center);
+		routes[start_node_id].g = game::Distance(source->m_center, destination->m_center);
 		while (!route_queue.empty()) {
 			NodeID current_node_id = route_queue.top();
 			route_queue.pop();
@@ -586,7 +586,7 @@ namespace pokebot::node {
 					}
 					base_cost += 2000.0f * danger[Joined_Team_Index].number_of_reference[current_node_id];
 #endif
-					float h = common::Distance(source->m_center, current_node->m_center) + common::Distance(current_node->m_center, destination->m_center);
+					float h = game::Distance(source->m_center, current_node->m_center) + game::Distance(current_node->m_center, destination->m_center);
 					float g = current_route->g + std::abs(near_route->f - h) + base_cost;
 					float f = g + h;
 					if (near_route->state == RouteState::New || near_route->f > f) {
@@ -623,7 +623,7 @@ namespace pokebot::node {
 		is_nav_loaded = true;
 		auto addGoal = [this](const GoalKind kind, const char* class_name, Vector(*originFunction)(edict_t*)) {
 			edict_t* entity = nullptr;
-			while ((entity = common::FindEntityByClassname(entity, class_name)) != nullptr) {
+			while ((entity = game::FindEntityByClassname(entity, class_name)) != nullptr) {
 				Vector origin = originFunction(entity);
 				auto area = GetNearest(origin);
 				if (area != nullptr) {
@@ -633,7 +633,7 @@ namespace pokebot::node {
 		};
 
 		auto returnOrigin = [](edict_t* entity) { return entity->v.origin; };
-		auto returnModelOrigin = [](edict_t* entity) { return common::VecBModelOrigin(entity); };
+		auto returnModelOrigin = [](edict_t* entity) { return game::VecBModelOrigin(entity); };
 
 		goals.clear();
 		addGoal(GoalKind::CT_Spawn, "info_player_start", returnOrigin);				// CT Spawn

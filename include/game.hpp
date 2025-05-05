@@ -80,11 +80,11 @@ namespace pokebot {
 
 		constexpr float Default_Max_Move_Speed = 255.0f;
 
-		constexpr int Primary_Weapon_Bit = (common::ToBit<int>(Weapon::M3) | common::ToBit<int>(Weapon::XM1014) | common::ToBit<int>(Weapon::MAC10) | common::ToBit<int>(Weapon::TMP) | common::ToBit<int>(Weapon::MP5) | common::ToBit<int>(Weapon::UMP45) | common::ToBit<int>(Weapon::P90) | common::ToBit<int>(Weapon::Famas) | common::ToBit<int>(Weapon::Galil) | common::ToBit<int>(Weapon::AK47) | common::ToBit<int>(Weapon::M4A1) | common::ToBit<int>(Weapon::AUG) | common::ToBit<int>(Weapon::SG552) | common::ToBit<int>(Weapon::SG550) | common::ToBit<int>(Weapon::G3SG1) | common::ToBit<int>(Weapon::Scout) | common::ToBit<int>(Weapon::AWP) | common::ToBit<int>(Weapon::M249));
-		constexpr int Secondary_Weapon_Bit = (common::ToBit<int>(Weapon::P228) | common::ToBit<int>(Weapon::USP) | common::ToBit<int>(Weapon::Deagle) | common::ToBit<int>(Weapon::FiveSeven) | common::ToBit<int>(Weapon::Glock18) | common::ToBit<int>(Weapon::Elite));
-		constexpr int Melee_Bit = (common::ToBit<int>(Weapon::Knife));
-		constexpr int Grenade_Bit = (common::ToBit<int>(Weapon::HEGrenade) | common::ToBit<int>(Weapon::Flashbang) | common::ToBit<int>(Weapon::Smoke));
-		constexpr int C4_Bit = (common::ToBit<int>(Weapon::C4));
+		constexpr int Primary_Weapon_Bit = (game::ToBit<int>(Weapon::M3) | game::ToBit<int>(Weapon::XM1014) | game::ToBit<int>(Weapon::MAC10) | game::ToBit<int>(Weapon::TMP) | game::ToBit<int>(Weapon::MP5) | game::ToBit<int>(Weapon::UMP45) | game::ToBit<int>(Weapon::P90) | game::ToBit<int>(Weapon::Famas) | game::ToBit<int>(Weapon::Galil) | game::ToBit<int>(Weapon::AK47) | game::ToBit<int>(Weapon::M4A1) | game::ToBit<int>(Weapon::AUG) | game::ToBit<int>(Weapon::SG552) | game::ToBit<int>(Weapon::SG550) | game::ToBit<int>(Weapon::G3SG1) | game::ToBit<int>(Weapon::Scout) | game::ToBit<int>(Weapon::AWP) | game::ToBit<int>(Weapon::M249));
+		constexpr int Secondary_Weapon_Bit = (game::ToBit<int>(Weapon::P228) | game::ToBit<int>(Weapon::USP) | game::ToBit<int>(Weapon::Deagle) | game::ToBit<int>(Weapon::FiveSeven) | game::ToBit<int>(Weapon::Glock18) | game::ToBit<int>(Weapon::Elite));
+		constexpr int Melee_Bit = (game::ToBit<int>(Weapon::Knife));
+		constexpr int Grenade_Bit = (game::ToBit<int>(Weapon::HEGrenade) | game::ToBit<int>(Weapon::Flashbang) | game::ToBit<int>(Weapon::Smoke));
+		constexpr int C4_Bit = (game::ToBit<int>(Weapon::C4));
 
 		enum class WeaponType {
 			Secondary,
@@ -215,7 +215,7 @@ namespace pokebot {
 
 			edict_t* const client{};
 
-			common::Team team{};
+			game::Team team{};
 			int money{};
 			StatusIcon status_icon{};
 			Item item{};
@@ -224,7 +224,7 @@ namespace pokebot {
 
 			util::Time use_reset_time{};
 
-			common::Array<int, 10> weapon_ammo{};
+			game::Array<int, 10> weapon_ammo{};
 			int weapon_clip{};
 			Weapon current_weapon{};
 		public:
@@ -300,7 +300,7 @@ namespace pokebot {
 			void PressKey(const int Key) noexcept;
 			void ResetKey() noexcept;
 
-			common::Team GetTeam() const noexcept { return common::GetTeamFromModel(client); }
+			game::Team GetTeam() const noexcept { return game::GetTeamFromModel(client); }
 
 			bool IsValid() const POKEBOT_NOEXCEPT { return IsValid(client); }
 			bool IsDead() const POKEBOT_NOEXCEPT { return IsDead(client); }
@@ -326,7 +326,7 @@ namespace pokebot {
 			bool IsClimblingLadder() const POKEBOT_NOEXCEPT { return (movetype & MOVETYPE_FLY); }
 
 			bool HasHostages() const POKEBOT_NOEXCEPT;
-			bool HasWeapon(const Weapon Weapon_ID) const POKEBOT_NOEXCEPT { return bool(weapons & common::ToBit<int>(Weapon_ID)); }
+			bool HasWeapon(const Weapon Weapon_ID) const POKEBOT_NOEXCEPT { return bool(weapons & game::ToBit<int>(Weapon_ID)); }
 			bool HasPrimaryWeapon() const POKEBOT_NOEXCEPT { return weapons & game::Primary_Weapon_Bit; }
 			bool HasSecondaryWeapon() const POKEBOT_NOEXCEPT { return weapons & game::Secondary_Weapon_Bit; }
 
@@ -350,9 +350,9 @@ namespace pokebot {
 			bool CanSeeFriend() const POKEBOT_NOEXCEPT;
 			void GetEnemyNamesWithinView(util::PlayerName player_names[32]) const POKEBOT_NOEXCEPT;
 			void GetEntityNamesInView(util::PlayerName player_names[32]) const POKEBOT_NOEXCEPT;
-			common::Team GetTeamFromModel() const POKEBOT_NOEXCEPT;
+			game::Team GetTeamFromModel() const POKEBOT_NOEXCEPT;
 
-			bool IsFakeClient() const POKEBOT_NOEXCEPT { return bool(flags & common::Third_Party_Bot_Flag); }
+			bool IsFakeClient() const POKEBOT_NOEXCEPT { return bool(flags & game::Third_Party_Bot_Flag); }
 		};
 
 		class ClientManager {
@@ -393,7 +393,7 @@ namespace pokebot {
 			void OnWeaponChanged(const std::string_view Client_Name, const game::Weapon) POKEBOT_NOEXCEPT;
 			void OnClipChanged(const std::string_view Client_Name, const game::Weapon, const int) POKEBOT_NOEXCEPT;
 			void OnAmmoPickedup(const std::string_view Client_Name, const game::AmmoID, const int) POKEBOT_NOEXCEPT;
-			void OnTeamAssigned(const std::string_view Client_Name, common::Team) POKEBOT_NOEXCEPT;
+			void OnTeamAssigned(const std::string_view Client_Name, game::Team) POKEBOT_NOEXCEPT;
 			void OnItemChanged(const std::string_view Client_Name, game::Item) POKEBOT_NOEXCEPT;
 			void OnStatusIconShown(const std::string_view Client_Name, const StatusIcon) POKEBOT_NOEXCEPT;
 		};
@@ -523,7 +523,7 @@ namespace pokebot {
 			size_t GetBotArgCount() const POKEBOT_NOEXCEPT;
 			bool IsBotCmd() const POKEBOT_NOEXCEPT;
 
-			size_t GetLives(const common::Team) const POKEBOT_NOEXCEPT;	// Get the number of lives of the team.
+			size_t GetLives(const game::Team) const POKEBOT_NOEXCEPT;	// Get the number of lives of the team.
 			uint32_t CurrentRonud() const POKEBOT_NOEXCEPT;
 			bool IsCurrentMode(const MapFlags) const POKEBOT_NOEXCEPT;
 			MapFlags GetMapFlag() const POKEBOT_NOEXCEPT;
@@ -582,7 +582,7 @@ namespace pokebot {
 				clients.OnAmmoPickedup(Client_Name, Ammo_ID, Ammo);
 			}
 
-			void OnTeamAssigned(const std::string_view Client_Name, common::Team Team) POKEBOT_NOEXCEPT {
+			void OnTeamAssigned(const std::string_view Client_Name, game::Team Team) POKEBOT_NOEXCEPT {
 				clients.OnTeamAssigned(Client_Name, Team);
 			}
 

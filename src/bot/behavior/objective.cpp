@@ -61,9 +61,9 @@ namespace pokebot::bot::behavior {
 	bool IsFarFromC4(const Bot* const Self) POKEBOT_NOEXCEPT {
 		assert(bot::Manager::Instance().C4Origin().has_value());
 		if constexpr (b) {
-			return common::Distance(Self->Origin(), *bot::Manager::Instance().C4Origin()) > 100.0f;
+			return game::Distance(Self->Origin(), *bot::Manager::Instance().C4Origin()) > 100.0f;
 		} else {
-			return common::Distance(Self->Origin(), *bot::Manager::Instance().C4Origin()) <= 100.0f;
+			return game::Distance(Self->Origin(), *bot::Manager::Instance().C4Origin()) <= 100.0f;
 		}
 	}
 
@@ -72,9 +72,9 @@ namespace pokebot::bot::behavior {
 		auto id = Manager::Instance().GetGoalNode(Self->JoinedTeam(), Self->JoinedPlatoon());
 		auto origin = node::czworld.GetOrigin(id);
 		if constexpr (b) {
-			return common::Distance(Self->Origin(), origin) > 200.0f;
+			return game::Distance(Self->Origin(), origin) > 200.0f;
 		} else {
-			return common::Distance(Self->Origin(), origin) <= 200.0f;
+			return game::Distance(Self->Origin(), origin) <= 200.0f;
 		}
 	}
 

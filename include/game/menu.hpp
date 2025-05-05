@@ -11,7 +11,7 @@ namespace pokebot::game {
 		int slot = 0;
 		util::fixed_string<256u> menu_message{};
 
-		common::Array<CustomRadio, 9> item;
+		game::Array<CustomRadio, 9> item;
 	public:
 		CommandMenu(util::fixed_string<60u> header, std::initializer_list<CustomRadio> messages);
 
@@ -21,7 +21,7 @@ namespace pokebot::game {
 		const int& Slot = slot;
 	};
 
-	class Menu final : private common::Singleton<Menu> {
+	class Menu final : private game::Singleton<Menu> {
 		// de_ map radio menu command.
 		CommandMenu demolition_strategy_command_menu{
 			"Pokebot Mission Command",

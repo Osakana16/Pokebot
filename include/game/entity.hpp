@@ -1,6 +1,6 @@
 #pragma once
 #include "team.hpp"
-namespace pokebot::common {
+namespace pokebot::game {
 	inline float Distance(const Vector& S1, const Vector& S2) POKEBOT_NOEXCEPT { return (S1 - S2).Length(); }
 	inline float Distance2D(const Vector& S1, const Vector& S2) POKEBOT_NOEXCEPT { return (S1 - S2).Length2D(); }
 
@@ -11,7 +11,7 @@ namespace pokebot::common {
 	edict_t* FindEntityByTargetname(edict_t* pentStart, const char* szName);
 	Vector VecBModelOrigin(edict_t* pEdict);
 	Vector UTIL_VecToAngles(const Vector& vec);
-	common::Team GetTeamFromModel(const edict_t* const);
+	game::Team GetTeamFromModel(const edict_t* const);
 
-	void Draw(edict_t* ent, const Vector& start, const Vector& end, int width, int noise, const common::Color& color, int brightness, int speed, int life);
+	void Draw(edict_t* ent, const Vector& start, const Vector& end, int width, int noise, const game::Color& color, int brightness, int speed, int life);
 }

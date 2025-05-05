@@ -146,7 +146,7 @@ namespace pokebot::bot::behavior {
 
 		set_goal_team_objective->Define([](Bot* const self) -> Status {
 			const bot::PlatoonID Joined_Platoon = self->JoinedPlatoon();
-			const common::Team Joined_Team = self->JoinedTeam();
+			const game::Team Joined_Team = self->JoinedTeam();
 			const node::NodeID Node = Manager::Instance().GetGoalNode(Joined_Team, Joined_Platoon);
 			assert(Node != node::Invalid_NodeID);
 
@@ -207,7 +207,7 @@ namespace pokebot::bot::behavior {
 			if (!self->goal_vector.has_value())
 				return Status::Failed;
 
-			if (common::Distance(self->Origin(), *self->goal_vector) >= 5.0f) {
+			if (game::Distance(self->Origin(), *self->goal_vector) >= 5.0f) {
 				self->look_direction.view = *self->goal_vector;
 				self->look_direction.movement = *self->goal_vector;
 				self->PressKey(ActionKey::Run);
@@ -353,7 +353,7 @@ namespace pokebot::bot::behavior {
 			} else
 				return Status::Failed;
 #else
-			assert(self->JoinedTeam() == common::Team::CT);
+			assert(self->JoinedTeam() == game::Team::CT);
 
 			edict_t* entity{};
 			float min_distance = std::numeric_limits<float>::max();

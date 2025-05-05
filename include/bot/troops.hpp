@@ -59,7 +59,7 @@ namespace pokebot::bot {
 
 		std::function<bool(const std::pair<util::PlayerName, Bot>& target)> condition;
 
-		common::Team team{};			// The team of the platoon.
+		game::Team team{};			// The team of the platoon.
 
 		Troops* parent{};				// My parent troop.
 
@@ -85,7 +85,7 @@ namespace pokebot::bot {
 	public:
 		void Init();
 
-		common::Team Team() { return team; }
+		game::Team Team() { return team; }
 		Troops(decltype(condition) target_condition, decltype(team) target_team) : condition(target_condition), team(target_team) {}
 
 		/**

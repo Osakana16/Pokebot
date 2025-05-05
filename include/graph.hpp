@@ -189,7 +189,7 @@ namespace pokebot::node {
 	// Compatibility with ZBot navmesh.
 	inline class CZBotGraph {
 		std::unordered_multimap<GoalKind, NodeID> goals{};
-		common::Array<Danger, 2> danger;
+		game::Array<Danger, 2> danger;
 		bool is_nav_loaded{};
 	public:
 		size_t GetNumberOfGoals(GoalKind) const POKEBOT_NOEXCEPT;
@@ -209,7 +209,7 @@ namespace pokebot::node {
 		
 		decltype(static_cast<const decltype(goals)>(goals).equal_range(GoalKind::None)) GetGoal(const GoalKind kind) const POKEBOT_NOEXCEPT;
 
-		void FindPath(PathWalk<std::uint32_t>* const, const Vector&, const Vector&, const common::Team);
+		void FindPath(PathWalk<std::uint32_t>* const, const Vector&, const Vector&, const game::Team);
 		
 		bool HasFlag(const NodeID, NavmeshFlag) const POKEBOT_NOEXCEPT;
 

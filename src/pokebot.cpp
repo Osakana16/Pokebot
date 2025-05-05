@@ -22,7 +22,7 @@ namespace pokebot::plugin {
             }
         }
 
-        static void pk_add_team_specified(const common::Team Default_Team) {
+        static void pk_add_team_specified(const game::Team Default_Team) {
             if (!node::czworld.IsNavFileLoaded()) {
                 SERVER_PRINT("[POKEBOT] Error: Cannot add bots because the .nav file is not loaded. Please generate it in CS:CZ.\n");
                 return;
@@ -32,8 +32,8 @@ namespace pokebot::plugin {
             GetArgs(&args);
 
             std::string_view name = "FirstBot";
-            pokebot::common::Team team = Default_Team;
-            pokebot::common::Model model = (pokebot::common::Model)(int)pokebot::util::Random<int>(1, 4);
+            pokebot::game::Team team = Default_Team;
+            pokebot::game::Model model = (pokebot::game::Model)(int)pokebot::util::Random<int>(1, 4);
             bot::Difficult difficult = bot::Difficult::Normal;
             if (args.size() >= 1) {
                 const size_t size = args[0].size();
@@ -60,8 +60,8 @@ namespace pokebot::plugin {
             GetArgs(&args);
 
             std::string_view name = "FirstBot";
-            pokebot::common::Team team = (pokebot::common::Team)(int)pokebot::util::Random<int>(1, 2);
-            pokebot::common::Model model = (pokebot::common::Model)(int)pokebot::util::Random<int>(1, 4);
+            pokebot::game::Team team = (pokebot::game::Team)(int)pokebot::util::Random<int>(1, 2);
+            pokebot::game::Model model = (pokebot::game::Model)(int)pokebot::util::Random<int>(1, 4);
             bot::Difficult difficult = bot::Difficult::Normal;
             if (args.size() >= 1) {
                 assert(args[0].size() <= 64u);
@@ -70,9 +70,9 @@ namespace pokebot::plugin {
 
             if (args.size() >= 2) {
                 if (args[1] == "1" || args[1] == "T" || args[1] == "t") {
-                    team = pokebot::common::Team::T;
+                    team = pokebot::game::Team::T;
                 } else if (args[1] == "2" || args[1] == "CT" || args[1] == "ct") {
-                    team = pokebot::common::Team::CT;
+                    team = pokebot::game::Team::CT;
                 }
             }
 
@@ -87,11 +87,11 @@ namespace pokebot::plugin {
         }
 
         void pk_add_ct() {
-            pk_add_team_specified(common::Team::CT);
+            pk_add_team_specified(game::Team::CT);
         }
 
         void pk_add_t() {
-            pk_add_team_specified(common::Team::T);
+            pk_add_team_specified(game::Team::T);
         }
     }
 
@@ -100,26 +100,26 @@ namespace pokebot::plugin {
             edict_t* bombsites[2]{};
 
             edict_t* edict{};
-            while ((edict = common::FindEntityByClassname(edict, "info_bomb_target")) != nullptr) {
+            while ((edict = game::FindEntityByClassname(edict, "info_bomb_target")) != nullptr) {
                 if (bombsites[0] == nullptr) {
                     bombsites[0] = edict;
                 } else {
                     bombsites[1] = edict;
                 }
-                SERVER_PRINT(std::format("[POKEBOT]info_bomb_target: {}\n", common::Distance(game::game.host.Origin(), common::VecBModelOrigin(edict))).c_str());
+                SERVER_PRINT(std::format("[POKEBOT]info_bomb_target: {}\n", game::Distance(game::game.host.Origin(), game::VecBModelOrigin(edict))).c_str());
             }
 
-            while ((edict = common::FindEntityByClassname(edict, "func_bomb_target")) != nullptr) {
+            while ((edict = game::FindEntityByClassname(edict, "func_bomb_target")) != nullptr) {
                 if (bombsites[0] == nullptr) {
                     bombsites[0] = edict;
                 } else {
                     bombsites[1] = edict;
                 }
-                SERVER_PRINT(std::format("[POKEBOT]func_bomb_target: {}\n", common::Distance(game::game.host.Origin(), common::VecBModelOrigin(edict))).c_str());
+                SERVER_PRINT(std::format("[POKEBOT]func_bomb_target: {}\n", game::Distance(game::game.host.Origin(), game::VecBModelOrigin(edict))).c_str());
             }
 
             if (bombsites[1] != nullptr && bombsites[0] != nullptr) {
-                SERVER_PRINT(std::format("[POKEBOT]distance: {}\n", common::Distance(common::VecBModelOrigin(bombsites[0]), common::VecBModelOrigin(bombsites[1]))).c_str());
+                SERVER_PRINT(std::format("[POKEBOT]distance: {}\n", game::Distance(game::VecBModelOrigin(bombsites[0]), game::VecBModelOrigin(bombsites[1]))).c_str());
             }
         });
 
@@ -185,7 +185,7 @@ namespace pokebot::plugin {
         }
     }
 
-    void Pokebot::AddBot(const std::string_view& Bot_Name, const common::Team Selected_Team, const common::Model Selected_Model, const bot::Difficult Difficult) POKEBOT_NOEXCEPT {
+    void Pokebot::AddBot(const std::string_view& Bot_Name, const game::Team Selected_Team, const game::Model Selected_Model, const bot::Difficult Difficult) POKEBOT_NOEXCEPT {
         pokebot::bot::Manager::Instance().Insert(Bot_Name.data(), Selected_Team, Selected_Model, Difficult);
     }
 

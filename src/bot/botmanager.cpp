@@ -4,14 +4,14 @@ import pokebot.util.random;
 
 namespace pokebot::bot {
 	namespace {
-		bool IsTerrorist(const BotPair& target) noexcept { return target.second.JoinedTeam() == common::Team::T; }
-		bool IsCounterTerrorist(const BotPair& target) noexcept { return target.second.JoinedTeam() == common::Team::CT; }
+		bool IsTerrorist(const BotPair& target) noexcept { return target.second.JoinedTeam() == game::Team::T; }
+		bool IsCounterTerrorist(const BotPair& target) noexcept { return target.second.JoinedTeam() == game::Team::CT; }
 	}
 
 	Manager::Manager() :
 		troops{
-			Troops(IsTerrorist, common::Team::T),
-			Troops(IsCounterTerrorist, common::Team::CT)
+			Troops(IsTerrorist, game::Team::T),
+			Troops(IsCounterTerrorist, game::Team::CT)
 	} {
 
 	}
@@ -91,7 +91,7 @@ namespace pokebot::bot {
 		auto& troop = troops[static_cast<int>(radio_message.team) - 1];
 
 		auto createLeaderPlatoon = [&]() -> PlatoonID {
-			return troop.CreatePlatoon([&](const BotPair& Pair) { return common::Distance(Pair.second.Origin(), Leader_Client->origin) <= 1000.0f; });
+			return troop.CreatePlatoon([&](const BotPair& Pair) { return game::Distance(Pair.second.Origin(), Leader_Client->origin) <= 1000.0f; });
 		};
 
 		if (radio_message.message == "#Cover_me") {
@@ -103,7 +103,7 @@ namespace pokebot::bot {
 		}
 	}
 
-	void Manager::Insert(util::PlayerName bot_name, const common::Team team, const common::Model model, const bot::Difficult Assigned_Diffcult) POKEBOT_NOEXCEPT {
+	void Manager::Insert(util::PlayerName bot_name, const game::Team team, const game::Model model, const bot::Difficult Assigned_Diffcult) POKEBOT_NOEXCEPT {
 		if (auto spawn_result = game::game.Spawn(bot_name.c_str()); std::get<bool>(spawn_result)) {
 			bot_name = std::get<util::PlayerName>(spawn_result).c_str();
 			auto insert_result = bots.insert({ bot_name.c_str(), Bot(bot_name.c_str(), team, model) });
@@ -125,10 +125,10 @@ namespace pokebot::bot {
 
 					} else {
 						edict_t* dropped_bomb{};
-						while ((dropped_bomb = common::FindEntityByClassname(dropped_bomb, "weaponbox")) != NULL) {
+						while ((dropped_bomb = game::FindEntityByClassname(dropped_bomb, "weaponbox")) != NULL) {
 							if (std::string_view(STRING(dropped_bomb->v.model)) == "models/w_backpack.mdl") {
 								backpack = dropped_bomb;
-								terrorist_troop.DecideStrategyFromRadio(&bots, RadioMessage{ .team=common::Team::T, .message="#Take_Bomb"  });
+								terrorist_troop.DecideStrategyFromRadio(&bots, RadioMessage{ .team=game::Team::T, .message="#Take_Bomb"  });
 								break;
 							}
 						}
@@ -136,7 +136,7 @@ namespace pokebot::bot {
 				}
 
 				edict_t* c4{};
-				while ((c4 = common::FindEntityByClassname(c4, "grenade")) != nullptr) {
+				while ((c4 = game::FindEntityByClassname(c4, "grenade")) != nullptr) {
 					if (std::string_view(STRING(c4->v.model)) == "models/w_c4.mdl") {
 						c4_origin = c4->v.origin;
 						break;
@@ -210,7 +210,7 @@ namespace pokebot::bot {
 	}
 
 	void Manager::OnBotJoinedCompletely(Bot* const completed_guy) POKEBOT_NOEXCEPT {
-		assert(completed_guy->JoinedTeam() == common::Team::T || completed_guy->JoinedTeam() == common::Team::CT);
+		assert(completed_guy->JoinedTeam() == game::Team::T || completed_guy->JoinedTeam() == game::Team::CT);
 		const int Team_Index = static_cast<int>(completed_guy->JoinedTeam()) - 1;
 
 		if (auto& troop = troops[Team_Index]; troop.NeedToDevise()) {
@@ -239,7 +239,7 @@ namespace pokebot::bot {
 		}
 	}
 
-	node::NodeID Manager::GetGoalNode(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT {
+	node::NodeID Manager::GetGoalNode(const game::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT {
 		auto& troop = troops[static_cast<int>(Target_Team) - 1];
 		if (!Index.has_value()) {
 			return troop.GetGoalNode();
@@ -248,8 +248,8 @@ namespace pokebot::bot {
 		}
 	}
 
-	std::optional<int> Manager::GetTroopTargetedHostage(const common::Team Target_Team, const PlatoonID Index) const noexcept {
-		assert(Target_Team == common::Team::CT);
+	std::optional<int> Manager::GetTroopTargetedHostage(const game::Team Target_Team, const PlatoonID Index) const noexcept {
+		assert(Target_Team == game::Team::CT);
 		auto& troop = troops[static_cast<int>(Target_Team) - 1];
 		if (!Index.has_value()) {
 			return troop.GetTargetHostageIndex();
@@ -258,7 +258,7 @@ namespace pokebot::bot {
 		}
 	}
 
-	game::Client* Manager::GetLeader(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT {
+	game::Client* Manager::GetLeader(const game::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT {
 		auto& troop = troops[static_cast<int>(Target_Team) - 1];
 		if (!Index.has_value()) {
 			return troop.GetLeader();
@@ -267,7 +267,7 @@ namespace pokebot::bot {
 		}
 	}
 
-	bool Manager::IsFollowerPlatoon(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT {
+	bool Manager::IsFollowerPlatoon(const game::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT {
 		if (!Index.has_value()) {
 			return false;
 		} else {

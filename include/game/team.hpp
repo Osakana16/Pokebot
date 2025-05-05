@@ -1,6 +1,6 @@
 #pragma once
 
-namespace pokebot::common {
+namespace pokebot::game {
 	enum class Team {
 		Spector,
 		T = 1,

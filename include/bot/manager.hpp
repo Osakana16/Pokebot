@@ -3,7 +3,7 @@
 
 namespace pokebot::bot {
 	struct RadioMessage {
-		common::Team team = common::Team::Spector;
+		game::Team team = game::Team::Spector;
 		util::PlayerName sender{};
 		util::fixed_string<255u> message{};
 		PlatoonID platoon{};
@@ -14,10 +14,10 @@ namespace pokebot::bot {
 	/**
 	* @brief Manager class for Bot.
 	*/
-	class Manager final : private common::Singleton<Manager> {
+	class Manager final : private game::Singleton<Manager> {
 		std::optional<Vector> c4_origin{};
 		edict_t* backpack{};
-		common::Array<Troops, 2> troops;
+		game::Array<Troops, 2> troops;
 		Troops& terrorist_troop = troops[0];
 		Troops& counter_terrorist_troop = troops[1];
 
@@ -67,7 +67,7 @@ namespace pokebot::bot {
 		* @param model The model of the bot.
 		* @param difficulty The difficulty level of the bot.
 		*/
-		void Insert(util::PlayerName bot_name, const common::Team team, const common::Model model, const bot::Difficult difficulty) POKEBOT_NOEXCEPT;
+		void Insert(util::PlayerName bot_name, const game::Team team, const game::Model model, const bot::Difficult difficulty) POKEBOT_NOEXCEPT;
 
 		/**
 		* @brief Kick a bot from the game.
@@ -167,18 +167,18 @@ namespace pokebot::bot {
 		* @param Index The platoon index.
 		* @return The goal node ID. If Index is less than 0, returns the troop's goal node ID.
 		*/
-		node::NodeID GetGoalNode(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
+		node::NodeID GetGoalNode(const game::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
 
 		/**
 		* @brief
 		* @return
 		*/
-		std::optional<int> GetTroopTargetedHostage(const common::Team Target_Team, const PlatoonID Index) const noexcept;
+		std::optional<int> GetTroopTargetedHostage(const game::Team Target_Team, const PlatoonID Index) const noexcept;
 
-		game::Client* GetLeader(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
-		bool IsFollowerPlatoon(const common::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
+		game::Client* GetLeader(const game::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
+		bool IsFollowerPlatoon(const game::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
 
-		void AssertStrategy(const common::Team Target_Team, const PlatoonID Index, TroopsStrategy::Strategy strategy) {
+		void AssertStrategy(const game::Team Target_Team, const PlatoonID Index, TroopsStrategy::Strategy strategy) {
 			auto& troop = troops[static_cast<int>(Target_Team) - 1];
 			if (Index < 0) {
 				troop.AssertStrategy(strategy);

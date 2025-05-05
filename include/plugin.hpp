@@ -18,7 +18,7 @@ namespace pokebot::plugin {
 
 		void RegisterCommand() POKEBOT_NOEXCEPT;
 		void OnUpdate() POKEBOT_NOEXCEPT;
-		void AddBot(const std::string_view& Bot_Name, const common::Team, const common::Model, const bot::Difficult) POKEBOT_NOEXCEPT;
+		void AddBot(const std::string_view& Bot_Name, const game::Team, const game::Model, const bot::Difficult) POKEBOT_NOEXCEPT;
 		
 		void OnServerInit();
 		

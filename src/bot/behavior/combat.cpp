@@ -23,7 +23,7 @@ namespace pokebot::bot::behavior {
 		template<bool b>
 		bool Always(const Bot* const) POKEBOT_NOEXCEPT { return b; }
 
-		template<common::Team value>
+		template<game::Team value>
 		bool Is(const Bot* const Self) { return Self->JoinedTeam() == value; }
 
 		template<bool b>
@@ -55,7 +55,7 @@ namespace pokebot::bot::behavior {
 
 		template<bool b>
 		bool IsOnBomb(const Bot* const Self) POKEBOT_NOEXCEPT {
-			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (common::Distance(Self->Origin(), *Manager::Instance().C4Origin()) <= 50.0f));
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (game::Distance(Self->Origin(), *Manager::Instance().C4Origin()) <= 50.0f));
 		}
 		
 		template<bool b>
@@ -70,7 +70,7 @@ namespace pokebot::bot::behavior {
 
 		template<bool b>
 		bool IsPlayerMate(const Bot* const Self) POKEBOT_NOEXCEPT {
-			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (Self->JoinedTeam() == common::GetTeamFromModel(game::game.host.AsEdict())));
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (Self->JoinedTeam() == game::GetTeamFromModel(game::game.host.AsEdict())));
 		}
 
 		template<bool b>
@@ -149,7 +149,7 @@ namespace pokebot::bot::behavior {
 			return false;
 		}
 
-		template<bool b, common::Team specified_team>
+		template<bool b, game::Team specified_team>
 		bool Is(const Bot* const Self) {
 			return Self->JoinedTeam() == specified_team;
 		}
@@ -185,8 +185,8 @@ namespace pokebot::bot::behavior {
 	void DefineCombat() {
 		reset_goal_to_retreat->Define
 		({
-			Condition::If(Is<true, common::Team::CT>, set_goal_ctspawn),
-			Condition::If(Is<true, common::Team::T>, set_goal_tspawn)					  
+			Condition::If(Is<true, game::Team::CT>, set_goal_ctspawn),
+			Condition::If(Is<true, game::Team::T>, set_goal_tspawn)					  
 		});
 
 		fight::beat_enemies->Define

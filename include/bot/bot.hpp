@@ -130,8 +130,8 @@ namespace pokebot::bot {
 		Message start_action{};
 
 		PlatoonID platoon = Not_Joined_Any_Platoon;
-		common::Team team{};
-		common::Model model{};
+		game::Team team{};
+		game::Model model{};
 
 		game::Weapon current_weapon = game::Weapon::Knife;
 
@@ -239,7 +239,7 @@ namespace pokebot::bot {
 		} look_direction{}, ideal_direction{};
 
 
-		Bot(const std::string_view&, const common::Team, const common::Model) POKEBOT_NOEXCEPT;
+		Bot(const std::string_view&, const game::Team, const game::Model) POKEBOT_NOEXCEPT;
 
 		void OnNewRound() POKEBOT_NOEXCEPT;
 		void Run() POKEBOT_NOEXCEPT;
@@ -286,7 +286,7 @@ namespace pokebot::bot {
 		bool CanSeeEntity(const edict_t*) const POKEBOT_NOEXCEPT;
 
 		PlatoonID JoinedPlatoon() const POKEBOT_NOEXCEPT;
-		common::Team JoinedTeam() const POKEBOT_NOEXCEPT;
+		game::Team JoinedTeam() const POKEBOT_NOEXCEPT;
 		float GetSecondLeftToCompleteReloading() const POKEBOT_NOEXCEPT;
 
 		/* - Client Wrapper - */

@@ -12,7 +12,7 @@ const edict_t* engine_target_edict = nullptr;
 bool is_bot{};
 bool is_host{};
 
-namespace pokebot::common {
+namespace pokebot::game {
     edict_t* FindEntityInSphere(edict_t* pentStart, const Vector& vecCenter, float flRadius) {
         edict_t* pentEntity = FIND_ENTITY_IN_SPHERE(pentStart, vecCenter, flRadius);
         if (!FNullEnt(pentEntity))
@@ -46,20 +46,20 @@ namespace pokebot::common {
         return Vector(rgflVecOut);
     }
 
-    common::Team GetTeamFromModel(const edict_t* const Edict) {
-        static std::unordered_map<pokebot::util::fixed_string<11u>, common::Team, pokebot::util::fixed_string<11u>::Hash> Model_And_Teams{
-            { "terror", common::Team::T },
-			{ "arab", common::Team::T },
-			{ "leet", common::Team::T },
-			{ "artic", common::Team::T },
-			{ "arctic", common::Team::T },
-			{ "guerilla", common::Team::T },
-			{ "urban", common::Team::CT },
-			{ "gsg9", common::Team::CT },
-			{ "sas", common::Team::CT },
-			{ "gign", common::Team::CT },
-			{ "vip", common::Team::CT },
-			{ "spetsnatz", common::Team::CT }
+    game::Team GetTeamFromModel(const edict_t* const Edict) {
+        static std::unordered_map<pokebot::util::fixed_string<11u>, game::Team, pokebot::util::fixed_string<11u>::Hash> Model_And_Teams{
+            { "terror", game::Team::T },
+			{ "arab", game::Team::T },
+			{ "leet", game::Team::T },
+			{ "artic", game::Team::T },
+			{ "arctic", game::Team::T },
+			{ "guerilla", game::Team::T },
+			{ "urban", game::Team::CT },
+			{ "gsg9", game::Team::CT },
+			{ "sas", game::Team::CT },
+			{ "gign", game::Team::CT },
+			{ "vip", game::Team::CT },
+			{ "spetsnatz", game::Team::CT }
         };
         auto infobuffer = (*g_engfuncs.pfnGetInfoKeyBuffer)(const_cast<edict_t*>(Edict));
         return Model_And_Teams.at((*g_engfuncs.pfnInfoKeyValue)(infobuffer, "model"));
@@ -155,14 +155,14 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             return;
 
                         using namespace pokebot;
-                        static const std::unordered_map<TextCache, pokebot::common::Team, TextCache::Hash> Menu_Cache {
-                            { "TERRORIST", common::Team::T },
-                            { "CT", common::Team::CT },
-                            { "UNASSIGNED", common::Team::Spector },
-                            { "SPECTATOR", common::Team::Spector }
+                        static const std::unordered_map<TextCache, pokebot::game::Team, TextCache::Hash> Menu_Cache {
+                            { "TERRORIST", game::Team::T },
+                            { "CT", game::Team::CT },
+                            { "UNASSIGNED", game::Team::Spector },
+                            { "SPECTATOR", game::Team::Spector }
                         };
 
-                        if (auto team = Menu_Cache.at(std::get<TextCache>(args[1]).c_str()); team == common::Team::Spector) {
+                        if (auto team = Menu_Cache.at(std::get<TextCache>(args[1]).c_str()); team == game::Team::Spector) {
                             game::game.RegisterClient(const_cast<edict_t*>(engine_target_edict));
                         } else {
                             game::game.OnTeamAssigned(STRING(engine_target_edict->v.netname), team);
@@ -536,7 +536,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
 
     meta_engfuncs.pfnClientCommand = [](edict_t* pEdict, const char* szFmt, ...) POKEBOT_NOEXCEPT {
         if (gpGlobals->deathmatch) {
-            if (pEdict->v.flags & (FL_FAKECLIENT | pokebot::common::Third_Party_Bot_Flag))
+            if (pEdict->v.flags & (FL_FAKECLIENT | pokebot::game::Third_Party_Bot_Flag))
                 RETURN_META(MRES_SUPERCEDE);
         }
         RETURN_META(MRES_IGNORED);

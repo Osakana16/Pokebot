@@ -1,7 +1,7 @@
 #include <sstream>
 #include "plugin.hpp"
 
-namespace pokebot::common {
+namespace pokebot::game {
 	void OriginToAngle(Vector* destination, const Vector& Target, const Vector& Origin) {
 		// float vecout[3]{};
 		Vector angle = Target - Origin;

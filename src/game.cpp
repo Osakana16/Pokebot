@@ -25,7 +25,7 @@ namespace pokebot {
 
 		bool Hostage::RecoginzeOwner(const std::string_view& Client_Name) POKEBOT_NOEXCEPT {
 			auto client = game.clients.Get(Client_Name.data());
-			if (client != nullptr && common::Distance(client->origin, entity->v.origin) < 83.0f && client->GetTeam() == common::Team::CT) {
+			if (client != nullptr && game::Distance(client->origin, entity->v.origin) < 83.0f && client->GetTeam() == game::Team::CT) {
 				if (owner_name.c_str() == Client_Name) {
 					owner_name.clear();
 				} else {
@@ -41,8 +41,8 @@ namespace pokebot {
 				return;
 			
 			auto owner = game.clients.Get(owner_name.data());
-			const bool Is_Owner_Terrorist = owner->GetTeam() == common::Team::T;
-			if (IsReleased() || owner->GetTeam() == common::Team::T || common::Distance(owner->origin, entity->v.origin) > 200.0f)
+			const bool Is_Owner_Terrorist = owner->GetTeam() == game::Team::T;
+			if (IsReleased() || owner->GetTeam() == game::Team::T || game::Distance(owner->origin, entity->v.origin) > 200.0f)
 				owner_name.clear();
 		}
 
@@ -113,7 +113,7 @@ namespace pokebot {
 			auto getNumber = [this](const char* class_name) -> size_t {
 				size_t number{};
 				edict_t* entity = nullptr;
-				while ((entity = common::FindEntityByClassname(entity, class_name)) != nullptr) {
+				while ((entity = game::FindEntityByClassname(entity, class_name)) != nullptr) {
 					number++;
 				}
 				return number;
@@ -229,7 +229,7 @@ namespace pokebot {
 
 		const edict_t* const Game::GetClosedHostage(const Vector& Origin, const float Base_Distance) {
 			for (auto& hostage : hostages) {
-				if (common::Distance(hostage.Origin(), Origin) <= Base_Distance) {
+				if (game::Distance(hostage.Origin(), Origin) <= Base_Distance) {
 					return hostage;
 				}
 			}
@@ -252,7 +252,7 @@ namespace pokebot {
 			return !bot_args.empty();
 		}
 
-		size_t Game::GetLives(const common::Team) const POKEBOT_NOEXCEPT {
+		size_t Game::GetLives(const game::Team) const POKEBOT_NOEXCEPT {
 			return 0;
 		}
 
@@ -370,7 +370,7 @@ namespace pokebot {
 				return std::make_tuple(false, "");
 
 			MDLL_ClientPutInServer(client);
-			client->v.flags |= pokebot::common::Third_Party_Bot_Flag;
+			client->v.flags |= pokebot::game::Third_Party_Bot_Flag;
 			return std::make_tuple(Register(client), client_name.data());
 		}
 
@@ -422,7 +422,7 @@ namespace pokebot {
 			GetAsMutable(Client_Name.data())->weapon_ammo[static_cast<int>(Ammo_ID)] = Amount;
 		}
 
-		void ClientManager::OnTeamAssigned(const std::string_view Client_Name, const common::Team Assigned_Team) POKEBOT_NOEXCEPT {
+		void ClientManager::OnTeamAssigned(const std::string_view Client_Name, const game::Team Assigned_Team) POKEBOT_NOEXCEPT {
 			auto target = GetAsMutable(Client_Name.data());
 			if (target != nullptr)
 				target->team = Assigned_Team;
@@ -481,8 +481,8 @@ namespace pokebot {
 		}
 
 		
-		common::Team Client::GetTeamFromModel() const POKEBOT_NOEXCEPT {
-			return common::GetTeamFromModel(client);
+		game::Team Client::GetTeamFromModel() const POKEBOT_NOEXCEPT {
+			return game::GetTeamFromModel(client);
 		}
 
 		bool Client::IsPlayerModelReloading() const POKEBOT_NOEXCEPT {
