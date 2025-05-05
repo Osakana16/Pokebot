@@ -46,6 +46,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Goldsrc|Win32'">
     <IncludePath>$(ProjectDir)metamod;$(ProjectDir)HLSDK\Multiplayer\cl_dll;$(ProjectDir)HLSDK\Multiplayer\common;$(ProjectDir)HLSDK\Multiplayer\dlls;$(ProjectDir)HLSDK\Multiplayer\engine;$(ProjectDir)HLSDK\Multiplayer\game_shared;$(ProjectDir)HLSDK\Multiplayer\pm_shared;$(ProjectDir)HLSDK\Multiplayer\utils;$(ProjectDir)HLSDK\Multiplayer\utils\common;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)lib\navmesh;$(LibraryPath)</LibraryPath>
+    <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Goldsrc|Win32'">
     <IncludePath>$(ProjectDir)metamod;$(ProjectDir)HLSDK\Multiplayer\cl_dll;$(ProjectDir)HLSDK\Multiplayer\common;$(ProjectDir)HLSDK\Multiplayer\dlls;$(ProjectDir)HLSDK\Multiplayer\engine;$(ProjectDir)HLSDK\Multiplayer\game_shared;$(ProjectDir)HLSDK\Multiplayer\pm_shared;$(ProjectDir)HLSDK\Multiplayer\utils;$(ProjectDir)HLSDK\Multiplayer\utils\common;$(IncludePath)</IncludePath>
@@ -121,6 +122,7 @@
   <ItemGroup>
     <ClCompile Include="module\pokebot_random.ixx" />
     <ClCompile Include="module\tracer.ixx" />
+    <ClCompile Include="src\game\menu.cpp" />
     <ClCompile Include="src\global_time_provider.cpp" />
     <ClInclude Include="include\behavior.hpp" />
     <ClInclude Include="include\bot\manager.hpp" />
@@ -129,6 +131,9 @@
     <ClInclude Include="include\buy.hpp" />
     <ClInclude Include="include\common.hpp" />
     <ClInclude Include="include\database.hpp" />
+    <ClInclude Include="include\game\entity.hpp" />
+    <ClInclude Include="include\game\menu.hpp" />
+    <ClInclude Include="include\game\team.hpp" />
     <ClInclude Include="include\plugin.hpp" />
     <ClInclude Include="include\game.hpp" />
     <ClInclude Include="include\graph.hpp" />

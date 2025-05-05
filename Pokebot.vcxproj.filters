@@ -28,6 +28,12 @@
     <Filter Include="module">
       <UniqueIdentifier>{59abbbd7-d874-400d-b30a-8e18eac3751d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\game">
+      <UniqueIdentifier>{303e26d5-617e-4024-b22b-b16ce4b8fb71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game">
+      <UniqueIdentifier>{fd871e7a-c43e-4435-a30f-0ba33d9675f6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -71,6 +77,15 @@
     </ClInclude>
     <ClInclude Include="include\util\timer.hpp">
       <Filter>include\util</Filter>
+    </ClInclude>
+    <ClInclude Include="include\game\menu.hpp">
+      <Filter>include\game</Filter>
+    </ClInclude>
+    <ClInclude Include="include\game\entity.hpp">
+      <Filter>include\game</Filter>
+    </ClInclude>
+    <ClInclude Include="include\game\team.hpp">
+      <Filter>include\game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -136,6 +151,9 @@
     </ClCompile>
     <ClCompile Include="module\tracer.ixx">
       <Filter>module</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\menu.cpp">
+      <Filter>src\game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

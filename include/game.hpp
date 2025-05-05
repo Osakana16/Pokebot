@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "database.hpp"
 #include "util/timer.hpp"
+#include "game/entity.hpp"
 
 namespace pokebot {
 	namespace game {
@@ -299,7 +300,7 @@ namespace pokebot {
 			void PressKey(const int Key) noexcept;
 			void ResetKey() noexcept;
 
-			common::Team GetTeam() const POKEBOT_NOEXCEPT { return common::GetTeamFromModel(client); }
+			common::Team GetTeam() const noexcept { return common::GetTeamFromModel(client); }
 
 			bool IsValid() const POKEBOT_NOEXCEPT { return IsValid(client); }
 			bool IsDead() const POKEBOT_NOEXCEPT { return IsDead(client); }
@@ -314,6 +315,7 @@ namespace pokebot {
 			bool HasDefuser() const POKEBOT_NOEXCEPT { return bool(DisplayingStatusIcon() & StatusIcon::Defuser); }
 
 			bool IsWalking() const noexcept { return bool(velocity.Length2D() <= 150.0f); }
+			bool IsStopping() const noexcept { return bool(velocity.Length2D() <= 10.0f); }
 			bool IsDucking() const POKEBOT_NOEXCEPT { return bool(button & IN_DUCK); }
 			bool IsInWater() const POKEBOT_NOEXCEPT { return bool(flags & FL_INWATER); }
 			bool IsOnFloor() const POKEBOT_NOEXCEPT { return bool(flags & (FL_ONGROUND | FL_PARTIALGROUND)) != 0; }
@@ -441,7 +443,11 @@ namespace pokebot {
 
 		class Host {
 			edict_t* host{};
+
+			
 		public:
+			void ShowMenu();
+
 			const edict_t* AsEdict() const POKEBOT_NOEXCEPT { return host; }
 			bool IsHostValid() const POKEBOT_NOEXCEPT;
 			void SetHost(edict_t* const target) POKEBOT_NOEXCEPT;

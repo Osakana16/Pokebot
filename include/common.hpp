@@ -27,12 +27,6 @@ namespace pokebot{
 
 		constexpr auto Third_Party_Bot_Flag = 1 << 27;
 
-		enum class Team {
-			Spector,
-			T = 1,
-			CT,
-			Random
-		};
 
 		struct Color {
 			int r{}, g{}, b{};
@@ -103,24 +97,11 @@ namespace pokebot{
 				return &Instance();
 			}
 		};
-
-		inline float Distance(const Vector& S1, const Vector& S2) POKEBOT_NOEXCEPT { return (S1 - S2).Length(); }
-		inline float Distance2D(const Vector& S1, const Vector& S2) POKEBOT_NOEXCEPT { return (S1 - S2).Length2D(); }
-
-		void OriginToAngle(Vector* destination, const Vector& Target, const Vector& Origin);
-		edict_t* FindEntityInSphere(edict_t* pentStart, const Vector& vecCenter, float flRadius);
-		edict_t* FindEntityByString(edict_t* pentStart, const char* szKeyword, const char* szValue);
-		edict_t* FindEntityByClassname(edict_t* pentStart, const char* szName);
-		edict_t* FindEntityByTargetname(edict_t* pentStart, const char* szName);
-		Vector VecBModelOrigin(edict_t* pEdict);
-		Vector UTIL_VecToAngles(const Vector& vec);
-		Team GetTeamFromModel(const edict_t* const);
-
-		void Draw(edict_t* ent, const Vector& start, const Vector& end, int width, int noise, const Color& color, int brightness, int speed, int life);
 	}
 }
 
 #include "util/fixed_string.hpp"
+#include "game/team.hpp"
 
 #include "graph.hpp"
 #include "game.hpp"

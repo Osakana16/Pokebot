@@ -213,6 +213,9 @@ namespace pokebot::bot {
 
 			client->PressKey(static_cast<int>(press_key));
 			press_key = ActionKey::None;
+		} else {
+			// While freezing.
+			stopping_time = gpGlobals->time + 5.0f;
 		}
 	}
 
@@ -403,6 +406,25 @@ namespace pokebot::bot {
 		}
 	}
 
+	void Bot::TryToUnstuck() {
+		/* 
+		* The function tries to unstuck by some actions; jump or reset the goal.
+		* 
+		* Bots get stuck due to various causes:
+		*	1. Collide the wall.
+		*	2. Collide the other players.
+		*	3. Stop by unknown reasons.
+		*/
+#if 1
+		goal_queue.Clear();
+		goal_vector = std::nullopt;
+		goal_node = node::Invalid_NodeID;
+
+		stopping_time = gpGlobals->time + 5.0f;
+#endif
+		state = State::Accomplishment;
+	}
+
 	template<typename Array>
 	std::map<float, int> SortedDistances(const Vector& Base, const Array& list) {
 		std::map<float, int> result{};
@@ -483,24 +505,24 @@ namespace pokebot::bot {
 		const auto Head = Foot + game::game.clients.Get(Name().data())->view_ofs;
 
 		auto CheckHead = [&] () -> bool {
-		util::Tracer tracer{};
+			util::Tracer tracer{};
 			const bool Is_Head_Forward_Center_Hit = tracer.MoveStart(Head).MoveDest(Head + gpGlobals->v_forward * 90.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
 			const bool Is_Head_Forward_Left_Hit = tracer.MoveDest(Head + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * -45.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
 			const bool Is_Head_Forward_Right_Hit = tracer.MoveDest(Head + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * 45.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
-		const bool Is_Head_Forward_Hit = Is_Head_Forward_Center_Hit || Is_Head_Forward_Left_Hit || Is_Head_Forward_Right_Hit;
+			const bool Is_Head_Forward_Hit = Is_Head_Forward_Center_Hit || Is_Head_Forward_Left_Hit || Is_Head_Forward_Right_Hit;
 
-		if (Is_Head_Forward_Hit) {
-			// Check left
+			if (Is_Head_Forward_Hit) {
+				// Check left
 				tracer.MoveDest(Head + gpGlobals->v_right * -90.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr);
-			if (tracer.IsHit()) {
-				PressKey(ActionKey::Move_Right);
-			} else {
-				// Check right
-					tracer.MoveDest(Head + gpGlobals->v_right * 90.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr);
 				if (tracer.IsHit()) {
-					PressKey(ActionKey::Move_Left);
+					PressKey(ActionKey::Move_Right);
+				} else {
+					// Check right
+					tracer.MoveDest(Head + gpGlobals->v_right * 90.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr);
+					if (tracer.IsHit()) {
+						PressKey(ActionKey::Move_Left);
+					}
 				}
-			}
 				return true;
 			}
 			return false;
@@ -540,13 +562,13 @@ namespace pokebot::bot {
 
 		if (!game::game.clients.Get(Name().c_str())->IsStopping()) {
 			stopping_time = gpGlobals->time + 1.0f;
-	}
+		}
 
 		if (stopping_time < gpGlobals->time) {
 			state = State::Stuck;
 		}
 	}
-	
+
 	bool Bot::CanSeeEntity(const edict_t* entity) const POKEBOT_NOEXCEPT {
 		auto client = game::game.clients.Get(Name().data()); client->CanSeeEntity(entity);
 		return client->CanSeeEntity(entity);
@@ -676,7 +698,7 @@ namespace pokebot::bot {
 	bool Bot::IsFalling() const POKEBOT_NOEXCEPT { return false; }
 	bool Bot::Jumped() const POKEBOT_NOEXCEPT { return false; }
 	bool Bot::IsJumping() const POKEBOT_NOEXCEPT { return !game::game.clients.Get(Name().data())->IsOnFloor(); }
-	bool Bot::IsLeadingHostages() const POKEBOT_NOEXCEPT { return false; }
+	bool Bot::IsLeadingHostages() const POKEBOT_NOEXCEPT { return game::game.clients.Get(Name().data())->HasHostages(); }
 	bool Bot::IsLookingThroughScope() const POKEBOT_NOEXCEPT { return false; }
 	bool Bot::IsLookingThroughCamera() const POKEBOT_NOEXCEPT { return false; }
 	bool Bot::IsChangingSilencer() const POKEBOT_NOEXCEPT { return false; }
@@ -689,25 +711,14 @@ namespace pokebot::bot {
 
 	void Bot::OnRadioRecieved(const std::string_view& Sender_Name, const std::string_view& Radio_Sentence) POKEBOT_NOEXCEPT {
 		static bool is_sent{};
-		const std::unordered_map<util::fixed_string<32u>, std::function<void()>, util::fixed_string<32u>::Hash> Radios{
-			{
-				"#Cover_me",
-				[] {
+		auto Ignore = [] { /* Do nothing */ };
+		auto AlwaysPositive = [&] { game::game.IssueCommand(Name().data(), "radio3"); game::game.IssueCommand(Name().data(), "menuselect 1"); };
+		auto AlwaysNegative = [&] { game::game.IssueCommand(Name().data(), "radio3"); game::game.IssueCommand(Name().data(), "menuselect 8"); };
 
-				}
-			},
-			{
-				"#You_take_the_point",
-				[] {
-
-				}
-			},
-			{
-				"#Hold_this_position",
-				[] {
-
-				}
-			},
+		const std::unordered_map<util::fixed_string<60u>, std::function<void()>, util::fixed_string<60u>::Hash> Radios{
+			{ "#Cover_me", Ignore },
+			{ "#You_take_the_point", Ignore },
+			{ "#Hold_this_position", Ignore },
 			{
 				"#Regroup_team",
 				[&] {
@@ -716,100 +727,49 @@ namespace pokebot::bot {
 #else
 						goal_queue.AddGoalQueue(node::czworld.GetNearest(Origin())->m_id);
 #endif
-					}
-				},
-				{
-					"#Follow_me",
-					[] {
-
-					}
-				},
-				{
-					"#Taking_fire",
-					[] {
-
-					}
-				},
-				{
-					"#Go_go_go",
-					[this] {
 						game::game.IssueCommand(Name().data(), "radio3");
 						game::game.IssueCommand(Name().data(), "menuselect 1");
 					}
 				},
+				{ "#Follow_me", AlwaysPositive },
+				{ "#Taking_fire", Ignore },
 				{
-					"#Team_fall_back",
-					[] {
-
+					"#Go_go_go",
+					[this] {
+						goal_node = node::Invalid_NodeID;
+						goal_vector = std::nullopt;
+						goal_queue.Clear();
+						game::game.IssueCommand(Name().data(), "radio3");
+						game::game.IssueCommand(Name().data(), "menuselect 1");
 					}
 				},
-				{
-					"#Stick_together_team",
-					[] {
-
-					}
-				},
-				{
-					"#Get_in_position_and_wait",
-					[] {
-
-					}
-				},
-				{
-					"#Storm_the_front", [] {
-
-					}
-				},
-				{
-					"#Report_in_team", [] {
-
-					}
-				},
-				{ "#Affirmative", [] {}},
-				{ "#Roger_that", [] {} },
-				{
-					"#Enemy_spotted", [] {
-
-					}
-				},
-				{
-					"#Need_backup", [] {
-
-					}
-				},
-				{
-					"#Sector_clear", [] {
-
-					}
-				},
-				{
-					"#In_position", [] {
-
-					}
-				},
-				{
-					"#Reporting_in", [] {
-
-					}
-				},
-				{
-					"#Get_out_of_there", [] {
-
-					}
-				},
-				{
-					"#Negative", [] {
-
-					}
-				},
-				{
-					"#Enemy_down", [] {
-
-					}
-				},
-				{
-					"#Fire_in_the_hole", [] {}
-				}
+				{ "#Team_fall_back", Ignore },
+				{ "#Stick_together_team", AlwaysPositive },
+				{ "#Get_in_position_and_wait", Ignore },
+				{ "#Storm_the_front", Ignore },
+				{ "#Report_in_team", [] {} },
+				{ "#Affirmative", Ignore },
+				{ "#Roger_that", Ignore },
+				{ "#Enemy_spotted", Ignore },
+				{ "#Need_backup", Ignore },
+				{ "#Sector_clear", Ignore },
+				{ "#In_position", Ignore },
+				{"#Reporting_in", Ignore },
+				{ "#Get_out_of_there", Ignore },
+				{ "#Negative", Ignore },
+				{ "#Enemy_down", Ignore },
+				{ "#Fire_in_the_hole", Ignore },
+				// Ex-Radio
+				{ "Team, infiltrate and eliminate.", Ignore },
+				{ "Focus efforts on the bombsite closest to CT spawn.", Ignore },
+				{ "Focus efforts on the bombsite furthest from CT spawn.", Ignore },
+				{ "Protect bomber.", Ignore },
+				{ "Take the rescue zones.", Ignore },
+				{ "Cover the V.I.P.", Ignore },
+				{ "Take the safety zones.", Ignore },
+				{ "Take the escape zones.", Ignore },
+				{ "All sticks together.", Ignore },
+				{ "Split up some squads.", Ignore },
 		};
 		Radios.at(Radio_Sentence.data())();
 	}

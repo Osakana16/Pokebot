@@ -2,6 +2,9 @@
 #include "navmesh/navigation_map.h"
 
 #include "bot/manager.hpp"
+
+#include "game/menu.hpp"
+
 #include <iostream>
 #include <functional>
 
@@ -141,6 +144,24 @@ namespace pokebot::plugin {
 
         REG_SVR_COMMAND("pk_navload", [] {
             pokebot::node::czworld.OnMapLoaded();
+        });
+
+        REG_SVR_COMMAND("pk_menu", [] {
+            std::vector<std::string_view> args{};
+            GetArgs(&args);
+
+            if (args.empty())
+                return;
+
+            if (args[0] == "1") {
+                pokebot::game::Menu::Instance().OnCommandRun(pokebot::game::game.host.AsEdict(), pokebot::game::Menu::SpecifiedCommand::ExRadio);
+            } else if (args[0] == "2") {
+                pokebot::game::Menu::Instance().OnCommandRun(pokebot::game::game.host.AsEdict(), pokebot::game::Menu::SpecifiedCommand::Buy_Strategy);
+            } else if (args[0] == "3") {
+                pokebot::game::Menu::Instance().OnCommandRun(pokebot::game::game.host.AsEdict(), pokebot::game::Menu::SpecifiedCommand::Strategy);
+            } else if (args[0] == "4") {
+                pokebot::game::Menu::Instance().OnCommandRun(pokebot::game::game.host.AsEdict(), pokebot::game::Menu::SpecifiedCommand::Platoon_Radio);
+            }
         });
 
         REG_SVR_COMMAND("pk_what_my_node", [] {

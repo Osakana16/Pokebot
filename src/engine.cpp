@@ -46,7 +46,7 @@ namespace pokebot::common {
         return Vector(rgflVecOut);
     }
 
-    Team GetTeamFromModel(const edict_t* const Edict) {
+    common::Team GetTeamFromModel(const edict_t* const Edict) {
         static std::unordered_map<pokebot::util::fixed_string<11u>, common::Team, pokebot::util::fixed_string<11u>::Hash> Model_And_Teams{
             { "terror", common::Team::T },
 			{ "arab", common::Team::T },

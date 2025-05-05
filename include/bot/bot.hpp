@@ -55,7 +55,8 @@ namespace pokebot::bot {
 	enum class State {
 		Accomplishment,	// The bot mainly does accomplish the mission
 		Crisis,			// The bot is in dangerous situation.
-		Follow			// Follow the leader
+		Follow,			// Follow the leader
+		Stuck			// 
 	};
 
 	class GoalQueue {
@@ -103,6 +104,8 @@ namespace pokebot::bot {
 	class Bot {
 		friend class Manager;
 		friend class Troops;
+
+		util::Time stopping_time{};
 
 		util::Time
 			frame_interval{},
@@ -153,12 +156,22 @@ namespace pokebot::bot {
 		std::vector<util::PlayerName> target_enemies{};
 
 		State state = State::Accomplishment;
-		void AccomplishMission() POKEBOT_NOEXCEPT, Combat() POKEBOT_NOEXCEPT, Follow() POKEBOT_NOEXCEPT;
-		void (Bot::*doObjective[3])() = {
+		void AccomplishMission() POKEBOT_NOEXCEPT;
+		void Combat() POKEBOT_NOEXCEPT;
+		void Follow() POKEBOT_NOEXCEPT;
+
+		/**
+		* @brief Try to unstuck.
+		* 
+		*/
+		void TryToUnstuck() POKEBOT_NOEXCEPT;
+
+		void (Bot::*doObjective[4])() = {
 			// Basic
 			&Bot::AccomplishMission,
 			&Bot::Combat,
-			&Bot::Follow
+			&Bot::Follow,
+			&Bot::TryToUnstuck
 		};
 
 		void OnTerroristDemolition() noexcept, 

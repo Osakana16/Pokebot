@@ -1,6 +1,8 @@
 #include "plugin.hpp"
 #include "graph.hpp"
+#include "game/menu.hpp"
 #include <vector>
+import pokebot.util.tracer;
 
 enginefuncs_t g_engfuncs;
 globalvars_t* gpGlobals;
@@ -210,7 +212,21 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
         RETURN_META(MRES_IGNORED);
     };
 
-    func_table.pfnClientCommand = [](edict_t*) -> void {
+    func_table.pfnClientCommand = [](edict_t* client) -> void {
+        if (client != pokebot::game::game.host.AsEdict()) {
+            return;
+        }
+
+        const std::string_view command = CMD_ARGV(0);
+        if (command != "menuselect") {
+            return;
+        }
+
+        const auto arg = CMD_ARGV(0);
+        int key{};
+        char *not_converted;
+        key = strtol(CMD_ARGV(1), &not_converted, 10);
+        pokebot::game::Menu::Instance().OnPress(client, key);
         RETURN_META(MRES_IGNORED);
     };
 
