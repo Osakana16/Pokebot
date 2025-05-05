@@ -4,7 +4,7 @@
 namespace {
     int current_message{};
     
-    using TextCache = pokebot::util::fixed_string<60u>;
+    using TextCache = pokebot::util::fixed_string<120u>;
     std::vector<std::variant<int, float, TextCache>> args{};
 }
 
