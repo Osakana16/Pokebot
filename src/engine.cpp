@@ -417,7 +417,8 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             { "#Defusing_Bomb_Without_Defuse_Kit", nothingToDo },
                             { "#Cant_buy", nothingToDo },
                             { "#Game_unknown_command", nothingToDo },
-                            { "#Name_change_at_respawn", nothingToDo }
+                            { "#Name_change_at_respawn", nothingToDo },
+                            { "#Command_Not_Available", nothingToDo }
                         };
 
                         
