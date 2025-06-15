@@ -64,6 +64,9 @@
     <Filter Include="module\game">
       <UniqueIdentifier>{f29b2d75-e869-4f12-888a-28ec4122cd68}</UniqueIdentifier>
     </Filter>
+    <Filter Include="module\game\client">
+      <UniqueIdentifier>{f8aa4ac5-a1f3-456b-8cf5-9d5bbfe217b3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -288,8 +291,20 @@
     <ClCompile Include="module\game\team.ixx">
       <Filter>module\game</Filter>
     </ClCompile>
-    <ClCompile Include="module\game\util.ixx">
+    <ClCompile Include="module\game\game_util.ixx">
       <Filter>module\game</Filter>
+    </ClCompile>
+    <ClCompile Include="module\util\color.ixx">
+      <Filter>module\util</Filter>
+    </ClCompile>
+    <ClCompile Include="module\util\flag.ixx">
+      <Filter>module\util</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\client\client.ixx">
+      <Filter>module\game\client</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\client\client_key.ixx">
+      <Filter>module\game\client</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

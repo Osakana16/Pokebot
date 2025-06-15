@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "database.hpp"
 #include "util/timer.hpp"
-
+#include "game/team.hpp"
 #include "game/map.hpp"
 #include "game_base.hpp"
 
@@ -354,7 +354,7 @@ namespace pokebot {
 			void GetEntityNamesInView(pokebot::util::PlayerName player_names[32]) const POKEBOT_NOEXCEPT;
 			game::Team GetTeamFromModel() const POKEBOT_NOEXCEPT;
 
-			bool IsFakeClient() const POKEBOT_NOEXCEPT { return bool(flags & game::Third_Party_Bot_Flag); }
+			bool IsFakeClient() const noexcept;
 		};
 
 		class ClientManager {
@@ -595,15 +595,5 @@ namespace pokebot {
 		bool CanSeeEntity(const edict_t* const self, const edict_t* const Target) POKEBOT_NOEXCEPT;
 		bool InViewCone(const edict_t* const self, const Vector& Origin) POKEBOT_NOEXCEPT;
 		bool IsVisible(const edict_t* const Self, const Vector& Origin) POKEBOT_NOEXCEPT;
-	}
-
-	namespace engine {
-		class ClientKey final {
-			const int Client_Index{};
-			char* const infobuffer{};
-		public:
-			ClientKey(edict_t* target) POKEBOT_NOEXCEPT;
-			ClientKey& SetValue(const char* Key, const char* Value) POKEBOT_NOEXCEPT;
-		};
 	}
 }

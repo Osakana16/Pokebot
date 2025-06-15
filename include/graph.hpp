@@ -1,7 +1,9 @@
 #pragma once
+#include "game/team.hpp"
 #include "navmesh/navigation_map.h"
 #include "graph_base.hpp"
 #define USE_NAVMESH true
+
 
 namespace pokebot::node {
 	

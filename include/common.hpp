@@ -24,14 +24,6 @@ namespace pokebot{
 #endif
 
 		using Dec = float;
-
-		constexpr auto Third_Party_Bot_Flag = 1 << 27;
-
-
-		struct Color {
-			int r{}, g{}, b{};
-		};
-
 		enum class Model {
 			Phoenix_Connexion = 1,
 			Elite_Crew,
@@ -101,7 +93,6 @@ namespace pokebot{
 }
 
 #include "util/fixed_string.hpp"
-#include "game/team.hpp"
 
 #include "graph.hpp"
 #include "game.hpp"

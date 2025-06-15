@@ -1,7 +1,12 @@
 ﻿#include "bot/manager.hpp"
 #include <unordered_set>
 
+
+import pokebot.game;
 import pokebot.game.util;
+import pokebot.game.client;
+import pokebot.util;
+import pokebot.util.tracer;
 
 namespace pokebot {
 	namespace game {
@@ -39,6 +44,7 @@ namespace pokebot {
 		}
 		
 		game::Team Client::GetTeam() const noexcept { return game::GetTeamFromModel(client); }
+		bool Client::IsFakeClient() const noexcept{ return bool(flags & util::Third_Party_Bot_Flag); }
 
 		void Hostage::Update() POKEBOT_NOEXCEPT {
 			if (owner_name.empty())
@@ -355,7 +361,7 @@ namespace pokebot {
 
 			// END OF FIX: --- score resetted
 			CALL_GAME_ENTITY(PLID, "player", VARS(client));
-			engine::ClientKey client_key{ client };
+			client::ClientKey client_key{ client };
 			client_key
 				.SetValue("model", "")
 				.SetValue("rate", "3500.000000")
@@ -374,7 +380,7 @@ namespace pokebot {
 				return std::make_tuple(false, "");
 
 			MDLL_ClientPutInServer(client);
-			client->v.flags |= pokebot::game::Third_Party_Bot_Flag;
+			client->v.flags |= pokebot::util::Third_Party_Bot_Flag;
 			return std::make_tuple(Register(client), client_name.data());
 		}
 
@@ -615,18 +621,6 @@ namespace pokebot {
 			const bool Is_Body_In_FOV = Is_Body_Visible && Is_Body_In_ViewCone;
 			const bool Is_Head_In_FOV = Is_Head_In_ViewCone && Is_Head_Visible;
 			return (Is_Body_In_FOV || Is_Head_In_FOV);
-		}
-	}
-
-	namespace engine {
-		ClientKey::ClientKey(edict_t* target) POKEBOT_NOEXCEPT :
-			Client_Index(ENTINDEX(target)),
-			infobuffer((*g_engfuncs.pfnGetInfoKeyBuffer)(target)) {
-		}
-
-		ClientKey& ClientKey::SetValue(const char* Key, const char* Value) POKEBOT_NOEXCEPT {
-			(*g_engfuncs.pfnSetClientKeyValue)(Client_Index, infobuffer, Key, Value);
-			return *this;
 		}
 	}
 }

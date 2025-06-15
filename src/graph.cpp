@@ -2,6 +2,7 @@
 #include <unordered_set>
 #include <fstream>
 
+import pokebot.game;
 import pokebot.game.util;
 
 namespace pokebot::node {

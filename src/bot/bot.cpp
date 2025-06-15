@@ -3,8 +3,10 @@
 
 #include <thread>
 
-import pokebot.util.tracer;
+import pokebot.game;
 import pokebot.game.util;
+import pokebot.util;
+import pokebot.util.tracer;
 
 namespace pokebot::bot {
 	void Bot::Run() POKEBOT_NOEXCEPT {
@@ -15,7 +17,7 @@ namespace pokebot::bot {
 		last_command_time = gpGlobals->time;
 
 		game::Client* client = const_cast<game::Client*>(game::game.clients.Get(Name().data()));
-		client->flags |= game::Third_Party_Bot_Flag;
+		client->flags |= pokebot::util::Third_Party_Bot_Flag;
 		g_engfuncs.pfnRunPlayerMove(client->Edict(),
 				movement_angle,
 				move_speed,

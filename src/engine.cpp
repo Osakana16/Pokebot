@@ -1,6 +1,11 @@
 #include "common.hpp"
 #include "bot/manager.hpp"
 
+import pokebot.game;
+import pokebot.game.util;
+import pokebot.util;
+import pokebot.util.tracer;
+
 namespace {
     int current_message{};
     
@@ -482,7 +487,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
 
     meta_engfuncs.pfnClientCommand = [](edict_t* pEdict, const char* szFmt, ...) POKEBOT_NOEXCEPT {
         if (gpGlobals->deathmatch) {
-            if (pEdict->v.flags & (FL_FAKECLIENT | pokebot::game::Third_Party_Bot_Flag))
+            if (pEdict->v.flags & (FL_FAKECLIENT | pokebot::util::Third_Party_Bot_Flag))
                 RETURN_META(MRES_SUPERCEDE);
         }
         RETURN_META(MRES_IGNORED);
