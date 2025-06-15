@@ -34,6 +34,39 @@
     <Filter Include="src\game">
       <UniqueIdentifier>{fd871e7a-c43e-4435-a30f-0ba33d9675f6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="module\bot">
+      <UniqueIdentifier>{80e4d90f-e681-488f-ae11-49bb21325f3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\bot\squad">
+      <UniqueIdentifier>{04743852-9303-4be6-9758-359bf5159527}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\util">
+      <UniqueIdentifier>{08d43cd8-f3d9-40f4-9f6a-712eb7e69b75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\bot\squad\goal_decision_strategy">
+      <UniqueIdentifier>{ffae58e7-8d92-42cc-991d-488d41268f3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\bot\squad\strategy">
+      <UniqueIdentifier>{edb1f6d4-276a-495d-9cbd-2a5a1102dd7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\bot\squad\staff">
+      <UniqueIdentifier>{d232b2f0-34db-4283-9e62-f98e8170dbb8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\bot\squad\util">
+      <UniqueIdentifier>{628de33d-5f5a-48e7-83a9-cb3a16ed5504}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\terrain">
+      <UniqueIdentifier>{3ec02e05-fd77-41e8-9791-5166994db797}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\terrain\goal">
+      <UniqueIdentifier>{840f09fc-3c26-4c4a-9cfd-1dd802bf5407}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\chat">
+      <UniqueIdentifier>{36d23462-703c-4054-b7d1-0eec386a99a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\game">
+      <UniqueIdentifier>{f29b2d75-e869-4f12-888a-28ec4122cd68}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -66,9 +99,6 @@
     <ClInclude Include="include\bot\manager.hpp">
       <Filter>include\bot</Filter>
     </ClInclude>
-    <ClInclude Include="include\bot\troops.hpp">
-      <Filter>include\bot</Filter>
-    </ClInclude>
     <ClInclude Include="include\util\global_time_provider.hpp">
       <Filter>include\util</Filter>
     </ClInclude>
@@ -86,6 +116,16 @@
     </ClInclude>
     <ClInclude Include="include\game\team.hpp">
       <Filter>include\game</Filter>
+    </ClInclude>
+    <ClInclude Include="include\game\map.hpp">
+      <Filter>include\game</Filter>
+    </ClInclude>
+    <ClInclude Include="include\graph_base.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="include\game_base.hpp">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -137,9 +177,6 @@
     <ClCompile Include="src\bot\botmanager.cpp">
       <Filter>src\bot</Filter>
     </ClCompile>
-    <ClCompile Include="src\bot\troops.cpp">
-      <Filter>src\bot</Filter>
-    </ClCompile>
     <ClCompile Include="include\bot\basic.hpp">
       <Filter>include\bot</Filter>
     </ClCompile>
@@ -154,6 +191,105 @@
     </ClCompile>
     <ClCompile Include="src\game\menu.cpp">
       <Filter>src\game</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\squad.ixx">
+      <Filter>module\bot\squad</Filter>
+    </ClCompile>
+    <ClCompile Include="module\util\util.ixx">
+      <Filter>module\util</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\troops.ixx">
+      <Filter>module\bot\squad</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\goal_decision_strategy\goal_decision_strategy.ixx">
+      <Filter>module\bot\squad\goal_decision_strategy</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\goal_decision_strategy\hostage_rescue_strategy.ixx">
+      <Filter>module\bot\squad\goal_decision_strategy</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\goal_decision_strategy\goal_decision_strategy_factory.ixx">
+      <Filter>module\bot\squad\goal_decision_strategy</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\goal_decision_strategy\decision_strategy.ixx">
+      <Filter>module\bot\squad\goal_decision_strategy</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\strategy\strategy.ixx">
+      <Filter>module\bot\squad\strategy</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\strategy\strategy_element.ixx">
+      <Filter>module\bot\squad\strategy</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\strategy\strategy_data.ixx">
+      <Filter>module\bot\squad\strategy</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\staff\staff.ixx">
+      <Filter>module\bot\squad\staff</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\staff\squad_staff.ixx">
+      <Filter>module\bot\squad\staff</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\staff\goal_staff.ixx">
+      <Filter>module\bot\squad\staff</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\staff\member_staff.ixx">
+      <Filter>module\bot\squad\staff</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\staff\assigner.ixx">
+      <Filter>module\bot\squad\staff</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\goal_decision_strategy\one_goal_strategy.ixx">
+      <Filter>module\bot\squad\goal_decision_strategy</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\goal_decision_strategy\multiple_goal_strategy.ixx">
+      <Filter>module\bot\squad\goal_decision_strategy</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\staff\staff_builder.ixx">
+      <Filter>module\bot\squad\staff</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\util\squad_util.ixx">
+      <Filter>module\bot\squad\util</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\util\role.ixx">
+      <Filter>module\bot\squad\util</Filter>
+    </ClCompile>
+    <ClCompile Include="module\terrain\terrain.ixx">
+      <Filter>module\terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="module\terrain\graph.ixx">
+      <Filter>module\terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="module\terrain\goal\terrain_goal.ixx">
+      <Filter>module\terrain\goal</Filter>
+    </ClCompile>
+    <ClCompile Include="module\terrain\goal\goal_kind.ixx">
+      <Filter>module\terrain\goal</Filter>
+    </ClCompile>
+    <ClCompile Include="module\chat\chat.ixx">
+      <Filter>module\chat</Filter>
+    </ClCompile>
+    <ClCompile Include="module\chat\talk.ixx">
+      <Filter>module\chat</Filter>
+    </ClCompile>
+    <ClCompile Include="module\chat\talk.windows.ixx">
+      <Filter>module\chat</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\goal_decision_strategy\prevent_hostage_strategy.ixx">
+      <Filter>module\bot\squad\goal_decision_strategy</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\game.ixx">
+      <Filter>module\game</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\goal_decision_strategy\first_goal_picker.ixx">
+      <Filter>module\bot\squad\goal_decision_strategy</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\goal_decision_strategy\last_goal_picker.ixx">
+      <Filter>module\bot\squad\goal_decision_strategy</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\goal_decision_strategy\distance_picker.ixx">
+      <Filter>module\bot\squad\goal_decision_strategy</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\squad\util\member_map.ixx">
+      <Filter>module\bot\squad\util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -170,5 +306,8 @@
   <ItemGroup>
     <None Include="LICENSE" />
     <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Pokebot.rc" />
   </ItemGroup>
 </Project>

@@ -129,7 +129,6 @@ namespace pokebot::bot {
 
 		Message start_action{};
 
-		PlatoonID platoon = Not_Joined_Any_Platoon;
 		game::Team team{};
 		game::Model model{};
 
@@ -153,7 +152,7 @@ namespace pokebot::bot {
 		ActionKey press_key{};
 		util::Timer danger_time{ util::GetRealGlobalTime };
 
-		std::vector<util::PlayerName> target_enemies{};
+		std::vector<pokebot::util::PlayerName> target_enemies{};
 
 		State state = State::Accomplishment;
 		void AccomplishMission() POKEBOT_NOEXCEPT;
@@ -199,10 +198,7 @@ namespace pokebot::bot {
 			}
 		};
 
-		util::PlayerName name{};
-
-		void JoinPlatoon(const PlatoonID Target_Platoon) noexcept;
-		void LeavePlatoon() noexcept { platoon = Not_Joined_Any_Platoon; }
+		pokebot::util::PlayerName name{};
 
 		void (Bot::*updateFuncs[5])() = {
 			&Bot::NormalUpdate,
@@ -266,7 +262,7 @@ namespace pokebot::bot {
 
 		// -- Getters --
 
-		const util::PlayerName& Name() const POKEBOT_NOEXCEPT;
+		const pokebot::util::PlayerName& Name() const POKEBOT_NOEXCEPT;
 		Vector Origin() const POKEBOT_NOEXCEPT;
 		float Health() const POKEBOT_NOEXCEPT;
 
@@ -285,7 +281,6 @@ namespace pokebot::bot {
 		bool IsFighting() const POKEBOT_NOEXCEPT { return danger_time.IsRunning(); }
 		bool CanSeeEntity(const edict_t*) const POKEBOT_NOEXCEPT;
 
-		PlatoonID JoinedPlatoon() const POKEBOT_NOEXCEPT;
 		game::Team JoinedTeam() const POKEBOT_NOEXCEPT;
 		float GetSecondLeftToCompleteReloading() const POKEBOT_NOEXCEPT;
 

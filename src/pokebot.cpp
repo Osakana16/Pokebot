@@ -171,6 +171,10 @@ namespace pokebot::plugin {
                 SERVER_PRINT(std::format("My id is not found.\n").c_str());
             }
         });
+
+        REG_SVR_COMMAND("pk_set_arrow", [] {
+            const_cast<edict_t*>(game::game.host.AsEdict())->v.renderfx = 1;
+        });
     }
 
     void Pokebot::OnUpdate() POKEBOT_NOEXCEPT {

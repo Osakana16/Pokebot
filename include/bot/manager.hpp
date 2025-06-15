@@ -1,48 +1,45 @@
 #pragma once
-#include "bot/troops.hpp"
+import pokebot.bot.squad;
 
 namespace pokebot::bot {
 	struct RadioMessage {
 		game::Team team = game::Team::Spector;
-		util::PlayerName sender{};
+		pokebot::util::PlayerName sender{};
 		util::fixed_string<255u> message{};
 		PlatoonID platoon{};
 	};
 
-	using BotPair = std::pair<util::PlayerName, Bot>;
+	using BotPair = std::pair<pokebot::util::PlayerName, Bot>;
 
 	/**
 	* @brief Manager class for Bot.
 	*/
 	class Manager final : private game::Singleton<Manager> {
+		std::unique_ptr<pokebot::bot::squad::Troops> terrorist_troops;
+		std::unique_ptr<pokebot::bot::squad::Troops> ct_troops;
+
 		std::optional<Vector> c4_origin{};
 		edict_t* backpack{};
-		game::Array<Troops, 2> troops;
-		Troops& terrorist_troop = troops[0];
-		Troops& counter_terrorist_troop = troops[1];
-
 		friend class pokebot::message::MessageDispatcher;
-		std::unordered_map<util::PlayerName, Bot, util::PlayerName::Hash> bots{};
+		std::unordered_map<pokebot::util::PlayerName, Bot, pokebot::util::PlayerName::Hash> bots{};
 
 		// The name of the player who has the bomb.
-		util::PlayerName bomber_name{};
+		pokebot::util::PlayerName bomber_name{};
 
 		util::Timer round_started_timer{ util::GetRealGlobalTime };
 		enum class InitializationStage { Preparation, Player_Action_Ready, Completed } initialization_stage{};
 
-		Bot* const Get(const std::string_view&) POKEBOT_NOEXCEPT;
+		Bot* const Get(const std::string_view&) noexcept;
+		const Bot* const Get(const std::string_view&) const noexcept;
 		RadioMessage radio_message{};
 		Manager();
 	public:
-		const decltype(bomber_name)& Bomber_Name = bomber_name;
-		/**
-		* @brief Get the instance of Manager
-		* @return The instance of Manager
-		*/
-		static Manager& Instance() POKEBOT_NOEXCEPT {
+		static Manager& Instance() {
 			static Manager manager{};
 			return manager;
 		}
+
+		const decltype(bomber_name)& Bomber_Name = bomber_name;
 
 		/**
 		* @brief Called when a new round starts.
@@ -67,7 +64,7 @@ namespace pokebot::bot {
 		* @param model The model of the bot.
 		* @param difficulty The difficulty level of the bot.
 		*/
-		void Insert(util::PlayerName bot_name, const game::Team team, const game::Model model, const bot::Difficult difficulty) POKEBOT_NOEXCEPT;
+		void Insert(pokebot::util::PlayerName bot_name, const game::Team team, const game::Model model, const bot::Difficult difficulty) POKEBOT_NOEXCEPT;
 
 		/**
 		* @brief Kick a bot from the game.
@@ -161,31 +158,7 @@ namespace pokebot::bot {
 
 		void OnMapLoaded();
 
-		/**
-		* @brief Get the goal node ID for a troop or platoon.
-		* @param Target_Team The team of the troop.
-		* @param Index The platoon index.
-		* @return The goal node ID. If Index is less than 0, returns the troop's goal node ID.
-		*/
-		node::NodeID GetGoalNode(const game::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
-
-		/**
-		* @brief
-		* @return
-		*/
-		std::optional<int> GetTroopTargetedHostage(const game::Team Target_Team, const PlatoonID Index) const noexcept;
-
-		game::Client* GetLeader(const game::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
-		bool IsFollowerPlatoon(const game::Team Target_Team, const PlatoonID Index) const POKEBOT_NOEXCEPT;
-
-		void AssertStrategy(const game::Team Target_Team, const PlatoonID Index, TroopsStrategy::Strategy strategy) {
-			auto& troop = troops[static_cast<int>(Target_Team) - 1];
-			if (Index < 0) {
-				troop.AssertStrategy(strategy);
-			} else {
-				troop.at(*Index).AssertStrategy(strategy);
-			}
-		}
+		node::NodeID GetGoalNode(const std::string_view& Client_Name) const noexcept;
 
 		/**
 		* @brief Get the origin of the C4 bomb.

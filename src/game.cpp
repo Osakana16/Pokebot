@@ -264,7 +264,7 @@ namespace pokebot {
 			return bool(map_flags & Game_Mode);
 		}
 
-		MapFlags Game::GetMapFlag() const POKEBOT_NOEXCEPT {
+		MapFlags Game::GetScenario() const POKEBOT_NOEXCEPT {
 			return map_flags;
 		}
 
@@ -458,7 +458,7 @@ namespace pokebot {
 			return false;
 		}
 
-		void Client::GetEnemyNamesWithinView(util::PlayerName player_names[32]) const POKEBOT_NOEXCEPT {
+		void Client::GetEnemyNamesWithinView(pokebot::util::PlayerName player_names[32]) const POKEBOT_NOEXCEPT {
 			int i = 0;
 			for (const auto& other : game.clients.GetAll()) {
 				if (other.second.IsDead() || other.second.GetTeam() == GetTeam()) {
@@ -471,7 +471,7 @@ namespace pokebot {
 			}
 		}
 
-		void Client::GetEntityNamesInView(util::PlayerName player_names[32]) const POKEBOT_NOEXCEPT {
+		void Client::GetEntityNamesInView(pokebot::util::PlayerName player_names[32]) const POKEBOT_NOEXCEPT {
 			int i = 0;
 			for (auto& other : game.clients.GetAll()) {
 				if (entity::CanSeeEntity(*this, other.second)) {

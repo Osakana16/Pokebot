@@ -33,7 +33,7 @@ namespace pokebot::bot {
 		namespace {
 			template<bool b>
 			bool IsSeeingEnemy(const Bot* const Self) POKEBOT_NOEXCEPT {
-			util::PlayerName enemies_in_view[32]{};
+			pokebot::util::PlayerName enemies_in_view[32]{};
 				RETURN_BEHAVIOR_TRUE_OR_FALSE(b, enemies_in_view[0].size() >= 0);
 			}
 

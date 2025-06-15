@@ -47,9 +47,10 @@ namespace pokebot::bot::behavior {
 	template<bool b>
 	bool IsTeamObjectiveSet(const Bot* const Self) POKEBOT_NOEXCEPT {
 		if constexpr (b) {
-			return Self->goal_node == Manager::Instance().GetGoalNode(Self->JoinedTeam(), Self->JoinedPlatoon());
+			return Self->goal_node == Manager::Instance().GetGoalNode(Self->Name().c_str());
 		} else {
-			return Self->goal_node != Manager::Instance().GetGoalNode(Self->JoinedTeam(), Self->JoinedPlatoon());
+			auto troops_goal_node = Manager::Instance().GetGoalNode(Self->Name().c_str());
+			return Self->goal_node != troops_goal_node;
 		}
 	}
 
@@ -69,12 +70,13 @@ namespace pokebot::bot::behavior {
 
 	template<bool b>
 	bool IsFarFromMainGoal(const Bot* const Self) POKEBOT_NOEXCEPT {
-		auto id = Manager::Instance().GetGoalNode(Self->JoinedTeam(), Self->JoinedPlatoon());
+		auto id = Manager::Instance().GetGoalNode(Self->Name().c_str());
 		auto origin = node::czworld.GetOrigin(id);
+		auto source = Self->Origin();
 		if constexpr (b) {
-			return game::Distance(Self->Origin(), origin) > 200.0f;
+			return game::Distance(source, *reinterpret_cast<Vector*>(&origin)) > 200.0f;
 		} else {
-			return game::Distance(Self->Origin(), origin) <= 200.0f;
+			return game::Distance(source, *reinterpret_cast<Vector*>(&origin)) <= 200.0f;
 		}
 	}
 

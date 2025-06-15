@@ -95,7 +95,6 @@ namespace pokebot::bot {
 		goal_node = node::Invalid_NodeID;
 		next_dest_node = node::Invalid_NodeID;
 
-		LeavePlatoon();
 		look_direction.Clear();
 		ideal_direction.Clear();
 
@@ -122,11 +121,6 @@ namespace pokebot::bot {
 			// Due to game engine specifications or bugs, 
 			// if we execute a heavy process immediately after the start of a round, 
 			// the game will freeze.
-			
-			if (state != State::Crisis && Manager::Instance().IsFollowerPlatoon(JoinedTeam(), JoinedPlatoon())) {
-				state = State::Follow;
-			}
-
 #if 0
 			// NOTE: This code makes the game laggy so it is temporary disabled.
 			// 
@@ -225,7 +219,7 @@ namespace pokebot::bot {
 	}
 
 	void Bot::AccomplishMission() POKEBOT_NOEXCEPT {
-		auto current_mode = game::game.GetMapFlag();
+		auto current_mode = game::game.GetScenario();
 		(this->*(accomplishState[static_cast<int>(JoinedTeam()) - 1][static_cast<int>(std::log2(static_cast<float>(current_mode)))]))();
 	}
 
@@ -353,6 +347,7 @@ namespace pokebot::bot {
 	}
 
 	void Bot::Follow() POKEBOT_NOEXCEPT {
+#if 0
 		const auto Leader_Client = Manager::Instance().GetLeader(JoinedTeam(), JoinedPlatoon());
 		assert(Leader_Client != nullptr);
 		const auto Leader_Origin = Leader_Client->origin;
@@ -383,7 +378,8 @@ namespace pokebot::bot {
 					}
 				}
 			} else {
-				node::czworld.FindPath(&routes, Origin(), node::czworld.GetOrigin(goal_node), JoinedTeam());
+				auto origin = node::czworld.GetOrigin(goal_node);
+				node::czworld.FindPath(&routes, Origin(), *reinterpret_cast<Vector*>(&*origin), JoinedTeam());
 				if (routes.Empty()) {
 					goal_node = node::Invalid_NodeID;
 				}
@@ -404,6 +400,7 @@ namespace pokebot::bot {
 				PressKey(ActionKey::Run);
 			}
 		}
+#endif
 	}
 
 	void Bot::TryToUnstuck() {
@@ -435,21 +432,21 @@ namespace pokebot::bot {
 	}
 
 	void Bot::CheckAround() {
+		auto next_origin = node::czworld.GetOrigin(next_dest_node);
 		if (!look_direction.view.has_value()) {
 #if !USE_NAVMESH
 			look_direction.view = node::world.GetOrigin(next_dest_node);
 #else
-			look_direction.view = node::czworld.GetOrigin(next_dest_node);
+			look_direction.view = *reinterpret_cast<Vector*>(&next_origin);
 			look_direction.view->z = Origin().z;
 #endif
 		}
 
-		auto next_origin = node::czworld.GetOrigin(next_dest_node);
 		if (!look_direction.movement.has_value()) {
 #if !USE_NAVMESH
 			look_direction.movement = node::world.GetOrigin(next_dest_node);
 #else
-			look_direction.movement = next_origin;
+			look_direction.movement = *reinterpret_cast<Vector*>(&next_origin);
 			look_direction.movement->z = Origin().z;
 #endif
 		}
@@ -460,7 +457,7 @@ namespace pokebot::bot {
 #if 1
 		if (game::poke_fight) {
 			auto client = game::game.clients.Get(Name().data());
-			util::PlayerName enemies_in_view[32]{};
+			pokebot::util::PlayerName enemies_in_view[32]{};
 			int i{};
 
 			client->GetEnemyNamesWithinView(enemies_in_view);
@@ -673,7 +670,7 @@ namespace pokebot::bot {
 
 	bool Bot::IsInBuyzone() const POKEBOT_NOEXCEPT { return game::game.clients.Get(Name().data())->IsInBuyzone(); }
 
-	const util::PlayerName& Bot::Name() const POKEBOT_NOEXCEPT { return name; }
+	const pokebot::util::PlayerName& Bot::Name() const POKEBOT_NOEXCEPT { return name; }
 
 	Vector Bot::Origin() const POKEBOT_NOEXCEPT {
 		return game::game.clients.Get(Name().data())->origin;
@@ -792,45 +789,7 @@ namespace pokebot::bot {
 		OnNewRound();
 	}
 
-	PlatoonID Bot::JoinedPlatoon() const POKEBOT_NOEXCEPT {
-		return platoon;
-	}
-
 	game::Team Bot::JoinedTeam() const POKEBOT_NOEXCEPT {
 		return team;
-	}
-
-	void Bot::JoinPlatoon(const PlatoonID Target_Platoon) noexcept {
-		assert(Target_Platoon.has_value());
-		platoon = *Target_Platoon;
-	}
-
-	void Bot::ReceiveCommand(const TroopsStrategy& Received_Strategy) {
-		switch (Received_Strategy.strategy) {
-			case TroopsStrategy::Strategy::Follow:
-			{
-				assert(!Received_Strategy.leader_name.empty());
-				break;
-			}
-			case TroopsStrategy::Strategy::Rush_And_Rescue:
-			{
-				break;
-			}
-			case TroopsStrategy::Strategy::Defend_Bombsite_Divided:
-			{
-				if (Received_Strategy.objective_goal_node == node::Invalid_NodeID) {
-					return;
-				}
-				goto set_goal;
-			}
-			default:
-			set_goal:
-			{
-				assert(Received_Strategy.leader_name.empty());
-				goal_queue.AddGoalQueue(Received_Strategy.objective_goal_node, 1);
-				break;
-			}
-		}
-		// SERVER_PRINT(std::format("[POKEBOT]New Goal ID:{}\n", goal_node).c_str());
 	}
 }

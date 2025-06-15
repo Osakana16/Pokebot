@@ -42,9 +42,9 @@ namespace pokebot::bot::behavior {
 		template<bool b>
 		bool IsTeamObjectiveSet(const Bot* const Self) POKEBOT_NOEXCEPT {
 			if constexpr (b) {
-				return Self->goal_node == Manager::Instance().GetGoalNode(Self->JoinedTeam(), Self->JoinedPlatoon());
+				return Self->goal_node == Manager::Instance().GetGoalNode(Self->Name().c_str());
 			} else {
-				return Self->goal_node != Manager::Instance().GetGoalNode(Self->JoinedTeam(), Self->JoinedPlatoon());
+				return Self->goal_node != Manager::Instance().GetGoalNode(Self->Name().c_str());
 			}
 		}
 

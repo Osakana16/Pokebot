@@ -6,27 +6,11 @@ namespace pokebot::bot::behavior {
 	namespace {
 		template<node::GoalKind kind>
 		Status SetGoal(Bot *const self) POKEBOT_NOEXCEPT {
-#if !USE_NAVMESH
-			if (node::world.IsOnNode(self->Origin(), self->goal_node) && node::world.IsSameGoal(self->goal_node, kind))
-				return Status::Enough;
-
-			node::NodeID id = node::Invalid_NodeID;
-			auto goals = node::world.GetGoal(kind);
-			for (auto goal = goals.first; goal != goals.second; goal++) {
-				id = goal->second;
-				break;
-			}
-			
-			if (id != node::Invalid_NodeID && !node::world.IsOnNode(self->Origin(), id) && self->goal_queue.AddGoalQueue(id, 1)) {
-				return Status::Executed;
-			} else
-				return Status::Enough;
-#else
 			if (node::czworld.IsOnNode(self->Origin(), self->goal_node) && node::czworld.IsSameGoal(self->goal_node, kind))
 				return Status::Success;
 
 			node::NodeID id = node::Invalid_NodeID;
-			auto goals = node::czworld.GetGoal(kind);
+			auto goals = node::czworld.GetNodeByKind(kind);
 			for (auto goal = goals.first; goal != goals.second; goal++) {
 				id = goal->second;
 				break;
@@ -36,7 +20,6 @@ namespace pokebot::bot::behavior {
 				return Status::Success;
 			} else
 				return Status::Failed;
-#endif
 		}
 	}
 
@@ -112,10 +95,7 @@ namespace pokebot::bot::behavior {
 		});
 
 		look_hostage->Define([](Bot* const self) -> Status {
-			auto hostage_id = Manager::Instance().GetTroopTargetedHostage(self->JoinedTeam(), self->JoinedPlatoon());
-			assert(hostage_id.has_value());
-
-			return LookAt(self, *game::game.GetHostageOrigin(*hostage_id), 1.0f);
+			return Status::Failed;
 		});
 
 		look_enemy->Define([](Bot* const self) -> Status {
@@ -145,9 +125,7 @@ namespace pokebot::bot::behavior {
 		adjust_scope->Define(BotPressesKey<bot::ActionKey::Attack2>);
 
 		set_goal_team_objective->Define([](Bot* const self) -> Status {
-			const bot::PlatoonID Joined_Platoon = self->JoinedPlatoon();
-			const game::Team Joined_Team = self->JoinedTeam();
-			const node::NodeID Node = Manager::Instance().GetGoalNode(Joined_Team, Joined_Platoon);
+			const node::NodeID Node = Manager::Instance().GetGoalNode(self->Name().c_str());
 			assert(Node != node::Invalid_NodeID);
 
 			node::NodeID id = Node;
@@ -176,16 +154,6 @@ namespace pokebot::bot::behavior {
 		});
 
 		set_goal_c4_node->Define([](Bot* const self) -> Status {
-#if !USE_NAVMESH
-			node::NodeID id = node::world.GetNearest(*manager.C4Origin());
-			if (node::world.IsOnNode(self->Origin(), id))
-				return Status::Enough;
-
-			if (id != node::Invalid_NodeID && !node::world.IsOnNode(self->Origin(), id) && self->goal_queue.AddGoalQueue(id, 1)) {
-				return Status::Executed;
-			} else
-				return Status::Failed;
-#else
 			auto area = node::czworld.GetNearest(*Manager::Instance().C4Origin());
 			for (const auto& Another_Origin : { Vector{}, Vector{50.0f, 0.0f, 0.0f}, Vector{ -50.0f, 0.0f, 0.0f }, Vector{0.0f, 50.0f, 0.0f}, Vector{0.0f, -50.0f, 0.0f} }) {
 				if ((area = node::czworld.GetNearest(*Manager::Instance().C4Origin() + Another_Origin)) != nullptr) {
@@ -200,7 +168,6 @@ namespace pokebot::bot::behavior {
 				return Status::Success;
 			} else
 				return Status::Failed;
-#endif
 		});
 
 		move_vector->Define([](Bot* const self) -> Status {
@@ -224,19 +191,6 @@ namespace pokebot::bot::behavior {
 		});
 
 		set_goal_hostage_vector->Define([](Bot* const self) -> Status {
-			if (self->goal_vector.has_value())
-				return Status::Failed;
-
-			auto hostage_id = Manager::Instance().GetTroopTargetedHostage(self->JoinedTeam(), self->JoinedPlatoon());
-			if (!hostage_id.has_value()) {
-				return Status::Failed;
-			}
-			
-			auto origin = game::game.GetHostageOrigin(*hostage_id);
-			if (!origin.has_value()) {
-				return Status::Failed;
-			}
-			self->goal_vector = *origin;
 			return Status::Success;
 		});
 
@@ -267,7 +221,7 @@ namespace pokebot::bot::behavior {
 			auto findCircleLine = [self](const Vector& Origin, const float Distance) POKEBOT_NOEXCEPT -> node::NodeID {
 				node::NodeID id = node::Invalid_NodeID;
 				for (const auto& Line : { Vector(Distance, .0f, .0f), Vector(-Distance, .0f, .0f), Vector(.0f, Distance, .0f), Vector(.0f, -Distance, .0f) }) {
-					auto area = node::czworld.GetNearest(node::czworld.GetOrigin(bot::Manager::Instance().GetGoalNode(self->JoinedTeam(), self->JoinedPlatoon())) + Line, FLT_MAX);
+					auto area = node::czworld.GetNearest(*reinterpret_cast<Vector*>(&node::czworld.GetOrigin(bot::Manager::Instance().GetGoalNode(self->Name().c_str()))) + Line, FLT_MAX);
 					if (area == nullptr)
 						continue;
 
@@ -336,44 +290,7 @@ namespace pokebot::bot::behavior {
 		});
 
 		set_goal_hostage_node->Define([](Bot* const self) -> Status {
-#if !USE_NAVMESH
-			edict_t* entity{};
-			float min_distance = std::numeric_limits<float>::max();
-			node::NodeID id = node::Invalid_NodeID;
-			while ((entity = common::FindEntityByClassname(entity, "hostage_entity")) != nullptr) {
-				if (float distance = common::Distance(self->Origin(), entity->v.origin);  id == node::Invalid_NodeID || min_distance > distance) {
-					min_distance = distance;
-					id = node::world.GetNearest(entity->v.origin);
-				}
-			}
-
-			if (id != node::Invalid_NodeID) {
-				self->goal_queue.AddGoalQueue(id, 1);
-				return Status::Executed;
-			} else
-				return Status::Failed;
-#else
-			assert(self->JoinedTeam() == game::Team::CT);
-
-			edict_t* entity{};
-			float min_distance = std::numeric_limits<float>::max();
-			auto hostage_id = Manager::Instance().GetTroopTargetedHostage(self->JoinedTeam(), self->JoinedPlatoon());
-			assert(hostage_id.has_value());
-
-			auto origin = game::game.GetHostageOrigin(*hostage_id);
-			assert(origin.has_value());
-
-			auto area = node::czworld.GetNearest(*origin);
-			if (area == nullptr)
-				return Status::Failed;
-
-			auto id = area->m_id;
-			if (id != node::Invalid_NodeID && !node::czworld.IsOnNode(self->Origin(), id) && self->goal_queue.AddGoalQueue(id, 1)) {
-				return Status::Success;
-			} else {
-				return Status::Failed;
-			}
-#endif
+			return Status::Failed;
 		});
 
 		set_goal_bombspot->Define(BotSetsGoal<node::GoalKind::Bombspot>);
@@ -395,7 +312,7 @@ namespace pokebot::bot::behavior {
 				}
 				// Find path.
 				if (const auto Goal_Node_ID = self->goal_node; Goal_Node_ID != node::Invalid_NodeID) {
-					node::czworld.FindPath(&self->routes, self->Origin(), node::czworld.GetOrigin(Goal_Node_ID), self->JoinedTeam());
+					node::czworld.FindPath(&self->routes, self->Origin(), *reinterpret_cast<Vector*>(&node::czworld.GetOrigin(Goal_Node_ID)), self->JoinedTeam());
 					if (self->routes.Empty() || self->routes.Destination() != self->goal_node) {
 						return Status::Failed;
 					} else {
@@ -519,7 +436,7 @@ namespace pokebot::bot::behavior {
 				private:
 					float time{};
 				};
-				static std::unordered_map<util::PlayerName, Timer, util::PlayerName::Hash> timers{};
+				static std::unordered_map<pokebot::util::PlayerName, Timer, pokebot::util::PlayerName::Hash> timers{};
 				auto& timer = timers[self->Name().data()];
 
 				switch (timer.RunningStatus()) {

@@ -67,7 +67,7 @@
       <OpenMPSupport>true</OpenMPSupport>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <BuildStlModules>true</BuildStlModules>
-      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <AssemblerOutput>NoListing</AssemblerOutput>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ExceptionHandling>Async</ExceptionHandling>
       <EnableModules>true</EnableModules>
@@ -101,7 +101,7 @@
       <OpenMPSupport>true</OpenMPSupport>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <BuildStlModules>true</BuildStlModules>
-      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <AssemblerOutput>NoListing</AssemblerOutput>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <EnableModules>true</EnableModules>
       <AdditionalBMIDirectories>
@@ -120,20 +120,55 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="module\bot\squad\goal_decision_strategy\decision_strategy.ixx" />
+    <ClCompile Include="module\bot\squad\goal_decision_strategy\distance_picker.ixx" />
+    <ClCompile Include="module\bot\squad\goal_decision_strategy\first_goal_picker.ixx" />
+    <ClCompile Include="module\bot\squad\goal_decision_strategy\goal_decision_strategy.ixx" />
+    <ClCompile Include="module\bot\squad\goal_decision_strategy\goal_decision_strategy_factory.ixx" />
+    <ClCompile Include="module\bot\squad\goal_decision_strategy\hostage_rescue_strategy.ixx" />
+    <ClCompile Include="module\bot\squad\goal_decision_strategy\last_goal_picker.ixx" />
+    <ClCompile Include="module\bot\squad\goal_decision_strategy\multiple_goal_strategy.ixx" />
+    <ClCompile Include="module\bot\squad\goal_decision_strategy\one_goal_strategy.ixx" />
+    <ClCompile Include="module\bot\squad\goal_decision_strategy\prevent_hostage_strategy.ixx" />
+    <ClCompile Include="module\bot\squad\squad.ixx" />
+    <ClCompile Include="module\bot\squad\staff\assigner.ixx" />
+    <ClCompile Include="module\bot\squad\staff\goal_staff.ixx" />
+    <ClCompile Include="module\bot\squad\staff\member_staff.ixx" />
+    <ClCompile Include="module\bot\squad\staff\squad_staff.ixx" />
+    <ClCompile Include="module\bot\squad\staff\staff.ixx" />
+    <ClCompile Include="module\bot\squad\staff\staff_builder.ixx" />
+    <ClCompile Include="module\bot\squad\strategy\strategy.ixx" />
+    <ClCompile Include="module\bot\squad\strategy\strategy_data.ixx" />
+    <ClCompile Include="module\bot\squad\strategy\strategy_element.ixx" />
+    <ClCompile Include="module\bot\squad\troops.ixx" />
+    <ClCompile Include="module\bot\squad\util\member_map.ixx" />
+    <ClCompile Include="module\bot\squad\util\role.ixx" />
+    <ClCompile Include="module\bot\squad\util\squad_util.ixx" />
+    <ClCompile Include="module\chat\chat.ixx" />
+    <ClCompile Include="module\chat\talk.ixx" />
+    <ClCompile Include="module\chat\talk.windows.ixx" />
+    <ClCompile Include="module\game\game.ixx" />
     <ClCompile Include="module\pokebot_random.ixx" />
+    <ClCompile Include="module\terrain\goal\goal_kind.ixx" />
+    <ClCompile Include="module\terrain\goal\terrain_goal.ixx" />
+    <ClCompile Include="module\terrain\graph.ixx" />
+    <ClCompile Include="module\terrain\terrain.ixx" />
     <ClCompile Include="module\tracer.ixx" />
+    <ClCompile Include="module\util\util.ixx" />
     <ClCompile Include="src\game\menu.cpp" />
     <ClCompile Include="src\global_time_provider.cpp" />
     <ClInclude Include="include\behavior.hpp" />
     <ClInclude Include="include\bot\manager.hpp" />
     <ClInclude Include="include\bot\bot.hpp" />
-    <ClInclude Include="include\bot\troops.hpp" />
     <ClInclude Include="include\buy.hpp" />
     <ClInclude Include="include\common.hpp" />
     <ClInclude Include="include\database.hpp" />
     <ClInclude Include="include\game\entity.hpp" />
+    <ClInclude Include="include\game\map.hpp" />
     <ClInclude Include="include\game\menu.hpp" />
     <ClInclude Include="include\game\team.hpp" />
+    <ClInclude Include="include\game_base.hpp" />
+    <ClInclude Include="include\graph_base.hpp" />
     <ClInclude Include="include\plugin.hpp" />
     <ClInclude Include="include\game.hpp" />
     <ClInclude Include="include\graph.hpp" />
@@ -146,12 +181,12 @@
     <ClCompile Include="src\bot\behavior\objective.cpp" />
     <ClCompile Include="src\bot\bot.cpp" />
     <ClCompile Include="src\bot\botmanager.cpp" />
-    <ClCompile Include="src\bot\troops.cpp" />
     <ClCompile Include="src\buy.cpp" />
     <ClCompile Include="src\common.cpp" />
     <ClInclude Include="include\util\fixed_string.hpp" />
     <ClInclude Include="include\util\global_time_provider.hpp" />
     <ClInclude Include="include\util\timer.hpp" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\database.cpp" />
@@ -173,6 +208,9 @@
   <ItemGroup>
     <None Include="LICENSE" />
     <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Pokebot.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

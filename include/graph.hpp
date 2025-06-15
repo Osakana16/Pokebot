@@ -1,9 +1,9 @@
 #pragma once
 #include "navmesh/navigation_map.h"
+#include "graph_base.hpp"
 #define USE_NAVMESH true
 
 namespace pokebot::node {
-	using NodeID = std::int64_t;
 	
 	template<typename T>
 	constexpr T World_Size = 8192;
@@ -122,17 +122,6 @@ namespace pokebot::node {
 		bool AddFlag(const NodeFlag) POKEBOT_NOEXCEPT;
 	};
 
-	enum class GoalKind {
-		None,
-		Terrorist_Spawn,
-		CT_Spawn,
-		Bombspot,
-		Rescue_Zone,
-		Escape_Zone,
-		Vip_Safety,
-		C4
-	};
-	constexpr auto All_Goal_List = { GoalKind::Terrorist_Spawn, GoalKind::CT_Spawn, GoalKind::Bombspot, GoalKind::Rescue_Zone, GoalKind::Escape_Zone, GoalKind::Vip_Safety };
 #if !USE_NAVMESH
 	inline class WaypointGraph {
 		friend class FGreater;
@@ -187,16 +176,16 @@ namespace pokebot::node {
 	};
 
 	// Compatibility with ZBot navmesh.
-	inline class CZBotGraph {
+	inline class CZBotGraph : public Graph {
 		std::unordered_multimap<GoalKind, NodeID> goals{};
 		game::Array<Danger, 2> danger;
 		bool is_nav_loaded{};
 	public:
-		size_t GetNumberOfGoals(GoalKind) const POKEBOT_NOEXCEPT;
+		size_t GetNumberOfGoals(GoalKind) const noexcept final;
 
 		bool IsSameGoal(const NodeID, const GoalKind) const POKEBOT_NOEXCEPT;
 		bool IsOnNode(const Vector& Position, const NodeID) const POKEBOT_NOEXCEPT;
-		Vector GetOrigin(const NodeID Node_ID) const POKEBOT_NOEXCEPT;
+		std::optional<HLVector> GetOrigin(const NodeID Node_ID) const POKEBOT_NOEXCEPT;
 
 		// Call on map loaded.
 		void OnMapLoaded();
@@ -207,7 +196,7 @@ namespace pokebot::node {
 
 		navmesh::NavArea* GetNearest(const Vector& Destination, const float Beneath_Limit = 120.0f) const POKEBOT_NOEXCEPT;
 		
-		decltype(static_cast<const decltype(goals)>(goals).equal_range(GoalKind::None)) GetGoal(const GoalKind kind) const POKEBOT_NOEXCEPT;
+		GoalKindRange GetNodeByKind(const GoalKind kind) const POKEBOT_NOEXCEPT final;
 
 		void FindPath(PathWalk<std::uint32_t>* const, const Vector&, const Vector&, const game::Team);
 		

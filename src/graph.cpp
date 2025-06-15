@@ -652,9 +652,9 @@ namespace pokebot::node {
 	}
 
 	
-	size_t CZBotGraph::GetNumberOfGoals(const GoalKind Kind) const POKEBOT_NOEXCEPT {
+	size_t CZBotGraph::GetNumberOfGoals(const GoalKind Kind) const noexcept {
 		size_t number{};
-		auto goals = GetGoal(Kind);
+		auto goals = GetNodeByKind(Kind);
 		for (auto goal = goals.first; goal != goals.second; goal++) {
 			number++;
 		}
@@ -662,7 +662,7 @@ namespace pokebot::node {
 	}
 
 	bool CZBotGraph::IsSameGoal(const NodeID Node_ID, const GoalKind Goal_Kind) const POKEBOT_NOEXCEPT {
-		auto goals = GetGoal(Goal_Kind);
+		auto goals = GetNodeByKind(Goal_Kind);
 		for (auto goal = goals.first; goal != goals.second; goal++) {
 			if (Node_ID == goal->second) {
 				return true;
@@ -676,16 +676,16 @@ namespace pokebot::node {
 		return (area != nullptr && area->m_id == Target_Node_ID);
 	}
 
-	decltype(static_cast<const decltype(CZBotGraph::goals)>(CZBotGraph::goals).equal_range(GoalKind::None)) CZBotGraph::GetGoal(const GoalKind kind) const POKEBOT_NOEXCEPT {
+	Graph::GoalKindRange CZBotGraph::GetNodeByKind(const GoalKind kind) const POKEBOT_NOEXCEPT {
 		return goals.equal_range(kind);
 	}
 
 
-	Vector CZBotGraph::GetOrigin(const NodeID Node_ID) const POKEBOT_NOEXCEPT {
+	std::optional<HLVector> CZBotGraph::GetOrigin(const NodeID Node_ID) const POKEBOT_NOEXCEPT {
 		if (auto area = navigation_map.GetNavAreaByID(Node_ID); area != nullptr) {
-			return area->m_center;
+			return HLVector{ .x = area->m_center.x, .y = area->m_center.y, .z = area->m_center.z };
 		} else {
-			return Vector(9999, 9999, 9999);
+			return std::nullopt;
 		}
 	}
 

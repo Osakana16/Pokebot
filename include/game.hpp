@@ -2,10 +2,12 @@
 #include "database.hpp"
 #include "util/timer.hpp"
 #include "game/entity.hpp"
+#include "game/map.hpp"
+#include "game_base.hpp"
 
 namespace pokebot {
 	namespace game {
-		using ClientCreationResult = std::tuple<bool, util::PlayerName>;
+		using ClientCreationResult = std::tuple<bool, pokebot::util::PlayerName>;
 
 		inline bool is_enabled_auto_waypoint = true;
 
@@ -348,15 +350,15 @@ namespace pokebot {
 
 			bool CanSeeEntity(const edict_t*) const noexcept;
 			bool CanSeeFriend() const POKEBOT_NOEXCEPT;
-			void GetEnemyNamesWithinView(util::PlayerName player_names[32]) const POKEBOT_NOEXCEPT;
-			void GetEntityNamesInView(util::PlayerName player_names[32]) const POKEBOT_NOEXCEPT;
+			void GetEnemyNamesWithinView(pokebot::util::PlayerName player_names[32]) const POKEBOT_NOEXCEPT;
+			void GetEntityNamesInView(pokebot::util::PlayerName player_names[32]) const POKEBOT_NOEXCEPT;
 			game::Team GetTeamFromModel() const POKEBOT_NOEXCEPT;
 
 			bool IsFakeClient() const POKEBOT_NOEXCEPT { return bool(flags & game::Third_Party_Bot_Flag); }
 		};
 
 		class ClientManager {
-			std::unordered_map<util::PlayerName, Client, util::PlayerName::Hash> clients{};
+			std::unordered_map<pokebot::util::PlayerName, Client, pokebot::util::PlayerName::Hash> clients{};
 		public:
 			void OnNewRound();
 			ClientCreationResult Create(std::string_view client_name);
@@ -403,14 +405,6 @@ namespace pokebot {
 			int volume{};
 		};
 
-		POKEBOT_DEFINE_ENUM_WITH_BIT_OPERATOR(
-			MapFlags,
-			Demolition = 1 << 0,
-			HostageRescue = 1 << 1,
-			Assassination = 1 << 2,			
-			Escape = 1 << 3
-		);
-
 		class Hostage final {
 			Hostage() = default;
 			Hostage(const Hostage&);
@@ -419,7 +413,7 @@ namespace pokebot {
 			util::Time time{};
 
 			const edict_t* entity;
-			util::PlayerName owner_name{};
+			pokebot::util::PlayerName owner_name{};
 		public:
 			operator const edict_t* const () const POKEBOT_NOEXCEPT {
 				return entity;
@@ -456,7 +450,7 @@ namespace pokebot {
 			void Update();
 		};
 
-		inline class Game {
+		inline class Game : public CSGameBase {
 			database::Database database{};
 			std::vector<Hostage> hostages{};
 
@@ -482,19 +476,19 @@ namespace pokebot {
 			* @brief Get the number of hostages.
 			* @return Number of hostages.
 			*/
-			size_t GetNumberOfHostages() const noexcept;
+			size_t GetNumberOfHostages() const noexcept final;
 
 			/**
 			* @brief Get the number of hostages who are not dead.
 			* @return Number of living hostages.
 			*/
-			size_t GetNumberOfLivingHostages() const noexcept;
+			size_t GetNumberOfLivingHostages() const noexcept final;
 			
 			/**
 			* @brief Get the number of hostages who are not dead.
 			* @return Number of living hostages.
 			*/
-			size_t GetNumberOfRescuedHostages() const noexcept;
+			size_t GetNumberOfRescuedHostages() const noexcept final;
 
 			/**
 			* @brief Get the hostage origin.
@@ -508,7 +502,7 @@ namespace pokebot {
 			* @param Index The hostage index
 			* @return True if the hostage is leading by a player, false if it's not.
 			*/
-			bool IsHostageUsed(const int Index) const POKEBOT_NOEXCEPT;
+			bool IsHostageUsed(const int Index) const POKEBOT_NOEXCEPT final;
 
 			/**
 			* @brief Check the hostage is used by the specified player.
@@ -526,7 +520,7 @@ namespace pokebot {
 			size_t GetLives(const game::Team) const POKEBOT_NOEXCEPT;	// Get the number of lives of the team.
 			uint32_t CurrentRonud() const POKEBOT_NOEXCEPT;
 			bool IsCurrentMode(const MapFlags) const POKEBOT_NOEXCEPT;
-			MapFlags GetMapFlag() const POKEBOT_NOEXCEPT;
+			MapFlags GetScenario() const POKEBOT_NOEXCEPT  final;
 			void IssueCommand(const std::string_view&, util::fixed_string<32u> sentence) POKEBOT_NOEXCEPT;
 
 			void Init(edict_t* entities, int max);
@@ -598,7 +592,7 @@ namespace pokebot {
 	}
 
 	namespace entity {
-		bool CanSeeEntity(const edict_t* const self, const const edict_t* Target) POKEBOT_NOEXCEPT;
+		bool CanSeeEntity(const edict_t* const self, const edict_t* const Target) POKEBOT_NOEXCEPT;
 		bool InViewCone(const edict_t* const self, const Vector& Origin) POKEBOT_NOEXCEPT;
 		bool IsVisible(const edict_t* const Self, const Vector& Origin) POKEBOT_NOEXCEPT;
 	}
