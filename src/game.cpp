@@ -1,6 +1,8 @@
 ﻿#include "bot/manager.hpp"
 #include <unordered_set>
 
+import pokebot.game.util;
+
 namespace pokebot {
 	namespace game {
 		ConVar::ConVar(const char* name, const char* initval, Var type, bool regMissing, const char* regVal) {
@@ -35,6 +37,8 @@ namespace pokebot {
 			}
 			return false;
 		}
+		
+		game::Team Client::GetTeam() const noexcept { return game::GetTeamFromModel(client); }
 
 		void Hostage::Update() POKEBOT_NOEXCEPT {
 			if (owner_name.empty())

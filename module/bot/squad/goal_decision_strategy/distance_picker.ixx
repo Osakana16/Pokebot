@@ -1,5 +1,6 @@
 import pokebot.bot.squad.strategy;
 import pokebot.util.random;
+import pokebot.game.util;
 
 export module pokebot.bot.squad.goal_decision_strategy:distance_picker;
 import :decision_strategy;

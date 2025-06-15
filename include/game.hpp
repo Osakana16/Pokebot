@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "database.hpp"
 #include "util/timer.hpp"
-#include "game/entity.hpp"
+
 #include "game/map.hpp"
 #include "game_base.hpp"
 
@@ -302,7 +302,7 @@ namespace pokebot {
 			void PressKey(const int Key) noexcept;
 			void ResetKey() noexcept;
 
-			game::Team GetTeam() const noexcept { return game::GetTeamFromModel(client); }
+			game::Team GetTeam() const noexcept;
 
 			bool IsValid() const POKEBOT_NOEXCEPT { return IsValid(client); }
 			bool IsDead() const POKEBOT_NOEXCEPT { return IsDead(client); }

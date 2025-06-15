@@ -2,6 +2,8 @@
 #include <unordered_set>
 #include <fstream>
 
+import pokebot.game.util;
+
 namespace pokebot::node {
 	void Point::Write(std::ofstream* const ofs) {
 		ofs->write(reinterpret_cast<const char*>(&point), sizeof(point));
@@ -539,7 +541,7 @@ namespace pokebot::node {
 
 		bool has_another_jump{};
 		routes[start_node_id].state = RouteState::Open;
-		routes[start_node_id].f = game::Distance(source->m_center, destination->m_center);
+		routes[start_node_id].f = pokebot::game::Distance(source->m_center, destination->m_center);
 		routes[start_node_id].g = game::Distance(source->m_center, destination->m_center);
 		while (!route_queue.empty()) {
 			NodeID current_node_id = route_queue.top();

@@ -4,6 +4,7 @@
 #include <thread>
 
 import pokebot.util.tracer;
+import pokebot.game.util;
 
 namespace pokebot::bot {
 	void Bot::Run() POKEBOT_NOEXCEPT {

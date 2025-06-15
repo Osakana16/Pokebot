@@ -148,6 +148,8 @@
     <ClCompile Include="module\chat\talk.ixx" />
     <ClCompile Include="module\chat\talk.windows.ixx" />
     <ClCompile Include="module\game\game.ixx" />
+    <ClCompile Include="module\game\team.ixx" />
+    <ClCompile Include="module\game\util.ixx" />
     <ClCompile Include="module\pokebot_random.ixx" />
     <ClCompile Include="module\terrain\goal\goal_kind.ixx" />
     <ClCompile Include="module\terrain\goal\terrain_goal.ixx" />
@@ -163,7 +165,6 @@
     <ClInclude Include="include\buy.hpp" />
     <ClInclude Include="include\common.hpp" />
     <ClInclude Include="include\database.hpp" />
-    <ClInclude Include="include\game\entity.hpp" />
     <ClInclude Include="include\game\map.hpp" />
     <ClInclude Include="include\game\menu.hpp" />
     <ClInclude Include="include\game\team.hpp" />

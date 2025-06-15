@@ -1,6 +1,7 @@
 #include "behavior.hpp"
 #include "bot/manager.hpp"
 
+import pokebot.game.util;
 namespace pokebot::bot::behavior {
 	namespace demolition {
 		std::shared_ptr<Sequence> plant = Sequence::Create("demolition::plant");

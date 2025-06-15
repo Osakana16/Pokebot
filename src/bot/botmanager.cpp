@@ -1,6 +1,7 @@
 #include "bot/manager.hpp"
 
 import pokebot.util.random;
+import pokebot.game.util;
 import pokebot.bot.squad;
 
 namespace pokebot::bot {

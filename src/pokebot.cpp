@@ -9,6 +9,7 @@
 #include <functional>
 
 import pokebot.util.random;
+import pokebot.game.util;
 
 namespace pokebot::plugin {
     namespace {

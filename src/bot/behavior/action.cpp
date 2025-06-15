@@ -2,6 +2,7 @@
 #include "bot/manager.hpp"
 #include <future>
 
+import pokebot.game.util;
 namespace pokebot::bot::behavior {
 	namespace {
 		template<node::GoalKind kind>

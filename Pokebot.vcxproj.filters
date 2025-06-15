@@ -108,9 +108,6 @@
     <ClInclude Include="include\game\menu.hpp">
       <Filter>include\game</Filter>
     </ClInclude>
-    <ClInclude Include="include\game\entity.hpp">
-      <Filter>include\game</Filter>
-    </ClInclude>
     <ClInclude Include="include\game\team.hpp">
       <Filter>include\game</Filter>
     </ClInclude>
@@ -287,6 +284,12 @@
     </ClCompile>
     <ClCompile Include="module\bot\squad\util\member_map.ixx">
       <Filter>module\bot\squad\util</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\team.ixx">
+      <Filter>module\game</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\util.ixx">
+      <Filter>module\game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
