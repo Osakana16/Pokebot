@@ -3,6 +3,7 @@
 #include "game/menu.hpp"
 #include <vector>
 
+import pokebot.bot.behavior;
 import pokebot.game;
 import pokebot.util.tracer;
 

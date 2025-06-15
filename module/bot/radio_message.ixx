@@ -1,4 +1,4 @@
-#pragma once
+export module pokebot.bot: radio_message;
 
 namespace pokebot::bot {
 	struct RadioMessage {

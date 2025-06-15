@@ -1,5 +1,4 @@
 #include "common.hpp"
-#include "bot/manager.hpp"
 
 import pokebot.bot;
 import pokebot.game;

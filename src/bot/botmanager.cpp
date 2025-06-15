@@ -96,7 +96,7 @@ namespace pokebot::bot {
 		radio_message.message = Radio_Sentence.data();
 	}
 
-	void Manager::Insert(pokebot::util::PlayerName bot_name, const game::Team team, const game::Model model, const bot::Difficult Assigned_Diffcult) POKEBOT_NOEXCEPT {
+	void Manager::Insert(pokebot::util::PlayerName bot_name, const game::Team team, const game::Model model) POKEBOT_NOEXCEPT {
 		if (auto spawn_result = game::game.Spawn(bot_name.c_str()); std::get<bool>(spawn_result)) {
 			bot_name = std::get<pokebot::util::PlayerName>(spawn_result).c_str();
 			auto insert_result = bots.insert({ bot_name.c_str(), Bot(bot_name.c_str(), team, model) });

@@ -1,7 +1,12 @@
 export module pokebot.bot: player_ai;
+import :goal_queue;
+import :message;
+import :difficult;
 import :personality_item;
 import :mood;
 import :state_machine;
+
+import pokebot.game.player;
 
 export namespace pokebot::bot {
 	class Bot {
@@ -52,7 +57,7 @@ export namespace pokebot::bot {
 
 		void TurnViewAngle(), TurnMovementAngle();
 
-		ActionKey press_key{};
+		pokebot::game::player::ActionKey press_key{};
 		util::Timer danger_time{ util::GetRealGlobalTime };
 
 		std::vector<pokebot::util::PlayerName> target_enemies{};
@@ -157,8 +162,12 @@ export namespace pokebot::bot {
 		// -- Setters --
 
 		void SetGoal(const node::NodeID) POKEBOT_NOEXCEPT;
-		void PressKey(ActionKey);
-		bool IsPressingKey(const ActionKey) const POKEBOT_NOEXCEPT;
+
+		void PressKey(game::player::ActionKey pressable_key) {
+			press_key |= pressable_key;
+		}
+
+		bool IsPressingKey(const game::player::ActionKey Key) const noexcept;
 		bool IsFollowing() const POKEBOT_NOEXCEPT { return false; }
 
 		// -- Getters --

@@ -121,11 +121,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="include\bit_operator_for_enum.hpp" />
+    <ClCompile Include="module\bot\behavior\action.ixx" />
+    <ClCompile Include="module\bot\behavior\behavior.ixx" />
+    <ClCompile Include="module\bot\behavior\behavior_declaration.ixx" />
+    <ClCompile Include="module\bot\behavior\behavior_definitions.ixx" />
+    <ClCompile Include="module\bot\behavior\behavior_node.ixx" />
+    <ClCompile Include="module\bot\behavior\behavior_node_status.ixx" />
+    <ClCompile Include="module\bot\behavior\condition.ixx" />
+    <ClCompile Include="module\bot\behavior\priority.ixx" />
+    <ClCompile Include="module\bot\behavior\root.ixx" />
+    <ClCompile Include="module\bot\behavior\sequence.ixx" />
     <ClCompile Include="module\bot\bot.ixx" />
     <ClCompile Include="module\bot\bot_manager.ixx" />
+    <ClCompile Include="module\bot\difficult.ixx" />
+    <ClCompile Include="module\bot\goal_queue.ixx" />
+    <ClCompile Include="module\bot\message.ixx" />
     <ClCompile Include="module\bot\mood.ixx" />
     <ClCompile Include="module\bot\personality_item.ixx" />
     <ClCompile Include="module\bot\player_ai.ixx" />
+    <ClCompile Include="module\bot\radio_message.ixx" />
     <ClCompile Include="module\bot\squad\goal_decision_strategy\decision_strategy.ixx" />
     <ClCompile Include="module\bot\squad\goal_decision_strategy\distance_picker.ixx" />
     <ClCompile Include="module\bot\squad\goal_decision_strategy\first_goal_picker.ixx" />
@@ -163,6 +177,7 @@
     <ClCompile Include="module\game\game.ixx" />
     <ClCompile Include="module\game\game_manager.ixx" />
     <ClCompile Include="module\game\game_manager_base.ixx" />
+    <ClCompile Include="module\game\player\action_key.ixx" />
     <ClCompile Include="module\game\player\item.ixx" />
     <ClCompile Include="module\game\player\player.ixx" />
     <ClCompile Include="module\game\player\status_icon.ixx" />
@@ -180,9 +195,6 @@
     <ClCompile Include="src\game\game_manager.cpp" />
     <ClCompile Include="src\game\menu.cpp" />
     <ClCompile Include="src\global_time_provider.cpp" />
-    <ClInclude Include="include\behavior.hpp" />
-    <ClInclude Include="include\bot\manager.hpp" />
-    <ClInclude Include="include\bot\bot.hpp" />
     <ClInclude Include="include\buy.hpp" />
     <ClInclude Include="include\common.hpp" />
     <ClInclude Include="include\database.hpp" />
@@ -194,11 +206,6 @@
     <ClInclude Include="include\game.hpp" />
     <ClInclude Include="include\graph.hpp" />
     <ClInclude Include="include\stdafx.h" />
-    <ClCompile Include="src\bot\behavior\action.cpp" />
-    <ClCompile Include="src\bot\behavior\behavior.cpp" />
-    <ClCompile Include="src\bot\behavior\combat.cpp" />
-    <ClCompile Include="src\bot\behavior\condition.cpp" />
-    <ClCompile Include="src\bot\behavior\objective.cpp" />
     <ClCompile Include="src\bot\bot.cpp" />
     <ClCompile Include="src\bot\botmanager.cpp" />
     <ClCompile Include="src\buy.cpp" />

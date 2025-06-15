@@ -10,12 +10,6 @@
     <Filter Include="src\bot">
       <UniqueIdentifier>{e3d05d61-4a97-4af7-b61f-dba5e17cb12a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\bot\behavior">
-      <UniqueIdentifier>{6f0d081d-e60c-44fd-b57f-b1c55ab513f1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bot">
-      <UniqueIdentifier>{abe5e82f-88f4-4a8d-96ee-6700be527256}</UniqueIdentifier>
-    </Filter>
     <Filter Include="include\util">
       <UniqueIdentifier>{cab8015c-05dd-4641-8a04-4de05e4770f2}</UniqueIdentifier>
     </Filter>
@@ -76,6 +70,12 @@
     <Filter Include="module\game\weapon">
       <UniqueIdentifier>{41835487-322a-4fc7-9e36-47f3ac485b2c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="module\bot\behavior">
+      <UniqueIdentifier>{49ea89a3-1997-40d3-b150-88438345f687}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\bot\behavior\definitions">
+      <UniqueIdentifier>{1efd2cc0-2da9-4180-a2b4-697aadbe0e5f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -96,17 +96,8 @@
     <ClInclude Include="include\database.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\behavior.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\buy.hpp">
       <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\bot\bot.hpp">
-      <Filter>include\bot</Filter>
-    </ClInclude>
-    <ClInclude Include="include\bot\manager.hpp">
-      <Filter>include\bot</Filter>
     </ClInclude>
     <ClInclude Include="include\util\global_time_provider.hpp">
       <Filter>include\util</Filter>
@@ -161,21 +152,6 @@
     </ClCompile>
     <ClCompile Include="src\bot\bot.cpp">
       <Filter>src\bot</Filter>
-    </ClCompile>
-    <ClCompile Include="src\bot\behavior\action.cpp">
-      <Filter>src\bot\behavior</Filter>
-    </ClCompile>
-    <ClCompile Include="src\bot\behavior\behavior.cpp">
-      <Filter>src\bot\behavior</Filter>
-    </ClCompile>
-    <ClCompile Include="src\bot\behavior\combat.cpp">
-      <Filter>src\bot\behavior</Filter>
-    </ClCompile>
-    <ClCompile Include="src\bot\behavior\condition.cpp">
-      <Filter>src\bot\behavior</Filter>
-    </ClCompile>
-    <ClCompile Include="src\bot\behavior\objective.cpp">
-      <Filter>src\bot\behavior</Filter>
     </ClCompile>
     <ClCompile Include="src\bot\botmanager.cpp">
       <Filter>src\bot</Filter>
@@ -359,6 +335,51 @@
     </ClCompile>
     <ClCompile Include="module\bot\personality_item.ixx">
       <Filter>module\bot</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\player\action_key.ixx">
+      <Filter>module\game\player</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\difficult.ixx">
+      <Filter>module\bot</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\message.ixx">
+      <Filter>module\bot</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\goal_queue.ixx">
+      <Filter>module\bot</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\radio_message.ixx">
+      <Filter>module\bot</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\behavior\behavior.ixx">
+      <Filter>module\bot\behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\behavior\behavior_node.ixx">
+      <Filter>module\bot\behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\behavior\behavior_node_status.ixx">
+      <Filter>module\bot\behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\behavior\sequence.ixx">
+      <Filter>module\bot\behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\behavior\priority.ixx">
+      <Filter>module\bot\behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\behavior\action.ixx">
+      <Filter>module\bot\behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\behavior\behavior_declaration.ixx">
+      <Filter>module\bot\behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\behavior\root.ixx">
+      <Filter>module\bot\behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\behavior\condition.ixx">
+      <Filter>module\bot\behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\behavior\behavior_definitions.ixx">
+      <Filter>module\bot\behavior\definitions</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

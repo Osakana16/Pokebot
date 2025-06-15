@@ -1,10 +1,10 @@
-#include "behavior.hpp"
-#include "bot/manager.hpp"
 module pokebot.bot: player_ai;
+import pokebot.bot.behavior;
 
 import std;
 import pokebot.game;
 import pokebot.game.client;
+import pokebot.game.player;
 import pokebot.game.util;
 import pokebot.util;
 import pokebot.util.tracer;
@@ -143,7 +143,7 @@ namespace pokebot::bot {
 			CheckBlocking();	// Check the something is blocking myself.
 
 			if (IsJumping()) {
-				PressKey(ActionKey::Duck);
+				PressKey(game::player::ActionKey::Duck);
 			}
 
 			// Move forward if the bot has the route.
@@ -159,58 +159,58 @@ namespace pokebot::bot {
 				}
 #endif
 				if (look_direction.view.has_value() && look_direction.movement.has_value()) {
-					PressKey(ActionKey::Run);
+					PressKey(game::player::ActionKey::Run);
 				}
 			}
 			look_direction.Clear();
 
 			// - Update Key -
 
-			if (bool(press_key & ActionKey::Run)) {
-				if (bool(press_key & ActionKey::Shift)) {
-					press_key &= ~ActionKey::Shift;
+			if (bool(press_key & game::player::ActionKey::Run)) {
+				if (bool(press_key & game::player::ActionKey::Shift)) {
+					press_key &= ~game::player::ActionKey::Shift;
 					move_speed = game::Default_Max_Move_Speed / 2.0f;
 				} else {
 					move_speed = game::Default_Max_Move_Speed;
 				}
 			}
 
-			if (bool(press_key & ActionKey::Move_Right)) {
+			if (bool(press_key & game::player::ActionKey::Move_Right)) {
 				strafe_speed = game::Default_Max_Move_Speed;
 			}
 
-			if (bool(press_key & ActionKey::Move_Left)) {
+			if (bool(press_key & game::player::ActionKey::Move_Left)) {
 				strafe_speed = -game::Default_Max_Move_Speed;
 			}
 
-			if (bool(press_key & ActionKey::Back)) {
+			if (bool(press_key & game::player::ActionKey::Back)) {
 
 			}
 
-			if (bool(press_key & ActionKey::Attack)) {
+			if (bool(press_key & game::player::ActionKey::Attack)) {
 
 			}
 
-			if (bool(press_key & ActionKey::Attack2)) {
+			if (bool(press_key & game::player::ActionKey::Attack2)) {
 
 			}
 
-			if (bool(press_key & ActionKey::Use)) {
+			if (bool(press_key & game::player::ActionKey::Use)) {
 
 			}
 
-			if (bool(press_key & ActionKey::Jump)) {
+			if (bool(press_key & game::player::ActionKey::Jump)) {
 				if (!client->IsOnFloor()) {
 					return;
 				}
 			}
 
-			if (bool(press_key & ActionKey::Duck)) {
+			if (bool(press_key & game::player::ActionKey::Duck)) {
 
 			}
 
 			client->PressKey(static_cast<int>(press_key));
-			press_key = ActionKey::None;
+			press_key = game::player::ActionKey::None;
 		} else {
 			// While freezing.
 			stopping_time = gpGlobals->time + 5.0f;
@@ -396,15 +396,15 @@ namespace pokebot::bot {
 			if (Ditance_To_Leader <= 275.0f) {
 				if (Ditance_To_Leader >= 75.0f) {
 					if (Leader_Client->IsDucking()) {
-						PressKey(ActionKey::Duck);
+						PressKey(game::player::ActionKey::Duck);
 					} else if (Leader_Client->IsWalking()) {
-						PressKey(ActionKey::Run | ActionKey::Shift);
+						PressKey(game::player::ActionKey::Run | game::player::ActionKey::Shift);
 					} else {
-						PressKey(ActionKey::Run);
+						PressKey(game::player::ActionKey::Run);
 					}
 				}
 			} else {
-				PressKey(ActionKey::Run);
+				PressKey(game::player::ActionKey::Run);
 			}
 		}
 #endif
@@ -497,7 +497,7 @@ namespace pokebot::bot {
 		for (edict_t* entity{}; (entity = game::FindEntityInSphere(entity, Origin(), 90.0f)) != nullptr;) {
 			if (std::string_view(STRING(entity->v.classname)) == "player") {
 				if (CanSeeEntity(entity)) {
-					PressKey(ActionKey::Move_Left);
+					PressKey(game::player::ActionKey::Move_Left);
 					return;
 				}
 			}
@@ -519,12 +519,12 @@ namespace pokebot::bot {
 				// Check left
 				tracer.MoveDest(Head + gpGlobals->v_right * -90.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr);
 				if (tracer.IsHit()) {
-					PressKey(ActionKey::Move_Right);
+					PressKey(game::player::ActionKey::Move_Right);
 				} else {
 					// Check right
 					tracer.MoveDest(Head + gpGlobals->v_right * 90.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr);
 					if (tracer.IsHit()) {
-						PressKey(ActionKey::Move_Left);
+						PressKey(game::player::ActionKey::Move_Left);
 					}
 				}
 				return true;
@@ -541,7 +541,7 @@ namespace pokebot::bot {
 			const bool Is_Foot_Forward_Right_Hit = tracer.MoveDest(Foot + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * 45.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
 			const bool Is_Foot_Forward_Hit = Is_Foot_Forward_Center_Hit || Is_Foot_Forward_Left_Hit || Is_Foot_Forward_Right_Hit;
 			if (Is_Knee_Forward_Center_Hit) {
-				PressKey(ActionKey::Jump);
+				PressKey(game::player::ActionKey::Jump);
 			} else {
 				// Check the forward navarea
 				for (auto& vector : { Origin(), Origin() + gpGlobals->v_forward * 90.0f }) {
@@ -549,11 +549,11 @@ namespace pokebot::bot {
 					if (auto area = node::czworld.GetNearest(vector); area != nullptr) {
 						// Jump if it is specified.
 						if (!node::czworld.HasFlag(area->m_id, node::NavmeshFlag::No_Jump) && node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Jump)) {
-							PressKey(ActionKey::Jump);
+							PressKey(game::player::ActionKey::Jump);
 						}
 						// Duck if it is specified.
 						if (node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Crouch)) {
-							PressKey(ActionKey::Duck);
+							PressKey(game::player::ActionKey::Duck);
 						}
 					}
 				}
@@ -578,11 +578,7 @@ namespace pokebot::bot {
 		return client->CanSeeEntity(entity);
 	}
 	
-	void Bot::PressKey(ActionKey pressable_key) {
-		press_key |= pressable_key;
-	}
-
-	bool Bot::IsPressingKey(const ActionKey Key) const POKEBOT_NOEXCEPT {
+	bool Bot::IsPressingKey(const game::player::ActionKey Key) const noexcept {
 		auto client = game::game.clients.Get(Name().data());
 		return (client->button & static_cast<int>(Key));
 	}

@@ -1,7 +1,7 @@
 module;
-#include "bot/manager.hpp"
 export module pokebot.bot: bot_manager;
 import :player_ai;
+import :radio_message;
 
 import pokebot.bot.squad;
 
@@ -17,7 +17,6 @@ export namespace pokebot::bot {
 
 		std::optional<Vector> c4_origin{};
 		edict_t* backpack{};
-		friend class pokebot::message::MessageDispatcher;
 		std::unordered_map<pokebot::util::PlayerName, Bot, pokebot::util::PlayerName::Hash> bots{};
 
 		// The name of the player who has the bomb.
@@ -61,7 +60,7 @@ export namespace pokebot::bot {
 		* @param model The model of the bot.
 		* @param difficulty The difficulty level of the bot.
 		*/
-		void Insert(pokebot::util::PlayerName bot_name, const game::Team team, const game::Model model, const bot::Difficult difficulty) POKEBOT_NOEXCEPT;
+		void Insert(pokebot::util::PlayerName bot_name, const game::Team team, const game::Model model) POKEBOT_NOEXCEPT;
 
 		/**
 		* @brief Kick a bot from the game.

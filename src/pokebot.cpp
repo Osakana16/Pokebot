@@ -1,10 +1,6 @@
 #include "plugin.hpp"
 #include "navmesh/navigation_map.h"
-
-#include "bot/manager.hpp"
-
 #include "game/menu.hpp"
-
 
 import std;
 import pokebot.bot;
@@ -36,7 +32,6 @@ namespace pokebot::plugin {
             std::string_view name = "FirstBot";
             pokebot::game::Team team = Default_Team;
             pokebot::game::Model model = (pokebot::game::Model)(int)pokebot::util::Random<int>(1, 4);
-            bot::Difficult difficult = bot::Difficult::Normal;
             if (args.size() >= 1) {
                 const size_t size = args[0].size();
                 name = args[0].substr(0, 32u).data();
@@ -46,10 +41,7 @@ namespace pokebot::plugin {
                 model = static_cast<decltype(model)>(std::strtol(args[1].data(), nullptr, 0) % 4);
             }
 
-            if (args.size() >= 3) {
-                difficult = static_cast<decltype(difficult)>(std::strtol(args[2].data(), nullptr, 0) % 3);
-            }
-            pokebot::plugin::pokebot_plugin.AddBot(name.data(), team, model, difficult);
+            pokebot::plugin::pokebot_plugin.AddBot(name.data(), team, model);
         }
 
         void pk_add() {
@@ -64,7 +56,6 @@ namespace pokebot::plugin {
             std::string_view name = "FirstBot";
             pokebot::game::Team team = (pokebot::game::Team)(int)pokebot::util::Random<int>(1, 2);
             pokebot::game::Model model = (pokebot::game::Model)(int)pokebot::util::Random<int>(1, 4);
-            bot::Difficult difficult = bot::Difficult::Normal;
             if (args.size() >= 1) {
                 assert(args[0].size() <= 64u);
                 name = args[0];
@@ -82,10 +73,7 @@ namespace pokebot::plugin {
                 model = static_cast<decltype(model)>(std::strtol(args[2].data(), nullptr, 0) % 4);
             }
 
-            if (args.size() >= 4) {
-                difficult = static_cast<decltype(difficult)>(std::strtol(args[3].data(), nullptr, 0) % 4);
-            }
-            pokebot::plugin::pokebot_plugin.AddBot(name.data(), team, model, difficult);
+            pokebot::plugin::pokebot_plugin.AddBot(name.data(), team, model);
         }
 
         void pk_add_ct() {
@@ -191,8 +179,8 @@ namespace pokebot::plugin {
         }
     }
 
-    void Pokebot::AddBot(const std::string_view& Bot_Name, const game::Team Selected_Team, const game::Model Selected_Model, const bot::Difficult Difficult) POKEBOT_NOEXCEPT {
-        pokebot::bot::Manager::Instance().Insert(Bot_Name.data(), Selected_Team, Selected_Model, Difficult);
+    void Pokebot::AddBot(const std::string_view& Bot_Name, const game::Team Selected_Team, const game::Model Selected_Model) POKEBOT_NOEXCEPT {
+        pokebot::bot::Manager::Instance().Insert(Bot_Name.data(), Selected_Team, Selected_Model);
     }
 
     void Pokebot::OnEntitySpawned() {
