@@ -1,19 +1,14 @@
-#pragma once
-#include "game/map.hpp"
-namespace pokebot::game {
-	class GameBase {
-	public:
-		inline virtual ~GameBase() = 0 {}
+export module pokebot.game: cs_game_manager;
+import :game_manager_base;
 
-	};
-
+export namespace pokebot::game {
 	/**
 	* @brief Game class for Counter-Strike
 	*/
 	class CSGameBase : public GameBase {
 	public:
 		inline virtual ~CSGameBase() override = 0 {}
-		
+
 		// - Hostage -
 
 		/**

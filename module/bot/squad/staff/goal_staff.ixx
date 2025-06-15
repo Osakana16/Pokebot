@@ -1,9 +1,9 @@
 module;
-#include <vector>
-
+import std;
 export module pokebot.bot.squad.staff:goal_staff;
 import :squad_staff;
 
+import pokebot.game;
 import pokebot.bot.squad.strategy;
 import pokebot.bot.squad.goal_decision_strategy;
 

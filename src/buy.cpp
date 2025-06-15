@@ -1,6 +1,7 @@
 #include "database.hpp"
 #include "buy.hpp"
 
+import pokebot.game;
 import pokebot.util.random;
 
 namespace pokebot {

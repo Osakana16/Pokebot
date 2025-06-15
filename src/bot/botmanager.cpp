@@ -1,5 +1,5 @@
 #include "bot/manager.hpp"
-
+import pokebot.game;
 import pokebot.util.random;
 import pokebot.game.util;
 import pokebot.bot.squad;
@@ -13,7 +13,7 @@ namespace pokebot::bot {
 	Manager::Manager() {}
 
 
-	void Manager::OnNewRoundPreparation() POKEBOT_NOEXCEPT {
+	void Manager::OnNewRoundPreparation() noexcept {
 		auto convert_to_set = [&](const game::Team target_team) {
 			std::unordered_set<util::PlayerName, util::PlayerName::Hash> members{};
 			for (auto& bot : bots | std::views::filter([target_team](const std::pair<pokebot::util::PlayerName, Bot>& pair) { return pair.second.JoinedTeam() == target_team; })) {

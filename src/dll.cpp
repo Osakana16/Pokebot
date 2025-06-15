@@ -2,6 +2,8 @@
 #include "graph.hpp"
 #include "game/menu.hpp"
 #include <vector>
+
+import pokebot.game;
 import pokebot.util.tracer;
 
 enginefuncs_t g_engfuncs;

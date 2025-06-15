@@ -1,5 +1,6 @@
 module;
-#include <memory>
+import std;
+
 export module pokebot.bot.squad.goal_decision_strategy:factory;
 import :decision_strategy;
 
@@ -10,6 +11,7 @@ import :distance_picker;
 import :multiple_goal_strategy;
 import :hostage_rescue;
 
+import pokebot.game;
 import pokebot.bot.squad.strategy;
 import pokebot.bot.squad.util;
 

@@ -1,6 +1,6 @@
 #include "behavior.hpp"
 #include "bot/manager.hpp"
-
+import pokebot.game;
 import pokebot.game.util;
 namespace pokebot::bot::behavior {
 	namespace fight {

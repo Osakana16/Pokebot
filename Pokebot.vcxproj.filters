@@ -67,6 +67,15 @@
     <Filter Include="module\game\client">
       <UniqueIdentifier>{f8aa4ac5-a1f3-456b-8cf5-9d5bbfe217b3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\game\client">
+      <UniqueIdentifier>{2e335863-b04e-4814-bd35-d0de087259c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\game\player">
+      <UniqueIdentifier>{2368918d-ef96-45f5-acbc-48d876374753}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\game\weapon">
+      <UniqueIdentifier>{41835487-322a-4fc7-9e36-47f3ac485b2c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -121,9 +130,6 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="include\game_base.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">
@@ -300,11 +306,44 @@
     <ClCompile Include="module\util\flag.ixx">
       <Filter>module\util</Filter>
     </ClCompile>
-    <ClCompile Include="module\game\client\client.ixx">
+    <ClCompile Include="module\game\client\client.declaration.ixx">
       <Filter>module\game\client</Filter>
     </ClCompile>
     <ClCompile Include="module\game\client\client_key.ixx">
       <Filter>module\game\client</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\client\client.ixx">
+      <Filter>module\game\client</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\client\client_manager.ixx">
+      <Filter>module\game\client</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\game_manager.ixx">
+      <Filter>module\game</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\client\client.cpp">
+      <Filter>src\game\client</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\player\player.ixx">
+      <Filter>module\game\player</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\player\status_icon.ixx">
+      <Filter>module\game\player</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\player\item.ixx">
+      <Filter>module\game\player</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\cs_game_manager.ixx">
+      <Filter>module\game</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\game_manager_base.ixx">
+      <Filter>module\game</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\game_manager.cpp">
+      <Filter>src\game</Filter>
+    </ClCompile>
+    <ClCompile Include="include\bit_operator_for_enum.hpp">
+      <Filter>include</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

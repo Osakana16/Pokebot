@@ -1,9 +1,9 @@
 #include "behavior.hpp"
 #include "bot/manager.hpp"
 
-#include <thread>
-
+import std;
 import pokebot.game;
+import pokebot.game.client;
 import pokebot.game.util;
 import pokebot.util;
 import pokebot.util.tracer;
@@ -16,7 +16,7 @@ namespace pokebot::bot {
 		const std::uint8_t Msec_Value = ComputeMsec();
 		last_command_time = gpGlobals->time;
 
-		game::Client* client = const_cast<game::Client*>(game::game.clients.Get(Name().data()));
+		pokebot::game::client::Client* client = const_cast<pokebot::game::client::Client*>(game::game.clients.Get(Name().data()));
 		client->flags |= pokebot::util::Third_Party_Bot_Flag;
 		g_engfuncs.pfnRunPlayerMove(client->Edict(),
 				movement_angle,
@@ -301,7 +301,7 @@ namespace pokebot::bot {
 		constexpr int Max_Armor = 100;
 		constexpr int Base_Fearless = Max_Health / 2 + Max_Armor / 5;
 
-		const game::Client *enemy_client{};
+		const pokebot::game::client::Client *enemy_client{};
 		for (auto& target_name : target_enemies) {
 			auto target_client = game::game.clients.Get(target_name.c_str());
 			if (!target_client->IsDead()) {

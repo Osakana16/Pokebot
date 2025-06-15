@@ -34,7 +34,7 @@ namespace pokebot::bot {
 		RadioMessage radio_message{};
 		Manager();
 	public:
-		static Manager& Instance() {
+		inline static Manager& Instance() {
 			static Manager manager{};
 			return manager;
 		}
@@ -44,7 +44,7 @@ namespace pokebot::bot {
 		/**
 		* @brief Called when a new round starts.
 		*/
-		void OnNewRoundPreparation() POKEBOT_NOEXCEPT;
+		void OnNewRoundPreparation() noexcept;
 
 		/**
 		* @brief Called when a new round starts.

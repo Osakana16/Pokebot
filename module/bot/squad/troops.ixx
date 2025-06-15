@@ -1,5 +1,7 @@
 export module pokebot.bot.squad:troops;
 
+import pokebot.game;
+import pokebot.game.util;
 import pokebot.bot.squad.staff;
 import pokebot.bot.squad.strategy;
 import pokebot.bot.squad.goal_decision_strategy;

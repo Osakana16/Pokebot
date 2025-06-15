@@ -5,9 +5,9 @@
 
 #include "game/menu.hpp"
 
-#include <iostream>
-#include <functional>
 
+import std;
+import pokebot.game;
 import pokebot.util.random;
 import pokebot.game.util;
 

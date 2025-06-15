@@ -1,5 +1,6 @@
 #include "game/menu.hpp"
 
+import pokebot.game;
 
 namespace pokebot::game {
 	namespace {
