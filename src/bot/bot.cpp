@@ -1,5 +1,6 @@
 #include "behavior.hpp"
 #include "bot/manager.hpp"
+module pokebot.bot: player_ai;
 
 import std;
 import pokebot.game;
@@ -217,7 +218,6 @@ namespace pokebot::bot {
 	}
 
 	void Bot::OnSelectionCompleted() POKEBOT_NOEXCEPT {
-		Manager::Instance().OnBotJoinedCompletely(this);
 		start_action = Message::Buy;
 	}
 
@@ -227,6 +227,7 @@ namespace pokebot::bot {
 	}
 
 	void Bot::OnTerroristDemolition() noexcept {
+#if 0
 		if (Manager::Instance().C4Origin().has_value()) {
 			behavior::demolition::t_planted_wary->Evaluate(this);
 		} else if (Manager::Instance().BackpackOrigin().has_value()) {
@@ -236,6 +237,7 @@ namespace pokebot::bot {
 				behavior::demolition::t_plant->Evaluate(this);
 			}
 		}
+#endif
 	}
 
 	void Bot::OnTerroristHostage() noexcept {
@@ -256,6 +258,7 @@ namespace pokebot::bot {
 	}
 
 	void Bot::OnCTDemolition() noexcept {
+#if 0
 		if (Manager::Instance().C4Origin().has_value()) {
 			if (game::Distance(Origin(), *Manager::Instance().C4Origin()) <= 50.0f) {
 				behavior::demolition::ct_defusing->Evaluate(this);
@@ -265,6 +268,7 @@ namespace pokebot::bot {
 		} else {
 			behavior::demolition::ct_defend->Evaluate(this);
 		}
+#endif
 	}
 
 	void Bot::OnCTHostage() noexcept {

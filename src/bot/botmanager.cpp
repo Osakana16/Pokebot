@@ -1,4 +1,6 @@
-#include "bot/manager.hpp"
+module pokebot.bot: bot_manager;
+
+import pokebot.bot;
 import pokebot.game;
 import pokebot.util.random;
 import pokebot.game.util;
@@ -178,10 +180,6 @@ namespace pokebot::bot {
 
 	void Manager::OnBombDropped(const std::string_view& Client_Name) POKEBOT_NOEXCEPT {
 		bomber_name = "";
-	}
-
-	void Manager::OnBotJoinedCompletely(Bot* const completed_guy) POKEBOT_NOEXCEPT {
-
 	}
 
 	void Manager::OnMapLoaded() {

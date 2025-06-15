@@ -1,3 +1,4 @@
+module pokebot.bot: player_ai;
 #include "database.hpp"
 #include "buy.hpp"
 

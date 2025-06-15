@@ -1,5 +1,7 @@
 #include "behavior.hpp"
 
+import pokebot.bot;
+
 namespace pokebot::bot {
 	namespace behavior {
 		std::shared_ptr<Action> breakpoint = Action::Create("breakpoint");

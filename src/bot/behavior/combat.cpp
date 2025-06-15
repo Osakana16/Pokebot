@@ -1,7 +1,10 @@
 #include "behavior.hpp"
 #include "bot/manager.hpp"
+
+import pokebot.bot;
 import pokebot.game;
 import pokebot.game.util;
+
 namespace pokebot::bot::behavior {
 	namespace fight {
 		std::shared_ptr<Sequence> try_to_lose_sight = Sequence::Create("fight::try_to_lose_sight");		// Try to lose the sight from the enemy

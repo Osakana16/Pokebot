@@ -121,6 +121,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="include\bit_operator_for_enum.hpp" />
+    <ClCompile Include="module\bot\bot.ixx" />
+    <ClCompile Include="module\bot\bot_manager.ixx" />
+    <ClCompile Include="module\bot\mood.ixx" />
+    <ClCompile Include="module\bot\personality_item.ixx" />
+    <ClCompile Include="module\bot\player_ai.ixx" />
     <ClCompile Include="module\bot\squad\goal_decision_strategy\decision_strategy.ixx" />
     <ClCompile Include="module\bot\squad\goal_decision_strategy\distance_picker.ixx" />
     <ClCompile Include="module\bot\squad\goal_decision_strategy\first_goal_picker.ixx" />
@@ -145,6 +150,7 @@
     <ClCompile Include="module\bot\squad\util\member_map.ixx" />
     <ClCompile Include="module\bot\squad\util\role.ixx" />
     <ClCompile Include="module\bot\squad\util\squad_util.ixx" />
+    <ClCompile Include="module\bot\state_machine.ixx" />
     <ClCompile Include="module\chat\chat.ixx" />
     <ClCompile Include="module\chat\talk.ixx" />
     <ClCompile Include="module\chat\talk.windows.ixx" />
@@ -188,7 +194,6 @@
     <ClInclude Include="include\game.hpp" />
     <ClInclude Include="include\graph.hpp" />
     <ClInclude Include="include\stdafx.h" />
-    <ClCompile Include="include\bot\basic.hpp" />
     <ClCompile Include="src\bot\behavior\action.cpp" />
     <ClCompile Include="src\bot\behavior\behavior.cpp" />
     <ClCompile Include="src\bot\behavior\combat.cpp" />
