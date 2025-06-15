@@ -76,6 +76,15 @@
     <Filter Include="module\bot\behavior\definitions">
       <UniqueIdentifier>{1efd2cc0-2da9-4180-a2b4-697aadbe0e5f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="module\terrain\graph">
+      <UniqueIdentifier>{a40213bf-3baa-4040-a4cb-519ade1a5562}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\terrain\graph\node">
+      <UniqueIdentifier>{a622ec52-171d-45ab-a28e-1cca2f9f6cf7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\terrain\graph\path">
+      <UniqueIdentifier>{db566c45-68b6-4de3-a1e3-afe12dd3e263}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -117,9 +126,6 @@
     <ClInclude Include="include\game\map.hpp">
       <Filter>include\game</Filter>
     </ClInclude>
-    <ClInclude Include="include\graph_base.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
@@ -130,9 +136,6 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\engine.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\graph.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\game.cpp">
@@ -229,9 +232,6 @@
       <Filter>module\bot\squad\util</Filter>
     </ClCompile>
     <ClCompile Include="module\terrain\terrain.ixx">
-      <Filter>module\terrain</Filter>
-    </ClCompile>
-    <ClCompile Include="module\terrain\graph.ixx">
       <Filter>module\terrain</Filter>
     </ClCompile>
     <ClCompile Include="module\terrain\goal\terrain_goal.ixx">
@@ -380,6 +380,45 @@
     </ClCompile>
     <ClCompile Include="module\bot\behavior\behavior_definitions.ixx">
       <Filter>module\bot\behavior\definitions</Filter>
+    </ClCompile>
+    <ClCompile Include="module\terrain\graph\graph.ixx">
+      <Filter>module\terrain\graph</Filter>
+    </ClCompile>
+    <ClCompile Include="module\terrain\graph\cznav_graph.ixx">
+      <Filter>module\terrain\graph</Filter>
+    </ClCompile>
+    <ClCompile Include="module\terrain\graph\waypoint_graph.ixx">
+      <Filter>module\terrain\graph</Filter>
+    </ClCompile>
+    <ClCompile Include="module\terrain\graph\graph_base.ixx">
+      <Filter>module\terrain\graph</Filter>
+    </ClCompile>
+    <ClCompile Include="module\terrain\graph\danger.ixx">
+      <Filter>module\terrain\graph</Filter>
+    </ClCompile>
+    <ClCompile Include="module\terrain\terrain_util.ixx">
+      <Filter>module\terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="module\terrain\graph\node\node.ixx">
+      <Filter>module\terrain\graph\node</Filter>
+    </ClCompile>
+    <ClCompile Include="module\terrain\graph\node\node_id.ixx">
+      <Filter>module\terrain\graph\node</Filter>
+    </ClCompile>
+    <ClCompile Include="module\terrain\graph\node\point.ixx">
+      <Filter>module\terrain\graph\node</Filter>
+    </ClCompile>
+    <ClCompile Include="module\terrain\graph\node\node_flag.ixx">
+      <Filter>module\terrain\graph\node</Filter>
+    </ClCompile>
+    <ClCompile Include="module\terrain\graph\path\path.ixx">
+      <Filter>module\terrain\graph\path</Filter>
+    </ClCompile>
+    <ClCompile Include="module\terrain\graph\path\route.ixx">
+      <Filter>module\terrain\graph\path</Filter>
+    </ClCompile>
+    <ClCompile Include="module\terrain\graph\path\path_walk.ixx">
+      <Filter>module\terrain\graph\path</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

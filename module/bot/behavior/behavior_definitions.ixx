@@ -10,6 +10,9 @@ import pokebot.bot;
 import pokebot.game;
 import pokebot.game.util;
 import pokebot.game.player;
+import pokebot.terrain.graph;
+import pokebot.terrain.graph.node;
+import pokebot.terrain.goal;
 
 #define BEHAVIOR_PRIVATE namespace
 #define BEHAVIOR_IF(A) [](const Bot* const Self) POKEBOT_NOEXCEPT { return A; }

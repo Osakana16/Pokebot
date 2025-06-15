@@ -8,6 +8,7 @@ import pokebot.game.player;
 import pokebot.game.util;
 import pokebot.util;
 import pokebot.util.tracer;
+import pokebot.terrain.graph;
 
 namespace pokebot::bot {
 	void Bot::Run() POKEBOT_NOEXCEPT {

@@ -186,8 +186,20 @@
     <ClCompile Include="module\pokebot_random.ixx" />
     <ClCompile Include="module\terrain\goal\goal_kind.ixx" />
     <ClCompile Include="module\terrain\goal\terrain_goal.ixx" />
-    <ClCompile Include="module\terrain\graph.ixx" />
+    <ClCompile Include="module\terrain\graph\cznav_graph.ixx" />
+    <ClCompile Include="module\terrain\graph\danger.ixx" />
+    <ClCompile Include="module\terrain\graph\graph.ixx" />
+    <ClCompile Include="module\terrain\graph\graph_base.ixx" />
+    <ClCompile Include="module\terrain\graph\node\node.ixx" />
+    <ClCompile Include="module\terrain\graph\node\node_flag.ixx" />
+    <ClCompile Include="module\terrain\graph\node\node_id.ixx" />
+    <ClCompile Include="module\terrain\graph\node\point.ixx" />
+    <ClCompile Include="module\terrain\graph\path\path.ixx" />
+    <ClCompile Include="module\terrain\graph\path\path_walk.ixx" />
+    <ClCompile Include="module\terrain\graph\path\route.ixx" />
+    <ClCompile Include="module\terrain\graph\waypoint_graph.ixx" />
     <ClCompile Include="module\terrain\terrain.ixx" />
+    <ClCompile Include="module\terrain\terrain_util.ixx" />
     <ClCompile Include="module\tracer.ixx" />
     <ClCompile Include="module\util\color.ixx" />
     <ClCompile Include="module\util\flag.ixx" />
@@ -201,7 +213,6 @@
     <ClInclude Include="include\game\map.hpp" />
     <ClInclude Include="include\game\menu.hpp" />
     <ClInclude Include="include\game\team.hpp" />
-    <ClInclude Include="include\graph_base.hpp" />
     <ClInclude Include="include\plugin.hpp" />
     <ClInclude Include="include\game.hpp" />
     <ClInclude Include="include\graph.hpp" />
@@ -220,7 +231,6 @@
     <ClCompile Include="src\dll.cpp" />
     <ClCompile Include="src\engine.cpp" />
     <ClCompile Include="src\game.cpp" />
-    <ClCompile Include="src\graph.cpp" />
     <ClCompile Include="src\pokebot.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_Goldsrc|Win32'">Create</PrecompiledHeader>

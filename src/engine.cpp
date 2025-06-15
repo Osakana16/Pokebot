@@ -5,6 +5,7 @@ import pokebot.game;
 import pokebot.game.util;
 import pokebot.util;
 import pokebot.util.tracer;
+import pokebot.terrain.graph;
 
 namespace {
     int current_message{};

@@ -6,6 +6,7 @@
 import pokebot.bot.behavior;
 import pokebot.game;
 import pokebot.util.tracer;
+import pokebot.terrain.graph;
 
 enginefuncs_t g_engfuncs;
 globalvars_t* gpGlobals;

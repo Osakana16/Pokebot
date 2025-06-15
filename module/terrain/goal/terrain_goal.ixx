@@ -1,2 +1,2 @@
-export module pokebot.terrain.terrain_goal;
+export module pokebot.terrain.goal;
 export import :goal_kind;

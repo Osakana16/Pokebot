@@ -6,6 +6,7 @@ import :personality_item;
 import :mood;
 import :state_machine;
 
+import pokebot.terrain.graph.path;
 import pokebot.game.player;
 
 export namespace pokebot::bot {

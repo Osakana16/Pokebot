@@ -7,6 +7,7 @@ import pokebot.bot;
 import pokebot.game;
 import pokebot.util.random;
 import pokebot.game.util;
+import pokebot.terrain.graph;
 
 namespace pokebot::plugin {
     namespace {

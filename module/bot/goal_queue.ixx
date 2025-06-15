@@ -1,5 +1,6 @@
 export module pokebot.bot: goal_queue;
 
+import pokebot.terrain.graph.node;
 namespace pokebot::bot {
 
 	class GoalQueue {

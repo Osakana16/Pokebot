@@ -1,23 +1,9 @@
-#pragma once
+export module pokebot.terrain.graph: graph_base;
+import pokebot.terrain.goal;
+import pokebot.terrain.util;
+import pokebot.terrain.graph.node;
 
-namespace pokebot::node {
-	enum class GoalKind {
-		None,
-		Terrorist_Spawn,
-		CT_Spawn,
-		Bombspot,
-		Rescue_Zone,
-		Escape_Zone,
-		Vip_Safety,
-		C4
-	};
-
-	struct HLVector {
-		float x, y, z;
-	};
-		
-	using NodeID = std::int64_t;
-	constexpr auto All_Goal_List = { GoalKind::Terrorist_Spawn, GoalKind::CT_Spawn, GoalKind::Bombspot, GoalKind::Rescue_Zone, GoalKind::Escape_Zone, GoalKind::Vip_Safety };
+export namespace pokebot::node {
 	class Graph {
 	public:
 		using GoalKindRange = decltype(static_cast<const std::unordered_multimap<pokebot::node::GoalKind, NodeID>>(std::unordered_multimap<pokebot::node::GoalKind, NodeID>()).equal_range(pokebot::node::GoalKind::None));

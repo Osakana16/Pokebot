@@ -5,7 +5,7 @@ import pokebot.game;
 import pokebot.util.random;
 import pokebot.game.util;
 import pokebot.bot.squad;
-
+import pokebot.terrain.graph;
 namespace pokebot::bot {
 	namespace {
 		bool IsTerrorist(const BotPair& target) noexcept { return target.second.JoinedTeam() == game::Team::T; }

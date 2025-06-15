@@ -1,5 +1,7 @@
 import pokebot.bot.squad.strategy;
 import pokebot.util.random;
+import pokebot.terrain.goal;
+import pokebot.terrain.graph;
 
 export module pokebot.bot.squad.goal_decision_strategy:one_goal_strategy;
 import :decision_strategy;
