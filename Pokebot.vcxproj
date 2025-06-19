@@ -174,6 +174,10 @@
     <ClCompile Include="module\game\client\client_key.ixx" />
     <ClCompile Include="module\game\client\client_manager.ixx" />
     <ClCompile Include="module\game\cs_game_manager.ixx" />
+    <ClCompile Include="module\game\entity\c4.ixx" />
+    <ClCompile Include="module\game\entity\entity.ixx" />
+    <ClCompile Include="module\game\entity\entity_manager.ixx" />
+    <ClCompile Include="module\game\entity\hostage.ixx" />
     <ClCompile Include="module\game\game.ixx" />
     <ClCompile Include="module\game\game_manager.ixx" />
     <ClCompile Include="module\game\game_manager_base.ixx" />
@@ -181,8 +185,10 @@
     <ClCompile Include="module\game\player\item.ixx" />
     <ClCompile Include="module\game\player\player.ixx" />
     <ClCompile Include="module\game\player\status_icon.ixx" />
+    <ClCompile Include="module\game\scenario.ixx" />
     <ClCompile Include="module\game\team.ixx" />
     <ClCompile Include="module\game\game_util.ixx" />
+    <ClCompile Include="module\plugin\pokebot.ixx" />
     <ClCompile Include="module\pokebot_random.ixx" />
     <ClCompile Include="module\terrain\goal\goal_kind.ixx" />
     <ClCompile Include="module\terrain\goal\terrain_goal.ixx" />
@@ -197,33 +203,28 @@
     <ClCompile Include="module\terrain\graph\path\path.ixx" />
     <ClCompile Include="module\terrain\graph\path\path_walk.ixx" />
     <ClCompile Include="module\terrain\graph\path\route.ixx" />
+    <ClCompile Include="module\terrain\graph\path\route_state.ixx" />
     <ClCompile Include="module\terrain\graph\waypoint_graph.ixx" />
     <ClCompile Include="module\terrain\terrain.ixx" />
     <ClCompile Include="module\terrain\terrain_util.ixx" />
     <ClCompile Include="module\tracer.ixx" />
     <ClCompile Include="module\util\color.ixx" />
     <ClCompile Include="module\util\flag.ixx" />
+    <ClCompile Include="module\util\timer.ixx" />
     <ClCompile Include="module\util\util.ixx" />
     <ClCompile Include="src\game\game_manager.cpp" />
     <ClCompile Include="src\game\menu.cpp" />
-    <ClCompile Include="src\global_time_provider.cpp" />
     <ClInclude Include="include\buy.hpp" />
     <ClInclude Include="include\common.hpp" />
     <ClInclude Include="include\database.hpp" />
-    <ClInclude Include="include\game\map.hpp" />
     <ClInclude Include="include\game\menu.hpp" />
-    <ClInclude Include="include\game\team.hpp" />
-    <ClInclude Include="include\plugin.hpp" />
     <ClInclude Include="include\game.hpp" />
     <ClInclude Include="include\graph.hpp" />
     <ClInclude Include="include\stdafx.h" />
     <ClCompile Include="src\bot\bot.cpp" />
     <ClCompile Include="src\bot\botmanager.cpp" />
     <ClCompile Include="src\buy.cpp" />
-    <ClCompile Include="src\common.cpp" />
     <ClInclude Include="include\util\fixed_string.hpp" />
-    <ClInclude Include="include\util\global_time_provider.hpp" />
-    <ClInclude Include="include\util\timer.hpp" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>

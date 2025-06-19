@@ -1,7 +1,9 @@
-#include "plugin.hpp"
+module;
 #include "navmesh/navigation_map.h"
 #include "game/menu.hpp"
 
+
+module pokebot;
 import std;
 import pokebot.bot;
 import pokebot.game;
@@ -122,10 +124,6 @@ namespace pokebot::plugin {
             pokebot::game::is_enabled_auto_waypoint = !pokebot::game::is_enabled_auto_waypoint;
         });
 
-        REG_SVR_COMMAND("pk_draw_waypoint", [] {
-            draw_node = !draw_node;
-        });
-
         REG_SVR_COMMAND("pk_kill", [] {
             std::vector<std::string_view> args{};
             GetArgs(&args);
@@ -172,12 +170,6 @@ namespace pokebot::plugin {
         pokebot::game::game.PreUpdate();
         pokebot::bot::Manager::Instance().Update();
         pokebot::game::game.PostUpdate();
-
-        if (draw_node) {
-#if !USE_NAVMESH
-            pokebot::node::world.Draw();
-#endif
-        }
     }
 
     void Pokebot::AddBot(const std::string_view& Bot_Name, const game::Team Selected_Team, const game::Model Selected_Model) POKEBOT_NOEXCEPT {

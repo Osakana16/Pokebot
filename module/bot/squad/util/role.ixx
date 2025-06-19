@@ -1,9 +1,8 @@
 module;
-#include "game/team.hpp"
-#include "game/map.hpp"
 #include <algorithm>
 
 export module pokebot.bot.squad.util:role;
+import pokebot.game.util;
 
 namespace pokebot::bot::squad::util {
 	export enum class Role {

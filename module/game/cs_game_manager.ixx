@@ -1,6 +1,8 @@
 export module pokebot.game: cs_game_manager;
 import :game_manager_base;
 
+import pokebot.game.util;
+
 export namespace pokebot::game {
 	/**
 	* @brief Game class for Counter-Strike

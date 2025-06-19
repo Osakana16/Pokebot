@@ -1,4 +1,6 @@
 export module pokebot.game.util;
+export import :team;
+export import :scenario;
 
 export namespace pokebot::game {
     float Distance(const Vector& S1, const Vector& S2) POKEBOT_NOEXCEPT { return (S1 - S2).Length(); }

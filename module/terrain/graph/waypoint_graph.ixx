@@ -8,6 +8,11 @@ import pokebot.game.util;
 import pokebot.util.tracer;
 
 namespace pokebot::node {
+	template<typename T>
+	constexpr T World_Size = 8192;
+	constexpr size_t Split_Size = 256;
+	constexpr size_t Tree_Size = World_Size<size_t> / Split_Size;
+
 	size_t PointAsIndex(const float Pos) POKEBOT_NOEXCEPT {
 		return static_cast<size_t>(Pos / Split_Size) + 16;
 	}

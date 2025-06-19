@@ -1,6 +1,7 @@
-#pragma once
-#include "..\bit_operator_for_enum.hpp"
-namespace pokebot::game {
+#include "bit_operator_for_enum.hpp"
+export module pokebot.game.util: scenario;
+
+export namespace pokebot::game {
 	POKEBOT_DEFINE_ENUM_WITH_BIT_OPERATOR(
 		MapFlags,
 		Demolition = 1 << 0,

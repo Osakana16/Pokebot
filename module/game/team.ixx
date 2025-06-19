@@ -1,5 +1,4 @@
-export module pokebot.game: team;
-#if 0
+export module pokebot.game.util: team;
 export namespace pokebot::game {
 	enum class Team {
 		Spector,
@@ -8,4 +7,3 @@ export namespace pokebot::game {
 		Random
 	};
 }
-#endif

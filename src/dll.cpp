@@ -1,8 +1,8 @@
-#include "plugin.hpp"
 #include "graph.hpp"
 #include "game/menu.hpp"
 #include <vector>
 
+import pokebot;
 import pokebot.bot.behavior;
 import pokebot.game;
 import pokebot.util.tracer;

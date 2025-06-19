@@ -7,58 +7,6 @@ import pokebot.util.tracer;
 
 namespace pokebot {
 	namespace game {
-		ConVar::ConVar(const char* name, const char* initval, Var type, bool regMissing, const char* regVal) {
-			game.AddCvar(name, initval, "", false, 0.0f, 0.0f, type, regMissing, regVal, this);
-		}
-		
-		ConVar::ConVar(const char* name, const char* initval, const char* info, bool bounded, float min, float max, Var type, bool regMissing, const char* regVal) {
-			game.AddCvar(name, initval, info, bounded, min, max, type, regMissing, regVal, this);
-		}
-
-		ConVar poke_freeze{ "pk_freeze", "0" };
-		ConVar poke_fight{ "pk_fight", "1"};
-		ConVar poke_buy{ "pk_buy", "1"};
-
-		Hostage Hostage::AttachHostage(const edict_t* Hostage_Entity) POKEBOT_NOEXCEPT {
-			assert(Hostage_Entity != nullptr);
-			Hostage hostage{};
-			hostage.entity = Hostage_Entity;
-			hostage.owner_name.clear();
-			return hostage;
-		}
-
-		bool Hostage::RecoginzeOwner(const std::string_view& Client_Name) POKEBOT_NOEXCEPT {
-			auto client = game.clients.Get(Client_Name.data());
-			if (client != nullptr && game::Distance(client->origin, entity->v.origin) < 83.0f && client->GetTeam() == game::Team::CT) {
-				if (owner_name.c_str() == Client_Name) {
-					owner_name.clear();
-				} else {
-					owner_name = Client_Name.data();
-				}
-				return true;
-			}
-			return false;
-		}
-		
-
-		void Hostage::Update() POKEBOT_NOEXCEPT {
-			if (owner_name.empty())
-				return;
-			
-			auto owner = game.clients.Get(owner_name.data());
-			const bool Is_Owner_Terrorist = owner->GetTeam() == game::Team::T;
-			if (IsReleased() || owner->GetTeam() == game::Team::T || game::Distance(owner->origin, entity->v.origin) > 200.0f)
-				owner_name.clear();
-		}
-
-		bool Hostage::IsUsed() const POKEBOT_NOEXCEPT { return game.PlayerExists(owner_name.data()); }
-		bool Hostage::IsOwnedBy(const std::string_view& Name) const POKEBOT_NOEXCEPT { return (IsUsed() && owner_name.data() == Name); }
-	 	bool Hostage::IsReleased() const POKEBOT_NOEXCEPT { return (entity->v.effects & EF_NODRAW); }
-		const Vector& Hostage::Origin() const POKEBOT_NOEXCEPT {
-			return entity->v.origin;
-		}
-
-
 
 
 		bool Host::IsHostValid() const POKEBOT_NOEXCEPT {

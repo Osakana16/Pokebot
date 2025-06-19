@@ -1,7 +1,6 @@
 module;
-#include "game/team.hpp"
-#include "game/map.hpp"
 
+import pokebot.game.util;
 export module pokebot.bot.squad.staff:squad_staff;
 
 namespace pokebot::bot::squad::staff {

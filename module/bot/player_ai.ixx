@@ -6,8 +6,11 @@ import :personality_item;
 import :mood;
 import :state_machine;
 
+import pokebot.game.util;
 import pokebot.terrain.graph.path;
 import pokebot.game.player;
+import pokebot.game.entity;
+import pokebot.util;
 
 export namespace pokebot::bot {
 	class Bot {

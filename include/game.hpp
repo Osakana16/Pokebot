@@ -1,8 +1,5 @@
 ﻿#pragma once
 #include "database.hpp"
-#include "util/timer.hpp"
-#include "game/team.hpp"
-#include "game/map.hpp"
 
 namespace pokebot {
 	namespace game {
@@ -146,90 +143,12 @@ namespace pokebot {
 		};
 
 
-		// variable type
-		enum class Var {
-			Normal = 0,
-			ReadOnly,
-			Password,
-			NoServer,
-			GameRef
-		};
-		
-		// ConVar class from YapBot © Copyright YaPB Project Developers
-		// 
-		// simplify access for console variables
-		class ConVar final {
-		public:
-			cvar_t* ptr;
-
-			ConVar() = delete;
-			~ConVar() = default;
-
-			ConVar(const char* name, const char* initval, Var type = Var::NoServer, bool regMissing = false, const char* regVal = nullptr);
-			ConVar(const char* name, const char* initval, const char* info, bool bounded = true, float min = 0.0f, float max = 1.0f, Var type = Var::NoServer, bool regMissing = false, const char* regVal = nullptr);
-			explicit operator bool() const POKEBOT_NOEXCEPT { return ptr->value > 0.0f; }
-			explicit operator int() const POKEBOT_NOEXCEPT { return static_cast<int>(ptr->value); }
-			explicit operator float() const POKEBOT_NOEXCEPT { return ptr->value; }
-			explicit operator const char* () const POKEBOT_NOEXCEPT { return ptr->string;  }
-		
-			void operator=(const float val) POKEBOT_NOEXCEPT { g_engfuncs.pfnCVarSetFloat(ptr->name, val); }
-			void operator=(const int val) POKEBOT_NOEXCEPT { operator=(static_cast<float>(val)); }
-			void operator=(const char* val) POKEBOT_NOEXCEPT { g_engfuncs.pfnCvar_DirectSet(ptr, const_cast<char*>(val)); }
-
-		};
-
-		extern ConVar poke_freeze;
-		extern ConVar poke_fight;
-		extern ConVar poke_buy;
-
-		struct ConVarReg {
-			cvar_t reg;
-			util::fixed_string<64u> info;
-			util::fixed_string<64u> init;
-			const char* regval;
-			class ConVar* self;
-			float initial, min, max;
-			bool missing;
-			bool bounded;
-			Var type;
-		};
 
 
 		struct Sound final {
 			Vector origin{};
 			int volume{};
 		};
-
-		class Hostage final {
-			Hostage() = default;
-			Hostage(const Hostage&);
-			Hostage& operator=(const Hostage&) = delete;
-
-			util::Time time{};
-
-			const edict_t* entity;
-			pokebot::util::PlayerName owner_name{};
-		public:
-			operator const edict_t* const () const POKEBOT_NOEXCEPT {
-				return entity;
-			}
-			void Update() POKEBOT_NOEXCEPT;
-			bool RecoginzeOwner(const std::string_view&) POKEBOT_NOEXCEPT;
-
-			bool IsUsed() const POKEBOT_NOEXCEPT;
-			bool IsOwnedBy(const std::string_view& Name) const POKEBOT_NOEXCEPT;
-			bool IsReleased() const POKEBOT_NOEXCEPT;
-			static Hostage AttachHostage(const edict_t*) POKEBOT_NOEXCEPT;
-			const Vector& Origin() const POKEBOT_NOEXCEPT;
-
-			Hostage(Hostage&& h) POKEBOT_NOEXCEPT {
-				owner_name = std::move(h.owner_name);
-				assert(h.owner_name.empty());
-				entity = h.entity;
-				h.entity = nullptr;
-			}
-		};
-
 		class Host {
 			edict_t* host{};
 

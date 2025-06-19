@@ -1,7 +1,8 @@
-#pragma once
-#include "util/global_time_provider.hpp"
+export module pokebot.util: timer;
 
-namespace pokebot::util {
+export namespace pokebot::util {
+
+
 	using Time = float;
 
 	class Timer final {
@@ -18,4 +19,8 @@ namespace pokebot::util {
 			time = t + GetGlobalTime();
 		}
 	};
+
+	util::Time GetRealGlobalTime() noexcept {
+		return gpGlobals->time;
+	}
 }

@@ -1,10 +1,98 @@
-export module pokebot.game: game_manager;
+﻿export module pokebot.game: game_manager;
 import :cs_game_manager;
 
 import pokebot.game.client;
 import pokebot.game.util;
+import pokebot.game.player;
+import pokebot.game.entity;
+import pokebot.util;
 
 export namespace pokebot::game {
+	// variable type
+	enum class Var {
+		Normal = 0,
+		ReadOnly,
+		Password,
+		NoServer,
+		GameRef
+	};
+
+	// ConVar class from YapBot © Copyright YaPB Project Developers
+	// 
+	// simplify access for console variables
+	class ConVar final {
+	public:
+		cvar_t* ptr;
+
+		ConVar() = delete;
+		~ConVar() = default;
+
+		ConVar(const char* name, const char* initval, Var type = Var::NoServer, bool regMissing = false, const char* regVal = nullptr);
+		ConVar(const char* name, const char* initval, const char* info, bool bounded = true, float min = 0.0f, float max = 1.0f, Var type = Var::NoServer, bool regMissing = false, const char* regVal = nullptr);
+
+		explicit operator bool() const POKEBOT_NOEXCEPT { return ptr->value > 0.0f; }
+		explicit operator int() const POKEBOT_NOEXCEPT { return static_cast<int>(ptr->value); }
+		explicit operator float() const POKEBOT_NOEXCEPT { return ptr->value; }
+		explicit operator const char* () const POKEBOT_NOEXCEPT { return ptr->string; }
+
+		void operator=(const float val) POKEBOT_NOEXCEPT { g_engfuncs.pfnCVarSetFloat(ptr->name, val); }
+		void operator=(const int val) POKEBOT_NOEXCEPT { operator=(static_cast<float>(val)); }
+		void operator=(const char* val) POKEBOT_NOEXCEPT { g_engfuncs.pfnCvar_DirectSet(ptr, const_cast<char*>(val)); }
+
+	};
+
+	struct ConVarReg {
+		cvar_t reg;
+		util::fixed_string<64u> info;
+		util::fixed_string<64u> init;
+		const char* regval;
+		class ConVar* self;
+		float initial, min, max;
+		bool missing;
+		bool bounded;
+		Var type;
+	};
+
+	class Hostage final {
+		Hostage() = default;
+		Hostage(const Hostage&);
+		Hostage& operator=(const Hostage&) = delete;
+
+		util::Time time{};
+
+		const edict_t* entity;
+		pokebot::util::PlayerName owner_name{};
+	public:
+		operator const edict_t* const () const POKEBOT_NOEXCEPT {
+			return entity;
+		}
+
+		static Hostage AttachHostage(const edict_t* Hostage_Entity) POKEBOT_NOEXCEPT {
+			assert(Hostage_Entity != nullptr);
+			Hostage hostage{};
+			hostage.entity = Hostage_Entity;
+			hostage.owner_name.clear();
+			return hostage;
+		}
+
+		bool RecoginzeOwner(const std::string_view& Client_Name) POKEBOT_NOEXCEPT;
+
+		void Update() POKEBOT_NOEXCEPT;
+		bool IsUsed() const POKEBOT_NOEXCEPT;
+		bool IsOwnedBy(const std::string_view& Name) const POKEBOT_NOEXCEPT { return (IsUsed() && owner_name.data() == Name); }
+		bool IsReleased() const POKEBOT_NOEXCEPT { return (entity->v.effects & EF_NODRAW); }
+		const Vector& Origin() const POKEBOT_NOEXCEPT {
+			return entity->v.origin;
+		}
+
+		Hostage(Hostage&& h) POKEBOT_NOEXCEPT {
+			owner_name = std::move(h.owner_name);
+			assert(h.owner_name.empty());
+			entity = h.entity;
+			h.entity = nullptr;
+		}
+	};
+
 	class Game : public CSGameBase {
 		database::Database database{};
 		std::vector<Hostage> hostages{};
@@ -298,4 +386,44 @@ export namespace pokebot::game {
 	};
 
 	Game game{};
+
+
+	ConVar::ConVar(const char* name, const char* initval, Var type, bool regMissing, const char* regVal) {
+		game.AddCvar(name, initval, "", false, 0.0f, 0.0f, type, regMissing, regVal, this);
+	}
+
+	ConVar::ConVar(const char* name, const char* initval, const char* info, bool bounded, float min, float max, Var type, bool regMissing, const char* regVal) {
+		game.AddCvar(name, initval, info, bounded, min, max, type, regMissing, regVal, this);
+	}
+
+
+	ConVar poke_freeze{ "pk_freeze", "0" };
+	ConVar poke_fight{ "pk_fight", "1" };
+	ConVar poke_buy{ "pk_buy", "1" };
+
+
+	bool Hostage::RecoginzeOwner(const std::string_view& Client_Name) POKEBOT_NOEXCEPT {
+		auto client = game.clients.Get(Client_Name.data());
+		if (client != nullptr && game::Distance(client->origin, entity->v.origin) < 83.0f && client->GetTeam() == game::Team::CT) {
+			if (owner_name.c_str() == Client_Name) {
+				owner_name.clear();
+			} else {
+				owner_name = Client_Name.data();
+			}
+			return true;
+		}
+		return false;
+	}
+
+	void Hostage::Update() POKEBOT_NOEXCEPT {
+		if (owner_name.empty())
+			return;
+
+		auto owner = game.clients.Get(owner_name.data());
+		const bool Is_Owner_Terrorist = owner->GetTeam() == game::Team::T;
+		if (IsReleased() || owner->GetTeam() == game::Team::T || game::Distance(owner->origin, entity->v.origin) > 200.0f)
+			owner_name.clear();
+	}
+
+	bool Hostage::IsUsed() const POKEBOT_NOEXCEPT { return game.PlayerExists(owner_name.data()); }
 }

@@ -13,9 +13,6 @@
     <Filter Include="include\util">
       <UniqueIdentifier>{cab8015c-05dd-4641-8a04-4de05e4770f2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\util">
-      <UniqueIdentifier>{6497e068-4486-46e0-89f7-cf46b7871f28}</UniqueIdentifier>
-    </Filter>
     <Filter Include="module">
       <UniqueIdentifier>{59abbbd7-d874-400d-b30a-8e18eac3751d}</UniqueIdentifier>
     </Filter>
@@ -85,6 +82,15 @@
     <Filter Include="module\terrain\graph\path">
       <UniqueIdentifier>{db566c45-68b6-4de3-a1e3-afe12dd3e263}</UniqueIdentifier>
     </Filter>
+    <Filter Include="module\game\entity">
+      <UniqueIdentifier>{86bf53ae-cfc5-459d-96b7-8df4221e59e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\plugin">
+      <UniqueIdentifier>{f1bc6465-fa0c-4fa8-b677-432e356e3a8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\game\variable">
+      <UniqueIdentifier>{41585130-f18a-4d36-b6f7-5572f7d45781}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -99,31 +105,16 @@
     <ClInclude Include="include\common.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\plugin.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\database.hpp">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\buy.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\util\global_time_provider.hpp">
-      <Filter>include\util</Filter>
-    </ClInclude>
     <ClInclude Include="include\util\fixed_string.hpp">
       <Filter>include\util</Filter>
     </ClInclude>
-    <ClInclude Include="include\util\timer.hpp">
-      <Filter>include\util</Filter>
-    </ClInclude>
     <ClInclude Include="include\game\menu.hpp">
-      <Filter>include\game</Filter>
-    </ClInclude>
-    <ClInclude Include="include\game\team.hpp">
-      <Filter>include\game</Filter>
-    </ClInclude>
-    <ClInclude Include="include\game\map.hpp">
       <Filter>include\game</Filter>
     </ClInclude>
     <ClInclude Include="resource.h" />
@@ -141,9 +132,6 @@
     <ClCompile Include="src\game.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\common.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\buy.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -158,9 +146,6 @@
     </ClCompile>
     <ClCompile Include="src\bot\botmanager.cpp">
       <Filter>src\bot</Filter>
-    </ClCompile>
-    <ClCompile Include="src\global_time_provider.cpp">
-      <Filter>src\util</Filter>
     </ClCompile>
     <ClCompile Include="module\pokebot_random.ixx">
       <Filter>module</Filter>
@@ -419,6 +404,30 @@
     </ClCompile>
     <ClCompile Include="module\terrain\graph\path\path_walk.ixx">
       <Filter>module\terrain\graph\path</Filter>
+    </ClCompile>
+    <ClCompile Include="module\terrain\graph\path\route_state.ixx">
+      <Filter>module\terrain\graph\path</Filter>
+    </ClCompile>
+    <ClCompile Include="module\util\timer.ixx">
+      <Filter>module\util</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\scenario.ixx">
+      <Filter>module\game</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\entity\entity.ixx">
+      <Filter>module\game\entity</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\entity\c4.ixx">
+      <Filter>module\game\entity</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\entity\hostage.ixx">
+      <Filter>module\game\entity</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\entity\entity_manager.ixx">
+      <Filter>module\game\entity</Filter>
+    </ClCompile>
+    <ClCompile Include="module\plugin\pokebot.ixx">
+      <Filter>module\plugin</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

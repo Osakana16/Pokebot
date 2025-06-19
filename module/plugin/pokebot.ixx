@@ -1,13 +1,9 @@
-#pragma once
+export module pokebot;
 
-#define POKEBOT_PLUGIN_GOLDSRC 0
-#define POKEBOT_PLUGIN_SOURCE 1
-#define POKEBOT_PLUGIN POKEBOT_PLUGIN_GOLDSRC
+import pokebot.game.util;
 
-namespace pokebot::plugin {
+export namespace pokebot::plugin {
 	inline class Pokebot {
-		static inline bool draw_node{};
-
 		int beam_sprite{};
 		edict_t* pWorldEntity{};
 		edict_t *spawned_entity{};
