@@ -10,14 +10,8 @@
     <Filter Include="src\bot">
       <UniqueIdentifier>{e3d05d61-4a97-4af7-b61f-dba5e17cb12a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\util">
-      <UniqueIdentifier>{cab8015c-05dd-4641-8a04-4de05e4770f2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="module">
       <UniqueIdentifier>{59abbbd7-d874-400d-b30a-8e18eac3751d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\game">
-      <UniqueIdentifier>{303e26d5-617e-4024-b22b-b16ce4b8fb71}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game">
       <UniqueIdentifier>{fd871e7a-c43e-4435-a30f-0ba33d9675f6}</UniqueIdentifier>
@@ -91,31 +85,43 @@
     <Filter Include="module\game\variable">
       <UniqueIdentifier>{41585130-f18a-4d36-b6f7-5572f7d45781}</UniqueIdentifier>
     </Filter>
+    <Filter Include="module\database">
+      <UniqueIdentifier>{869b1380-97f3-4e9b-ab42-9af932aabeec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\game\event">
+      <UniqueIdentifier>{ec1f154b-bd3a-41cf-9820-f52e64a40213}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\plugin\command">
+      <UniqueIdentifier>{ebdf2804-9ef1-4068-97ef-0b84f5440202}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\common">
+      <UniqueIdentifier>{5d90ee97-0a15-4d6f-bc8c-28c91162de86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\plugin\event">
+      <UniqueIdentifier>{7cdf7ede-8a8b-4abd-92e4-2663c20b2fa3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\bot\state">
+      <UniqueIdentifier>{48293663-8848-4171-8948-742aa4be0fa4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\bot\state\scenario">
+      <UniqueIdentifier>{326b8b65-0292-438f-8034-77c96ce88634}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\game\scenario">
+      <UniqueIdentifier>{04ba6e35-b20f-4b96-919a-9e328709cc76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module\bot\client">
+      <UniqueIdentifier>{974ab710-1b9b-4a2d-a1b2-3d2fc752d7d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="NewFilter1">
+      <UniqueIdentifier>{2264a733-8cc1-461c-b3af-cc428a654ded}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\game.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\graph.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\common.hpp">
       <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\database.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\buy.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\util\fixed_string.hpp">
-      <Filter>include\util</Filter>
-    </ClInclude>
-    <ClInclude Include="include\game\menu.hpp">
-      <Filter>include\game</Filter>
     </ClInclude>
     <ClInclude Include="resource.h" />
   </ItemGroup>
@@ -135,9 +141,6 @@
     <ClCompile Include="src\buy.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\database.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\pokebot.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -152,9 +155,6 @@
     </ClCompile>
     <ClCompile Include="module\tracer.ixx">
       <Filter>module</Filter>
-    </ClCompile>
-    <ClCompile Include="src\game\menu.cpp">
-      <Filter>src\game</Filter>
     </ClCompile>
     <ClCompile Include="module\bot\squad\squad.ixx">
       <Filter>module\bot\squad</Filter>
@@ -297,9 +297,6 @@
     <ClCompile Include="module\game\game_manager_base.ixx">
       <Filter>module\game</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\game_manager.cpp">
-      <Filter>src\game</Filter>
-    </ClCompile>
     <ClCompile Include="include\bit_operator_for_enum.hpp">
       <Filter>include</Filter>
     </ClCompile>
@@ -428,6 +425,84 @@
     </ClCompile>
     <ClCompile Include="module\plugin\pokebot.ixx">
       <Filter>module\plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="module\plugin\command\command.ixx">
+      <Filter>module\plugin\command</Filter>
+    </ClCompile>
+    <ClCompile Include="module\common\event_handler.ixx">
+      <Filter>module\common</Filter>
+    </ClCompile>
+    <ClCompile Include="module\plugin\event\plugin_event.ixx">
+      <Filter>module\plugin\event</Filter>
+    </ClCompile>
+    <ClCompile Include="module\plugin\event\client_disconnection.ixx">
+      <Filter>module\plugin\event</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\state\state.ixx">
+      <Filter>module\bot\state</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\client\bot_client.ixx">
+      <Filter>module\bot\client</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\state\follow.ixx">
+      <Filter>module\bot\state</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\state\state_element.ixx">
+      <Filter>module\bot\state</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\state\accomplish.ixx">
+      <Filter>module\bot\state</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\state\bot_state_element.ixx">
+      <Filter>module\bot\state</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\scenario\game_scenario.ixx">
+      <Filter>module\game\scenario</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\scenario\scenario_manager.ixx">
+      <Filter>module\game\scenario</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\scenario\demolition_manager.ixx">
+      <Filter>module\game\scenario</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\bot_id.ixx">
+      <Filter>module\bot</Filter>
+    </ClCompile>
+    <ClCompile Include="module\util\fixed_string.ixx">
+      <Filter>module\util</Filter>
+    </ClCompile>
+    <ClCompile Include="module\database\database.ixx">
+      <Filter>module\database</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\weapon\weapon.ixx">
+      <Filter>module\game\weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\weapon\weapon_id.ixx">
+      <Filter>module\game\weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\weapon\ammo_id.ixx">
+      <Filter>module\game\weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\weapon\weapon_type.ixx">
+      <Filter>module\game\weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\weapon\weapon_definition.ixx">
+      <Filter>module\game\weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="module\plugin\host\host.ixx">
+      <Filter>module\plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\client\client_creation_result.ixx">
+      <Filter>module\game\client</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\menu.ixx">
+      <Filter>module\game</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\buy.ixx">
+      <Filter>module\bot</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\client\spawner.ixx">
+      <Filter>module\game\client</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

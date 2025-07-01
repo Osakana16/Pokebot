@@ -13,6 +13,7 @@ import pokebot.game.player;
 import pokebot.terrain.graph;
 import pokebot.terrain.graph.node;
 import pokebot.terrain.goal;
+import pokebot.util;
 
 #define BEHAVIOR_PRIVATE namespace
 #define BEHAVIOR_IF(A) [](const Bot* const Self) POKEBOT_NOEXCEPT { return A; }
@@ -49,17 +50,17 @@ namespace pokebot::bot::behavior {
 
 		template<bool b>
 		bool HasGrenade(const Bot* const Self) POKEBOT_NOEXCEPT {
-			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (Self->HasWeapon(game::Weapon::HEGrenade)));
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (Self->HasWeapon(game::weapon::ID::HEGrenade)));
 		}
 
 		template<bool b>
 		bool HasFlashbang(const Bot* const Self) POKEBOT_NOEXCEPT {
-			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (Self->HasWeapon(game::Weapon::Flashbang)));
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (Self->HasWeapon(game::weapon::ID::Flashbang)));
 		}
 
 		template<bool b>
 		bool HasSmoke(const Bot* const Self) POKEBOT_NOEXCEPT {
-			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (Self->HasWeapon(game::Weapon::Smoke)));
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (Self->HasWeapon(game::weapon::ID::Smoke)));
 		}
 
 		template<bool b>
@@ -148,12 +149,7 @@ namespace pokebot::bot::behavior {
 
 		template<bool b>
 		bool HasBomb(const Bot* const Self) POKEBOT_NOEXCEPT {
-			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->HasWeapon(game::Weapon::C4));
-		}
-
-		template<bool b>
-		bool IsPlayerMate(const Bot* const Self) POKEBOT_NOEXCEPT {
-			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (Self->JoinedTeam() == game::GetTeamFromModel(game::game.host.AsEdict())));
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Self->HasWeapon(game::weapon::ID::C4));
 		}
 
 		template<bool b>
@@ -285,7 +281,7 @@ export namespace pokebot::bot::behavior {
 		return SetGoal<kind>(self);
 	}
 
-	template<game::Weapon weapon>
+	template<game::weapon::ID weapon>
 	Status BotChangesIfNotSelected(Bot* const self) {
 		if (!self->IsCurrentWeapon(weapon)) {
 			self->SelectWeapon(weapon);
@@ -324,11 +320,11 @@ export namespace pokebot::bot::behavior {
 			}
 		});
 
-		change_melee->Define(BotChangesIfNotSelected<game::Weapon::Knife>);
-		change_grenade->Define(BotChangesIfNotSelected<game::Weapon::HEGrenade>);
-		change_flashbang->Define(BotChangesIfNotSelected<game::Weapon::Flashbang>);
-		change_smoke->Define(BotChangesIfNotSelected<game::Weapon::Smoke>);
-		change_c4->Define(BotChangesIfNotSelected<game::Weapon::C4>);
+		change_melee->Define(BotChangesIfNotSelected<game::weapon::ID::Knife>);
+		change_grenade->Define(BotChangesIfNotSelected<game::weapon::ID::HEGrenade>);
+		change_flashbang->Define(BotChangesIfNotSelected<game::weapon::ID::Flashbang>);
+		change_smoke->Define(BotChangesIfNotSelected<game::weapon::ID::Smoke>);
+		change_c4->Define(BotChangesIfNotSelected<game::weapon::ID::C4>);
 
 		look_c4->Define([](Bot* const self) -> Status {
 			return LookAt(self, *Manager::Instance().C4Origin() - Vector{ 0, 0, 36 }, 1.0f);
@@ -552,7 +548,9 @@ export namespace pokebot::bot::behavior {
 				}
 				// Find path.
 				if (const auto Goal_Node_ID = self->goal_node; Goal_Node_ID != node::Invalid_NodeID) {
-					node::czworld.FindPath(&self->routes, self->Origin(), *reinterpret_cast<Vector*>(&node::czworld.GetOrigin(Goal_Node_ID)), self->JoinedTeam());
+					auto hlorigin = *node::czworld.GetOrigin(0);
+					Vector origin = *reinterpret_cast<Vector*>(&hlorigin);
+					node::czworld.FindPath(&self->routes, self->Origin(), origin, self->JoinedTeam());
 					if (self->routes.Empty() || self->routes.Destination() != self->goal_node) {
 						return Status::Failed;
 					} else {
@@ -564,55 +562,6 @@ export namespace pokebot::bot::behavior {
 		});
 
 		head_to_goal->Define([](Bot* const self) -> Status {
-#if !USE_NAVMESH
-			const auto Current_Node_ID = node::world.GetNearest(self->Origin());
-			if (self->goal_node == node::Invalid_NodeID && self->goal_queue.IsEmpty()) {
-				if (!self->IsFollowing() && self->Objective_Goal_Node() == Current_Node_ID) {
-					return Status::Enough;
-				} else
-					return Status::Not_Ready;
-			}
-
-			if (Current_Node_ID != node::Invalid_NodeID && self->goal_node == Current_Node_ID) {
-				return Status::Enough;
-			} else if (node::world.IsOnNode(self->Origin(), self->goal_node)) {
-				return Status::Enough;
-			}
-
-			if (!self->goal_queue.IsEmpty()) {
-				self->goal_node = self->goal_queue.Get();
-			}
-
-			if (self->routes.Empty() || self->routes.IsEnd()) {
-				// Find path.
-
-				const auto Goal_Node_ID = self->goal_node;
-				if (Current_Node_ID == Goal_Node_ID) {
-					return Status::Executed;
-				} else if (Current_Node_ID == node::Invalid_NodeID) {
-					return Status::Failed;
-				}
-
-				node::world.FindPath(&self->routes, Current_Node_ID, Goal_Node_ID);
-				if (self->routes.Empty() || self->routes.Destination() != self->goal_node) {
-					return Status::Failed;
-				}
-			}
-
-			if (self->next_dest_node == node::Invalid_NodeID) {
-				self->next_dest_node = self->routes.Current();
-			} else if (node::world.IsOnNode(self->Origin(), self->next_dest_node)) {
-				if (!self->routes.IsEnd()) {
-					if (self->routes.Next())
-						self->next_dest_node = self->routes.Current();
-				} else {
-					// self->goal_queue.Pop();
-				}
-			} else {
-				self->PressKey(ActionKey::Run);
-			}
-			return Status::Executed;
-#else
 			// Manage current node.
 			
 			if (!self->routes.Empty() && !self->routes.IsEnd()) {
@@ -643,7 +592,6 @@ export namespace pokebot::bot::behavior {
 				return Status::Running;
 			}
 			return Status::Failed;
-#endif
 		});
 	}
 

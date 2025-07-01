@@ -9,6 +9,7 @@ import :state_machine;
 import pokebot.game.util;
 import pokebot.terrain.graph.path;
 import pokebot.game.player;
+import pokebot.game.weapon;
 import pokebot.game.entity;
 import pokebot.util;
 
@@ -44,7 +45,7 @@ export namespace pokebot::bot {
 		game::Team team{};
 		game::Model model{};
 
-		game::Weapon current_weapon = game::Weapon::Knife;
+		game::weapon::ID current_weapon = game::weapon::ID::Knife;
 
 		Vector movement_angle{};
 		float move_speed{}, strafe_speed{};
@@ -128,11 +129,7 @@ export namespace pokebot::bot {
 		util::Timer behavior_wait_timer{ util::GetRealGlobalTime };
 
 		GoalQueue goal_queue{};
-#if !USE_NAVMESH
-		node::PathWalk<node::NodeID> routes{};
-#else
 		node::PathWalk<std::uint32_t> routes{};
-#endif
 		std::optional<Vector> goal_vector{};
 		pokebot::node::NodeID goal_node{};
 		pokebot::node::NodeID next_dest_node{};
@@ -150,7 +147,7 @@ export namespace pokebot::bot {
 		void OnNewRound() POKEBOT_NOEXCEPT;
 		void Run() POKEBOT_NOEXCEPT;
 
-		void SelectWeapon(const game::Weapon), SelectPrimaryWeapon(), SelectSecondaryWeapon();
+		void SelectWeapon(const game::weapon::ID), SelectPrimaryWeapon(), SelectSecondaryWeapon();
 
 		bool HasEnemy() const POKEBOT_NOEXCEPT;
 		void LookAtClosestEnemy();
@@ -184,8 +181,8 @@ export namespace pokebot::bot {
 
 		bool HasPrimaryWeapon() const POKEBOT_NOEXCEPT;
 		bool HasSecondaryWeapon() const POKEBOT_NOEXCEPT;
-		bool HasWeapon(const game::Weapon Weapon_ID) const POKEBOT_NOEXCEPT;
-		bool IsCurrentWeapon(const game::Weapon Weapon_ID) const POKEBOT_NOEXCEPT { return (current_weapon == Weapon_ID); }
+		bool HasWeapon(const game::weapon::ID Weapon_ID) const POKEBOT_NOEXCEPT;
+		bool IsCurrentWeapon(const game::weapon::ID Weapon_ID) const POKEBOT_NOEXCEPT { return (current_weapon == Weapon_ID); }
 
 		bool HasGoalToHead() const POKEBOT_NOEXCEPT;
 		bool IsInBuyzone() const POKEBOT_NOEXCEPT;

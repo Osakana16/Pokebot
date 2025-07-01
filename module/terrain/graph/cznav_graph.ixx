@@ -203,6 +203,7 @@ export namespace pokebot::node {
 		}
 
 		Graph::GoalKindRange GetNodeByKind(const GoalKind kind) const POKEBOT_NOEXCEPT {
+
 			return goals.equal_range(kind);
 		}
 

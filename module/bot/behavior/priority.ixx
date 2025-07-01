@@ -1,7 +1,7 @@
 export module pokebot.bot.behavior: priority;
 import :behavior_node;
 
-namespace pokebot::bot::behavior {
+export namespace pokebot::bot::behavior {
 	class Priority : public BehaviorNode {
 		std::vector<std::shared_ptr<BehaviorNode>> children;
 	public:

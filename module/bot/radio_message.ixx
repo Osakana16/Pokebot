@@ -1,5 +1,7 @@
 export module pokebot.bot: radio_message;
 import pokebot.game.util;
+import pokebot.util;
+
 namespace pokebot::bot {
 	struct RadioMessage {
 		game::Team team = game::Team::Spector;

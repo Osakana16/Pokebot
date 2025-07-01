@@ -1,5 +1,6 @@
 ﻿export module pokebot.game.client: client;
 
+import pokebot.game.weapon;
 import pokebot.game.player;
 import pokebot.game.util;
 import pokebot.util;
@@ -7,6 +8,7 @@ import pokebot.util;
 export namespace pokebot::game::client {
 	class Client {
 		friend class ClientManager;
+	public:
 
 		edict_t* const client{};
 
@@ -21,8 +23,8 @@ export namespace pokebot::game::client {
 
 		game::Array<int, 10> weapon_ammo{};
 		int weapon_clip{};
-		Weapon current_weapon{};
-	public:
+		game::weapon::ID current_weapon{};
+
 		static bool IsDead(const edict_t* const Target) POKEBOT_NOEXCEPT { return Target->v.deadflag == DEAD_DEAD || Target->v.health <= 0 || Target->v.movetype == MOVETYPE_NOCLIP; }
 		static bool IsValid(const edict_t* const Target) POKEBOT_NOEXCEPT { return (Target != nullptr && !Target->free); }
 
@@ -81,7 +83,7 @@ export namespace pokebot::game::client {
 		const Vector& velocity;
 
 		game::StatusIcon DisplayingStatusIcon() const POKEBOT_NOEXCEPT { return status_icon; }
-		Weapon CurrentWeapon() const POKEBOT_NOEXCEPT { return current_weapon; }
+		weapon::ID CurrentWeapon() const POKEBOT_NOEXCEPT { return current_weapon; }
 		int CurrentWeaponClip() const POKEBOT_NOEXCEPT { return weapon_clip; }
 
 		edict_t* Edict() POKEBOT_NOEXCEPT { return client; }
@@ -112,7 +114,7 @@ export namespace pokebot::game::client {
 		bool IsDead() const POKEBOT_NOEXCEPT { return IsDead(client); }
 
 		bool IsVIP() const POKEBOT_NOEXCEPT { return is_vip; }
-		int WeaponAmmo(const AmmoID Ammo_ID) const POKEBOT_NOEXCEPT { return weapon_ammo[static_cast<int>(Ammo_ID) - 1]; }
+		int WeaponAmmo(const weapon::ammo::ID Ammo_ID) const POKEBOT_NOEXCEPT { return weapon_ammo[static_cast<int>(Ammo_ID) - 1]; }
 
 		bool IsInBuyzone() const noexcept { return bool(DisplayingStatusIcon() & StatusIcon::Buy_Zone); }
 		bool IsInEscapezone() const noexcept { return bool(DisplayingStatusIcon() & StatusIcon::Escape_Zone); }
@@ -127,26 +129,26 @@ export namespace pokebot::game::client {
 		bool IsOnFloor() const POKEBOT_NOEXCEPT { return bool(flags & (FL_ONGROUND | FL_PARTIALGROUND)) != 0; }
 		bool IsOnTrain() const POKEBOT_NOEXCEPT { return bool(flags & FL_ONTRAIN); }
 		bool IsFiring() const POKEBOT_NOEXCEPT { return bool(button & IN_ATTACK); }
-		bool IsReadyToThrowGrenade() const POKEBOT_NOEXCEPT { return IsFiring() && bool(weapons & Grenade_Bit); }
-		bool IsPlantingBomb() const POKEBOT_NOEXCEPT { return IsFiring() && bool(weapons & C4_Bit) && (sequence == 63 || sequence == 61); }
+		bool IsReadyToThrowGrenade() const POKEBOT_NOEXCEPT { return IsFiring() && bool(weapons & weapon::Grenade_Bit); }
+		bool IsPlantingBomb() const POKEBOT_NOEXCEPT { return IsFiring() && bool(weapons & weapon::C4_Bit) && (sequence == 63 || sequence == 61); }
 		bool IsClimblingLadder() const POKEBOT_NOEXCEPT { return (movetype & MOVETYPE_FLY); }
 
 		bool HasHostages() const noexcept;
-		bool HasWeapon(const Weapon Weapon_ID) const noexcept { return bool(weapons & game::ToBit<int>(Weapon_ID)); }
-		bool HasPrimaryWeapon() const noexcept { return weapons & game::Primary_Weapon_Bit; }
-		bool HasSecondaryWeapon() const noexcept { return weapons & game::Secondary_Weapon_Bit; }
+		bool HasWeapon(const weapon::ID Weapon_ID) const noexcept { return bool(weapons & game::ToBit<int>(Weapon_ID)); }
+		bool HasPrimaryWeapon() const noexcept { return weapons & weapon::Primary_Weapon_Bit; }
+		bool HasSecondaryWeapon() const noexcept { return weapons & weapon::Secondary_Weapon_Bit; }
 
 		/**
 		* @brief Check the clip of current weapon remains or not
 		* @return
 		*/
-		bool IsOutOfClip() const POKEBOT_NOEXCEPT { return (Weapon_Type[static_cast<int>(CurrentWeapon())] == WeaponType::Primary || Weapon_Type[static_cast<int>(CurrentWeapon())] == WeaponType::Secondary) && CurrentWeaponClip() <= 0; }
-		bool IsOutOfAmmo(const AmmoID Ammo_ID) const POKEBOT_NOEXCEPT { return WeaponAmmo(Ammo_ID) <= 0; }
+		bool IsOutOfClip() const POKEBOT_NOEXCEPT { return (weapon::Weapon_Type[static_cast<int>(CurrentWeapon())] == weapon::WeaponType::Primary || weapon::Weapon_Type[static_cast<int>(CurrentWeapon())] == weapon::WeaponType::Secondary) && CurrentWeaponClip() <= 0; }
+		bool IsOutOfAmmo(const weapon::ammo::ID Ammo_ID) const POKEBOT_NOEXCEPT { return WeaponAmmo(Ammo_ID) <= 0; }
 		bool IsOutOfCurrentWeaponAmmo() const POKEBOT_NOEXCEPT {
 			return
-				(Weapon_Type[static_cast<int>(CurrentWeapon())] == WeaponType::Primary ||
-				 Weapon_Type[static_cast<int>(CurrentWeapon())] == WeaponType::Secondary) &&
-				IsOutOfAmmo(std::get<AmmoID>(Weapon_CVT[static_cast<int>(CurrentWeapon()) - 1]));
+				(weapon::Weapon_Type[static_cast<int>(CurrentWeapon())] == weapon::WeaponType::Primary ||
+				 weapon::Weapon_Type[static_cast<int>(CurrentWeapon())] == weapon::WeaponType::Secondary) &&
+				IsOutOfAmmo(std::get<weapon::ammo::ID>(weapon::Weapon_CVT[static_cast<int>(CurrentWeapon()) - 1]));
 		}
 
 
@@ -260,5 +262,14 @@ export namespace pokebot::game::client {
 
 		game::Team GetTeam() const noexcept { return game::GetTeamFromModel(client); }
 		bool IsFakeClient() const noexcept { return bool(flags & util::Third_Party_Bot_Flag); }
+
+		void on_money_changed(const int Money) POKEBOT_NOEXCEPT {
+			money = Money;
+		}
+
+		
+		void on_nvg_changed(const bool nvg) POKEBOT_NOEXCEPT {
+			is_nvg_on = nvg;
+		}
 	};
 }

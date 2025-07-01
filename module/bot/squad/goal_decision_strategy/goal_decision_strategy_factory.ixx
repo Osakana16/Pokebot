@@ -39,6 +39,8 @@ namespace pokebot::bot::squad::goal_decision_strategy {
 		DecisionStrategyFactory() {}
 
 		DecisionStrategyFactory& SetTeam(const game::Team Base_Team) {
+			assert(Base_Team != game::Team::Spector && "Spector is not supported.");
+			assert(Base_Team != game::Team::Random && "Random is not supported.");
 			team = Base_Team;
 			return *this;
 		}

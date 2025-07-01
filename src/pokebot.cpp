@@ -120,9 +120,6 @@ namespace pokebot::plugin {
         REG_SVR_COMMAND("pk_add_ct", pk_add_ct);
         REG_SVR_COMMAND("pk_add_t", pk_add_t);
 
-        REG_SVR_COMMAND("pk_auto_waypoint", [] {
-            pokebot::game::is_enabled_auto_waypoint = !pokebot::game::is_enabled_auto_waypoint;
-        });
 
         REG_SVR_COMMAND("pk_kill", [] {
             std::vector<std::string_view> args{};
@@ -197,11 +194,7 @@ namespace pokebot::plugin {
 
 
     void Pokebot::OnMapLoaded() {
-#if !USE_NAVMESH
-        pokebot::node::world.OnMapLoaded();
-#else
         pokebot::node::czworld.OnMapLoaded();
-#endif
         pokebot::bot::Manager::Instance().OnMapLoaded();
     }
 }

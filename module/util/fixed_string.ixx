@@ -1,4 +1,4 @@
-#pragma once
+export module pokebot.util: fixed_string;
 
 #ifdef NDEBUG
 #define assert_or_abort(EXPR) if (!EXPR) abort()
@@ -6,7 +6,7 @@
 #define assert_or_abort(EXPR) assert(EXPR)
 #endif
 
-namespace pokebot::util {
+export namespace pokebot::util {
 	template<size_t N>
 	class fixed_string {
 		static_assert(N >= 2);

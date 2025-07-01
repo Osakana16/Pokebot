@@ -1,4 +1,3 @@
-#include "graph.hpp"
 #include "game/menu.hpp"
 #include <vector>
 
@@ -152,16 +151,8 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
     func_table.pfnStartFrame = []() -> void {
         using namespace pokebot;
         if (is_game_completely_initialized) {
-#if !USE_NAVMESH
-            pokebot::node::world.OnNewRound();
-#else
             pokebot::node::czworld.OnNewRound();
-#endif
             is_game_completely_initialized = false;
-        }
-
-        if (pokebot::game::game.host.AsEdict() != nullptr) {
-            // DEBUG_PRINTF("weaponanim={}\n", pokebot::game::game.host.AsEdict()->v.weaponanim);
         }
 
         pokebot::plugin::pokebot_plugin.OnUpdate();
@@ -209,9 +200,6 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
     };
 
     func_table.pfnServerActivate = [](edict_t* edictList, int edictCount, int) -> void {
-#if !USE_NAVMESH
-        pokebot::node::world.Clear();
-#endif
         pokebot::game::game.Init(edictList, edictCount);
         RETURN_META(MRES_IGNORED);
     };

@@ -2,6 +2,8 @@ export module pokebot.game.util;
 export import :team;
 export import :scenario;
 
+import pokebot.util;
+
 export namespace pokebot::game {
     float Distance(const Vector& S1, const Vector& S2) POKEBOT_NOEXCEPT { return (S1 - S2).Length(); }
     float Distance2D(const Vector& S1, const Vector& S2) POKEBOT_NOEXCEPT { return (S1 - S2).Length2D(); }
@@ -63,4 +65,36 @@ export namespace pokebot::game {
         Vector angle = Target - Origin;
         VEC_TO_ANGLES(angle, *destination);
     }
+
+	namespace entity {
+		bool InViewCone(const edict_t* const self, const Vector& Origin) POKEBOT_NOEXCEPT {
+			MAKE_VECTORS(self->v.angles);
+			const auto Vector_2D_Los = (Origin - self->v.origin).Make2D().Normalize();
+			const auto Dot = DotProduct(Vector_2D_Los, gpGlobals->v_forward.Make2D());
+			return (Dot > 0.50);
+		}
+
+		bool IsVisible(const edict_t* const self, const Vector& Origin) POKEBOT_NOEXCEPT {
+			// look through caller's eyes
+			TraceResult tr;
+			UTIL_TraceLine(self->v.origin + self->v.view_ofs, Origin, dont_ignore_monsters, ignore_glass, const_cast<edict_t*>(self), &tr);
+			return (tr.flFraction >= 1.0);	// line of sight is not established or valid
+		}
+
+		bool CanSeeEntity(const edict_t* const self, const const edict_t* Target) POKEBOT_NOEXCEPT {
+			const auto Body = Target->v.origin;
+			const auto Head = Target->v.origin + Target->v.view_ofs;
+			
+			const bool Is_Body_In_ViewCone = InViewCone(self, Body);
+			const bool Is_Body_Visible = IsVisible(self, Body);
+
+			const bool Is_Head_In_ViewCone = InViewCone(self, Head);
+			const bool Is_Head_Visible = IsVisible(self, Head);
+
+
+			const bool Is_Body_In_FOV = Is_Body_Visible && Is_Body_In_ViewCone;
+			const bool Is_Head_In_FOV = Is_Head_In_ViewCone && Is_Head_Visible;
+			return (Is_Body_In_FOV || Is_Head_In_FOV);
+		}
+	}
 }

@@ -7,8 +7,6 @@ import pokebot.util.tracer;
 
 namespace pokebot {
 	namespace game {
-
-
 		bool Host::IsHostValid() const POKEBOT_NOEXCEPT {
 			return host != nullptr;
 		}
@@ -25,11 +23,6 @@ namespace pokebot {
 #ifndef NDEBUG
 				host->v.health = 255;
 #endif
-				if (game::is_enabled_auto_waypoint &&  (host->v.deadflag != DEAD_DEAD && host->v.deadflag != DEAD_DYING && host->v.movetype != MOVETYPE_NOCLIP)) {
-#if !USE_NAVMESH
-					pokebot::node::world.Add(pokebot::game::game.host.Origin(), pokebot::node::GoalKind::None);
-#endif
-				}
 			}
 		}
 	}

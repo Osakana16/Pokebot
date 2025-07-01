@@ -92,7 +92,3 @@ namespace pokebot{
 	}
 }
 
-#include "util/fixed_string.hpp"
-
-#include "graph.hpp"
-#include "game.hpp"

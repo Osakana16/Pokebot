@@ -1,6 +1,7 @@
 ﻿export module pokebot.game: game_manager;
 import :cs_game_manager;
 
+import pokebot.database;
 import pokebot.game.client;
 import pokebot.game.util;
 import pokebot.game.player;
@@ -8,6 +9,8 @@ import pokebot.game.entity;
 import pokebot.util;
 
 export namespace pokebot::game {
+	constexpr float Default_Max_Move_Speed = 255.0f;
+
 	// variable type
 	enum class Var {
 		Normal = 0,
@@ -15,6 +18,19 @@ export namespace pokebot::game {
 		Password,
 		NoServer,
 		GameRef
+	};
+
+	class Host {
+		edict_t* host{};
+	public:
+		void ShowMenu();
+
+		const edict_t* AsEdict() const POKEBOT_NOEXCEPT { return host; }
+		bool IsHostValid() const POKEBOT_NOEXCEPT;
+		void SetHost(edict_t* const target) POKEBOT_NOEXCEPT;
+		const char* const HostName() const POKEBOT_NOEXCEPT;
+		const Vector& Origin() const POKEBOT_NOEXCEPT;
+		void Update();
 	};
 
 	// ConVar class from YapBot © Copyright YaPB Project Developers
@@ -104,13 +120,10 @@ export namespace pokebot::game {
 
 		std::vector<ConVarReg> convars{};
 	public:
+		Host host{};
 		client::ClientManager clients{};
 
-
-		ClientCreationResult Spawn(const std::string_view& client_name) { return clients.Create(client_name.data()); }
 		bool RegisterClient(edict_t* client) { return clients.Register(client); }
-
-		Host host{};
 
 		void AddCvar(const char* name, const char* value, const char* info, bool bounded, float min, float max, Var varType, bool missingAction, const char* regval, ConVar* self) {
 			ConVarReg reg{
@@ -173,28 +186,8 @@ export namespace pokebot::game {
 		}
 
 		void PreUpdate() {
-			host.Update();
-
 			for (auto& hostage : hostages) {
 				hostage.Update();
-			}
-
-			for (const auto& client : clients.GetAll()) {
-				Sound produced_sound{};
-				if (bool(client.second.button & IN_ATTACK)) {
-					produced_sound = Sound{ .origin = Vector{}, .volume = 100 };
-				}
-
-				if (bool(client.second.button & IN_USE)) {
-					// Sound occurs.
-					produced_sound = Sound{ .origin = client.second.origin, .volume = 50 };
-					// Recoginze the player as a owner.
-					for (auto& hostage : hostages) {
-						if (hostage.RecoginzeOwner(client.first.data())) {
-							break;
-						}
-					}
-				}
 			}
 		}
 
@@ -275,7 +268,7 @@ export namespace pokebot::game {
 		bool IsHostageUsed(const int Index) const POKEBOT_NOEXCEPT {
 			return hostages[Index].IsUsed();
 		}
-
+		
 		bool IsHostageOwnedBy(const int Index, const std::string_view& Owner_Name) {
 			return hostages[Index].IsOwnedBy(Owner_Name);
 		}
@@ -360,15 +353,15 @@ export namespace pokebot::game {
 			clients.OnNVGToggled(Client_Name, Toggled);
 		}
 
-		void OnWeaponChanged(const std::string_view Client_Name, const Weapon Weapon_ID) POKEBOT_NOEXCEPT {
+		void OnWeaponChanged(const std::string_view Client_Name, const weapon::ID Weapon_ID) POKEBOT_NOEXCEPT {
 			clients.OnWeaponChanged(Client_Name, Weapon_ID);
 		}
 
-		void OnClipChanged(const std::string_view Client_Name, const Weapon Weapon_ID, const int Clip) POKEBOT_NOEXCEPT {
+		void OnClipChanged(const std::string_view Client_Name, const weapon::ID Weapon_ID, const int Clip) POKEBOT_NOEXCEPT {
 			clients.OnClipChanged(Client_Name, Weapon_ID, Clip);
 		}
 
-		void OnAmmoPickedup(const std::string_view Client_Name, const AmmoID Ammo_ID, const int Ammo) POKEBOT_NOEXCEPT {
+		void OnAmmoPickedup(const std::string_view Client_Name, const weapon::ammo::ID Ammo_ID, const int Ammo) POKEBOT_NOEXCEPT {
 			clients.OnAmmoPickedup(Client_Name, Ammo_ID, Ammo);
 		}
 

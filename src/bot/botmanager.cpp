@@ -63,7 +63,7 @@ namespace pokebot::bot {
 	void Manager::OnDied(const std::string_view& Bot_Name) POKEBOT_NOEXCEPT {
 		auto bot = Get(Bot_Name.data());
 		if (bot != nullptr) {
-			bot->current_weapon = game::Weapon::None;
+			bot->current_weapon = game::weapon::ID::None;
 			bot->goal_queue.Clear();
 		}
 	}
@@ -97,7 +97,7 @@ namespace pokebot::bot {
 	}
 
 	void Manager::Insert(pokebot::util::PlayerName bot_name, const game::Team team, const game::Model model) POKEBOT_NOEXCEPT {
-		if (auto spawn_result = game::game.Spawn(bot_name.c_str()); std::get<bool>(spawn_result)) {
+		if (auto spawn_result = game::game.clients.Create(bot_name.c_str()); std::get<bool>(spawn_result)) {
 			bot_name = std::get<pokebot::util::PlayerName>(spawn_result).c_str();
 			auto insert_result = bots.insert({ bot_name.c_str(), Bot(bot_name.c_str(), team, model) });
 			assert(insert_result.second);

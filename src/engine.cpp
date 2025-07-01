@@ -168,9 +168,9 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             // DEBUG_PRINTF("CurWeapon\n");
                             using namespace pokebot;
                             if (std::get<int>(args[0]) != 0) {
-                                game::game.OnWeaponChanged(STRING(engine_target_edict->v.netname), (game::Weapon)std::get<int>(args[1]));
+                                game::game.OnWeaponChanged(STRING(engine_target_edict->v.netname), (game::weapon::ID)std::get<int>(args[1]));
                             }
-                            game::game.OnClipChanged(STRING(engine_target_edict->v.netname), static_cast<game::Weapon>(std::get<int>(args[1])), std::get<int>(args[2]));
+                            game::game.OnClipChanged(STRING(engine_target_edict->v.netname), static_cast<game::weapon::ID>(std::get<int>(args[1])), std::get<int>(args[2]));
                         }
                     }
                 },
@@ -198,7 +198,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             return;
 
                         using namespace pokebot;
-                        game::game.OnAmmoPickedup(STRING(engine_target_edict->v.netname), static_cast<game::AmmoID>(Ammo_ID - 1), Amount);
+                        game::game.OnAmmoPickedup(STRING(engine_target_edict->v.netname), static_cast<game::weapon::ammo::ID>(Ammo_ID - 1), Amount);
                     }
                 },
                 {

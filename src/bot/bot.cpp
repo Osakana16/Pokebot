@@ -166,7 +166,8 @@ namespace pokebot::bot {
 			look_direction.Clear();
 
 			// - Update Key -
-
+			
+			constexpr float Default_Max_Move_Speed = 255.0f;
 			if (bool(press_key & game::player::ActionKey::Run)) {
 				if (bool(press_key & game::player::ActionKey::Shift)) {
 					press_key &= ~game::player::ActionKey::Shift;
@@ -234,7 +235,7 @@ namespace pokebot::bot {
 		} else if (Manager::Instance().BackpackOrigin().has_value()) {
 			behavior::demolition::t_pick_up_bomb->Evaluate(this);
 		} else {
-			if (HasWeapon(game::Weapon::C4)) {
+			if (HasWeapon(game::weapon::ID::C4)) {
 				behavior::demolition::t_plant->Evaluate(this);
 			}
 		}
@@ -260,15 +261,6 @@ namespace pokebot::bot {
 
 	void Bot::OnCTDemolition() noexcept {
 #if 0
-		if (Manager::Instance().C4Origin().has_value()) {
-			if (game::Distance(Origin(), *Manager::Instance().C4Origin()) <= 50.0f) {
-				behavior::demolition::ct_defusing->Evaluate(this);
-			} else {
-				behavior::demolition::ct_planted->Evaluate(this);
-			}
-		} else {
-			behavior::demolition::ct_defend->Evaluate(this);
-		}
 #endif
 	}
 
@@ -442,21 +434,13 @@ namespace pokebot::bot {
 	void Bot::CheckAround() {
 		auto next_origin = node::czworld.GetOrigin(next_dest_node);
 		if (!look_direction.view.has_value()) {
-#if !USE_NAVMESH
-			look_direction.view = node::world.GetOrigin(next_dest_node);
-#else
 			look_direction.view = *reinterpret_cast<Vector*>(&next_origin);
 			look_direction.view->z = Origin().z;
-#endif
 		}
 
 		if (!look_direction.movement.has_value()) {
-#if !USE_NAVMESH
-			look_direction.movement = node::world.GetOrigin(next_dest_node);
-#else
 			look_direction.movement = *reinterpret_cast<Vector*>(&next_origin);
 			look_direction.movement->z = Origin().z;
-#endif
 		}
 
 
@@ -609,19 +593,19 @@ namespace pokebot::bot {
 		game::game.IssueCommand(Name().data(), std::format("menuselect {}", value).c_str());
 	}
 
-	void Bot::SelectWeapon(const game::Weapon Target_Weapon) {
+	void Bot::SelectWeapon(const game::weapon::ID Target_Weapon) {
 		if (HasWeapon(Target_Weapon)) {
 			current_weapon = Target_Weapon;
-			game::game.IssueCommand(Name().data(), std::format("{}", std::get<game::WeaponName>(game::Weapon_CVT[static_cast<int>(Target_Weapon) - 1])).c_str());
+			game::game.IssueCommand(Name().data(), std::format("{}", std::get<game::weapon::WeaponName>(game::weapon::Weapon_CVT[static_cast<int>(Target_Weapon) - 1])).c_str());
 		}
 	}
 
 	void Bot::SelectPrimaryWeapon() {
-		SelectWeapon(static_cast<game::Weapon>(std::log2(game::game.clients.Get(Name().data())->weapons & game::Primary_Weapon_Bit)));
+		SelectWeapon(static_cast<game::weapon::ID>(std::log2(game::game.clients.Get(Name().data())->weapons & game::weapon::Primary_Weapon_Bit)));
 	}
 
 	void Bot::SelectSecondaryWeapon() {
-		SelectWeapon(static_cast<game::Weapon>(std::log2(game::game.clients.Get(Name().data())->weapons & game::Secondary_Weapon_Bit)));
+		SelectWeapon(static_cast<game::weapon::ID>(std::log2(game::game.clients.Get(Name().data())->weapons & game::weapon::Secondary_Weapon_Bit)));
 	}
 
 	void Bot::LookAtClosestEnemy() {
@@ -686,7 +670,7 @@ namespace pokebot::bot {
 
 	bool Bot::HasPrimaryWeapon() const POKEBOT_NOEXCEPT { return (game::game.clients.Get(Name().data())->HasPrimaryWeapon()); }
 	bool Bot::HasSecondaryWeapon() const POKEBOT_NOEXCEPT { return (game::game.clients.Get(Name().data())->HasSecondaryWeapon()); }
-	bool Bot::HasWeapon(const game::Weapon Weapon_ID) const POKEBOT_NOEXCEPT { return game::game.clients.Get(Name().data())->HasWeapon(Weapon_ID); }
+	bool Bot::HasWeapon(const game::weapon::ID Weapon_ID) const POKEBOT_NOEXCEPT { return game::game.clients.Get(Name().data())->HasWeapon(Weapon_ID); }
 	bool Bot::IsDucking() const POKEBOT_NOEXCEPT { return (game::game.clients.Get(Name().data())->IsDucking()); }
 	bool Bot::IsDriving() const POKEBOT_NOEXCEPT { return (game::game.clients.Get(Name().data())->IsOnTrain()); }
 	bool Bot::IsInWater() const POKEBOT_NOEXCEPT { return (game::game.clients.Get(Name().data())->IsInWater()); }
@@ -723,11 +707,7 @@ namespace pokebot::bot {
 			{
 				"#Regroup_team",
 				[&] {
-#if !USE_NAVMESH
-						goal_queue.AddGoalQueue(node::world.GetNearest(game::game.clients.Get(Sender_Name)->origin));
-#else
 						goal_queue.AddGoalQueue(node::czworld.GetNearest(Origin())->m_id);
-#endif
 						game::game.IssueCommand(Name().data(), "radio3");
 						game::game.IssueCommand(Name().data(), "menuselect 1");
 					}

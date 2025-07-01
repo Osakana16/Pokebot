@@ -1,4 +1,5 @@
 export module pokebot.bot.squad.staff:assigner;
+import pokebot.util;
 
 namespace pokebot::bot::squad::staff {
 	export class Assigner {

@@ -1,3 +1,4 @@
+#if false
 #include <memory>
 export module pokebot.terrain.graph: waypoint_graph;
 import pokebot.terrain.graph.node;
@@ -471,3 +472,4 @@ namespace pokebot::node {
 
 	};
 }
+#endif

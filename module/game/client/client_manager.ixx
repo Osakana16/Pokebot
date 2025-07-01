@@ -1,3 +1,6 @@
+module;
+#include <tuple>
+
 import pokebot.game.util;
 import pokebot.util;
 
@@ -6,6 +9,7 @@ import :client;
 import :client_key;
 
 export namespace pokebot::game::client {
+	using ClientCreationResult = std::tuple<bool, pokebot::util::PlayerName>;
 	class ClientManager {
 		std::unordered_map<pokebot::util::PlayerName, Client, pokebot::util::PlayerName::Hash> clients{};
 	public:
@@ -115,15 +119,15 @@ export namespace pokebot::game::client {
 			GetAsMutable(Client_Name.data())->is_nvg_on = Toggle;
 		}
 
-		void OnWeaponChanged(const std::string_view Client_Name, const game::Weapon Weapon_ID) POKEBOT_NOEXCEPT {
+		void OnWeaponChanged(const std::string_view Client_Name, const game::weapon::ID Weapon_ID) POKEBOT_NOEXCEPT {
 			GetAsMutable(Client_Name.data())->current_weapon = Weapon_ID;
 		}
 
-		void OnClipChanged(const std::string_view Client_Name, const game::Weapon Weapon_ID, const int Amount) POKEBOT_NOEXCEPT {
+		void OnClipChanged(const std::string_view Client_Name, const game::weapon::ID Weapon_ID, const int Amount) POKEBOT_NOEXCEPT {
 			GetAsMutable(Client_Name.data())->weapon_clip = Amount;
 		}
 
-		void OnAmmoPickedup(const std::string_view Client_Name, const game::AmmoID Ammo_ID, const int Amount) POKEBOT_NOEXCEPT {
+		void OnAmmoPickedup(const std::string_view Client_Name, const game::weapon::ammo::ID Ammo_ID, const int Amount) POKEBOT_NOEXCEPT {
 			GetAsMutable(Client_Name.data())->weapon_ammo[static_cast<int>(Ammo_ID)] = Amount;
 		}
 

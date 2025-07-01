@@ -1,0 +1,40 @@
+export module pokebot.game.weapon: weapon_id;
+
+export namespace pokebot::game::weapon {
+	enum class ID {
+		None = -1,
+		P228 = 1,
+		Shield = 2,
+		Scout = 3,
+		HEGrenade = 4,
+		XM1014 = 5,
+		C4 = 6,
+		MAC10 = 7,
+		AUG = 8,
+		Smoke = 9,
+		Elite = 10,
+		FiveSeven = 11,
+		UMP45 = 12,
+		SG550 = 13,
+		Galil = 14,
+		Famas = 15,
+		USP = 16,
+		Glock18 = 17,
+		AWP = 18,
+		MP5 = 19,
+		M249 = 20,
+		M3 = 21,
+		M4A1 = 22,
+		TMP = 23,
+		G3SG1 = 24,
+		Flashbang = 25,
+		Deagle = 26,
+		SG552 = 27,
+		AK47 = 28,
+		Knife = 29,
+		P90 = 30,
+		Armor = 31,
+		ArmorHelm = 32,
+		Defuser = 33
+	};
+}
