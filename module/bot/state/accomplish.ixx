@@ -14,9 +14,9 @@ export namespace pokebot::bot::state {
 
 		void Run() final {
 			if constexpr (team == pokebot::game::Team::T) {
-				if (Manager::Instance().C4Origin().has_value()) {
+				if (game::game.GetC4Origin().has_value()) {
 					behavior::demolition::t_planted_wary->Evaluate(self);
-				} else if (Manager::Instance().BackpackOrigin().has_value()) {
+				} else if (game::game.GetBackpackOrigin().has_value()) {
 					behavior::demolition::t_pick_up_bomb->Evaluate(self);
 				} else {
 					if (self->HasWeapon(game::weapon::ID::C4)) {
@@ -24,8 +24,8 @@ export namespace pokebot::bot::state {
 					}
 				}
 			} else if constexpr (team == pokebot::game::Team::CT) {
-				if (Manager::Instance().C4Origin().has_value()) {
-					if (game::Distance(self->Origin(), *Manager::Instance().C4Origin()) <= 50.0f) {
+				if (game::game.GetC4Origin().has_value()) {
+					if (game::Distance(self->Origin(), *game::game.GetC4Origin()) <= 50.0f) {
 						behavior::demolition::ct_defusing->Evaluate(self);
 					} else {
 						behavior::demolition::ct_planted->Evaluate(self);

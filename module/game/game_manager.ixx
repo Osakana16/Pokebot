@@ -119,7 +119,18 @@ export namespace pokebot::game {
 		bool is_newround{};
 
 		std::vector<ConVarReg> convars{};
+		std::optional<Vector> c4_origin{};
+		edict_t* backpack{};
+
 	public:
+		std::optional<Vector> GetC4Origin() const noexcept {
+			return c4_origin;
+		}
+
+		std::optional<Vector> GetBackpackOrigin() const noexcept {
+			return backpack != nullptr ? std::make_optional(backpack->v.origin) : std::nullopt;
+		}
+
 		Host host{};
 		client::ClientManager clients{};
 
@@ -186,9 +197,43 @@ export namespace pokebot::game {
 		}
 
 		void PreUpdate() {
+#if 0
+			if (game::game.IsCurrentMode(game::MapFlags::Demolition)) {
+				if (!c4_origin.has_value()) {
+					if (bomber_name.empty()) {
+						// When the bomb is dropped:
+						// 
+						if (backpack != nullptr) {
+
+						} else {
+							edict_t* dropped_bomb{};
+							while ((dropped_bomb = game::FindEntityByClassname(dropped_bomb, "weaponbox")) != NULL) {
+								if (std::string_view(STRING(dropped_bomb->v.model)) == "models/w_backpack.mdl") {
+									backpack = dropped_bomb;
+									break;
+								}
+							}
+						}
+					}
+
+					edict_t* c4{};
+					while ((c4 = game::FindEntityByClassname(c4, "grenade")) != nullptr) {
+						if (std::string_view(STRING(c4->v.model)) == "models/w_c4.mdl") {
+							c4_origin = c4->v.origin;
+							break;
+						}
+					}
+
+					if (c4_origin.has_value()) {
+						// OnBombPlanted();
+					}
+				}
+			}
+
 			for (auto& hostage : hostages) {
 				hostage.Update();
 			}
+#endif
 		}
 
 		void PostUpdate() noexcept {

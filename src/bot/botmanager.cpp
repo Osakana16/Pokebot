@@ -27,7 +27,6 @@ namespace pokebot::bot {
 		for (auto& bot : bots) {
 			bot.second.OnNewRound();
 		}
-		c4_origin = std::nullopt;
 		
 		std::unordered_set<util::PlayerName, util::PlayerName::Hash> terrorists = convert_to_set(game::Team::T);
 		std::unordered_set<util::PlayerName, util::PlayerName::Hash> cts = convert_to_set(game::Team::CT);
@@ -109,38 +108,6 @@ namespace pokebot::bot {
 			return;
 
 		OnNewRoundReady();
-		if (game::game.IsCurrentMode(game::MapFlags::Demolition)) {
-			if (!c4_origin.has_value()) {
-				if (bomber_name.empty()) {
-					// When the bomb is dropped:
-					// 
-					if (backpack != nullptr) {
-
-					} else {
-						edict_t* dropped_bomb{};
-						while ((dropped_bomb = game::FindEntityByClassname(dropped_bomb, "weaponbox")) != NULL) {
-							if (std::string_view(STRING(dropped_bomb->v.model)) == "models/w_backpack.mdl") {
-								backpack = dropped_bomb;
-
-								break;
-							}
-						}
-					}
-				}
-
-				edict_t* c4{};
-				while ((c4 = game::FindEntityByClassname(c4, "grenade")) != nullptr) {
-					if (std::string_view(STRING(c4->v.model)) == "models/w_c4.mdl") {
-						c4_origin = c4->v.origin;
-						break;
-					}
-				}
-
-				if (c4_origin.has_value()) {
-					OnBombPlanted();
-				}
-			}
-		}
 
 		for (auto& bot : bots) {
 			bot.second.Run();
@@ -175,7 +142,6 @@ namespace pokebot::bot {
 
 	void Manager::OnBombPickedUp(const std::string_view& Client_Name) POKEBOT_NOEXCEPT {
 		bomber_name = Client_Name.data();
-		backpack = nullptr;
 	}
 
 	void Manager::OnBombDropped(const std::string_view& Client_Name) POKEBOT_NOEXCEPT {
@@ -185,8 +151,6 @@ namespace pokebot::bot {
 	void Manager::OnMapLoaded() {
 		bots.clear();
 		bomber_name.clear();
-		backpack = nullptr;
-		c4_origin = std::nullopt;
 		memset(&radio_message, 0, sizeof(radio_message));
 		round_started_timer.SetTime(0.0f);
 	}

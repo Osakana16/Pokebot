@@ -129,7 +129,7 @@ namespace pokebot::bot::behavior {
 
 		template<bool b>
 		bool IsBombPlanted(const Bot* const Self) {
-			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, Manager::Instance().C4Origin().has_value());
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, game::game.GetC4Origin().has_value());
 		}
 
 		template<bool b>
@@ -139,7 +139,7 @@ namespace pokebot::bot::behavior {
 
 		template<bool b>
 		bool IsOnBomb(const Bot* const Self) POKEBOT_NOEXCEPT {
-			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (game::Distance(Self->Origin(), *Manager::Instance().C4Origin()) <= 50.0f));
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (game::Distance(Self->Origin(), *game::game.GetC4Origin()) <= 50.0f));
 		}
 
 		template<bool b>
@@ -327,7 +327,7 @@ export namespace pokebot::bot::behavior {
 		change_c4->Define(BotChangesIfNotSelected<game::weapon::ID::C4>);
 
 		look_c4->Define([](Bot* const self) -> Status {
-			return LookAt(self, *Manager::Instance().C4Origin() - Vector{ 0, 0, 36 }, 1.0f);
+			return LookAt(self, *game::game.GetC4Origin() - Vector{ 0, 0, 36 }, 1.0f);
 		});
 
 		look_hostage->Define([](Bot* const self) -> Status {
@@ -390,9 +390,9 @@ export namespace pokebot::bot::behavior {
 		});
 
 		set_goal_c4_node->Define([](Bot* const self) -> Status {
-			auto area = node::czworld.GetNearest(*Manager::Instance().C4Origin());
+			auto area = node::czworld.GetNearest(*game::game.GetC4Origin());
 			for (const auto& Another_Origin : { Vector{}, Vector{50.0f, 0.0f, 0.0f}, Vector{ -50.0f, 0.0f, 0.0f }, Vector{0.0f, 50.0f, 0.0f}, Vector{0.0f, -50.0f, 0.0f} }) {
-				if ((area = node::czworld.GetNearest(*Manager::Instance().C4Origin() + Another_Origin)) != nullptr) {
+				if ((area = node::czworld.GetNearest(*game::game.GetC4Origin() + Another_Origin)) != nullptr) {
 					break;
 				}
 			}
@@ -419,10 +419,10 @@ export namespace pokebot::bot::behavior {
 		});
 
 		set_goal_c4_vector->Define([](Bot* const self) -> Status {
-			if (!Manager::Instance().C4Origin().has_value() || self->goal_vector.has_value())
+			if (!game::game.GetC4Origin().has_value() || self->goal_vector.has_value())
 				return Status::Failed;
 
-			self->goal_vector = *Manager::Instance().C4Origin();
+			self->goal_vector = *game::game.GetC4Origin();
 			return Status::Success;
 		});
 
@@ -431,11 +431,11 @@ export namespace pokebot::bot::behavior {
 		});
 
 		set_goal_backpack_node->Define([](Bot* const self) -> Status {
-			auto area = node::czworld.GetNearest(*Manager::Instance().BackpackOrigin());
+			auto area = node::czworld.GetNearest(*game::game.GetBackpackOrigin());
 			if (area == nullptr) {
 				return Status::Failed;
 			}
-			node::NodeID id = node::czworld.GetNearest(*Manager::Instance().BackpackOrigin())->m_id;
+			node::NodeID id = node::czworld.GetNearest(*game::game.GetBackpackOrigin())->m_id;
 			if (node::czworld.IsOnNode(self->Origin(), id))
 				return Status::Failed;
 
@@ -446,10 +446,10 @@ export namespace pokebot::bot::behavior {
 		});
 
 		set_goal_backpack_vector->Define([](Bot* const self) -> Status {
-			if (!Manager::Instance().BackpackOrigin().has_value() || self->goal_vector.has_value())
+			if (!game::game.GetBackpackOrigin().has_value() || self->goal_vector.has_value())
 				return Status::Failed;
 
-			self->goal_vector = *Manager::Instance().BackpackOrigin();
+			self->goal_vector = *game::game.GetBackpackOrigin();
 			return Status::Success;
 		});
 
@@ -493,7 +493,7 @@ export namespace pokebot::bot::behavior {
 			auto findCircleLine = [](const Vector& Origin, const float Distance) POKEBOT_NOEXCEPT -> node::NodeID {
 				node::NodeID id = node::Invalid_NodeID;
 				for (const auto& Line : { Vector(Distance, .0f, .0f), Vector(-Distance, .0f, .0f), Vector(.0f, Distance, .0f), Vector(.0f, -Distance, .0f) }) {
-					auto area = node::czworld.GetNearest(*Manager::Instance().C4Origin() + Line, FLT_MAX);
+					auto area = node::czworld.GetNearest(*game::game.GetC4Origin() + Line, FLT_MAX);
 					if (area == nullptr)
 						continue;
 
@@ -703,16 +703,21 @@ export namespace pokebot::bot::behavior {
 
 	template<bool b>
 	bool IsFarFromC4(const Bot* const Self) POKEBOT_NOEXCEPT {
-		assert(bot::Manager::Instance().C4Origin().has_value());
+#if 0
+		assert(bot::game::game.GetC4Origin().has_value());
 		if constexpr (b) {
-			return game::Distance(Self->Origin(), *bot::Manager::Instance().C4Origin()) > 100.0f;
+			return game::Distance(Self->Origin(), *bot::game::game.GetC4Origin()) > 100.0f;
 		} else {
-			return game::Distance(Self->Origin(), *bot::Manager::Instance().C4Origin()) <= 100.0f;
+			return game::Distance(Self->Origin(), *bot::game::game.GetC4Origin()) <= 100.0f;
 		}
+#else
+		return false;
+#endif
 	}
 
 	template<bool b>
 	bool IsFarFromMainGoal(const Bot* const Self) POKEBOT_NOEXCEPT {
+#if 0
 		auto id = Manager::Instance().GetGoalNode(Self->Name().c_str());
 		auto origin = node::czworld.GetOrigin(id);
 		auto source = Self->Origin();
@@ -721,6 +726,9 @@ export namespace pokebot::bot::behavior {
 		} else {
 			return game::Distance(source, *reinterpret_cast<Vector*>(&origin)) <= 200.0f;
 		}
+#else
+		return false;
+#endif
 	}
 
 	void DefineObjective() {

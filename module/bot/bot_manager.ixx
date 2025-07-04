@@ -15,8 +15,6 @@ export namespace pokebot::bot {
 		std::unique_ptr<pokebot::bot::squad::Troops> terrorist_troops;
 		std::unique_ptr<pokebot::bot::squad::Troops> ct_troops;
 
-		std::optional<Vector> c4_origin{};
-		edict_t* backpack{};
 		std::unordered_map<pokebot::util::PlayerName, Bot, pokebot::util::PlayerName::Hash> bots{};
 
 		// The name of the player who has the bomb.
@@ -149,17 +147,5 @@ export namespace pokebot::bot {
 		void OnMapLoaded();
 
 		node::NodeID GetGoalNode(const std::string_view& Client_Name) const noexcept;
-
-		/**
-		* @brief Get the origin of the C4 bomb.
-		* @return The origin of the C4 bomb.
-		*/
-		const std::optional<Vector>& C4Origin() const POKEBOT_NOEXCEPT { return c4_origin; }
-
-		/**
-		* @brief Get the origin of the C4 bomb.
-		* @return The origin of the C4 bomb.
-		*/
-		std::optional<Vector> BackpackOrigin() const POKEBOT_NOEXCEPT { return (backpack != nullptr ? std::make_optional(backpack->v.origin) : std::nullopt); }
 	};
 }
