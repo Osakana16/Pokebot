@@ -1,10 +1,15 @@
-#include "game/menu.hpp"
+module;
 #include <vector>
 
-import pokebot;
+
+module pokebot: dll;
+import :plugin;
+
 import pokebot.bot.behavior;
 import pokebot.game;
+import pokebot.game.util;
 import pokebot.util.tracer;
+import pokebot.util.random;
 import pokebot.terrain.graph;
 
 enginefuncs_t g_engfuncs;
@@ -112,7 +117,7 @@ C_DLLEXPORT int Meta_Attach(PLUG_LOADTIME now, META_FUNCTIONS* pFunctionTable, m
 
     pokebot::bot::behavior::DefineBehavior();
 
-    pokebot::plugin::pokebot_plugin.RegisterCommand();
+    pokebot::plugin::Pokebot::RegisterCommand();
 
     // print a message to notify about plugin attaching
     LOG_CONSOLE(PLID, "%s: plugin attaching", Plugin_info.name);
@@ -155,7 +160,7 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
             is_game_completely_initialized = false;
         }
 
-        pokebot::plugin::pokebot_plugin.OnUpdate();
+        plugin::Pokebot::OnUpdate();
         RETURN_META(MRES_IGNORED);
     };
 
@@ -165,8 +170,8 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
     };
 
     func_table.pfnSpawn = [](edict_t* entity) -> int {
-        pokebot::plugin::pokebot_plugin.AppendSpawnedEntity(entity);
-		pokebot::plugin::pokebot_plugin.OnEntitySpawned();
+        pokebot::plugin::Pokebot::AppendSpawnedEntity(entity);
+		pokebot::plugin::Pokebot::OnEntitySpawned();
 
         RETURN_META_VALUE(MRES_IGNORED, 0);
     };
@@ -182,7 +187,7 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
                 // pokebot::game::game.clients.Register(entity);
                 is_game_completely_initialized = true;
 
-                pokebot::plugin::pokebot_plugin.OnMapLoaded();
+                pokebot::plugin::Pokebot::OnMapLoaded();
             }
             SERVER_PRINT(std::format("POKEBOT: {} is connected.\n", STRING(entity->v.netname)).c_str());
         }
@@ -191,11 +196,12 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
 
     func_table.pfnClientDisconnect = [](edict_t* entity) -> void {
         SERVER_PRINT(std::format("POKEBOT: {} is disconnected.\n", STRING(entity->v.netname)).c_str());
-        pokebot::plugin::pokebot_plugin.OnClientDisconnect(entity);
+        pokebot::plugin::Pokebot::OnClientDisconnect(entity);
         RETURN_META(MRES_IGNORED);
     };
 
     func_table.pfnClientPutInServer = [](edict_t* entity) -> void {
+		pokebot::plugin::Pokebot::OnClientPutIn(entity);
         RETURN_META(MRES_IGNORED);
     };
 
@@ -205,6 +211,7 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
     };
 
     func_table.pfnClientCommand = [](edict_t* client) -> void {
+        pokebot::plugin::Pokebot::OnPlayerMenuSelect(client);
         if (client != pokebot::game::game.host.AsEdict()) {
             return;
         }

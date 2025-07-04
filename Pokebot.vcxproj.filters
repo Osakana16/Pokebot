@@ -91,9 +91,6 @@
     <Filter Include="module\game\event">
       <UniqueIdentifier>{ec1f154b-bd3a-41cf-9820-f52e64a40213}</UniqueIdentifier>
     </Filter>
-    <Filter Include="module\plugin\command">
-      <UniqueIdentifier>{ebdf2804-9ef1-4068-97ef-0b84f5440202}</UniqueIdentifier>
-    </Filter>
     <Filter Include="module\common">
       <UniqueIdentifier>{5d90ee97-0a15-4d6f-bc8c-28c91162de86}</UniqueIdentifier>
     </Filter>
@@ -112,8 +109,8 @@
     <Filter Include="module\bot\client">
       <UniqueIdentifier>{974ab710-1b9b-4a2d-a1b2-3d2fc752d7d4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="NewFilter1">
-      <UniqueIdentifier>{2264a733-8cc1-461c-b3af-cc428a654ded}</UniqueIdentifier>
+    <Filter Include="module\plugin\console">
+      <UniqueIdentifier>{ebdf2804-9ef1-4068-97ef-0b84f5440202}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -426,9 +423,6 @@
     <ClCompile Include="module\plugin\pokebot.ixx">
       <Filter>module\plugin</Filter>
     </ClCompile>
-    <ClCompile Include="module\plugin\command\command.ixx">
-      <Filter>module\plugin\command</Filter>
-    </ClCompile>
     <ClCompile Include="module\common\event_handler.ixx">
       <Filter>module\common</Filter>
     </ClCompile>
@@ -503,6 +497,48 @@
     </ClCompile>
     <ClCompile Include="module\game\client\spawner.ixx">
       <Filter>module\game\client</Filter>
+    </ClCompile>
+    <ClCompile Include="module\plugin\event\client_connection.ixx">
+      <Filter>module\plugin\event</Filter>
+    </ClCompile>
+    <ClCompile Include="module\plugin\event\client_information.ixx">
+      <Filter>module\plugin\event</Filter>
+    </ClCompile>
+    <ClCompile Include="module\plugin\event\map_loaded.ixx">
+      <Filter>module\plugin\event</Filter>
+    </ClCompile>
+    <ClCompile Include="module\plugin\event\player_menuselect.ixx">
+      <Filter>module\plugin\event</Filter>
+    </ClCompile>
+    <ClCompile Include="module\plugin\dll.ixx">
+      <Filter>module\plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="module\plugin\plugin.ixx">
+      <Filter>module\plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="module\console\command\console_command.ixx">
+      <Filter>module\plugin\console</Filter>
+    </ClCompile>
+    <ClCompile Include="module\console\command\console_args.ixx">
+      <Filter>module\plugin\console</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pk_kill.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pk_add.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="module\console\command\console_command_register.ixx">
+      <Filter>module\plugin\console</Filter>
+    </ClCompile>
+    <ClCompile Include="module\console\command\pk_menu.ixx">
+      <Filter>module\plugin\console</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pk_menu.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="module\console\pk_bot.ixx">
+      <Filter>module\plugin\console</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

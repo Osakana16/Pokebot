@@ -177,6 +177,11 @@
     <ClCompile Include="module\chat\talk.ixx" />
     <ClCompile Include="module\chat\talk.windows.ixx" />
     <ClCompile Include="module\common\event_handler.ixx" />
+    <ClCompile Include="module\console\command\console_args.ixx" />
+    <ClCompile Include="module\console\command\console_command.ixx" />
+    <ClCompile Include="module\console\command\console_command_register.ixx" />
+    <ClCompile Include="module\console\command\pk_menu.ixx" />
+    <ClCompile Include="module\console\pk_bot.ixx" />
     <ClCompile Include="module\database\database.ixx" />
     <ClCompile Include="module\game\client\client.cpp" />
     <ClCompile Include="module\game\client\client.declaration.ixx" />
@@ -209,10 +214,15 @@
     <ClCompile Include="module\game\weapon\weapon_definition.ixx" />
     <ClCompile Include="module\game\weapon\weapon_id.ixx" />
     <ClCompile Include="module\game\weapon\weapon_type.ixx" />
-    <ClCompile Include="module\plugin\command\command.ixx" />
+    <ClCompile Include="module\plugin\event\client_connection.ixx" />
     <ClCompile Include="module\plugin\event\client_disconnection.ixx" />
+    <ClCompile Include="module\plugin\event\client_information.ixx" />
+    <ClCompile Include="module\plugin\event\map_loaded.ixx" />
+    <ClCompile Include="module\plugin\event\player_menuselect.ixx" />
     <ClCompile Include="module\plugin\event\plugin_event.ixx" />
     <ClCompile Include="module\plugin\host\host.ixx" />
+    <ClCompile Include="module\plugin\dll.ixx" />
+    <ClCompile Include="module\plugin\plugin.ixx" />
     <ClCompile Include="module\plugin\pokebot.ixx" />
     <ClCompile Include="module\pokebot_random.ixx" />
     <ClCompile Include="module\terrain\goal\goal_kind.ixx" />
@@ -249,6 +259,9 @@
     <ClCompile Include="src\dll.cpp" />
     <ClCompile Include="src\engine.cpp" />
     <ClCompile Include="src\game.cpp" />
+    <ClCompile Include="src\pk_add.cpp" />
+    <ClCompile Include="src\pk_kill.cpp" />
+    <ClCompile Include="src\pk_menu.cpp" />
     <ClCompile Include="src\pokebot.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_Goldsrc|Win32'">Create</PrecompiledHeader>
