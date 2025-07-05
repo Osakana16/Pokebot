@@ -6,6 +6,9 @@ import pokebot.util.random;
 import pokebot.game.util;
 import pokebot.bot.squad;
 import pokebot.terrain.graph;
+import pokebot.common.event_handler;
+
+
 namespace pokebot::bot {
 	namespace {
 		bool IsTerrorist(const BotPair& target) noexcept { return target.second.JoinedTeam() == game::Team::T; }
@@ -13,7 +16,19 @@ namespace pokebot::bot {
 	}
 
 	Manager::Manager() {}
+	
+	Manager::Manager(common::Observable<void>* frame_update_observable) {
+		class BotManagerUpdateObserver : public common::Observer<void> {
+		public:
+			~BotManagerUpdateObserver() final {}
 
+			void OnEvent() final {
+
+			}
+		};
+
+		frame_update_observable->AddObserver(std::make_shared<BotManagerUpdateObserver>());
+	}
 
 	void Manager::OnNewRoundPreparation() noexcept {
 		auto convert_to_set = [&](const game::Team target_team) {

@@ -429,9 +429,6 @@
     <ClCompile Include="module\plugin\event\plugin_event.ixx">
       <Filter>module\plugin\event</Filter>
     </ClCompile>
-    <ClCompile Include="module\plugin\event\client_disconnection.ixx">
-      <Filter>module\plugin\event</Filter>
-    </ClCompile>
     <ClCompile Include="module\bot\state\state.ixx">
       <Filter>module\bot\state</Filter>
     </ClCompile>
@@ -498,16 +495,7 @@
     <ClCompile Include="module\game\client\spawner.ixx">
       <Filter>module\game\client</Filter>
     </ClCompile>
-    <ClCompile Include="module\plugin\event\client_connection.ixx">
-      <Filter>module\plugin\event</Filter>
-    </ClCompile>
     <ClCompile Include="module\plugin\event\client_information.ixx">
-      <Filter>module\plugin\event</Filter>
-    </ClCompile>
-    <ClCompile Include="module\plugin\event\map_loaded.ixx">
-      <Filter>module\plugin\event</Filter>
-    </ClCompile>
-    <ClCompile Include="module\plugin\event\player_menuselect.ixx">
       <Filter>module\plugin\event</Filter>
     </ClCompile>
     <ClCompile Include="module\plugin\dll.ixx">
@@ -539,6 +527,9 @@
     </ClCompile>
     <ClCompile Include="module\console\pk_bot.ixx">
       <Filter>module\plugin\console</Filter>
+    </ClCompile>
+    <ClCompile Include="module\plugin\event\server_activation.ixx">
+      <Filter>module\plugin\event</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -46,4 +46,58 @@ export namespace pokebot::common {
         virtual void AddObserver(std::shared_ptr<Observer<void>> observer) = 0;
         virtual void Notifyobservers() = 0;
     };
+
+    template<typename Event>
+    class NormalObservable : public Observable<Event> {
+		std::forward_list<std::shared_ptr<common::Observer<Event>>> observers{};
+	public:
+		~NormalObservable() final {}
+
+		NormalObservable() {}
+
+		void AddObserver(std::shared_ptr<common::Observer<Event>> observer) final {
+			observers.push_front(observer);
+		}
+
+		void Notifyobservers(const Event& event) final {
+			for (auto& observer : observers)
+				observer->OnEvent(event);
+		}
+    };
+
+    template<typename Event>
+    class NormalObservable<Event*> : public Observable<Event*> {
+		std::forward_list<std::shared_ptr<common::Observer<Event*>>> observers{};
+	public:
+		~NormalObservable() final {}
+
+		NormalObservable() {}
+
+		void AddObserver(std::shared_ptr<common::Observer<Event*>> observer) final {
+			observers.push_front(observer);
+		}
+
+		void Notifyobservers(const Event* const& event) final {
+			for (auto& observer : observers)
+				observer->OnEvent(event);
+		}
+    };
+    
+    template<>
+    class NormalObservable<void> : public Observable<void> {
+		std::forward_list<std::shared_ptr<common::Observer<void>>> observers{};
+	public:
+		~NormalObservable() final {}
+
+		NormalObservable() {}
+
+		void AddObserver(std::shared_ptr<common::Observer<void>> observer) final {
+			observers.push_front(observer);
+		}
+
+		void Notifyobservers() final {
+			for (auto& observer : observers)
+				observer->OnEvent();
+		}
+    };
 }

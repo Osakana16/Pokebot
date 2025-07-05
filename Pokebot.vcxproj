@@ -214,12 +214,9 @@
     <ClCompile Include="module\game\weapon\weapon_definition.ixx" />
     <ClCompile Include="module\game\weapon\weapon_id.ixx" />
     <ClCompile Include="module\game\weapon\weapon_type.ixx" />
-    <ClCompile Include="module\plugin\event\client_connection.ixx" />
-    <ClCompile Include="module\plugin\event\client_disconnection.ixx" />
     <ClCompile Include="module\plugin\event\client_information.ixx" />
-    <ClCompile Include="module\plugin\event\map_loaded.ixx" />
-    <ClCompile Include="module\plugin\event\player_menuselect.ixx" />
     <ClCompile Include="module\plugin\event\plugin_event.ixx" />
+    <ClCompile Include="module\plugin\event\server_activation.ixx" />
     <ClCompile Include="module\plugin\host\host.ixx" />
     <ClCompile Include="module\plugin\dll.ixx" />
     <ClCompile Include="module\plugin\plugin.ixx" />

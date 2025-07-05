@@ -4,9 +4,40 @@ import pokebot.game.util;
 import pokebot.game.client;
 import pokebot.util;
 import pokebot.util.tracer;
+import pokebot.common.event_handler;
+import pokebot.plugin.event;
 
 namespace pokebot {
 	namespace game {
+		Game::Game(common::Observable<void>* frame_update_observable,
+				   plugin::event::ClientInformationObservable* client_connection_observable,
+				   plugin::event::ClientInformationObservable* client_disconnection_observable) {
+			class GameUpdateObserver : public common::Observer<void> {
+			public:
+				~GameUpdateObserver() final {}
+
+				void OnEvent() final {}
+			};
+
+			class ClientConnectionObserver : public common::Observer<plugin::event::ClientInformation> {
+			public:
+				~ClientConnectionObserver() final {}
+
+				void OnEvent(const plugin::event::ClientInformation&) final {}
+			};
+
+			class ClientDisconnectionObserver : public common::Observer<plugin::event::ClientInformation> {
+			public:
+				~ClientDisconnectionObserver() final {}
+				
+				void OnEvent(const plugin::event::ClientInformation&) final {}
+			};
+
+			frame_update_observable->AddObserver(std::make_shared<GameUpdateObserver>());
+			client_connection_observable->AddObserver(std::make_shared<ClientConnectionObserver>());
+			client_disconnection_observable->AddObserver(std::make_shared<ClientDisconnectionObserver>());
+		}
+
 		bool Host::IsHostValid() const POKEBOT_NOEXCEPT {
 			return host != nullptr;
 		}

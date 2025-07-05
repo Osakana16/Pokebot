@@ -54,8 +54,12 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 ) {
     switch (ul_reason_for_call) {
         case DLL_PROCESS_ATTACH:
+            pokebot::plugin::Pokebot::OnDllAttached();
+            break;
         case DLL_THREAD_ATTACH:
+            break;
         case DLL_THREAD_DETACH:
+            break;
         case DLL_PROCESS_DETACH:
             break;
     }
@@ -165,11 +169,13 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
     };
 
     func_table.pfnGameInit = []() -> void {
+		pokebot::plugin::Pokebot::OnGameInit();
         // pokebot::ParseWeaponJson();
         RETURN_META(MRES_IGNORED);
     };
 
     func_table.pfnSpawn = [](edict_t* entity) -> int {
+		pokebot::plugin::Pokebot::OnEntitySpawned(entity);
         pokebot::plugin::Pokebot::AppendSpawnedEntity(entity);
 		pokebot::plugin::Pokebot::OnEntitySpawned();
 
@@ -189,6 +195,7 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
 
                 pokebot::plugin::Pokebot::OnMapLoaded();
             }
+            pokebot::plugin::Pokebot::OnClientConnect(entity, Address);
             SERVER_PRINT(std::format("POKEBOT: {} is connected.\n", STRING(entity->v.netname)).c_str());
         }
         RETURN_META_VALUE(MRES_IGNORED, 0);
@@ -201,12 +208,14 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
     };
 
     func_table.pfnClientPutInServer = [](edict_t* entity) -> void {
-		pokebot::plugin::Pokebot::OnClientPutIn(entity);
+		pokebot::plugin::Pokebot::OnClientPutInServer(entity);
         RETURN_META(MRES_IGNORED);
     };
 
-    func_table.pfnServerActivate = [](edict_t* edictList, int edictCount, int) -> void {
-        pokebot::game::game.Init(edictList, edictCount);
+    func_table.pfnServerActivate = [](edict_t* edict_list, int edict_count, int client_max) -> void {
+        pokebot::plugin::Pokebot::OnServerActivate(edict_list, edict_count, client_max);
+
+        pokebot::game::game.Init(edict_list, edict_count);
         RETURN_META(MRES_IGNORED);
     };
 
@@ -222,9 +231,8 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
         }
 
         const auto arg = CMD_ARGV(0);
-        int key{};
         char *not_converted;
-        key = strtol(CMD_ARGV(1), &not_converted, 10);
+        int key = strtol(CMD_ARGV(1), &not_converted, 10);
         pokebot::game::Menu::Instance().OnPress(client, key);
         RETURN_META(MRES_IGNORED);
     };

@@ -1,5 +1,7 @@
-export module pokebot.util.random;
+module;
 #include <random>
+
+export module pokebot.util.random;
 
 namespace pokebot::util {
 	export template<typename T>

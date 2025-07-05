@@ -13,6 +13,7 @@ export namespace pokebot::util {
 		char str[N]{};
 	public:
 		fixed_string() {}
+		fixed_string(int) = delete;
 		fixed_string(const char* const a) { operator=(a); }
 
 		char* begin() noexcept { return &str[0]; }

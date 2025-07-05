@@ -7,6 +7,9 @@ import pokebot.game.util;
 import pokebot.game.player;
 import pokebot.game.entity;
 import pokebot.util;
+import pokebot.plugin.event;
+
+import pokebot.common.event_handler;
 
 export namespace pokebot::game {
 	constexpr float Default_Max_Move_Speed = 255.0f;
@@ -123,6 +126,11 @@ export namespace pokebot::game {
 		edict_t* backpack{};
 
 	public:
+		Game() = default;
+		Game(pokebot::common::Observable<void>* frame_update_observable,
+			 pokebot::plugin::event::ClientInformationObservable* client_connection_observable,
+			 pokebot::plugin::event::ClientInformationObservable* client_disconnection_observable);
+
 		std::optional<Vector> GetC4Origin() const noexcept {
 			return c4_origin;
 		}
