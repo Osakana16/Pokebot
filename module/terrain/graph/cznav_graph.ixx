@@ -5,16 +5,20 @@ import :graph_base;
 import pokebot.terrain.graph.path;
 import pokebot.terrain.graph.node;
 
+import pokebot.common.event_handler;
 import pokebot.game.util;
+import pokebot.util;
 import pokebot.util.tracer;
 
 export namespace pokebot::node {
 	// Compatibility with ZBot navmesh.
-	inline class CZBotGraph : public Graph {
+	class CZBotGraph : public Graph {
 		std::unordered_multimap<GoalKind, NodeID> goals{};
 		game::Array<Danger, 2> danger;
 		bool is_nav_loaded{};
 	public:
+		CZBotGraph(common::Observable<util::fixed_string<256u>>*);
+
 		navmesh::NavigationMap navigation_map{};
 		std::vector<Route<navmesh::NavArea*>> routes{};
 
@@ -22,7 +26,10 @@ export namespace pokebot::node {
 			return navigation_map.GetNavArea(&Destination, Beneath_Limit);
 		}
 
-		void FindPath(PathWalk<std::uint32_t>* const walk_routes, const Vector& Source, const Vector& Destination, const game::Team Joined_Team) {
+		void FindPath(PathWalk<std::uint32_t>* const walk_routes, const Vector& Source, const Vector& Destination, const game::Team Joined_Team) override {
+			static CZBotGraph *self;
+			self = this;
+
 			const int Joined_Team_Index = static_cast<int>(Joined_Team) - 1;
 			assert(Joined_Team_Index >= 0 && Joined_Team_Index <= 1);
 			auto source = navigation_map.GetNavArea(&Source);
@@ -43,7 +50,7 @@ export namespace pokebot::node {
 			class FGreater {
 			public:
 				bool operator ()(const NodeID a_id, const NodeID b_id) {
-					return czworld.routes.at(a_id).f > czworld.routes.at(b_id).f;
+					return self->routes.at(a_id).f > self->routes.at(b_id).f;
 				}
 			};
 			routes.resize(navmesh::NavArea::m_nextID);
@@ -133,50 +140,6 @@ export namespace pokebot::node {
 			return is_nav_loaded;
 		}
 
-		void OnMapLoaded() {
-			if (!navigation_map.Load(std::format("cstrike/maps/{}.nav", STRING(gpGlobals->mapname)))) {
-				if (!navigation_map.Load(std::format("czero/maps/{}.nav", STRING(gpGlobals->mapname)))) {
-					SERVER_PRINT("[POKEBOT]Failed to load the nav file.\n");
-					is_nav_loaded = false;
-					return;
-				} else {
-					SERVER_PRINT("[POKEBOT]Loaded the nav file from czero.\n");
-				}
-			} else {
-				SERVER_PRINT("[POKEBOT]Loaded the nav file from cstrike.\n");
-			}
-
-			is_nav_loaded = true;
-			auto addGoal = [this](const GoalKind kind, const char* class_name, Vector(*originFunction)(edict_t*)) {
-				edict_t* entity = nullptr;
-				while ((entity = game::FindEntityByClassname(entity, class_name)) != nullptr) {
-					Vector origin = originFunction(entity);
-					auto area = GetNearest(origin);
-					if (area != nullptr) {
-						goals.insert({ kind, area->m_id });
-					}
-				}
-			};
-
-			auto returnOrigin = [](edict_t* entity) { return entity->v.origin; };
-			auto returnModelOrigin = [](edict_t* entity) { return game::VecBModelOrigin(entity); };
-
-			goals.clear();
-			addGoal(GoalKind::CT_Spawn, "info_player_start", returnOrigin);				// CT Spawn
-			addGoal(GoalKind::Terrorist_Spawn, "info_player_deathmatch", returnOrigin);	// Terrorist Spawn
-			addGoal(GoalKind::Rescue_Zone, "func_hostage_rescue", returnModelOrigin);
-			addGoal(GoalKind::Rescue_Zone, "info_hostage_rescue", returnModelOrigin);
-			addGoal(GoalKind::Bombspot, "func_bomb_target", returnModelOrigin);
-			addGoal(GoalKind::Bombspot, "info_bomb_target", returnModelOrigin);
-			addGoal(GoalKind::Vip_Safety, "info_vip_start", returnModelOrigin);
-			addGoal(GoalKind::Vip_Safety, "func_vip_safetyzone", returnModelOrigin);
-			addGoal(GoalKind::Escape_Zone, "func_escapezone", returnModelOrigin);
-		}
-
-		void OnNewRound() {
-
-		}
-
 
 		size_t GetNumberOfGoals(const GoalKind Kind) const noexcept {
 			size_t number{};
@@ -221,5 +184,5 @@ export namespace pokebot::node {
 			auto area = navigation_map.GetNavAreaByID(id);
 			return area != nullptr && bool(area->m_attributeFlags & static_cast<navmesh::NavAttributeType>(flag));
 		}
-	} czworld;
+	};
 }

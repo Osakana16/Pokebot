@@ -7,6 +7,7 @@ import :mood;
 import :state_machine;
 
 import pokebot.game.util;
+import pokebot.terrain.graph;
 import pokebot.terrain.graph.path;
 import pokebot.game.player;
 import pokebot.game.weapon;
@@ -120,6 +121,8 @@ export namespace pokebot::bot {
 			&Bot::SelectionUpdate,	// Model Select
 			&Bot::OnSelectionCompleted
 		};
+
+		pokebot::node::Graph& graph;
 	public:
 		void LockByBomb() { is_locked_by_bomb = true; }
 		void UnlockByBomb() { is_locked_by_bomb = false; }
@@ -142,7 +145,7 @@ export namespace pokebot::bot {
 		} look_direction{}, ideal_direction{};
 
 
-		Bot(const std::string_view&, const game::Team, const game::Model) POKEBOT_NOEXCEPT;
+		Bot(pokebot::node::Graph&, const std::string_view&, const game::Team, const game::Model) POKEBOT_NOEXCEPT;
 
 		void OnNewRound() POKEBOT_NOEXCEPT;
 		void Run() POKEBOT_NOEXCEPT;

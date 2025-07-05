@@ -112,6 +112,12 @@
     <Filter Include="module\plugin\console">
       <UniqueIdentifier>{ebdf2804-9ef1-4068-97ef-0b84f5440202}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\bot\behaviour">
+      <UniqueIdentifier>{505b37d5-f732-4c99-8167-eaec4377ea8f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\bot\behaviour\node">
+      <UniqueIdentifier>{cee5b265-581f-4a07-bf13-e625dd251eea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -530,6 +536,12 @@
     </ClCompile>
     <ClCompile Include="module\plugin\event\server_activation.ixx">
       <Filter>module\plugin\event</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot\behaviour\action.cpp">
+      <Filter>src\bot\behaviour</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cznav_graph.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

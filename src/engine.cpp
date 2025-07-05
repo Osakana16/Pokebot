@@ -1,4 +1,7 @@
+module;
 #include "common.hpp"
+
+module pokebot: plugin;
 
 import pokebot.bot;
 import pokebot.game;
@@ -30,23 +33,20 @@ void UTIL_TraceHull(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTER
     TRACE_HULL(vecStart, vecEnd, igmon, hullNumber, pentIgnore, ptr);
 }
 
-
-C_DLLEXPORT int
-GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
-    meta_engfuncs.pfnMessageBegin = [](int msg_dest, int msg_type, const float* pOrigin, edict_t* edict) {
+namespace pokebot::plugin {
+    void Pokebot::OnMessageBegin(int msg_dest, int msg_type, const float* pOrigin, edict_t* edict) {
         if (gpGlobals->deathmatch) {
             using namespace pokebot;
-            is_bot = (edict != nullptr && pokebot::bot::Manager::Instance().IsExist(STRING(edict->v.netname)));
+            is_bot = (edict != nullptr && bot_manager->IsExist(STRING(edict->v.netname)));
             is_host = (edict == game::game.host.AsEdict());
 
             engine_target_edict = edict;
             current_message = msg_type;
         }
-
         RETURN_META(MRES_IGNORED);
-    };
+    }
 
-    meta_engfuncs.pfnMessageEnd = []() {
+    void Pokebot::OnMessageEnd() {
         if (gpGlobals->deathmatch) {
             static std::unordered_map<int, std::function<void()>> messages
             {
@@ -84,7 +84,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
 
                             auto it = Menu_Cache.find(std::get<TextCache>(args[3]).c_str());
                             if (it != Menu_Cache.end()) {
-                                pokebot::bot::Manager::Instance().Assign(STRING(engine_target_edict->v.netname), it->second);
+                                bot_manager->Assign(STRING(engine_target_edict->v.netname), it->second);
                             }
                         }
                     }
@@ -151,7 +151,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             // This calls when
                             //  1. the player picked up a weapon.
                             //  2. the bomber entered the bombsite.
-                            pokebot::bot::Manager::Instance().OnBombPickedUp(STRING(INDEXENT(std::get<int>(args[0]))->v.netname));
+                            bot_manager->OnBombPickedUp(STRING(INDEXENT(std::get<int>(args[0]))->v.netname));
                         }
                     }
                 },
@@ -230,7 +230,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                         const int Armor = std::get<int>(args[0]);
                         const int Bit = std::get<int>(args[2]);
                         game::game.OnDamageTaken(STRING(engine_target_edict->v.netname), engine_target_edict->v.dmg_inflictor, Health, Armor, Bit);
-                        bot::Manager::Instance().OnDamageTaken(STRING(engine_target_edict->v.netname), engine_target_edict->v.dmg_inflictor,  Health, Armor, Bit);
+                        bot_manager->OnDamageTaken(STRING(engine_target_edict->v.netname), engine_target_edict->v.dmg_inflictor,  Health, Armor, Bit);
                     }
                 },
                 {
@@ -344,7 +344,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             { "#Weapon_Not_Available", nothingToDo },
                             { "#Game_bomb_pickup", [] {}  },
                             { "#Got_bomb", nothingToDo },
-                            { "#Game_bomb_drop", [] { pokebot::bot::Manager::Instance().OnBombDropped(std::get<TextCache>(args[2]).data()); }},
+                            { "#Game_bomb_drop", [] { bot_manager->OnBombDropped(std::get<TextCache>(args[2]).data()); }},
                             // TODO: These below should set failIfBotDoes
                             { "#Not_Enough_Money", nothingToDo },
                             { "#Cstrike_Already_Own_Weapon", nothingToDo },
@@ -380,7 +380,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                             std::string_view radio = std::get<TextCache>(args[4]).data();
 
                             if (it == Text_Message.find("#Game_radio")) {
-                                bot::Manager::Instance().OnRadioRecieved(sender, radio);
+                                bot_manager->OnRadioRecieved(sender, radio);
                             }
                         } else if (args.size() >= 3 && std::holds_alternative<TextCache>(args[2])) {
                             Text_Message.at(std::get<TextCache>(args[1]).data())();
@@ -452,8 +452,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
                     if (std::get<int>(args[0]) == 0 && std::get<int>(args[1]) == 0) {
                         pokebot::game::game.OnNewRound();
 
-                        pokebot::bot::Manager::Instance().OnNewRoundPreparation();
-                        pokebot::node::czworld.OnNewRound();
+                        bot_manager->OnNewRoundPreparation();
                     }
                 }
                 }
@@ -464,13 +463,32 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
             if (it != messages.end()) {
                 it->second();
             }
-
-
-
             args.clear();
         }
         RETURN_META(MRES_IGNORED);
-    };
+    }
+
+    void Pokebot::OnVGUIMenuShown() {
+
+    }
+
+    void Pokebot::OnShowMenu() {
+
+    }
+
+    void Pokebot::OnWeaponListCalled() {
+
+    }
+
+    void Pokebot::OnTeamInfoCalled() {
+
+    }
+}
+
+C_DLLEXPORT int
+GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
+    meta_engfuncs.pfnMessageBegin = pokebot::plugin::Pokebot::OnMessageBegin;
+    meta_engfuncs.pfnMessageEnd = pokebot::plugin::Pokebot::OnMessageEnd;
 
     meta_engfuncs.pfnChangeLevel = [](const char* s1, const char* s2) {
         RETURN_META(MRES_IGNORED);

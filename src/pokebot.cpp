@@ -16,37 +16,28 @@ edict_t* pokebot::plugin::Pokebot::spawned_entity;
 
 namespace pokebot::plugin {
     void Pokebot::OnDllAttached() noexcept {
-        class ServerActivationObserver : public common::Observer<event::EdictList> {
-        public:
-            ~ServerActivationObserver() final {}
-
-            void OnEvent(const event::EdictList& event) final {
-                Pokebot::game = std::make_unique<pokebot::game::Game>(&Pokebot::frame_update_observable, &Pokebot::client_connection_observable, &Pokebot::client_disconnection_observable);
-                Pokebot::bot_manager = std::make_unique<pokebot::bot::Manager>(&Pokebot::frame_update_observable);
-            }
+        auto callback = [](const event::EdictList& event) {
+            Pokebot::game = std::make_unique<pokebot::game::Game>(&Pokebot::frame_update_observable, &Pokebot::client_connection_observable, &Pokebot::client_disconnection_observable);
+            Pokebot::czworld = std::make_unique<pokebot::node::CZBotGraph>(&map_loaded_observable);
+            Pokebot::bot_manager = std::make_unique<pokebot::bot::Manager>(*Pokebot::czworld, &Pokebot::frame_update_observable);
         };
 
-        server_activation_observable.AddObserver(std::make_shared<ServerActivationObserver>());
+        server_activation_observable.AddObserver(std::make_shared<common::NormalObserver<event::EdictList>>(callback));
     }
 
     void Pokebot::RegisterCommand() noexcept {
         console::CommandRegister{};
-
-        REG_SVR_COMMAND("pk_navload", [] {
-            pokebot::node::czworld.OnMapLoaded();
-        });
     }
 
     void Pokebot::OnUpdate() noexcept {
 		frame_update_observable.Notifyobservers();
 
         pokebot::game::game.PreUpdate();
-        pokebot::bot::Manager::Instance().Update();
         pokebot::game::game.PostUpdate();
     }
 
     void Pokebot::AddBot(const std::string_view& Bot_Name, const game::Team Selected_Team, const game::Model Selected_Model) noexcept {
-        pokebot::bot::Manager::Instance().Insert(Bot_Name.data(), Selected_Team, Selected_Model);
+        bot_manager->Insert(Bot_Name.data(), Selected_Team, Selected_Model);
     }
 
     void Pokebot::OnEntitySpawned() noexcept {
@@ -65,7 +56,6 @@ namespace pokebot::plugin {
 
     void Pokebot::OnClientDisconnect(const edict_t* const disconnected_client) noexcept {
         client_disconnection_observable.Notifyobservers({ .entity = disconnected_client, .Address = nullptr });
-        pokebot::bot::Manager::Instance().Remove(STRING(disconnected_client->v.netname));
         pokebot::game::game.clients.Disconnect(STRING(disconnected_client->v.netname));
     }
     
@@ -76,8 +66,6 @@ namespace pokebot::plugin {
 
     void Pokebot::OnMapLoaded() noexcept {
         map_loaded_observable.Notifyobservers(STRING(gpGlobals->mapname));
-        pokebot::node::czworld.OnMapLoaded();
-        pokebot::bot::Manager::Instance().OnMapLoaded();
     }
 
 
@@ -98,4 +86,8 @@ namespace pokebot::plugin {
 	}
 
     void Pokebot::AppendSpawnedEntity(edict_t* entity) noexcept { spawned_entity = entity; }
+
+    bool Pokebot::IsPlayable() noexcept {
+        return czworld->IsNavFileLoaded();
+	}
 }

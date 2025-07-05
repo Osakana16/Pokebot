@@ -7,7 +7,7 @@ import pokebot.util.random;
 import pokebot.game.util;
 
 static void pk_add_team_specified(const pokebot::game::Team Default_Team) {
-    if (!pokebot::node::czworld.IsNavFileLoaded()) {
+    if (!pokebot::plugin::Pokebot::IsPlayable()) {
         SERVER_PRINT("[POKEBOT] Error: Cannot add bots because the .nav file is not loaded. Please generate it in CS:CZ.\n");
         return;
     }
@@ -31,7 +31,7 @@ static void pk_add_team_specified(const pokebot::game::Team Default_Team) {
 }
 
 void pk_add() {
-    if (!pokebot::node::czworld.IsNavFileLoaded()) {
+    if (!pokebot::plugin::Pokebot::IsPlayable()) {
         SERVER_PRINT("[POKEBOT] Error: Cannot add bots because the .nav file does not exist. Please generate it in CS:CZ.\n");
         return;
     }

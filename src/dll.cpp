@@ -154,15 +154,9 @@ GiveFnptrsToDll(enginefuncs_t* pengfuncsFromEngine, globalvars_t* pGlobals) {
     gpGlobals = pGlobals;
 }
 
-bool is_game_completely_initialized = false;
-
 C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersion) {
     func_table.pfnStartFrame = []() -> void {
         using namespace pokebot;
-        if (is_game_completely_initialized) {
-            pokebot::node::czworld.OnNewRound();
-            is_game_completely_initialized = false;
-        }
 
         plugin::Pokebot::OnUpdate();
         RETURN_META(MRES_IGNORED);
@@ -191,7 +185,6 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
                 pokebot::game::game.host.SetHost(entity);
                 // REMOVED: We cannot get the player's name at this timing.
                 // pokebot::game::game.clients.Register(entity);
-                is_game_completely_initialized = true;
 
                 pokebot::plugin::Pokebot::OnMapLoaded();
             }

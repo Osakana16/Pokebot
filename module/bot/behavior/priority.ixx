@@ -7,10 +7,10 @@ export namespace pokebot::bot::behavior {
 	public:
 		using BehaviorNode::BehaviorNode;
 
-		Status Evaluate(Bot* const self) {
+		Status Evaluate(Bot* const self, const node::Graph* const graph) override {
 			// SERVER_PRINT(std::format("{}\n", name).c_str());
 			for (auto child : children) {
-				switch (child->Evaluate(self)) {
+				switch (child->Evaluate(self, graph)) {
 					case Status::Running:
 						return Status::Running;
 					case Status::Success:

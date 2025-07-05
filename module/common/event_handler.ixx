@@ -1,6 +1,8 @@
 export module pokebot.common.event_handler;
 
 export namespace pokebot::common {
+    // - Observer -
+
     template <typename Event>
     class Observer {
     public:
@@ -8,27 +10,12 @@ export namespace pokebot::common {
         virtual void OnEvent(const Event& event) = 0;
     };
     
-    template <typename Event>
-    class Observable {
-    public:
-        virtual ~Observable() = 0 {}
-        virtual void AddObserver(std::shared_ptr<Observer<Event>> observer) = 0;
-        virtual void Notifyobservers(const Event& event) = 0;
-    };
     
     template <typename Event>
     class Observer<Event*> {
     public:
         virtual ~Observer() = 0 {}
         virtual void OnEvent(const Event* const& event) = 0;
-    };
-    
-    template <typename Event>
-    class Observable<Event*> {
-    public:
-        virtual ~Observable() = 0 {}
-        virtual void AddObserver(std::shared_ptr<Observer<Event*>> observer) = 0;
-        virtual void Notifyobservers(const Event* const& event) = 0;
     };
 
     template<>
@@ -38,6 +25,62 @@ export namespace pokebot::common {
         virtual void OnEvent() = 0;
     };
 
+    template <typename Event>
+    class NormalObserver : public Observer<Event> {
+		std::function<void(const Event&)> callback;
+    public:
+        NormalObserver(decltype(callback) callback_) : callback(callback_) {}
+
+        ~NormalObserver() final {}
+        void OnEvent(const Event& event) final {
+            callback(event);
+        }
+    };
+    
+    
+    template <typename Event>
+    class NormalObserver<Event*> : public Observer<Event> {
+		std::function<void(const Event* const&)> callback;
+    public:
+        NormalObserver(decltype(callback) callback_) : callback(callback_) {}
+
+        ~NormalObserver() final {}
+
+        void OnEvent(const Event* const& event) final {
+            callback(event);
+        }
+    };
+
+    template<>
+    class NormalObserver<void> : public Observer<void> {
+		std::function<void()> callback;
+    public:
+        NormalObserver(decltype(callback) callback_) : callback(callback_) {}
+
+        ~NormalObserver() final {}
+
+        void OnEvent() final {
+            callback();
+        }
+    };
+
+	// - Observable -
+
+    template <typename Event>
+    class Observable {
+    public:
+        virtual ~Observable() = 0 {}
+        virtual void AddObserver(std::shared_ptr<Observer<Event>> observer) = 0;
+        virtual void Notifyobservers(const Event& event) = 0;
+    };
+    
+    template <typename Event>
+    class Observable<Event*> {
+    public:
+        virtual ~Observable() = 0 {}
+        virtual void AddObserver(std::shared_ptr<Observer<Event*>> observer) = 0;
+        virtual void Notifyobservers(const Event* const& event) = 0;
+    };
 
     template<>
     class Observable<void> {

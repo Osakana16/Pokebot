@@ -5,6 +5,7 @@ import pokebot.common.event_handler;
 import pokebot.plugin.event;
 import pokebot.plugin.event.server_activation;
 
+import pokebot.terrain.graph;
 import pokebot.util;
 import pokebot.game;
 import pokebot.game.util;
@@ -25,7 +26,10 @@ export namespace pokebot::plugin {
 
 		inline static std::unique_ptr<pokebot::bot::Manager> bot_manager{};
 		inline static std::unique_ptr<pokebot::game::Game> game{};
+		inline static std::unique_ptr<pokebot::node::Graph> czworld{};
 	public:
+		static bool IsPlayable() noexcept;
+
 		static void OnDllAttached() noexcept;
 
 		static void AppendSpawnedEntity(edict_t* entity) noexcept;
@@ -45,5 +49,14 @@ export namespace pokebot::plugin {
 		static void OnClientPutInServer(edict_t* client) noexcept;
 		static void OnEntitySpawned(edict_t* entity) noexcept;
 		static void OnPlayerMenuSelect(edict_t* client) noexcept;
+
+		
+		static void OnMessageBegin(int msg_dest, int msg_type, const float* pOrigin, edict_t* edict);
+		static void OnMessageEnd();
+
+		static void OnVGUIMenuShown();
+		static void OnShowMenu();
+		static void OnWeaponListCalled();
+		static void OnTeamInfoCalled();
 	};
 }

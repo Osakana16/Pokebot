@@ -8,9 +8,16 @@ import pokebot.game.player;
 import pokebot.game.util;
 import pokebot.util;
 import pokebot.util.tracer;
-import pokebot.terrain.graph;
 
 namespace pokebot::bot {
+	Bot::Bot(pokebot::node::Graph& graph_, const std::string_view& Bot_Name, const game::Team Join_Team, const game::Model Select_Model) POKEBOT_NOEXCEPT : graph(graph_) {
+		team = Join_Team;
+		model = Select_Model;
+		name = Bot_Name.data();
+
+		OnNewRound();
+	}
+
 	void Bot::Run() POKEBOT_NOEXCEPT {
 		(this->*(updateFuncs[static_cast<int>(start_action)]))();
 		frame_interval = gpGlobals->time - last_command_time;
@@ -243,13 +250,13 @@ namespace pokebot::bot {
 	}
 
 	void Bot::OnTerroristHostage() noexcept {
-		behavior::rescue::t_defend_hostage->Evaluate(this);
+		behavior::rescue::t_defend_hostage->Evaluate(this, &graph);
 	}
 
 	void Bot::OnTerroristAssasination() noexcept {
 		auto client = game::game.clients.Get(Name().data());
 		if (client->IsVIP()) {
-			behavior::assassination::ct_vip_escape->Evaluate(this);
+			behavior::assassination::ct_vip_escape->Evaluate(this, &graph);
 		} else {
 
 		}
@@ -267,16 +274,16 @@ namespace pokebot::bot {
 	void Bot::OnCTHostage() noexcept {
 		auto client = game::game.clients.Get(Name().data());
 		if (!client->HasHostages()) {
-			behavior::rescue::ct_try->Evaluate(this);
+			behavior::rescue::ct_try->Evaluate(this, &graph);
 		} else {
-			behavior::rescue::ct_leave->Evaluate(this);
+			behavior::rescue::ct_leave->Evaluate(this, &graph);
 		}
 	}
 
 	void Bot::OnCTAssasination() noexcept {
 		auto client = game::game.clients.Get(Name().data());
 		if (client->IsVIP()) {
-			behavior::assassination::ct_vip_escape->Evaluate(this);
+			behavior::assassination::ct_vip_escape->Evaluate(this, &graph);
 		} else {
 
 		}
@@ -338,11 +345,11 @@ namespace pokebot::bot {
 		}
 
 		if (fighting_spirit <= Base_Fearless) {
-			behavior::fight::retreat->Evaluate(this);
+			behavior::fight::retreat->Evaluate(this, &graph);
 		}
 
 		if (CanSeeEntity(enemy_client->Edict())) {
-			behavior::fight::beat_enemies->Evaluate(this);
+			behavior::fight::beat_enemies->Evaluate(this, &graph);
 		}
 	}
 
@@ -432,7 +439,7 @@ namespace pokebot::bot {
 	}
 
 	void Bot::CheckAround() {
-		auto next_origin = node::czworld.GetOrigin(next_dest_node);
+		auto next_origin = graph.GetOrigin(next_dest_node);
 		if (!look_direction.view.has_value()) {
 			look_direction.view = *reinterpret_cast<Vector*>(&next_origin);
 			look_direction.view->z = Origin().z;
@@ -531,13 +538,13 @@ namespace pokebot::bot {
 				// Check the forward navarea
 				for (auto& vector : { Origin(), Origin() + gpGlobals->v_forward * 90.0f }) {
 					// 
-					if (auto area = node::czworld.GetNearest(vector); area != nullptr) {
+					if (auto area = graph.GetNearest(vector); area != nullptr) {
 						// Jump if it is specified.
-						if (!node::czworld.HasFlag(area->m_id, node::NavmeshFlag::No_Jump) && node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Jump)) {
+						if (!graph.HasFlag(area->m_id, node::NavmeshFlag::No_Jump) && graph.HasFlag(area->m_id, node::NavmeshFlag::Jump)) {
 							PressKey(game::player::ActionKey::Jump);
 						}
 						// Duck if it is specified.
-						if (node::czworld.HasFlag(area->m_id, node::NavmeshFlag::Crouch)) {
+						if (graph.HasFlag(area->m_id, node::NavmeshFlag::Crouch)) {
 							PressKey(game::player::ActionKey::Duck);
 						}
 					}
@@ -707,7 +714,7 @@ namespace pokebot::bot {
 			{
 				"#Regroup_team",
 				[&] {
-						goal_queue.AddGoalQueue(node::czworld.GetNearest(Origin())->m_id);
+						goal_queue.AddGoalQueue(graph.GetNearest(Origin())->m_id);
 						game::game.IssueCommand(Name().data(), "radio3");
 						game::game.IssueCommand(Name().data(), "menuselect 1");
 					}
@@ -762,15 +769,6 @@ namespace pokebot::bot {
 				goal_queue.Clear();
 				break;
 		}
-	}
-
-	Bot::Bot(const std::string_view& Bot_Name, const game::Team Join_Team, const game::Model Select_Model) POKEBOT_NOEXCEPT {
-		team = Join_Team;
-		model = Select_Model;
-
-		name = Bot_Name.data();
-
-		OnNewRound();
 	}
 
 	game::Team Bot::JoinedTeam() const POKEBOT_NOEXCEPT {

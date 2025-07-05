@@ -15,19 +15,12 @@ namespace pokebot::bot {
 		bool IsCounterTerrorist(const BotPair& target) noexcept { return target.second.JoinedTeam() == game::Team::CT; }
 	}
 
-	Manager::Manager() {}
-	
-	Manager::Manager(common::Observable<void>* frame_update_observable) {
-		class BotManagerUpdateObserver : public common::Observer<void> {
-		public:
-			~BotManagerUpdateObserver() final {}
-
-			void OnEvent() final {
-
-			}
+	Manager::Manager(node::Graph& graph_, common::Observable<void>* frame_update_observable) : graph(graph_) {
+		auto callback = [&]() {
+			Update();
 		};
 
-		frame_update_observable->AddObserver(std::make_shared<BotManagerUpdateObserver>());
+		frame_update_observable->AddObserver(std::make_shared<common::NormalObserver<void>>(callback));
 	}
 
 	void Manager::OnNewRoundPreparation() noexcept {
@@ -48,8 +41,8 @@ namespace pokebot::bot {
 		terrorist_troops = std::make_unique<pokebot::bot::squad::Troops>(game::Team::T, terrorists);
 		ct_troops = std::make_unique<pokebot::bot::squad::Troops>(game::Team::CT, cts);
 
-		terrorist_troops->Establish(&game::game, &node::czworld);
-		ct_troops->Establish(&game::game, &node::czworld);
+		terrorist_troops->Establish(&game::game, &graph);
+		ct_troops->Establish(&game::game, &graph);
 
 		initialization_stage = InitializationStage::Player_Action_Ready;
 		round_started_timer.SetTime(1.0f);
@@ -113,7 +106,7 @@ namespace pokebot::bot {
 	void Manager::Insert(pokebot::util::PlayerName bot_name, const game::Team team, const game::Model model) POKEBOT_NOEXCEPT {
 		if (auto spawn_result = game::game.clients.Create(bot_name.c_str()); std::get<bool>(spawn_result)) {
 			bot_name = std::get<pokebot::util::PlayerName>(spawn_result).c_str();
-			auto insert_result = bots.insert({ bot_name.c_str(), Bot(bot_name.c_str(), team, model) });
+			auto insert_result = bots.insert({ bot_name.c_str(), Bot(graph, bot_name.c_str(), team, model) });
 			assert(insert_result.second);
 		}
 	}
@@ -168,15 +161,5 @@ namespace pokebot::bot {
 		bomber_name.clear();
 		memset(&radio_message, 0, sizeof(radio_message));
 		round_started_timer.SetTime(0.0f);
-	}
-
-	node::NodeID Manager::GetGoalNode(const std::string_view& Client_Name) const noexcept {
-		switch (const game::Team Target_Team = Get(Client_Name)->JoinedTeam(); Target_Team) {
-			case game::Team::T:
-				return terrorist_troops->GetPlatoonGoal(Client_Name.data());
-			case game::Team::CT:
-				return ct_troops->GetPlatoonGoal(Client_Name.data());
-		}
-		return {};
 	}
 }

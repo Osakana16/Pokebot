@@ -4,6 +4,7 @@ import :player_ai;
 import :radio_message;
 import pokebot.common.event_handler;
 
+import pokebot.terrain.graph;
 import pokebot.bot.squad;
 
 export namespace pokebot::bot {
@@ -27,13 +28,10 @@ export namespace pokebot::bot {
 		Bot* const Get(const std::string_view&) noexcept;
 		const Bot* const Get(const std::string_view&) const noexcept;
 		RadioMessage radio_message{};
+
+		node::Graph& graph;
 	public:
-		Manager();
-		Manager(common::Observable<void>* frame_update_observable);
-		inline static Manager& Instance() {
-			static Manager manager{};
-			return manager;
-		}
+		Manager(node::Graph&, common::Observable<void>* frame_update_observable);
 
 		const decltype(bomber_name)& Bomber_Name = bomber_name;
 
