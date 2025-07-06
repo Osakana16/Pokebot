@@ -15,12 +15,15 @@ export namespace pokebot::engine {
 		Defuse_Kit = 1 << 3
 	};
 
-	struct Observables {
-		common::NormalObservable<std::tuple<const edict_t* const, TextCache>> show_menu_observable{};
-		common::NormalObservable<std::tuple<const edict_t* const, ScoreStatus>> score_attribute_observable{};
-		common::NormalObservable<std::tuple<const edict_t* const, game::StatusIcon>> status_icon_observable{};
-		common::NormalObservable<std::tuple<const edict_t* const, const edict_t* const, int, int, int>> player_damage_taken_observable{};
+	template <typename... T>
+	using EdictParameter = std::tuple<const edict_t* const, T...>;
 
+	struct Observables {
+		common::NormalObservable<EdictParameter<TextCache>> show_menu_observable{};
+		common::NormalObservable<EdictParameter<ScoreStatus>> score_attribute_observable{};
+		common::NormalObservable<EdictParameter<game::StatusIcon>> status_icon_observable{};
+		common::NormalObservable<EdictParameter<const edict_t* const, int, int, int>> player_damage_taken_observable{};
+		
 		common::NormalObservable<void> new_round_observable{};
 	};
 
