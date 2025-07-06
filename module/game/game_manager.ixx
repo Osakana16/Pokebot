@@ -14,14 +14,6 @@ import pokebot.common.event_handler;
 export namespace pokebot::game {
 	constexpr float Default_Max_Move_Speed = 255.0f;
 
-	// variable type
-	enum class Var {
-		Normal = 0,
-		ReadOnly,
-		Password,
-		NoServer,
-		GameRef
-	};
 
 	class Host {
 		edict_t* host{};
@@ -34,42 +26,6 @@ export namespace pokebot::game {
 		const char* const HostName() const POKEBOT_NOEXCEPT;
 		const Vector& Origin() const POKEBOT_NOEXCEPT;
 		void Update();
-	};
-
-	// ConVar class from YapBot © Copyright YaPB Project Developers
-	// 
-	// simplify access for console variables
-	class ConVar final {
-	public:
-		cvar_t* ptr;
-
-		ConVar() = delete;
-		~ConVar() = default;
-
-		ConVar(const char* name, const char* initval, Var type = Var::NoServer, bool regMissing = false, const char* regVal = nullptr);
-		ConVar(const char* name, const char* initval, const char* info, bool bounded = true, float min = 0.0f, float max = 1.0f, Var type = Var::NoServer, bool regMissing = false, const char* regVal = nullptr);
-
-		explicit operator bool() const POKEBOT_NOEXCEPT { return ptr->value > 0.0f; }
-		explicit operator int() const POKEBOT_NOEXCEPT { return static_cast<int>(ptr->value); }
-		explicit operator float() const POKEBOT_NOEXCEPT { return ptr->value; }
-		explicit operator const char* () const POKEBOT_NOEXCEPT { return ptr->string; }
-
-		void operator=(const float val) POKEBOT_NOEXCEPT { g_engfuncs.pfnCVarSetFloat(ptr->name, val); }
-		void operator=(const int val) POKEBOT_NOEXCEPT { operator=(static_cast<float>(val)); }
-		void operator=(const char* val) POKEBOT_NOEXCEPT { g_engfuncs.pfnCvar_DirectSet(ptr, const_cast<char*>(val)); }
-
-	};
-
-	struct ConVarReg {
-		cvar_t reg;
-		util::fixed_string<64u> info;
-		util::fixed_string<64u> init;
-		const char* regval;
-		class ConVar* self;
-		float initial, min, max;
-		bool missing;
-		bool bounded;
-		Var type;
 	};
 
 	class Hostage final {
@@ -121,7 +77,6 @@ export namespace pokebot::game {
 		uint32_t round{};
 		bool is_newround{};
 
-		std::vector<ConVarReg> convars{};
 		std::optional<Vector> c4_origin{};
 		edict_t* backpack{};
 
@@ -143,52 +98,6 @@ export namespace pokebot::game {
 		client::ClientManager clients{};
 
 		bool RegisterClient(edict_t* client) { return clients.Register(client); }
-
-		void AddCvar(const char* name, const char* value, const char* info, bool bounded, float min, float max, Var varType, bool missingAction, const char* regval, ConVar* self) {
-			ConVarReg reg{
-				.reg = {
-					.name = name,
-					.string = value,
-					.flags = FCVAR_EXTDLL
-				},
-				.info = info,
-				.init = value,
-				.regval = regval,
-				.self = self,
-				.initial = (float)std::atof(value),
-				.min = min,
-				.max = max,
-				.missing = missingAction,
-				.bounded = bounded,
-				.type = varType
-			};
-
-			switch (varType) {
-				case Var::ReadOnly:
-					reg.reg.flags |= FCVAR_SPONLY | FCVAR_PRINTABLEONLY;
-					[[fallthrough]];
-				case Var::Normal:
-					reg.reg.flags |= FCVAR_SERVER;
-					break;
-				case Var::Password:
-					reg.reg.flags |= FCVAR_PROTECTED;
-					break;
-			}
-			convars.push_back(reg);
-		}
-
-		void RegisterCvars() {
-			for (auto& var : convars) {
-				ConVar& self = *var.self;
-				cvar_t& reg = var.reg;
-				self.ptr = g_engfuncs.pfnCVarGetPointer(reg.name);
-
-				if (!self.ptr) {
-					g_engfuncs.pfnCVarRegister(&var.reg);
-					self.ptr = g_engfuncs.pfnCVarGetPointer(reg.name);
-				}
-			}
-		}
 
 		void OnNewRound() noexcept {
 			round++;
@@ -283,7 +192,7 @@ export namespace pokebot::game {
 				}
 			}
 
-			RegisterCvars();
+			// RegisterCvars();
 		}
 #
 		bool Kill(const std::string_view& Client_Name) {
@@ -432,21 +341,6 @@ export namespace pokebot::game {
 	};
 
 	Game game{};
-
-
-	ConVar::ConVar(const char* name, const char* initval, Var type, bool regMissing, const char* regVal) {
-		game.AddCvar(name, initval, "", false, 0.0f, 0.0f, type, regMissing, regVal, this);
-	}
-
-	ConVar::ConVar(const char* name, const char* initval, const char* info, bool bounded, float min, float max, Var type, bool regMissing, const char* regVal) {
-		game.AddCvar(name, initval, info, bounded, min, max, type, regMissing, regVal, this);
-	}
-
-
-	ConVar poke_freeze{ "pk_freeze", "0" };
-	ConVar poke_fight{ "pk_fight", "1" };
-	ConVar poke_buy{ "pk_buy", "1" };
-
 
 	bool Hostage::RecoginzeOwner(const std::string_view& Client_Name) POKEBOT_NOEXCEPT {
 		auto client = game.clients.Get(Client_Name.data());

@@ -555,6 +555,12 @@
     <ClCompile Include="src\engine_messages.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="module\plugin\console\console_variable.ixx">
+      <Filter>module\plugin\console</Filter>
+    </ClCompile>
+    <ClCompile Include="src\console_variable.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE" />

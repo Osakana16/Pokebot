@@ -9,6 +9,7 @@ import pokebot.game.player;
 import pokebot.game.util;
 import pokebot.util;
 import pokebot.util.tracer;
+import pokebot.plugin.console.variable;
 
 namespace pokebot::bot {
 	Bot::Bot(pokebot::node::Graph& graph_, const std::string_view& Bot_Name, const game::Team Join_Team, const game::Model Select_Model) POKEBOT_NOEXCEPT : graph(graph_) {
@@ -455,7 +456,7 @@ namespace pokebot::bot {
 		TurnViewAngle();
 		TurnMovementAngle();
 #if 1
-		if (game::poke_fight) {
+		if (plugin::console::poke_fight) {
 			auto client = game::game.clients.Get(Name().data());
 			pokebot::util::PlayerName enemies_in_view[32]{};
 			int i{};

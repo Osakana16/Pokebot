@@ -5,6 +5,7 @@ import pokebot.common.event_handler;
 import pokebot.plugin.event;
 import pokebot.plugin.event.server_activation;
 
+import pokebot.plugin.console.variable;
 import pokebot.terrain.graph;
 import pokebot.util;
 import pokebot.game;
@@ -14,6 +15,9 @@ export namespace pokebot::plugin {
 	class Pokebot {
 		static edict_t* pWorldEntity;
 		static edict_t* spawned_entity;
+
+		
+		static std::vector<console::ConVarReg> convars;
 
 		inline static common::NormalObservable<plugin::event::ClientInformation> client_connection_observable{};
 		inline static common::NormalObservable<plugin::event::ClientInformation> client_disconnection_observable{};
@@ -28,6 +32,9 @@ export namespace pokebot::plugin {
 		inline static std::unique_ptr<pokebot::game::Game> game{};
 		inline static std::unique_ptr<pokebot::node::Graph> czworld{};
 	public:
+		static void AddConsoleVariable(const char* name, const char* value, const char* info, bool bounded, float min, float max, console::Var varType, bool missingAction, const char* regval, console::ConVar* self);
+		static void RegisterConsoleVariables() noexcept;
+
 		static bool IsPlayable() noexcept;
 
 		static void OnDllAttached() noexcept;

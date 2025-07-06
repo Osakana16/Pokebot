@@ -10,11 +10,13 @@ import pokebot.util.random;
 import pokebot.game.util;
 import pokebot.terrain.graph;
 import pokebot.plugin.console.command;
+import pokebot.plugin.console.variable;
 
 import pokebot.engine;
 
 edict_t* pokebot::plugin::Pokebot::pWorldEntity;
 edict_t* pokebot::plugin::Pokebot::spawned_entity;
+std::vector<pokebot::plugin::console::ConVarReg> pokebot::plugin::Pokebot::convars;
 
 namespace pokebot::plugin {
     void Pokebot::OnDllAttached() noexcept {
@@ -28,8 +30,10 @@ namespace pokebot::plugin {
             Pokebot::bot_manager = std::make_unique<pokebot::bot::Manager>(
                 *Pokebot::czworld,
                 &Pokebot::frame_update_observable,
-				&engine::EngineInterface::observables
+                &engine::EngineInterface::observables
             );
+
+			Pokebot::RegisterConsoleVariables();
         };
 
         server_activation_observable.AddObserver(std::make_shared<common::NormalObserver<event::EdictList>>(callback));
@@ -40,7 +44,7 @@ namespace pokebot::plugin {
     }
 
     void Pokebot::OnUpdate() noexcept {
-		frame_update_observable.Notifyobservers();
+        frame_update_observable.Notifyobservers();
 
         pokebot::game::game.PreUpdate();
         pokebot::game::game.PostUpdate();
@@ -61,14 +65,14 @@ namespace pokebot::plugin {
     }
 
     void Pokebot::OnClientConnect(edict_t* entity, const char* Address) noexcept {
-        client_connection_observable.Notifyobservers({ .entity=entity, .Address=Address });
+        client_connection_observable.Notifyobservers({ .entity = entity, .Address = Address });
     }
 
     void Pokebot::OnClientDisconnect(const edict_t* const disconnected_client) noexcept {
         client_disconnection_observable.Notifyobservers({ .entity = disconnected_client, .Address = nullptr });
         pokebot::game::game.clients.Disconnect(STRING(disconnected_client->v.netname));
     }
-    
+
     void Pokebot::OnServerActivate(edict_t edict_list[], int edict_count, int client_max) noexcept {
         server_activation_observable.Notifyobservers({ .edict_list = edict_list, .edict_count = edict_count, .client_max = client_max });
     }
@@ -80,7 +84,7 @@ namespace pokebot::plugin {
 
 
     void Pokebot::OnClientPutInServer(edict_t* client) noexcept {
-		client_put_in_server_observable.Notifyobservers(client);
+        client_put_in_server_observable.Notifyobservers(client);
     }
 
     void Pokebot::OnPlayerMenuSelect(edict_t* client) noexcept {
@@ -89,15 +93,71 @@ namespace pokebot::plugin {
 
     void Pokebot::OnGameInit() noexcept {
         game_init_observable.Notifyobservers();
-	}
+    }
 
     void Pokebot::OnEntitySpawned(edict_t* entity) noexcept {
         entity_spawn_obserable.Notifyobservers(entity);
-	}
+    }
 
     void Pokebot::AppendSpawnedEntity(edict_t* entity) noexcept { spawned_entity = entity; }
 
     bool Pokebot::IsPlayable() noexcept {
         return czworld->IsNavFileLoaded();
-	}
+    }
+
+    void Pokebot::AddConsoleVariable(const char* name, const char* value, const char* info, bool bounded, float min, float max, console::Var varType, bool missingAction, const char* regval, console::ConVar* self) {
+        console::ConVarReg reg{
+            .reg = {
+                .name = name,
+                .string = value,
+                .flags = FCVAR_EXTDLL
+            },
+            .info = info,
+            .init = value,
+            .regval = regval,
+            .self = self,
+            .initial = (float)std::atof(value),
+            .min = min,
+            .max = max,
+            .missing = missingAction,
+            .bounded = bounded,
+            .type = varType
+        };
+
+        switch (varType) {
+            case console::Var::ReadOnly:
+                reg.reg.flags |= FCVAR_SPONLY | FCVAR_PRINTABLEONLY;
+                [[fallthrough]];
+            case console::Var::Normal:
+                reg.reg.flags |= FCVAR_SERVER;
+                break;
+            case console::Var::Password:
+                reg.reg.flags |= FCVAR_PROTECTED;
+                break;
+        }
+        convars.push_back(reg);
+    }
+
+    void Pokebot::RegisterConsoleVariables() noexcept {
+        for (auto& var : convars) {
+            console::ConVar& self = *var.self;
+            cvar_t& reg = var.reg;
+            self.ptr = g_engfuncs.pfnCVarGetPointer(reg.name);
+
+            if (!self.ptr) {
+                g_engfuncs.pfnCVarRegister(&var.reg);
+                self.ptr = g_engfuncs.pfnCVarGetPointer(reg.name);
+            }
+        }
+    }
+}
+
+namespace pokebot::plugin::console {
+    ConVar::ConVar(const char* name, const char* initval, Var type, bool regMissing, const char* regVal) {
+        plugin::Pokebot::AddConsoleVariable(name, initval, "", false, 0.0f, 0.0f, type, regMissing, regVal, this);
+    }
+
+    ConVar::ConVar(const char* name, const char* initval, const char* info, bool bounded, float min, float max, Var type, bool regMissing, const char* regVal) {
+       plugin::Pokebot::AddConsoleVariable(name, initval, info, bounded, min, max, type, regMissing, regVal, this);
+    }
 }

@@ -6,6 +6,7 @@ import pokebot.database;
 import pokebot.game;
 import pokebot.game.weapon;
 import pokebot.util.random;
+import pokebot.plugin.console.variable;
 
 namespace pokebot::buy {
 	template<typename T, T min_money, T max_money>
@@ -384,7 +385,7 @@ namespace pokebot::buy {
 
 namespace pokebot::bot {
 	void Bot::BuyUpdate() POKEBOT_NOEXCEPT {
-		if (!game::poke_buy) {
+		if (!plugin::console::poke_buy) {
 			return;
 		}
 

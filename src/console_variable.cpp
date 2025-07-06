@@ -1,0 +1,1 @@
+module pokebot.plugin.console.variable;
