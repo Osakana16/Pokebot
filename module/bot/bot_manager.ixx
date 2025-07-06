@@ -4,6 +4,7 @@ import :player_ai;
 import :radio_message;
 import pokebot.common.event_handler;
 
+import pokebot.engine;
 import pokebot.terrain.graph;
 import pokebot.bot.squad;
 
@@ -31,7 +32,9 @@ export namespace pokebot::bot {
 
 		node::Graph& graph;
 	public:
-		Manager(node::Graph&, common::Observable<void>* frame_update_observable);
+		Manager(node::Graph&,
+				common::Observable<void>* frame_update_observable,
+				engine::Observables*);
 
 		const decltype(bomber_name)& Bomber_Name = bomber_name;
 

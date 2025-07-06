@@ -53,10 +53,5 @@ export namespace pokebot::plugin {
 		
 		static void OnMessageBegin(int msg_dest, int msg_type, const float* pOrigin, edict_t* edict);
 		static void OnMessageEnd();
-
-		static void OnVGUIMenuShown();
-		static void OnShowMenu();
-		static void OnWeaponListCalled();
-		static void OnTeamInfoCalled();
 	};
 }

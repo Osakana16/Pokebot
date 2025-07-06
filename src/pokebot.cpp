@@ -11,6 +11,8 @@ import pokebot.game.util;
 import pokebot.terrain.graph;
 import pokebot.plugin.console.command;
 
+import pokebot.engine;
+
 edict_t* pokebot::plugin::Pokebot::pWorldEntity;
 edict_t* pokebot::plugin::Pokebot::spawned_entity;
 
@@ -18,8 +20,16 @@ namespace pokebot::plugin {
     void Pokebot::OnDllAttached() noexcept {
         auto callback = [](const event::EdictList& event) {
             Pokebot::game = std::make_unique<pokebot::game::Game>(&Pokebot::frame_update_observable, &Pokebot::client_connection_observable, &Pokebot::client_disconnection_observable);
-            Pokebot::czworld = std::make_unique<pokebot::node::CZBotGraph>(&map_loaded_observable);
-            Pokebot::bot_manager = std::make_unique<pokebot::bot::Manager>(*Pokebot::czworld, &Pokebot::frame_update_observable);
+
+            Pokebot::czworld = std::make_unique<pokebot::node::CZBotGraph>(
+                &map_loaded_observable
+            );
+
+            Pokebot::bot_manager = std::make_unique<pokebot::bot::Manager>(
+                *Pokebot::czworld,
+                &Pokebot::frame_update_observable,
+				&engine::EngineInterface::observables
+            );
         };
 
         server_activation_observable.AddObserver(std::make_shared<common::NormalObserver<event::EdictList>>(callback));

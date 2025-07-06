@@ -1,6 +1,7 @@
 export module pokebot.bot: buy;
 import :player_ai;
 
+import pokebot.engine;
 import pokebot.database;
 import pokebot.game;
 import pokebot.game.weapon;
@@ -395,51 +396,51 @@ namespace pokebot::bot {
 				if (data == nullptr)
 					continue;
 
-				game::game.IssueCommand(Name().data(), "buy");
+				engine::EngineInterface::InputFakeclientCommand(client->client, "buy");
 				for (auto menu : data->menu[JoinedTeam() == game::Team::CT]) {
-					game::game.IssueCommand(Name().data(), std::format("menuselect {}", menu).c_str());
+					engine::EngineInterface::InputFakeclientCommand(client->client, std::format("menuselect {}", menu).c_str());
 				}
 			}
 
 			if (bool(node->equipment_flag & buy::Shield_Flag)) {
-				game::game.IssueCommand(Name().data(), "shield");
+				engine::EngineInterface::InputFakeclientCommand(client->client, "shield");
 				node->equipment_flag &= ~buy::Shield_Flag;
 			}
 
 			if (bool(node->equipment_flag & buy::DefuseKit_Flag)) {
-				game::game.IssueCommand(Name().data(), "defuser");
+				engine::EngineInterface::InputFakeclientCommand(client->client, "defuser");
 				node->equipment_flag &= ~buy::DefuseKit_Flag;
 			}
 
 			if (bool(node->equipment_flag & buy::NVG_Flag)) {
-				game::game.IssueCommand(Name().data(), "nvgs");
+				engine::EngineInterface::InputFakeclientCommand(client->client, "nvgs");
 				node->equipment_flag &= ~buy::NVG_Flag;
 			}
 
 			if (bool(node->equipment_flag & buy::Smoke_Flag)) {
-				game::game.IssueCommand(Name().data(), "sgren");
+				engine::EngineInterface::InputFakeclientCommand(client->client, "sgren");
 				node->equipment_flag &= ~buy::Smoke_Flag;
 			}
 
 			if (bool(node->equipment_flag & buy::HE_Flag)) {
-				game::game.IssueCommand(Name().data(), "hegren");
+				engine::EngineInterface::InputFakeclientCommand(client->client, "hegren");
 				node->equipment_flag &= ~buy::HE_Flag;
 			}
 
 			if (bool(node->equipment_flag & buy::Kelvar_Flag)) {
-				game::game.IssueCommand(Name().data(), "vest");
+				engine::EngineInterface::InputFakeclientCommand(client->client, "vest");
 				node->equipment_flag &= ~buy::Kelvar_Flag;
 			}
 
 			if (bool(node->equipment_flag & buy::Helmet_Flag)) {
-				game::game.IssueCommand(Name().data(), "vesthelm");
+				engine::EngineInterface::InputFakeclientCommand(client->client, "vesthelm");
 				node->equipment_flag &= ~buy::Helmet_Flag;
 			}
 
 			std::uint32_t flashbang_buy_bit = 0b000'0'0'0'0'0'10'00'0000000000'0000000000;
 			while ((node->equipment_flag & buy::Flashbang_Flag) > 0) {
 				if (bool(node->equipment_flag & flashbang_buy_bit)) {
-					game::game.IssueCommand(Name().data(), "flash");
+					engine::EngineInterface::InputFakeclientCommand(client->client, "flash");
 					// Set 0 to a bit to decrement the number of buy.
 					node->equipment_flag &= ~flashbang_buy_bit;
 					flashbang_buy_bit >>= 1;
@@ -449,7 +450,7 @@ namespace pokebot::bot {
 			std::uint32_t primaryammo_buy_bit = 0b000'0'0'0'0'0'00'00'0100000000'0000000000;
 			while ((node->equipment_flag & buy::Primary_Ammo_Flag) > 0) {
 				if (bool(node->equipment_flag & primaryammo_buy_bit)) {
-					game::game.IssueCommand(Name().data(), "buyammo1");
+					engine::EngineInterface::InputFakeclientCommand(client->client, "buyammo1");
 
 					// Set 0 to a bit to decrement the number of buy.
 					node->equipment_flag &= ~primaryammo_buy_bit;
@@ -460,7 +461,7 @@ namespace pokebot::bot {
 			std::uint32_t secondaryammo_buy_bit = 0b000'0'0'0'0'0'00'00'0000000000'0100000000;
 			while ((node->equipment_flag & buy::Secondary_Ammo_Flag) > 0) {
 				if (bool(node->equipment_flag & secondaryammo_buy_bit)) {
-					game::game.IssueCommand(Name().data(), "buyammo2");
+					engine::EngineInterface::InputFakeclientCommand(client->client, "buyammo2");
 
 					// Set 0 to a bit to decrement the number of buy.
 					node->equipment_flag &= ~secondaryammo_buy_bit;

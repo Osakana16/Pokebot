@@ -15,12 +15,41 @@ namespace pokebot::bot {
 		bool IsCounterTerrorist(const BotPair& target) noexcept { return target.second.JoinedTeam() == game::Team::CT; }
 	}
 
-	Manager::Manager(node::Graph& graph_, common::Observable<void>* frame_update_observable) : graph(graph_) {
-		auto callback = [&]() {
-			Update();
-		};
+	Manager::Manager(node::Graph& graph_, 
+					 common::Observable<void>* frame_update_observable,
+					 engine::Observables* observables) : graph(graph_) 
+	{
+		auto update_callback = [&]() { Update(); };
+		auto newround_callback = [&]() { OnNewRoundPreparation(); };
 
-		frame_update_observable->AddObserver(std::make_shared<common::NormalObserver<void>>(callback));
+		frame_update_observable->AddObserver(std::make_shared<common::NormalObserver<void>>(update_callback));
+		observables->new_round_observable.AddObserver(std::make_shared<common::NormalObserver<void>>(newround_callback));
+		observables->show_menu_observable.AddObserver(std::make_shared<common::NormalObserver<std::tuple<const edict_t* const, engine::TextCache>>>([&](const std::tuple<const edict_t* const, engine::TextCache>& args) {
+			auto player_name = STRING(std::get<0>(args)->v.netname);
+			if (auto bot = Get(player_name); bot != nullptr) {
+				static const std::unordered_map<engine::TextCache, pokebot::bot::Message, engine::TextCache::Hash> Menu_Cache{
+					{ "#Team_Select", pokebot::bot::Message::Team_Select },
+					{ "#Team_Select_Spect", pokebot::bot::Message::Team_Select },
+					{ "#IG_Team_Select", pokebot::bot::Message::Team_Select },
+					{ "#IG_Team_Select_Spect", pokebot::bot::Message::Team_Select },
+					{ "#IG_VIP_Team_Select", pokebot::bot::Message::Team_Select },
+					{ "#IG_VIP_Team_Select_Spect", pokebot::bot::Message::Team_Select },
+					{ "#Terrorist_Select", pokebot::bot::Message::Model_Select },
+					{ "#CT_Select", pokebot::bot::Message::Model_Select }
+				};
+
+				if (auto it = Menu_Cache.find(std::get<1>(args).c_str()); it != Menu_Cache.end()) {
+					Assign(player_name, it->second);
+				}
+			}
+		}));
+
+		observables->status_icon_observable.AddObserver(std::make_shared<common::NormalObserver<std::tuple<const edict_t* const, game::StatusIcon>>>([&](const std::tuple<const edict_t* const, game::StatusIcon>& args) {
+			auto player_name = STRING(std::get<0>(args)->v.netname);
+			if (auto bot = Get(player_name); bot != nullptr) {
+				game::game.clients.OnStatusIconShown(player_name, std::get<1>(args));
+			}
+		}));
 	}
 
 	void Manager::OnNewRoundPreparation() noexcept {

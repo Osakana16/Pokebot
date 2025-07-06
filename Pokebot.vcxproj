@@ -183,6 +183,7 @@
     <ClCompile Include="module\console\command\pk_menu.ixx" />
     <ClCompile Include="module\console\pk_bot.ixx" />
     <ClCompile Include="module\database\database.ixx" />
+    <ClCompile Include="module\engine\engine_interface.ixx" />
     <ClCompile Include="module\game\client\client.cpp" />
     <ClCompile Include="module\game\client\client.declaration.ixx" />
     <ClCompile Include="module\game\client\client.ixx" />
@@ -257,6 +258,8 @@
     <ClCompile Include="src\cznav_graph.cpp" />
     <ClCompile Include="src\dll.cpp" />
     <ClCompile Include="src\engine.cpp" />
+    <ClCompile Include="src\engine_interface.cpp" />
+    <ClCompile Include="src\engine_messages.cpp" />
     <ClCompile Include="src\game.cpp" />
     <ClCompile Include="src\pk_add.cpp" />
     <ClCompile Include="src\pk_kill.cpp" />

@@ -2,6 +2,7 @@ module pokebot.bot: player_ai;
 import pokebot.bot.behavior;
 
 import std;
+import pokebot.engine;
 import pokebot.game;
 import pokebot.game.client;
 import pokebot.game.player;
@@ -597,13 +598,15 @@ namespace pokebot::bot {
 				return;
 			}
 		}
-		game::game.IssueCommand(Name().data(), std::format("menuselect {}", value).c_str());
+		auto client = game::game.clients.Get(Name().data());
+		engine::EngineInterface::InputFakeclientCommand(client->client, std::format("menuselect {}", value).c_str());
 	}
 
 	void Bot::SelectWeapon(const game::weapon::ID Target_Weapon) {
 		if (HasWeapon(Target_Weapon)) {
 			current_weapon = Target_Weapon;
-			game::game.IssueCommand(Name().data(), std::format("{}", std::get<game::weapon::WeaponName>(game::weapon::Weapon_CVT[static_cast<int>(Target_Weapon) - 1])).c_str());
+			auto client = game::game.clients.Get(Name().data());
+			engine::EngineInterface::InputFakeclientCommand(client->client, std::format("{}", std::get<game::weapon::WeaponName>(game::weapon::Weapon_CVT[static_cast<int>(Target_Weapon) - 1])).c_str());
 		}
 	}
 
@@ -703,9 +706,10 @@ namespace pokebot::bot {
 
 	void Bot::OnRadioRecieved(const std::string_view& Sender_Name, const std::string_view& Radio_Sentence) POKEBOT_NOEXCEPT {
 		static bool is_sent{};
+		auto client = game::game.clients.Get(name.c_str());
 		auto Ignore = [] { /* Do nothing */ };
-		auto AlwaysPositive = [&] { game::game.IssueCommand(Name().data(), "radio3"); game::game.IssueCommand(Name().data(), "menuselect 1"); };
-		auto AlwaysNegative = [&] { game::game.IssueCommand(Name().data(), "radio3"); game::game.IssueCommand(Name().data(), "menuselect 8"); };
+		auto AlwaysPositive = [&] { engine::EngineInterface::InputFakeclientCommand(client->client, "radio3"); engine::EngineInterface::InputFakeclientCommand(client->client, "menuselect 1"); };
+		auto AlwaysNegative = [&] { engine::EngineInterface::InputFakeclientCommand(client->client, "radio3"); engine::EngineInterface::InputFakeclientCommand(client->client, "menuselect 8"); };
 
 		const std::unordered_map<util::fixed_string<60u>, std::function<void()>, util::fixed_string<60u>::Hash> Radios{
 			{ "#Cover_me", Ignore },
@@ -715,20 +719,20 @@ namespace pokebot::bot {
 				"#Regroup_team",
 				[&] {
 						goal_queue.AddGoalQueue(graph.GetNearest(Origin())->m_id);
-						game::game.IssueCommand(Name().data(), "radio3");
-						game::game.IssueCommand(Name().data(), "menuselect 1");
+						engine::EngineInterface::InputFakeclientCommand(client->client, "radio3");
+						engine::EngineInterface::InputFakeclientCommand(client->client, "menuselect 1");
 					}
 				},
 				{ "#Follow_me", AlwaysPositive },
 				{ "#Taking_fire", Ignore },
 				{
 					"#Go_go_go",
-					[this] {
+					[&] {
 						goal_node = node::Invalid_NodeID;
 						goal_vector = std::nullopt;
 						goal_queue.Clear();
-						game::game.IssueCommand(Name().data(), "radio3");
-						game::game.IssueCommand(Name().data(), "menuselect 1");
+						engine::EngineInterface::InputFakeclientCommand(client->client, "radio3");
+						engine::EngineInterface::InputFakeclientCommand(client->client, "menuselect 1");
 					}
 				},
 				{ "#Team_fall_back", Ignore },

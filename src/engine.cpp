@@ -2,7 +2,7 @@ module;
 #include "common.hpp"
 
 module pokebot: plugin;
-
+import pokebot.engine;
 import pokebot.bot;
 import pokebot.game;
 import pokebot.game.util;
@@ -468,31 +468,29 @@ namespace pokebot::plugin {
         RETURN_META(MRES_IGNORED);
     }
 
-    void Pokebot::OnVGUIMenuShown() {
-
-    }
-
-    void Pokebot::OnShowMenu() {
-
-    }
-
-    void Pokebot::OnWeaponListCalled() {
-
-    }
-
-    void Pokebot::OnTeamInfoCalled() {
-
-    }
 }
 
 C_DLLEXPORT int
 GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
+#if 1
+    meta_engfuncs.pfnMessageBegin = pokebot::engine::EngineInterface::OnMessageBegin;
+    meta_engfuncs.pfnMessageEnd = pokebot::engine::EngineInterface::OnMessageEnd;
+    meta_engfuncs.pfnWriteByte = pokebot::engine::EngineInterface::OnWriteByte;
+    meta_engfuncs.pfnWriteChar = pokebot::engine::EngineInterface::OnWriteChar;
+    meta_engfuncs.pfnWriteShort = pokebot::engine::EngineInterface::OnWriteShort;
+    meta_engfuncs.pfnWriteLong = pokebot::engine::EngineInterface::OnWriteLong;
+    meta_engfuncs.pfnWriteAngle = pokebot::engine::EngineInterface::OnWriteAngle;
+    meta_engfuncs.pfnWriteCoord = pokebot::engine::EngineInterface::OnWriteCoord;
+    meta_engfuncs.pfnWriteString = pokebot::engine::EngineInterface::OnWriteString;
+    meta_engfuncs.pfnWriteEntity = pokebot::engine::EngineInterface::OnWriteEntity;
+    meta_engfuncs.pfnClientCommand = pokebot::engine::EngineInterface::OnClientCommand;
+    meta_engfuncs.pfnCmd_Args = pokebot::engine::EngineInterface::OnArgs;
+    meta_engfuncs.pfnCmd_Argv = pokebot::engine::EngineInterface::OnArgv;
+    meta_engfuncs.pfnCmd_Argc = pokebot::engine::EngineInterface::OnArgc;
+#else
+
     meta_engfuncs.pfnMessageBegin = pokebot::plugin::Pokebot::OnMessageBegin;
     meta_engfuncs.pfnMessageEnd = pokebot::plugin::Pokebot::OnMessageEnd;
-
-    meta_engfuncs.pfnChangeLevel = [](const char* s1, const char* s2) {
-        RETURN_META(MRES_IGNORED);
-    };
 
     meta_engfuncs.pfnFindEntityByString = [](edict_t* pEdictStartSearchAfter, const char* pszField, const char* pszValue) -> edict_t* {
         if (gpGlobals->deathmatch) {
@@ -501,10 +499,6 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
             }
         }
         RETURN_META_VALUE(MRES_IGNORED, nullptr);
-    };
-
-    meta_engfuncs.pfnRemoveEntity = [](edict_t* e) {
-        RETURN_META(MRES_IGNORED);
     };
 
     meta_engfuncs.pfnClientCommand = [](edict_t* pEdict, const char* szFmt, ...) POKEBOT_NOEXCEPT{
@@ -595,15 +589,7 @@ GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* interfaceVersion) {
         }
         RETURN_META_VALUE(MRES_IGNORED, 0);
     };
-
-    meta_engfuncs.pfnSetClientMaxspeed = [](const edict_t* pEdict, float fNewMaxspeed) {
-        RETURN_META(MRES_IGNORED);
-    };
-
-    meta_engfuncs.pfnGetPlayerUserId = [](edict_t* e) -> int {
-        RETURN_META_VALUE(MRES_IGNORED, 0);
-    };
-
+#endif
     memcpy(pengfuncsFromEngine, &meta_engfuncs, sizeof(enginefuncs_t));
     return TRUE;
 }
