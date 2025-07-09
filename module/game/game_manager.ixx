@@ -2,7 +2,6 @@
 import :cs_game_manager;
 
 import pokebot.database;
-import pokebot.game.client;
 import pokebot.game.util;
 import pokebot.game.player;
 import pokebot.game.entity;
@@ -13,7 +12,7 @@ import pokebot.common.event_handler;
 
 export namespace pokebot::game {
 	constexpr float Default_Max_Move_Speed = 255.0f;
-
+	class Game;
 
 	class Host {
 		edict_t* host{};
@@ -30,13 +29,14 @@ export namespace pokebot::game {
 
 	class Hostage final {
 		Hostage() = default;
-		Hostage(const Hostage&);
+		Hostage(const Hostage&) = default;
 		Hostage& operator=(const Hostage&) = delete;
 
 		util::Time time{};
 
 		const edict_t* entity;
 		pokebot::util::PlayerName owner_name{};
+		Game* game{};
 	public:
 		operator const edict_t* const () const POKEBOT_NOEXCEPT {
 			return entity;
@@ -53,19 +53,14 @@ export namespace pokebot::game {
 		bool RecoginzeOwner(const std::string_view& Client_Name) POKEBOT_NOEXCEPT;
 
 		void Update() POKEBOT_NOEXCEPT;
-		bool IsUsed() const POKEBOT_NOEXCEPT;
+		bool IsUsed() const POKEBOT_NOEXCEPT { return false;  }
 		bool IsOwnedBy(const std::string_view& Name) const POKEBOT_NOEXCEPT { return (IsUsed() && owner_name.data() == Name); }
 		bool IsReleased() const POKEBOT_NOEXCEPT { return (entity->v.effects & EF_NODRAW); }
 		const Vector& Origin() const POKEBOT_NOEXCEPT {
 			return entity->v.origin;
 		}
 
-		Hostage(Hostage&& h) POKEBOT_NOEXCEPT {
-			owner_name = std::move(h.owner_name);
-			assert(h.owner_name.empty());
-			entity = h.entity;
-			h.entity = nullptr;
-		}
+		Hostage(Game* game, Hostage&&);
 	};
 
 	class Game : public CSGameBase {
@@ -81,7 +76,6 @@ export namespace pokebot::game {
 		edict_t* backpack{};
 
 	public:
-		Game() = default;
 		Game(pokebot::common::Observable<void>* frame_update_observable,
 			 pokebot::plugin::event::ClientInformationObservable* client_connection_observable,
 			 pokebot::plugin::event::ClientInformationObservable* client_disconnection_observable);
@@ -95,13 +89,9 @@ export namespace pokebot::game {
 		}
 
 		Host host{};
-		client::ClientManager clients{};
-
-		bool RegisterClient(edict_t* client) { return clients.Register(client); }
 
 		void OnNewRound() noexcept {
 			round++;
-			clients.OnNewRound();
 
 			auto getNumber = [this](const char* class_name) -> size_t {
 				size_t number{};
@@ -115,7 +105,7 @@ export namespace pokebot::game {
 
 		void PreUpdate() {
 #if 0
-			if (game::game.IsCurrentMode(game::MapFlags::Demolition)) {
+			if (game.IsCurrentMode(game::MapFlags::Demolition)) {
 				if (!c4_origin.has_value()) {
 					if (bomber_name.empty()) {
 						// When the bomb is dropped:
@@ -153,14 +143,6 @@ export namespace pokebot::game {
 #endif
 		}
 
-		void PostUpdate() noexcept {
-			for (auto& client : clients.GetAll()) {
-				if (client.second.IsFakeClient()) {
-					const_cast<client::Client&>(client.second).ResetKey();
-				}
-			}
-		}
-
 		void Init(edict_t* entities, int max) {
 			map_flags = static_cast<MapFlags>(0);
 			hostages.clear();
@@ -178,7 +160,7 @@ export namespace pokebot::game {
 				} else if (classname == "func_vip_safetyzone" || classname == "info_vip_safetyzone") {
 					map_flags |= MapFlags::Assassination; // assassination map
 				} else if (classname == "hostage_entity") {
-					hostages.push_back(std::move(Hostage::AttachHostage(ent)));
+					// hostages.push_back(std::move(Hostage::AttachHostage(ent)));
 					map_flags |= MapFlags::HostageRescue; // rescue map
 				} else if (classname == "func_bomb_target" || classname == "info_bomb_target") {
 					map_flags |= MapFlags::Demolition; // defusion map
@@ -190,17 +172,6 @@ export namespace pokebot::game {
 						map_flags &= ~MapFlags::HostageRescue;
 					}
 				}
-			}
-
-			// RegisterCvars();
-		}
-#
-		bool Kill(const std::string_view& Client_Name) {
-			if (PlayerExists(Client_Name.data())) {
-				MDLL_ClientKill(const_cast<edict_t*>(clients.Get(Client_Name.data())->Edict()));
-				return true;
-			} else {
-				return false;
 			}
 		}
 
@@ -224,8 +195,6 @@ export namespace pokebot::game {
 
 			return hostages[Index].Origin();
 		}
-
-		bool PlayerExists(const char* const Client_Name) const POKEBOT_NOEXCEPT { return clients.Get(Client_Name) != nullptr; }
 
 		bool IsHostageUsed(const int Index) const POKEBOT_NOEXCEPT {
 			return hostages[Index].IsUsed();
@@ -275,75 +244,17 @@ export namespace pokebot::game {
 		MapFlags GetScenario() const POKEBOT_NOEXCEPT {
 			return map_flags;
 		}
-
-		void IssueCommand(const std::string_view& Client_Name, util::fixed_string<32u> sentence) POKEBOT_NOEXCEPT {
-			bot_args.clear();
-			char* arg = strtok(sentence.data(), " ");
-			bot_args.push_back(arg);
-			while ((arg = strtok(nullptr, " ")) != nullptr) {
-				bot_args.push_back(arg);
-			}
-			MDLL_ClientCommand(const_cast<edict_t*>(clients.Get(Client_Name.data())->Edict()));
-			bot_args.clear();
-		}
-
-		void OnVIPChanged(const std::string_view Client_Name) POKEBOT_NOEXCEPT {
-			clients.OnVIPChanged(Client_Name);
-		}
-
-		void OnDefuseKitEquiped(const std::string_view Client_Name) POKEBOT_NOEXCEPT {
-			clients.OnDefuseKitEquiped(Client_Name);
-		}
-
-		void OnDeath(const std::string_view Client_Name) POKEBOT_NOEXCEPT {
-			clients.OnDeath(Client_Name);
-		}
-
-		void OnDamageTaken(const std::string_view Client_Name, const edict_t* Inflictor, const int Health, const int Armor, const int Bit) POKEBOT_NOEXCEPT {
-			clients.OnDamageTaken(Client_Name, Inflictor, Health, Armor, Bit);
-		}
-
-		void OnMoneyChanged(const std::string_view Client_Name, const int Money) POKEBOT_NOEXCEPT {
-			clients.OnMoneyChanged(Client_Name, Money);
-		}
-
-		void OnScreenFaded(const std::string_view Client_Name) POKEBOT_NOEXCEPT {
-			clients.OnScreenFaded(Client_Name);
-		}
-
-		void OnNVGToggled(const std::string_view Client_Name, const bool Toggled) POKEBOT_NOEXCEPT {
-			clients.OnNVGToggled(Client_Name, Toggled);
-		}
-
-		void OnWeaponChanged(const std::string_view Client_Name, const weapon::ID Weapon_ID) POKEBOT_NOEXCEPT {
-			clients.OnWeaponChanged(Client_Name, Weapon_ID);
-		}
-
-		void OnClipChanged(const std::string_view Client_Name, const weapon::ID Weapon_ID, const int Clip) POKEBOT_NOEXCEPT {
-			clients.OnClipChanged(Client_Name, Weapon_ID, Clip);
-		}
-
-		void OnAmmoPickedup(const std::string_view Client_Name, const weapon::ammo::ID Ammo_ID, const int Ammo) POKEBOT_NOEXCEPT {
-			clients.OnAmmoPickedup(Client_Name, Ammo_ID, Ammo);
-		}
-
-		void OnTeamAssigned(const std::string_view Client_Name, Team Team) POKEBOT_NOEXCEPT {
-			clients.OnTeamAssigned(Client_Name, Team);
-		}
-
-		void OnItemChanged(const std::string_view Client_Name, Item Item_ID) POKEBOT_NOEXCEPT {
-			clients.OnItemChanged(Client_Name, Item_ID);
-		}
-
-		void OnStatusIconShown(const std::string_view Client_Name, const StatusIcon Icon) POKEBOT_NOEXCEPT {
-			clients.OnStatusIconShown(Client_Name, Icon);
-		}
 	};
-
-	Game game{};
+#if 0
+	Hostage::Hostage(Game *game_, Hostage&& h) : game(game_) {
+		owner_name = std::move(h.owner_name);
+		assert(h.owner_name.empty());
+		entity = h.entity;
+		h.entity = nullptr;
+	}
 
 	bool Hostage::RecoginzeOwner(const std::string_view& Client_Name) POKEBOT_NOEXCEPT {
-		auto client = game.clients.Get(Client_Name.data());
+		auto client = game->clients.Get(Client_Name.data());
 		if (client != nullptr && game::Distance(client->origin, entity->v.origin) < 83.0f && client->GetTeam() == game::Team::CT) {
 			if (owner_name.c_str() == Client_Name) {
 				owner_name.clear();
@@ -359,11 +270,12 @@ export namespace pokebot::game {
 		if (owner_name.empty())
 			return;
 
-		auto owner = game.clients.Get(owner_name.data());
+		auto owner = game->clients.Get(owner_name.data());
 		const bool Is_Owner_Terrorist = owner->GetTeam() == game::Team::T;
 		if (IsReleased() || owner->GetTeam() == game::Team::T || game::Distance(owner->origin, entity->v.origin) > 200.0f)
 			owner_name.clear();
 	}
 
-	bool Hostage::IsUsed() const POKEBOT_NOEXCEPT { return game.PlayerExists(owner_name.data()); }
+	bool Hostage::IsUsed() const POKEBOT_NOEXCEPT { return game->PlayerExists(owner_name.data()); }
+#endif
 }

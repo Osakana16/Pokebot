@@ -4,6 +4,8 @@ import :player_ai;
 import :radio_message;
 import pokebot.common.event_handler;
 
+import pokebot.game;
+import pokebot.game.client;
 import pokebot.engine;
 import pokebot.terrain.graph;
 import pokebot.bot.squad;
@@ -30,9 +32,13 @@ export namespace pokebot::bot {
 		const Bot* const Get(const std::string_view&) const noexcept;
 		RadioMessage radio_message{};
 
+		game::Game& game;
 		node::Graph& graph;
+		game::client::ClientManager& clients;
 	public:
-		Manager(node::Graph&,
+		Manager(game::Game&,
+				node::Graph&,
+				game::client::ClientManager& ,
 				common::Observable<void>* frame_update_observable,
 				engine::Observables*);
 
@@ -61,7 +67,7 @@ export namespace pokebot::bot {
 		* @param model The model of the bot.
 		* @param difficulty The difficulty level of the bot.
 		*/
-		void Insert(pokebot::util::PlayerName bot_name, const game::Team team, const game::Model model) POKEBOT_NOEXCEPT;
+		void Insert(pokebot::util::PlayerName bot_name, const game::Team team, game::client::ClientManager&, const game::Model model) POKEBOT_NOEXCEPT;
 
 		/**
 		* @brief Kick a bot from the game.

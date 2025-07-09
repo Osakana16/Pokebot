@@ -16,7 +16,7 @@ import pokebot.terrain.goal;
 import pokebot.util;
 
 #define BEHAVIOR_PRIVATE namespace
-#define BEHAVIOR_IF(A) [](const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT { return A; }
+#define BEHAVIOR_IF(A) [](const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT { return A; }
 #define BEHAVIOR_IFELSE(AIF,A_PROCESS,BIF,B_PROCESS) Condition::If(AIF, A_PROCESS), Condition::If(BIF, B_PROCESS)
 #define BEHAVIOR_IFELSE_TEMPLATE(IF,A_PROCESS,B_PROCESS) Condition::If(IF<true>, A_PROCESS), Condition::If(IF<false>, B_PROCESS)
 
@@ -28,73 +28,73 @@ import pokebot.util;
 namespace pokebot::bot::behavior {
 	namespace {
 		template<bool b>
-		bool IsSeeingEnemy(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool IsSeeingEnemy(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			pokebot::util::PlayerName enemies_in_view[32]{};
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, enemies_in_view[0].size() >= 0);
 		}
 
 		template<bool b>
-		bool HasPrimaryWeapon(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool HasPrimaryWeapon(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (self->HasPrimaryWeapon()));
 		}
 
 		template<bool b>
-		bool HasSecondaryWeapon(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool HasSecondaryWeapon(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (self->HasSecondaryWeapon()));
 		}
 
 		template<bool b>
-		bool HasMelee(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool HasMelee(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			return true;
 		}
 
 		template<bool b>
-		bool HasGrenade(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool HasGrenade(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (self->HasWeapon(game::weapon::ID::HEGrenade)));
 		}
 
 		template<bool b>
-		bool HasFlashbang(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool HasFlashbang(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (self->HasWeapon(game::weapon::ID::Flashbang)));
 		}
 
 		template<bool b>
-		bool HasSmoke(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool HasSmoke(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (self->HasWeapon(game::weapon::ID::Smoke)));
 		}
 
 		template<bool b>
-		bool IsEquipingArmour(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool IsEquipingArmour(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			return false;
 		}
 
 		template<bool b>
-		bool IsEquipingHelmet(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool IsEquipingHelmet(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			return false;
 		}
 
 		template<bool b>
-		bool IsDying(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool IsDying(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (self->Health() <= 25));
 		}
 
 		template<bool b>
-		bool IsLonely(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool IsLonely(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			return false;
 		}
 
 		template<bool b>
-		bool HasEnoughPrimaryAmmo(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool HasEnoughPrimaryAmmo(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			return false;
 		}
 
 		template<bool b>
-		bool HasEnoughSecondaryAmmo(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool HasEnoughSecondaryAmmo(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			return false;
 		}
 
 		template<node::GoalKind kind>
-		Status SetGoal(Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		Status SetGoal(Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			if (graph->IsOnNode(self->Origin(), self->goal_node) && graph->IsSameGoal(self->goal_node, kind))
 				return Status::Success;
 
@@ -115,68 +115,68 @@ namespace pokebot::bot::behavior {
 		bool Always(const Bot* const, const node::Graph* const graph) POKEBOT_NOEXCEPT { return b; }
 
 		template<game::Team value>
-		bool Is(const Bot* const self, const node::Graph* const graph) { return self->JoinedTeam() == value; }
+		bool Is(const Bot* const self, const game::Game* const game, const node::Graph* const graph) { return self->JoinedTeam() == value; }
 
 		template<bool b>
-		bool IsPlayingGame(const Bot* const self, const node::Graph* const graph) {
+		bool IsPlayingGame(const Bot* const self, const game::Game* const game, const node::Graph* const graph) {
 			return false;
 		}
 
 		template<bool b>
-		bool CanSeeEnemy(const Bot* const self, const node::Graph* const graph) { RETURN_BEHAVIOR_TRUE_OR_FALSE(b, self->IsLookingAtEnemy()); }
+		bool CanSeeEnemy(const Bot* const self, const game::Game* const game, const node::Graph* const graph) { RETURN_BEHAVIOR_TRUE_OR_FALSE(b, self->IsLookingAtEnemy()); }
 
 		template<bool b>
-		bool IsBombPlanted(const Bot* const self, const node::Graph* const graph) {
-			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, game::game.GetC4Origin().has_value());
+		bool IsBombPlanted(const Bot* const self, const game::Game* const game, const node::Graph* const graph) {
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, game->GetC4Origin().has_value());
 		}
 
 		template<bool b>
-		bool IsTickingToExplosion(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool IsTickingToExplosion(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			return false;
 		}
 
 		template<bool b>
-		bool IsOnBomb(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
-			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (game::Distance(self->Origin(), *game::game.GetC4Origin()) <= 50.0f));
+		bool IsOnBomb(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (game::Distance(self->Origin(), *game->GetC4Origin()) <= 50.0f));
 		}
 
 		template<bool b>
-		bool HasGoal(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool HasGoal(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, self->goal_node != node::Invalid_NodeID);
 		}
 
 		template<bool b>
-		bool HasBomb(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool HasBomb(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, self->HasWeapon(game::weapon::ID::C4));
 		}
 
 		template<bool b>
-		bool IsJumping(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool IsJumping(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, !self->IsOnFloor());
 		}
 
 		template<bool b>
-		bool IsDucking(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool IsDucking(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, self->IsDucking());
 		}
 
 		template<bool b>
-		bool IsSwimming(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool IsSwimming(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, self->IsSwimming());
 		}
 
 		template<bool b>
-		bool IsBlind(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool IsBlind(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, true);
 		}
 
 		template<bool b>
-		bool IsUsing(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool IsUsing(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, self->IsPressingKey(game::player::ActionKey::Use));
 		}
 
 		template<bool b>
-		bool IsDriving(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool IsDriving(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, self->IsDriving());
 		}
 
@@ -196,8 +196,8 @@ namespace pokebot::bot::behavior {
 		}
 
 		template<game::MapFlags flag>
-		bool IsCurrentMode(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
-			return game::game.IsCurrentMode(flag);
+		bool IsCurrentMode(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+			return game->IsCurrentMode(flag);
 		}
 
 		template<bool b>
@@ -206,39 +206,39 @@ namespace pokebot::bot::behavior {
 		}
 
 		template<bool b>
-		bool IsFeelingLikeBravely(const Bot* const self, const node::Graph* const graph) {
+		bool IsFeelingLikeBravely(const Bot* const self, const game::Game* const game, const node::Graph* const graph) {
 			return self->mood.brave >= 50;
 		}
 
 		template<bool b>
-		bool IsFeelingLikeCooperation(const Bot* const self, const node::Graph* const graph) {
+		bool IsFeelingLikeCooperation(const Bot* const self, const game::Game* const game, const node::Graph* const graph) {
 			return self->mood.coop >= 50;
 		}
 
 		template<bool b>
-		bool IsVip(const Bot* const self, const node::Graph* const graph) {
+		bool IsVip(const Bot* const self, const game::Game* const game, const node::Graph* const graph) {
 			return false;
 		}
 
 		template<bool b, typename T>
-		bool Is(const Bot* const self, const node::Graph* const graph) {
+		bool Is(const Bot* const self, const game::Game* const game, const node::Graph* const graph) {
 			static_assert(false);
 			return false;
 		}
 
 		template<bool b, game::Team specified_team>
-		bool Is(const Bot* const self, const node::Graph* const graph) {
+		bool Is(const Bot* const self, const game::Game* const game, const node::Graph* const graph) {
 			return self->JoinedTeam() == specified_team;
 		}
 		BEHAVIOR_CREATE(Sequence, reset_goal_to_retreat);
 		BEHAVIOR_CREATE(Priority, change_shotting_by_distance);
 
-		bool HasGuns(const bot::Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool HasGuns(const bot::Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			return self->HasPrimaryWeapon() || self->HasSecondaryWeapon();
 		}
 
 		template<bool b>
-		bool HasCrisis(const bot::Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool HasCrisis(const bot::Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			if constexpr (b) {
 				return !self->IsGoodCondition();
 			} else {
@@ -247,12 +247,12 @@ namespace pokebot::bot::behavior {
 		}
 
 		template<bool b>
-		bool IsEnemyFar(const bot::Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		bool IsEnemyFar(const bot::Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, self->IsEnemyFar());
 		}
 
 
-		auto LookAt = [](Bot* const self, const node::Graph* const graph, const Vector& Dest, const float Range) POKEBOT_NOEXCEPT->Status{
+		auto LookAt = [](Bot* const self, const game::Game* const game, const node::Graph* const graph, const Vector& Dest, const float Range) POKEBOT_NOEXCEPT->Status{
 			self->look_direction.view = Dest;
 			self->look_direction.movement = Dest;
 			return Status::Success;
@@ -265,7 +265,7 @@ export namespace pokebot::bot::behavior {
 ;
 		
 	template<game::player::ActionKey key>
-	Status BotPressesKey(Bot* const self, const node::Graph* const graph) {
+	Status BotPressesKey(Bot* const self, const game::Game* const game, const node::Graph* const graph) {
 		if (!self->IsPressingKey(key)) {
 			self->PressKey(key);
 			return Status::Success;
@@ -275,12 +275,12 @@ export namespace pokebot::bot::behavior {
 	}
 	
 	template<node::GoalKind kind>
-	Status BotSetsGoal(Bot* const self, const node::Graph* const graph) {
-		return SetGoal<kind>(self, graph);
+	Status BotSetsGoal(Bot* const self, const game::Game* const game, const node::Graph* const graph) {
+		return SetGoal<kind>(self, game, graph);
 	}
 
 	template<game::weapon::ID weapon>
-	Status BotChangesIfNotSelected(Bot* const self, const node::Graph* const graph) {
+	Status BotChangesIfNotSelected(Bot* const self, const game::Game* const game, const node::Graph* const graph) {
 		if (!self->IsCurrentWeapon(weapon)) {
 			self->SelectWeapon(weapon);
 			return Status::Success;
@@ -290,7 +290,7 @@ export namespace pokebot::bot::behavior {
 	}
 
 	void DefineAction() {
-		reset_goal->Define([](Bot* const self, const node::Graph* const graph) -> Status {
+		reset_goal->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
 			if (self->goal_node == node::Invalid_NodeID && self->next_dest_node == node::Invalid_NodeID)
 				return Status::Failed;
 
@@ -300,7 +300,7 @@ export namespace pokebot::bot::behavior {
 			return Status::Success;
 		});
 
-		change_primary->Define([](Bot* const self, const node::Graph* const graph) -> Status {
+		change_primary->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
 			if (self->HasPrimaryWeapon()) {
 				self->SelectPrimaryWeapon();
 				return Status::Success;
@@ -309,7 +309,7 @@ export namespace pokebot::bot::behavior {
 			}
 		});
 
-		change_secondary->Define([](Bot* const self, const node::Graph* const graph) -> Status {
+		change_secondary->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
 			if (self->HasSecondaryWeapon()) {
 				self->SelectSecondaryWeapon();
 				return Status::Success;
@@ -324,15 +324,15 @@ export namespace pokebot::bot::behavior {
 		change_smoke->Define(BotChangesIfNotSelected<game::weapon::ID::Smoke>);
 		change_c4->Define(BotChangesIfNotSelected<game::weapon::ID::C4>);
 
-		look_c4->Define([](Bot* const self, const node::Graph* const graph) -> Status {
-			return LookAt(self, graph, *game::game.GetC4Origin() - Vector{ 0, 0, 36 }, 1.0f);
+		look_c4->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
+			return LookAt(self, game, graph, *game->GetC4Origin() - Vector{ 0, 0, 36 }, 1.0f);
 		});
 
-		look_hostage->Define([](Bot* const self, const node::Graph* const graph) -> Status {
+		look_hostage->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
 			return Status::Failed;
 		});
 
-		look_enemy->Define([](Bot* const self, const node::Graph* const graph) -> Status {
+		look_enemy->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
 			if (self->HasEnemy()) {
 				self->LookAtClosestEnemy();
 				return Status::Success;
@@ -341,11 +341,11 @@ export namespace pokebot::bot::behavior {
 			}
 		});
 
-		look_door->Define([](Bot* const self, const node::Graph* const graph) -> Status {
+		look_door->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
 			return Status::Failed;
 		});
 
-		look_button->Define([](Bot* const self, const node::Graph* const graph) -> Status {
+		look_button->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
 			return Status::Failed;
 		});
 
@@ -358,7 +358,7 @@ export namespace pokebot::bot::behavior {
 		change_silencer->Define(BotPressesKey<game::player::ActionKey::Attack2>);
 		adjust_scope->Define(BotPressesKey<game::player::ActionKey::Attack2>);
 
-		set_goal_team_objective->Define([](Bot* const self, const node::Graph* const graph) -> Status {
+		set_goal_team_objective->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
 			// const node::NodeID Node = Manager::Instance().GetGoalNode(self->Name().c_str());
 			const node::NodeID Node = {};
 			assert(Node != node::Invalid_NodeID);
@@ -373,7 +373,7 @@ export namespace pokebot::bot::behavior {
 				return Status::Failed;
 		});
 
-		rapid_fire->Define([](Bot* const self, const node::Graph* const graph) -> Status {
+		rapid_fire->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
 			if (self->IsPressingKey(game::player::ActionKey::Attack)) {
 				self->PressKey(game::player::ActionKey::Attack);
 				return Status::Running;
@@ -383,15 +383,15 @@ export namespace pokebot::bot::behavior {
 			}
 		});
 
-		lock->Define([](Bot* const self, const node::Graph* const graph) -> Status {
+		lock->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
 			self->LockByBomb();
 			return Status::Success;
 		});
 
-		set_goal_c4_node->Define([](Bot* const self, const node::Graph* const graph) -> Status {
-			auto area = graph->GetNearest(*game::game.GetC4Origin());
+		set_goal_c4_node->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
+			auto area = graph->GetNearest(*game->GetC4Origin());
 			for (const auto& Another_Origin : { Vector{}, Vector{50.0f, 0.0f, 0.0f}, Vector{ -50.0f, 0.0f, 0.0f }, Vector{0.0f, 50.0f, 0.0f}, Vector{0.0f, -50.0f, 0.0f} }) {
-				if ((area = graph->GetNearest(*game::game.GetC4Origin() + Another_Origin)) != nullptr) {
+				if ((area = graph->GetNearest(*game->GetC4Origin() + Another_Origin)) != nullptr) {
 					break;
 				}
 			}
@@ -405,7 +405,7 @@ export namespace pokebot::bot::behavior {
 				return Status::Failed;
 		});
 
-		move_vector->Define([](Bot* const self, const node::Graph* const graph) -> Status {
+		move_vector->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
 			if (!self->goal_vector.has_value())
 				return Status::Failed;
 
@@ -417,24 +417,24 @@ export namespace pokebot::bot::behavior {
 			return Status::Success;
 		});
 
-		set_goal_c4_vector->Define([](Bot* const self, const node::Graph* const graph) -> Status {
-			if (!game::game.GetC4Origin().has_value() || self->goal_vector.has_value())
+		set_goal_c4_vector->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
+			if (!game->GetC4Origin().has_value() || self->goal_vector.has_value())
 				return Status::Failed;
 
-			self->goal_vector = *game::game.GetC4Origin();
+			self->goal_vector = *game->GetC4Origin();
 			return Status::Success;
 		});
 
-		set_goal_hostage_vector->Define([](Bot* const self, const node::Graph* const graph) -> Status {
+		set_goal_hostage_vector->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
 			return Status::Success;
 		});
 
-		set_goal_backpack_node->Define([](Bot* const self, const node::Graph* const graph) -> Status {
-			auto area = graph->GetNearest(*game::game.GetBackpackOrigin());
+		set_goal_backpack_node->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
+			auto area = graph->GetNearest(*game->GetBackpackOrigin());
 			if (area == nullptr) {
 				return Status::Failed;
 			}
-			node::NodeID id = graph->GetNearest(*game::game.GetBackpackOrigin())->m_id;
+			node::NodeID id = graph->GetNearest(*game->GetBackpackOrigin())->m_id;
 			if (graph->IsOnNode(self->Origin(), id))
 				return Status::Failed;
 
@@ -444,15 +444,15 @@ export namespace pokebot::bot::behavior {
 				return Status::Failed;
 		});
 
-		set_goal_backpack_vector->Define([](Bot* const self, const node::Graph* const graph) -> Status {
-			if (!game::game.GetBackpackOrigin().has_value() || self->goal_vector.has_value())
+		set_goal_backpack_vector->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
+			if (!game->GetBackpackOrigin().has_value() || self->goal_vector.has_value())
 				return Status::Failed;
 
-			self->goal_vector = *game::game.GetBackpackOrigin();
+			self->goal_vector = *game->GetBackpackOrigin();
 			return Status::Success;
 		});
 
-		set_goal_from_team_objective_within_range->Define([](Bot* const self, const node::Graph* const graph) -> Status {
+		set_goal_from_team_objective_within_range->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
 			auto findCircleLine = [self, graph](const Vector& Origin, const float Distance) POKEBOT_NOEXCEPT -> node::NodeID {
 				node::NodeID id = node::Invalid_NodeID;
 				for (const auto& Line : { Vector(Distance, .0f, .0f), Vector(-Distance, .0f, .0f), Vector(.0f, Distance, .0f), Vector(.0f, -Distance, .0f) }) {
@@ -489,11 +489,11 @@ export namespace pokebot::bot::behavior {
 			return Status::Failed;
 		});
 
-		set_goal_from_c4_within_range->Define([](Bot* const self, const node::Graph* const graph) -> Status {
-			auto findCircleLine = [graph](const Vector& Origin, const float Distance) POKEBOT_NOEXCEPT -> node::NodeID {
+		set_goal_from_c4_within_range->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
+			auto findCircleLine = [&](const Vector& Origin, const float Distance) POKEBOT_NOEXCEPT -> node::NodeID {
 				node::NodeID id = node::Invalid_NodeID;
 				for (const auto& Line : { Vector(Distance, .0f, .0f), Vector(-Distance, .0f, .0f), Vector(.0f, Distance, .0f), Vector(.0f, -Distance, .0f) }) {
-					auto area = graph->GetNearest(*game::game.GetC4Origin() + Line, FLT_MAX);
+					auto area = graph->GetNearest(*game->GetC4Origin() + Line, FLT_MAX);
 					if (area == nullptr)
 						continue;
 
@@ -525,7 +525,7 @@ export namespace pokebot::bot::behavior {
 			return Status::Failed;
 		});
 
-		set_goal_hostage_node->Define([](Bot* const self, const node::Graph* const graph) -> Status {
+		set_goal_hostage_node->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
 			return Status::Failed;
 		});
 
@@ -536,7 +536,7 @@ export namespace pokebot::bot::behavior {
 		set_goal_tspawn->Define(BotSetsGoal<node::GoalKind::Terrorist_Spawn>);
 		set_goal_ctspawn->Define(BotSetsGoal<node::GoalKind::CT_Spawn>);
 
-		find_goal->Define([](Bot* const self, const node::Graph* const graph) -> Status {
+		find_goal->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
 			if (self->routes.Empty() || self->routes.IsEnd()) {
 				if (!self->goal_queue.IsEmpty()) {
 					self->goal_node = self->goal_queue.Get();
@@ -561,7 +561,7 @@ export namespace pokebot::bot::behavior {
 			return Status::Failed;
 		});
 
-		head_to_goal->Define([](Bot* const self, const node::Graph* const graph) -> Status {
+		head_to_goal->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
 			// Manage current node.
 			
 			if (!self->routes.Empty() && !self->routes.IsEnd()) {
@@ -601,7 +601,7 @@ export namespace pokebot::bot::behavior {
 
 		if (wait == nullptr) {
 			wait = Action::Create(std::format("wait for {}", sec));
-			wait->Define([sec, revision](Bot* const self, const node::Graph* const graph) -> Status {
+			wait->Define([sec, revision](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
 				class Timer final {
 				public:
 					enum class Status {
@@ -676,7 +676,7 @@ export namespace pokebot::bot::behavior {
 	BEHAVIOR_CREATE(Sequence, reset_team_objective);
 
 	template<bool b>
-	bool IsEnoughToRescueHostage(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+	bool IsEnoughToRescueHostage(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 		// Return true if the following conditions meet the requirements
 		// 1. I have some hostages.
 		// 2. Teammates are leading some hostages.
@@ -688,7 +688,7 @@ export namespace pokebot::bot::behavior {
 	}
 	
 	template<bool b>
-	bool IsTeamObjectiveSet(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+	bool IsTeamObjectiveSet(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 #if 0
 		if constexpr (b) {
 			return self->goal_node == Manager::Instance().GetGoalNode(self->Name().c_str());
@@ -701,18 +701,18 @@ export namespace pokebot::bot::behavior {
 #endif
 	}
 
-	bool CanUseHostage(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
-		return game::game.GetClosedHostage(self->Origin(), 83.0f) != nullptr;
+	bool CanUseHostage(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+		return const_cast<game::Game*>(game)->GetClosedHostage(self->Origin(), 83.0f) != nullptr;
 	}
 
 	template<bool b>
-	bool IsFarFromC4(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+	bool IsFarFromC4(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 #if 0
-		assert(bot::game::game.GetC4Origin().has_value());
+		assert(bot::game->GetC4Origin().has_value());
 		if constexpr (b) {
-			return game::Distance(self->Origin(), *bot::game::game.GetC4Origin()) > 100.0f;
+			return game::Distance(self->Origin(), *bot::game->GetC4Origin()) > 100.0f;
 		} else {
-			return game::Distance(self->Origin(), *bot::game::game.GetC4Origin()) <= 100.0f;
+			return game::Distance(self->Origin(), *bot::game->GetC4Origin()) <= 100.0f;
 		}
 #else
 		return false;
@@ -720,7 +720,7 @@ export namespace pokebot::bot::behavior {
 	}
 
 	template<bool b>
-	bool IsFarFromMainGoal(const Bot* const self, const node::Graph* const graph) POKEBOT_NOEXCEPT {
+	bool IsFarFromMainGoal(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 #if 0
 		auto id = Manager::Instance().GetGoalNode(self->Name().c_str());
 		auto origin = graph->GetOrigin(id);

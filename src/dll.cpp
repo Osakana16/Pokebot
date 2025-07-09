@@ -182,7 +182,7 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
             if (strcmp(Address, "loopback") == 0) {
                 SERVER_PRINT(std::format("POKEBOT: The host is connected.\n", STRING(entity->v.netname)).c_str());
                 // save the edict of the listen server client...
-                pokebot::game::game.host.SetHost(entity);
+                // 
                 // REMOVED: We cannot get the player's name at this timing.
                 // pokebot::game::game.clients.Register(entity);
 
@@ -207,16 +207,11 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
 
     func_table.pfnServerActivate = [](edict_t* edict_list, int edict_count, int client_max) -> void {
         pokebot::plugin::Pokebot::OnServerActivate(edict_list, edict_count, client_max);
-
-        pokebot::game::game.Init(edict_list, edict_count);
         RETURN_META(MRES_IGNORED);
     };
 
     func_table.pfnClientCommand = [](edict_t* client) -> void {
         pokebot::plugin::Pokebot::OnPlayerMenuSelect(client);
-        if (client != pokebot::game::game.host.AsEdict()) {
-            return;
-        }
 
         const std::string_view command = CMD_ARGV(0);
         if (command != "menuselect") {

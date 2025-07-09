@@ -18,6 +18,11 @@ edict_t* pokebot::plugin::Pokebot::pWorldEntity;
 edict_t* pokebot::plugin::Pokebot::spawned_entity;
 std::vector<pokebot::plugin::console::ConVarReg> pokebot::plugin::Pokebot::convars;
 
+std::unique_ptr<pokebot::bot::Manager> pokebot::plugin::Pokebot::bot_manager;
+std::unique_ptr<pokebot::game::Game> pokebot::plugin::Pokebot::game;
+std::unique_ptr<pokebot::node::Graph> pokebot::plugin::Pokebot::czworld;
+std::unique_ptr<pokebot::game::client::ClientManager> pokebot::plugin::Pokebot::clients;
+
 namespace pokebot::plugin {
     void Pokebot::OnDllAttached() noexcept {
         auto callback = [](const event::EdictList& event) {
@@ -26,9 +31,11 @@ namespace pokebot::plugin {
             Pokebot::czworld = std::make_unique<pokebot::node::CZBotGraph>(
                 &map_loaded_observable
             );
-
+			Pokebot::clients = std::make_unique<pokebot::game::client::ClientManager>();
             Pokebot::bot_manager = std::make_unique<pokebot::bot::Manager>(
+                *Pokebot::game,
                 *Pokebot::czworld,
+                *Pokebot::clients,
                 &Pokebot::frame_update_observable,
                 &engine::EngineInterface::observables
             );
@@ -46,12 +53,11 @@ namespace pokebot::plugin {
     void Pokebot::OnUpdate() noexcept {
         frame_update_observable.Notifyobservers();
 
-        pokebot::game::game.PreUpdate();
-        pokebot::game::game.PostUpdate();
+        game->PreUpdate();
     }
 
     void Pokebot::AddBot(const std::string_view& Bot_Name, const game::Team Selected_Team, const game::Model Selected_Model) noexcept {
-        bot_manager->Insert(Bot_Name.data(), Selected_Team, Selected_Model);
+        bot_manager->Insert(Bot_Name.data(), Selected_Team, *clients, Selected_Model);
     }
 
     void Pokebot::OnEntitySpawned() noexcept {
@@ -70,7 +76,7 @@ namespace pokebot::plugin {
 
     void Pokebot::OnClientDisconnect(const edict_t* const disconnected_client) noexcept {
         client_disconnection_observable.Notifyobservers({ .entity = disconnected_client, .Address = nullptr });
-        pokebot::game::game.clients.Disconnect(STRING(disconnected_client->v.netname));
+        clients->Disconnect(STRING(disconnected_client->v.netname));
     }
 
     void Pokebot::OnServerActivate(edict_t edict_list[], int edict_count, int client_max) noexcept {

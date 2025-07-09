@@ -5,6 +5,7 @@ module pokebot: plugin;
 import pokebot.engine;
 import pokebot.bot;
 import pokebot.game;
+import pokebot.game.player;
 import pokebot.game.util;
 import pokebot.util;
 import pokebot.util.tracer;
@@ -38,7 +39,7 @@ namespace pokebot::plugin {
         if (gpGlobals->deathmatch) {
             using namespace pokebot;
             is_bot = (edict != nullptr && bot_manager->IsExist(STRING(edict->v.netname)));
-            is_host = (edict == game::game.host.AsEdict());
+            is_host = (edict == game->host.AsEdict());
 
             engine_target_edict = edict;
             current_message = msg_type;
@@ -114,9 +115,9 @@ namespace pokebot::plugin {
                         };
 
                         if (auto team = Menu_Cache.at(std::get<TextCache>(args[1]).c_str()); team == game::Team::Spector) {
-                            game::game.RegisterClient(const_cast<edict_t*>(engine_target_edict));
+                            // game::game.RegisterClient(const_cast<edict_t*>(engine_target_edict));
                         } else {
-                            game::game.OnTeamAssigned(STRING(engine_target_edict->v.netname), team);
+                            // game::game.OnTeamAssigned(STRING(engine_target_edict->v.netname), team);
                         }
                     }
                 },
@@ -142,7 +143,7 @@ namespace pokebot::plugin {
                         };
 
                         if (bool(std::get<int>(args[1]) & ScoreStatus::VIP)) {
-                            pokebot::game::game.OnVIPChanged(STRING(INDEXENT(std::get<int>(args[0]))->v.netname));
+                            // pokebot::game::game.OnVIPChanged(STRING(INDEXENT(std::get<int>(args[0]))->v.netname));
                         } else if ((std::get<int>(args[1]) & ScoreStatus::Dead)) {
 
                         } else if ((std::get<int>(args[1]) & ScoreStatus::Defuse_Kit)) {
@@ -168,9 +169,9 @@ namespace pokebot::plugin {
                             // DEBUG_PRINTF("CurWeapon\n");
                             using namespace pokebot;
                             if (std::get<int>(args[0]) != 0) {
-                                game::game.OnWeaponChanged(STRING(engine_target_edict->v.netname), (game::weapon::ID)std::get<int>(args[1]));
+                               //  game::game.OnWeaponChanged(STRING(engine_target_edict->v.netname), (game::weapon::ID)std::get<int>(args[1]));
                             }
-                            game::game.OnClipChanged(STRING(engine_target_edict->v.netname), static_cast<game::weapon::ID>(std::get<int>(args[1])), std::get<int>(args[2]));
+                           //  game::game.OnClipChanged(STRING(engine_target_edict->v.netname), static_cast<game::weapon::ID>(std::get<int>(args[1])), std::get<int>(args[2]));
                         }
                     }
                 },
@@ -198,7 +199,7 @@ namespace pokebot::plugin {
                             return;
 
                         using namespace pokebot;
-                        game::game.OnAmmoPickedup(STRING(engine_target_edict->v.netname), static_cast<game::weapon::ammo::ID>(Ammo_ID - 1), Amount);
+                        // game::game.OnAmmoPickedup(STRING(engine_target_edict->v.netname), static_cast<game::weapon::ammo::ID>(Ammo_ID - 1), Amount);
                     }
                 },
                 {
@@ -209,7 +210,7 @@ namespace pokebot::plugin {
 
                         if (args.size() >= 1 && std::holds_alternative<int>(args[0])) {
                             using namespace pokebot;
-                            game::game.OnMoneyChanged(STRING(engine_target_edict->v.netname), std::clamp(std::get<int>(args[0]), 0, 16000));
+                           //  game::game.OnMoneyChanged(STRING(engine_target_edict->v.netname), std::clamp(std::get<int>(args[0]), 0, 16000));
                         }
                     }
                 },
@@ -229,7 +230,7 @@ namespace pokebot::plugin {
                         const int Health = std::get<int>(args[1]);
                         const int Armor = std::get<int>(args[0]);
                         const int Bit = std::get<int>(args[2]);
-                        game::game.OnDamageTaken(STRING(engine_target_edict->v.netname), engine_target_edict->v.dmg_inflictor, Health, Armor, Bit);
+                        // game::game.OnDamageTaken(STRING(engine_target_edict->v.netname), engine_target_edict->v.dmg_inflictor, Health, Armor, Bit);
                         bot_manager->OnDamageTaken(STRING(engine_target_edict->v.netname), engine_target_edict->v.dmg_inflictor,  Health, Armor, Bit);
                     }
                 },
@@ -244,16 +245,16 @@ namespace pokebot::plugin {
                         }
 
                         using namespace pokebot::game;
-                        static const std::unordered_map<TextCache, StatusIcon, TextCache::Hash> Icon_Cache{
-                            { "c4", StatusIcon::C4 },
-                            { "buyzone", StatusIcon::Buy_Zone },
-                            { "rescue",  StatusIcon::Rescue_Zone },
-                            { "vipsafety", StatusIcon::Vip_Safety },
+                        static const std::unordered_map<TextCache, game::StatusIcon, TextCache::Hash> Icon_Cache{
+                            { "c4", game::StatusIcon::C4 },
+                            { "buyzone", game::StatusIcon::Buy_Zone },
+                            { "rescue",  game::StatusIcon::Rescue_Zone },
+                            { "vipsafety", game::StatusIcon::Vip_Safety },
                         };
 
                         if (auto it = Icon_Cache.find(std::get<TextCache>(args[1]).data()); it != Icon_Cache.end()) {
-                            using namespace pokebot;
-                            game::game.OnStatusIconShown(STRING(engine_target_edict->v.netname), it->second);
+                            // using namespace pokebot;
+                            // game::game.OnStatusIconShown(STRING(engine_target_edict->v.netname), it->second);
                         }
                     }
                 },
@@ -267,8 +268,8 @@ namespace pokebot::plugin {
                             return;
                         }
 
-                        using namespace pokebot;
-                        game::game.OnItemChanged(STRING(engine_target_edict->v.netname), static_cast<game::Item>(std::get<int>(args[0])));
+                        // using namespace pokebot;
+                        // game::game.OnItemChanged(STRING(engine_target_edict->v.netname), static_cast<game::Item>(std::get<int>(args[0])));
                     }
                 },
                 {
@@ -283,8 +284,8 @@ namespace pokebot::plugin {
                             return;
                         }
 
-                        using namespace pokebot;
-                        game::game.OnNVGToggled(STRING(engine_target_edict->v.netname), std::get<int>(args[0]) > 0);
+                        // using namespace pokebot;
+                        // game::game.OnNVGToggled(STRING(engine_target_edict->v.netname), std::get<int>(args[0]) > 0);
                     }
                 },
                 {
@@ -450,8 +451,6 @@ namespace pokebot::plugin {
                     }
 
                     if (std::get<int>(args[0]) == 0 && std::get<int>(args[1]) == 0) {
-                        pokebot::game::game.OnNewRound();
-
                         bot_manager->OnNewRoundPreparation();
                     }
                 }

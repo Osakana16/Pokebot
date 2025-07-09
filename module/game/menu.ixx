@@ -179,7 +179,7 @@ export namespace pokebot::game {
 		* @param The client that is seeing the menu.
 		*/
 		void Close(const edict_t* entity) {
-			game::game.IssueCommand(STRING(entity->v.netname), "menuselect 0");
+			// game.IssueCommand(STRING(entity->v.netname), "menuselect 0");
 			MESSAGE_BEGIN(MSG_ONE, GET_USER_MSG_ID(PLID, "ShowMenu", NULL), NULL, const_cast<edict_t*>(entity));
 			WRITE_SHORT(0);
 			WRITE_CHAR(0);

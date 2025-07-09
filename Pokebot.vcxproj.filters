@@ -561,6 +561,9 @@
     <ClCompile Include="src\console_variable.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\client_manager.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE" />

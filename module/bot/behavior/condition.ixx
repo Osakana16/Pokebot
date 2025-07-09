@@ -5,9 +5,9 @@ namespace pokebot::bot::behavior {
 		std::shared_ptr<BehaviorNode> child{};
 		Activator CanActive;
 	public:
-		Status Evaluate(Bot* const self, const node::Graph* const graph) override {
-			if (CanActive(self, graph)) {
-				return child->Evaluate(self, graph);
+		Status Evaluate(Bot* const self, game::Game* game, const node::Graph* const graph) override {
+			if (CanActive(self, game, graph)) {
+				return child->Evaluate(self, game, graph);
 			}
 			return Status::Not_Executed;
 		}

@@ -15,9 +15,11 @@ namespace pokebot::bot {
 		bool IsCounterTerrorist(const BotPair& target) noexcept { return target.second.JoinedTeam() == game::Team::CT; }
 	}
 
-	Manager::Manager(node::Graph& graph_, 
+	Manager::Manager(game::Game& game_,
+					 node::Graph& graph_, 
+					 game::client::ClientManager& clients_,
 					 common::Observable<void>* frame_update_observable,
-					 engine::Observables* observables) : graph(graph_) 
+					 engine::Observables* observables) : game(game_), graph(graph_), clients(clients_)
 	{
 		auto update_callback = [&]() { Update(); };
 		auto newround_callback = [&]() { OnNewRoundPreparation(); };
@@ -47,7 +49,7 @@ namespace pokebot::bot {
 		observables->status_icon_observable.AddObserver(std::make_shared<common::NormalObserver<std::tuple<const edict_t* const, game::StatusIcon>>>([&](const std::tuple<const edict_t* const, game::StatusIcon>& args) {
 			auto player_name = STRING(std::get<0>(args)->v.netname);
 			if (auto bot = Get(player_name); bot != nullptr) {
-				game::game.clients.OnStatusIconShown(player_name, std::get<1>(args));
+				clients.OnStatusIconShown(player_name, std::get<1>(args));
 			}
 		}));
 	}
@@ -70,8 +72,8 @@ namespace pokebot::bot {
 		terrorist_troops = std::make_unique<pokebot::bot::squad::Troops>(game::Team::T, terrorists);
 		ct_troops = std::make_unique<pokebot::bot::squad::Troops>(game::Team::CT, cts);
 
-		terrorist_troops->Establish(&game::game, &graph);
-		ct_troops->Establish(&game::game, &graph);
+		terrorist_troops->Establish(&game, &graph);
+		ct_troops->Establish(&game, &graph);
 
 		initialization_stage = InitializationStage::Player_Action_Ready;
 		round_started_timer.SetTime(1.0f);
@@ -125,17 +127,17 @@ namespace pokebot::bot {
 	}
 
 	void Manager::OnRadioRecieved(const std::string_view& Sender_Name, const std::string_view& Radio_Sentence) POKEBOT_NOEXCEPT {
-		const auto Leader_Client = game::game.clients.Get(Sender_Name.data());
+		const auto Leader_Client = clients.Get(Sender_Name.data());
 
 		radio_message.team = Leader_Client->GetTeam();
 		radio_message.sender = Sender_Name.data();
 		radio_message.message = Radio_Sentence.data();
 	}
 
-	void Manager::Insert(pokebot::util::PlayerName bot_name, const game::Team team, const game::Model model) POKEBOT_NOEXCEPT {
-		if (auto spawn_result = game::game.clients.Create(bot_name.c_str()); std::get<bool>(spawn_result)) {
+	void Manager::Insert(pokebot::util::PlayerName bot_name, const game::Team team, game::client::ClientManager& clients, const game::Model model) POKEBOT_NOEXCEPT {
+		if (auto spawn_result = clients.Create(bot_name.c_str()); std::get<bool>(spawn_result)) {
 			bot_name = std::get<pokebot::util::PlayerName>(spawn_result).c_str();
-			auto insert_result = bots.insert({ bot_name.c_str(), Bot(graph, bot_name.c_str(), team, model) });
+			auto insert_result = bots.insert({ bot_name.c_str(), Bot(game, graph, clients, bot_name.c_str(), team, model) });
 			assert(insert_result.second);
 		}
 	}

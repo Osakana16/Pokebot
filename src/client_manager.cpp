@@ -1,0 +1,150 @@
+module pokebot.game.client: client_manager;
+import :client;
+import :client_key;
+
+import pokebot.game.weapon;
+import pokebot.game.util;
+import pokebot.util;
+
+namespace pokebot::game::client {
+	auto& ClientManager::GetAll() const {
+		return clients;
+	}
+
+	const Client* ClientManager::Get(const char* const Name) const {
+		if (auto it = clients.find(Name); it != clients.end()) {
+			return &it->second;
+		}
+		return nullptr;
+	}
+
+	Client* ClientManager::GetAsMutable(const char* const Name) {
+		if (auto it = clients.find(Name); it != clients.end()) {
+			return &it->second;
+		}
+		return nullptr;
+	}
+
+	bool ClientManager::Disconnect(const char* const Name) noexcept {
+		return clients.erase(Name) > 0;
+	}
+
+
+	void ClientManager::OnNewRound() {
+		for (auto& client : clients) {
+			client.second.is_nvg_on = false;
+		}
+	}
+
+	ClientCreationResult ClientManager::Create(std::string_view client_name) {
+		assert(!client_name.empty());
+		if (client_name.empty())
+			return std::make_tuple(false, "");
+
+		auto client = (*g_engfuncs.pfnCreateFakeClient)(client_name.data());
+		if (client == nullptr)
+			return std::make_tuple(false, "");
+
+		client_name = STRING(client->v.netname);
+		if (client->pvPrivateData != nullptr)
+			FREE_PRIVATE(client);
+
+		client->pvPrivateData = nullptr;
+		client->v.frags = 0;
+
+		// END OF FIX: --- score resetted
+		CALL_GAME_ENTITY(PLID, "player", VARS(client));
+		client::ClientKey client_key{ client };
+		client_key
+			.SetValue("model", "")
+			.SetValue("rate", "3500.000000")
+			.SetValue("hud_fastswitch", "1")
+			.SetValue("cl_updaterate", "20")
+			.SetValue("tracker", "0")
+			.SetValue("cl_dlmax", "128")
+			.SetValue("lefthand", "1")
+			.SetValue("friends", "0")
+			.SetValue("dm", "0")
+			.SetValue("ah", "1")
+			.SetValue("_vgui_menus", "0");
+
+		char ptr[128]{};            // allocate space for message from ClientConnect
+		if (!MDLL_ClientConnect(client, client_name.data(), "127.0.0.1", ptr))
+			return std::make_tuple(false, "");
+
+		MDLL_ClientPutInServer(client);
+		client->v.flags |= pokebot::util::Third_Party_Bot_Flag;
+		return std::make_tuple(Register(client), client_name.data());
+	}
+
+	bool ClientManager::Register(edict_t* edict) {
+		if (auto it = clients.find(STRING(edict->v.netname)); it == clients.end()) {
+			clients.emplace(STRING(edict->v.netname), edict);
+			return true;
+		}
+		return false;
+	}
+
+	void ClientManager::OnDeath(const std::string_view Client_Name) {
+		decltype(auto) target = GetAsMutable(Client_Name.data());
+		target->status_icon = StatusIcon::Not_Displayed;
+		target->item = Item::None;
+	}
+
+	void ClientManager::OnDamageTaken(const std::string_view Client_Name, const edict_t* Inflictor, const int Health, const int Armor, const int Bit) {
+		if (auto target = GetAsMutable(Client_Name.data()); target != nullptr) {
+			if (target->health - Health <= 0) {
+				OnDeath(Client_Name);
+			} else {
+				// TODO: Send the event message for a bot.
+			}
+		}
+	}
+
+	void ClientManager::OnMoneyChanged(const std::string_view Client_Name, const int Money) {
+		GetAsMutable(Client_Name.data())->money = Money;
+	}
+
+	void ClientManager::OnScreenFaded(const std::string_view Client_Name) {
+
+	}
+
+	void ClientManager::OnNVGToggled(const std::string_view Client_Name, const bool Toggle) {
+		GetAsMutable(Client_Name.data())->is_nvg_on = Toggle;
+	}
+
+	void ClientManager::OnWeaponChanged(const std::string_view Client_Name, const game::weapon::ID Weapon_ID) {
+		GetAsMutable(Client_Name.data())->current_weapon = Weapon_ID;
+	}
+
+	void ClientManager::OnClipChanged(const std::string_view Client_Name, const game::weapon::ID Weapon_ID, const int Amount) {
+		GetAsMutable(Client_Name.data())->weapon_clip = Amount;
+	}
+
+	void ClientManager::OnAmmoPickedup(const std::string_view Client_Name, const game::weapon::ammo::ID Ammo_ID, const int Amount) {
+		GetAsMutable(Client_Name.data())->weapon_ammo[static_cast<int>(Ammo_ID)] = Amount;
+	}
+
+	void ClientManager::OnTeamAssigned(const std::string_view Client_Name, const game::Team Assigned_Team) {
+		auto target = GetAsMutable(Client_Name.data());
+		if (target != nullptr)
+			target->team = Assigned_Team;
+	}
+
+	void ClientManager::OnItemChanged(const std::string_view Client_Name, game::Item item) {
+		GetAsMutable(Client_Name.data())->item |= item;
+	}
+
+	void ClientManager::OnStatusIconShown(const std::string_view Client_Name, const StatusIcon Icon) {
+		GetAsMutable(Client_Name.data())->status_icon |= Icon;
+	}
+
+	void ClientManager::OnVIPChanged(const std::string_view Client_Name) {
+		auto&& candidate = GetAsMutable(Client_Name.data());
+		candidate->is_vip = true;
+	}
+
+	void ClientManager::OnDefuseKitEquiped(const std::string_view Client_Name) {
+		GetAsMutable(Client_Name.data())->item |= Item::Defuse_Kit;
+	}
+}

@@ -6,6 +6,8 @@ import :personality_item;
 import :mood;
 import :state_machine;
 
+import pokebot.game;
+import pokebot.game.client;
 import pokebot.game.util;
 import pokebot.terrain.graph;
 import pokebot.terrain.graph.path;
@@ -122,8 +124,12 @@ export namespace pokebot::bot {
 			&Bot::OnSelectionCompleted
 		};
 
+		pokebot::game::Game& game;
 		pokebot::node::Graph& graph;
+		pokebot::game::client::Client& client;
 	public:
+		Bot(pokebot::game::Game&, pokebot::node::Graph&, pokebot::game::client::ClientManager&, const std::string_view&, const game::Team, const game::Model) noexcept;
+
 		void LockByBomb() { is_locked_by_bomb = true; }
 		void UnlockByBomb() { is_locked_by_bomb = false; }
 
@@ -143,9 +149,6 @@ export namespace pokebot::bot {
 			std::optional<Vector> view{}, movement{};
 			void Clear() POKEBOT_NOEXCEPT { view = movement = std::nullopt; }
 		} look_direction{}, ideal_direction{};
-
-
-		Bot(pokebot::node::Graph&, const std::string_view&, const game::Team, const game::Model) POKEBOT_NOEXCEPT;
 
 		void OnNewRound() POKEBOT_NOEXCEPT;
 		void Run() POKEBOT_NOEXCEPT;

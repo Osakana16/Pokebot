@@ -1,5 +1,6 @@
 ﻿export module pokebot.game.client: client;
 
+import pokebot.game;
 import pokebot.game.weapon;
 import pokebot.game.player;
 import pokebot.game.util;
@@ -9,7 +10,6 @@ export namespace pokebot::game::client {
 	class Client {
 		friend class ClientManager;
 	public:
-
 		edict_t* const client{};
 
 		game::Team team{};
@@ -55,7 +55,8 @@ export namespace pokebot::game::client {
 			button(client->v.button),
 			impulse(client->v.impulse),
 			weaponanim(client->v.weaponanim),
-			index(ENTINDEX(const_cast<edict_t*>(e))) {
+			index(ENTINDEX(const_cast<edict_t*>(e)))
+		{
 		}
 
 		const int& index;
@@ -133,7 +134,6 @@ export namespace pokebot::game::client {
 		bool IsPlantingBomb() const POKEBOT_NOEXCEPT { return IsFiring() && bool(weapons & weapon::C4_Bit) && (sequence == 63 || sequence == 61); }
 		bool IsClimblingLadder() const POKEBOT_NOEXCEPT { return (movetype & MOVETYPE_FLY); }
 
-		bool HasHostages() const noexcept;
 		bool HasWeapon(const weapon::ID Weapon_ID) const noexcept { return bool(weapons & game::ToBit<int>(Weapon_ID)); }
 		bool HasPrimaryWeapon() const noexcept { return weapons & weapon::Primary_Weapon_Bit; }
 		bool HasSecondaryWeapon() const noexcept { return weapons & weapon::Secondary_Weapon_Bit; }
@@ -156,11 +156,6 @@ export namespace pokebot::game::client {
 		bool CanSeeEntity(const edict_t* const Target) const noexcept {
 			return entity::CanSeeEntity(Edict(), Target);
 		}
-
-		bool CanSeeFriend() const noexcept;
-		void GetEnemyNamesWithinView(pokebot::util::PlayerName player_names[32]) const noexcept;
-		void GetEntityNamesInView(pokebot::util::PlayerName player_names[32]) const noexcept;
-
 
 		game::Team GetTeamFromModel() const POKEBOT_NOEXCEPT {
 			return game::GetTeamFromModel(client);

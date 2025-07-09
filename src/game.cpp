@@ -11,7 +11,8 @@ namespace pokebot {
 	namespace game {
 		Game::Game(common::Observable<void>* frame_update_observable,
 				   plugin::event::ClientInformationObservable* client_connection_observable,
-				   plugin::event::ClientInformationObservable* client_disconnection_observable) {
+				   plugin::event::ClientInformationObservable* client_disconnection_observable) 
+		{
 			class GameUpdateObserver : public common::Observer<void> {
 			public:
 				~GameUpdateObserver() final {}

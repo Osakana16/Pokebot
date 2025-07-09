@@ -389,59 +389,58 @@ namespace pokebot::bot {
 			return;
 		}
 
-		auto client = game::game.clients.Get(name.c_str());
-		if (client->IsInBuyzone() && !buy_wait_timer.IsRunning()) {
-			auto ai = buy::BuyAI(client->Money);
+		if (client.IsInBuyzone() && !buy_wait_timer.IsRunning()) {
+			auto ai = buy::BuyAI(client.Money);
 			auto node = ai.GetPattern(0, 0);
 			for (auto data : node->data) {
 				if (data == nullptr)
 					continue;
 
-				engine::EngineInterface::InputFakeclientCommand(client->client, "buy");
+				engine::EngineInterface::InputFakeclientCommand(client.client, "buy");
 				for (auto menu : data->menu[JoinedTeam() == game::Team::CT]) {
-					engine::EngineInterface::InputFakeclientCommand(client->client, std::format("menuselect {}", menu).c_str());
+					engine::EngineInterface::InputFakeclientCommand(client.client, std::format("menuselect {}", menu).c_str());
 				}
 			}
 
 			if (bool(node->equipment_flag & buy::Shield_Flag)) {
-				engine::EngineInterface::InputFakeclientCommand(client->client, "shield");
+				engine::EngineInterface::InputFakeclientCommand(client.client, "shield");
 				node->equipment_flag &= ~buy::Shield_Flag;
 			}
 
 			if (bool(node->equipment_flag & buy::DefuseKit_Flag)) {
-				engine::EngineInterface::InputFakeclientCommand(client->client, "defuser");
+				engine::EngineInterface::InputFakeclientCommand(client.client, "defuser");
 				node->equipment_flag &= ~buy::DefuseKit_Flag;
 			}
 
 			if (bool(node->equipment_flag & buy::NVG_Flag)) {
-				engine::EngineInterface::InputFakeclientCommand(client->client, "nvgs");
+				engine::EngineInterface::InputFakeclientCommand(client.client, "nvgs");
 				node->equipment_flag &= ~buy::NVG_Flag;
 			}
 
 			if (bool(node->equipment_flag & buy::Smoke_Flag)) {
-				engine::EngineInterface::InputFakeclientCommand(client->client, "sgren");
+				engine::EngineInterface::InputFakeclientCommand(client.client, "sgren");
 				node->equipment_flag &= ~buy::Smoke_Flag;
 			}
 
 			if (bool(node->equipment_flag & buy::HE_Flag)) {
-				engine::EngineInterface::InputFakeclientCommand(client->client, "hegren");
+				engine::EngineInterface::InputFakeclientCommand(client.client, "hegren");
 				node->equipment_flag &= ~buy::HE_Flag;
 			}
 
 			if (bool(node->equipment_flag & buy::Kelvar_Flag)) {
-				engine::EngineInterface::InputFakeclientCommand(client->client, "vest");
+				engine::EngineInterface::InputFakeclientCommand(client.client, "vest");
 				node->equipment_flag &= ~buy::Kelvar_Flag;
 			}
 
 			if (bool(node->equipment_flag & buy::Helmet_Flag)) {
-				engine::EngineInterface::InputFakeclientCommand(client->client, "vesthelm");
+				engine::EngineInterface::InputFakeclientCommand(client.client, "vesthelm");
 				node->equipment_flag &= ~buy::Helmet_Flag;
 			}
 
 			std::uint32_t flashbang_buy_bit = 0b000'0'0'0'0'0'10'00'0000000000'0000000000;
 			while ((node->equipment_flag & buy::Flashbang_Flag) > 0) {
 				if (bool(node->equipment_flag & flashbang_buy_bit)) {
-					engine::EngineInterface::InputFakeclientCommand(client->client, "flash");
+					engine::EngineInterface::InputFakeclientCommand(client.client, "flash");
 					// Set 0 to a bit to decrement the number of buy.
 					node->equipment_flag &= ~flashbang_buy_bit;
 					flashbang_buy_bit >>= 1;
@@ -451,7 +450,7 @@ namespace pokebot::bot {
 			std::uint32_t primaryammo_buy_bit = 0b000'0'0'0'0'0'00'00'0100000000'0000000000;
 			while ((node->equipment_flag & buy::Primary_Ammo_Flag) > 0) {
 				if (bool(node->equipment_flag & primaryammo_buy_bit)) {
-					engine::EngineInterface::InputFakeclientCommand(client->client, "buyammo1");
+					engine::EngineInterface::InputFakeclientCommand(client.client, "buyammo1");
 
 					// Set 0 to a bit to decrement the number of buy.
 					node->equipment_flag &= ~primaryammo_buy_bit;
@@ -462,7 +461,7 @@ namespace pokebot::bot {
 			std::uint32_t secondaryammo_buy_bit = 0b000'0'0'0'0'0'00'00'0000000000'0100000000;
 			while ((node->equipment_flag & buy::Secondary_Ammo_Flag) > 0) {
 				if (bool(node->equipment_flag & secondaryammo_buy_bit)) {
-					engine::EngineInterface::InputFakeclientCommand(client->client, "buyammo2");
+					engine::EngineInterface::InputFakeclientCommand(client.client, "buyammo2");
 
 					// Set 0 to a bit to decrement the number of buy.
 					node->equipment_flag &= ~secondaryammo_buy_bit;
