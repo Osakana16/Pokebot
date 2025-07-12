@@ -48,8 +48,8 @@ export namespace pokebot::plugin::console {
 		bool bounded;
 		Var type;
 	};
-
-	ConVar poke_freeze{ "pk_freeze", "0" };
-	ConVar poke_fight{ "pk_fight", "1" };
-	ConVar poke_buy{ "pk_buy", "1" };
+	
+	extern ConVar poke_freeze;
+	extern ConVar poke_fight;
+	extern ConVar poke_buy;
 }

@@ -166,4 +166,9 @@ namespace pokebot::plugin::console {
     ConVar::ConVar(const char* name, const char* initval, const char* info, bool bounded, float min, float max, Var type, bool regMissing, const char* regVal) {
        plugin::Pokebot::AddConsoleVariable(name, initval, info, bounded, min, max, type, regMissing, regVal, this);
     }
+
+    // Fix for Static Initialization Order Fiasco
+	ConVar poke_freeze{ "pk_freeze", "0" };
+	ConVar poke_fight{ "pk_fight", "1" };
+	ConVar poke_buy{ "pk_buy", "1" };
 }
