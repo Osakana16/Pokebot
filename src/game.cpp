@@ -16,18 +16,22 @@ namespace pokebot {
 				auto entityExists = [](const char* class_name) -> bool { edict_t* entity{}; return (FindEntityByClassname(entity, class_name) != nullptr); };
 
 				if (entityExists("func_bomb_target") || entityExists("info_bomb_target")) {
+					map_flags |= MapFlags::Demolition;
 					scenario_managers[0] = std::make_shared<game::scenario::DemolitionManager>();
 				}
 
 				if (entityExists("func_hostage_rescue") || entityExists("info_hostage_rescue")) {
+					map_flags |= MapFlags::HostageRescue;
 					// TODO: Assign the hostage rescue manager
 				}
 
 				if (entityExists("info_vip_start") || entityExists("func_vip_safetyzone")) {
+					map_flags |= MapFlags::Assassination;
 					// TODO: Assign the VIP manager.
 				}
 				
 				if (entityExists("func_escapezone")) {
+					map_flags |= MapFlags::Escape;
 					// TODO: Assign escape manager.
 				}
 			}));

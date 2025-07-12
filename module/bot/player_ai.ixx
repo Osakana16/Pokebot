@@ -6,6 +6,7 @@ import :personality_item;
 import :mood;
 import :state_machine;
 
+import pokebot.bot.squad;
 import pokebot.game;
 import pokebot.game.client;
 import pokebot.game.util;
@@ -127,8 +128,11 @@ export namespace pokebot::bot {
 		pokebot::game::Game& game;
 		pokebot::node::Graph& graph;
 		pokebot::game::client::Client& client;
+		squad::Troops* troops{};
 	public:
-		Bot(pokebot::game::Game&, pokebot::node::Graph&, pokebot::game::client::ClientManager&, const std::string_view&, const game::Team, const game::Model) noexcept;
+		Bot(squad::Troops*, pokebot::game::Game&, pokebot::node::Graph&, pokebot::game::client::ClientManager&, const std::string_view&, const game::Team, const game::Model) noexcept;
+
+		node::NodeID GetTeamGoal() const noexcept { return troops->GetPlatoonGoal(name); }
 
 		void LockByBomb() { is_locked_by_bomb = true; }
 		void UnlockByBomb() { is_locked_by_bomb = false; }
@@ -150,7 +154,7 @@ export namespace pokebot::bot {
 			void Clear() POKEBOT_NOEXCEPT { view = movement = std::nullopt; }
 		} look_direction{}, ideal_direction{};
 
-		void OnNewRound() POKEBOT_NOEXCEPT;
+		void OnNewRound(squad::Troops*) POKEBOT_NOEXCEPT;
 		void Run() POKEBOT_NOEXCEPT;
 
 		void SelectWeapon(const game::weapon::ID), SelectPrimaryWeapon(), SelectSecondaryWeapon();

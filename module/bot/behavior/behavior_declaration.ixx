@@ -1,6 +1,6 @@
 export module pokebot.bot.behavior: behavior_declaration;
 import :sequence;
-import :priority;
+import :selector;
 import :action;
 
 #define BEHAVIOR_PRIVATE namespace
@@ -58,7 +58,7 @@ export namespace pokebot::bot::behavior {
 
 	namespace fight {
 		BEHAVIOR_CREATE(Sequence, beat_enemies);
-		BEHAVIOR_CREATE(Priority, retreat);
+		BEHAVIOR_CREATE(Selector, retreat);
 	}
 
 	// - DEmolition Behaviors - 
@@ -66,27 +66,27 @@ export namespace pokebot::bot::behavior {
 		/*
 			The bomber plants the bomb.
 		*/
-		BEHAVIOR_CREATE(Priority, t_plant);
+		BEHAVIOR_CREATE(Sequence, t_plant);
 
-		BEHAVIOR_CREATE(Priority, t_planted_wary);	// Terrorists make the rounds to defend the bomb.
-		BEHAVIOR_CREATE(Priority, t_planted_camp);	// Terrorirts camp around c4 to defend the bomb.
-		BEHAVIOR_CREATE(Priority, t_pick_up_bomb);	// Terrorirts try to pick up the bomb.
+		BEHAVIOR_CREATE(Selector, t_planted_wary);	// Terrorists make the rounds to defend the bomb.
+		BEHAVIOR_CREATE(Selector, t_planted_camp);	// Terrorirts camp around c4 to defend the bomb.
+		BEHAVIOR_CREATE(Selector, t_pick_up_bomb);	// Terrorirts try to pick up the bomb.
 
-		BEHAVIOR_CREATE(Priority, t_defusing);
+		BEHAVIOR_CREATE(Selector, t_defusing);
 
-		BEHAVIOR_CREATE(Priority, ct_defend);
-		BEHAVIOR_CREATE(Priority, ct_defend_wary);
-		BEHAVIOR_CREATE(Priority, ct_defend_camp);
-		BEHAVIOR_CREATE(Priority, ct_planted);
+		BEHAVIOR_CREATE(Selector, ct_defend);
+		BEHAVIOR_CREATE(Selector, ct_defend_wary);
+		BEHAVIOR_CREATE(Selector, ct_defend_camp);
+		BEHAVIOR_CREATE(Selector, ct_planted);
 		BEHAVIOR_CREATE(Sequence, ct_defusing);
 	}
 
 	// - Rescue Behaviors -
 	namespace rescue {
-		BEHAVIOR_CREATE(Priority, t_defend_hostage);
+		BEHAVIOR_CREATE(Selector, t_defend_hostage);
 
-		BEHAVIOR_CREATE(Priority, ct_try);
-		BEHAVIOR_CREATE(Priority, ct_leave);
+		BEHAVIOR_CREATE(Selector, ct_try);
+		BEHAVIOR_CREATE(Selector, ct_leave);
 		BEHAVIOR_CREATE(Sequence, lead_hostage);
 	}
 

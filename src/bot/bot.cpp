@@ -12,7 +12,8 @@ import pokebot.util.tracer;
 import pokebot.plugin.console.variable;
 
 namespace pokebot::bot {
-	Bot::Bot(game::Game& game_,
+	Bot::Bot(squad::Troops* troops_,
+			 game::Game& game_,
 			 pokebot::node::Graph& graph_,
 			 pokebot::game::client::ClientManager& clients,
 			 const std::string_view& Bot_Name,
@@ -22,8 +23,7 @@ namespace pokebot::bot {
 		team = Join_Team;
 		model = Select_Model;
 		name = Bot_Name.data();
-
-		OnNewRound();
+		OnNewRound(troops_);
 	}
 
 	void Bot::Run() POKEBOT_NOEXCEPT {
@@ -106,7 +106,7 @@ namespace pokebot::bot {
 		game::OriginToAngle(&movement_angle, *look_direction.movement, Origin());
 	}
 
-	void Bot::OnNewRound() POKEBOT_NOEXCEPT {
+	void Bot::OnNewRound(squad::Troops* troops_) POKEBOT_NOEXCEPT {
 		goal_queue.Clear();
 		routes.Clear();
 
@@ -123,6 +123,7 @@ namespace pokebot::bot {
 		start_action = Message::Buy;
 		buy_wait_timer.SetTime(1.0f);
 
+		troops = troops_;
 		// mapdata::BSP().LoadWorldMap();
 	}
 
@@ -240,17 +241,15 @@ namespace pokebot::bot {
 	}
 
 	void Bot::OnTerroristDemolition() noexcept {
-#if 0
-		if (game.GetC4Origin().has_value()) {
-			behavior::demolition::t_planted_wary->Evaluate(this);
-		} else if (game.GetBackpackOrigin().has_value()) {
-			behavior::demolition::t_pick_up_bomb->Evaluate(this);
+		if (game.GetDemolitionManager()->GetC4Origin().has_value()) {
+			behavior::demolition::t_planted_wary->Evaluate(this, &game, &graph);
+		} else if (game.GetDemolitionManager()->GetBackpackOrigin().has_value()) {
+			behavior::demolition::t_pick_up_bomb->Evaluate(this, &game, &graph);
 		} else {
 			if (HasWeapon(game::weapon::ID::C4)) {
-				behavior::demolition::t_plant->Evaluate(this);
+				behavior::demolition::t_plant->Evaluate(this, &game, &graph);
 			}
 		}
-#endif
 	}
 
 	void Bot::OnTerroristHostage() noexcept {
@@ -271,6 +270,7 @@ namespace pokebot::bot {
 
 	void Bot::OnCTDemolition() noexcept {
 #if 0
+
 #endif
 	}
 
@@ -316,6 +316,7 @@ namespace pokebot::bot {
 				break;
 			}
 		}
+
 		if (enemy_client == nullptr) {
 			danger_time.SetTime(0.0f);
 			return;

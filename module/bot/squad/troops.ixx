@@ -41,34 +41,22 @@ namespace pokebot::bot::squad {
 			}
 			return number;
 		}
-
-		void AddMembers(const squad::util::MemberSet& Members) {
+	public:
+		void UpdateMember(const squad::util::MemberSet& Members) {
 			for (auto& member : Members) {
 				const bool Is_Added = AddMember(member);
 				assert(Is_Added && "Failed to add member.");
 			}
 		}
-	public:
-		Troops(game::Team team_) : team(team_) {}
-		
-		Troops(game::Team team_,
-			   const std::unordered_set<pokebot::util::PlayerName, pokebot::util::PlayerName::Hash>& Members) : Troops(team_) {
-			AddMembers(Members);
-			assert(!members.empty());
-		}
 
-		Troops(game::Team team_,
-			   const squad::util::MemberSet& Members,
-			   pokebot::game::CSGameBase* game,
-			   pokebot::node::Graph* graph) : Troops(team_) {
-			OnNewRound(Members, graph, game);
-		}
+		Troops(game::Team team_) : team(team_) {}
+
 		
 		void Establish(pokebot::game::CSGameBase* const game, pokebot::node::Graph* const graph) {
 			assert(game != nullptr && "nullptr is assigned.");
 			assert(graph != nullptr && "nullptr is assigned.");
 			if (members.empty()) {
-				assert(false);
+				// assert(false);
 				return;
 			}
 

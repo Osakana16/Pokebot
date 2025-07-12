@@ -115,9 +115,6 @@
     <Filter Include="src\bot\behaviour">
       <UniqueIdentifier>{505b37d5-f732-4c99-8167-eaec4377ea8f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\bot\behaviour\node">
-      <UniqueIdentifier>{cee5b265-581f-4a07-bf13-e625dd251eea}</UniqueIdentifier>
-    </Filter>
     <Filter Include="module\engine">
       <UniqueIdentifier>{1c151d07-5eaf-4427-998c-9e753b3444df}</UniqueIdentifier>
     </Filter>
@@ -351,7 +348,7 @@
     <ClCompile Include="module\bot\behavior\sequence.ixx">
       <Filter>module\bot\behavior</Filter>
     </ClCompile>
-    <ClCompile Include="module\bot\behavior\priority.ixx">
+    <ClCompile Include="module\bot\behavior\selector.ixx">
       <Filter>module\bot\behavior</Filter>
     </ClCompile>
     <ClCompile Include="module\bot\behavior\action.ixx">
@@ -575,6 +572,15 @@
     </ClCompile>
     <ClCompile Include="module\game\scenario\hostage_rescue_manager.ixx">
       <Filter>module\game\scenario</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot\behaviour\action_definitions.cpp">
+      <Filter>src\bot</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\behavior\succeeder.ixx">
+      <Filter>module\bot\behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot\behavior\objective_definitions.cpp">
+      <Filter>src\bot</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

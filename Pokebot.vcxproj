@@ -128,9 +128,10 @@
     <ClCompile Include="module\bot\behavior\behavior_node.ixx" />
     <ClCompile Include="module\bot\behavior\behavior_node_status.ixx" />
     <ClCompile Include="module\bot\behavior\condition.ixx" />
-    <ClCompile Include="module\bot\behavior\priority.ixx" />
+    <ClCompile Include="module\bot\behavior\selector.ixx" />
     <ClCompile Include="module\bot\behavior\root.ixx" />
     <ClCompile Include="module\bot\behavior\sequence.ixx" />
+    <ClCompile Include="module\bot\behavior\succeeder.ixx" />
     <ClCompile Include="module\bot\bot.ixx" />
     <ClCompile Include="module\bot\bot_id.ixx" />
     <ClCompile Include="module\bot\bot_manager.ixx" />
@@ -252,7 +253,9 @@
     <ClCompile Include="module\util\util.ixx" />
     <ClInclude Include="include\common.hpp" />
     <ClInclude Include="include\stdafx.h" />
+    <ClCompile Include="src\bot\behavior\objective_definitions.cpp" />
     <ClCompile Include="src\bot\behaviour\action.cpp" />
+    <ClCompile Include="src\bot\behaviour\action_definitions.cpp" />
     <ClCompile Include="src\bot\bot.cpp" />
     <ClCompile Include="src\bot\botmanager.cpp" />
     <ClCompile Include="src\buy.cpp" />
