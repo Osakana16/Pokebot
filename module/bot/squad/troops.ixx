@@ -31,7 +31,7 @@ namespace pokebot::bot::squad {
 			if (bool(map_flag & pokebot::game::MapFlags::Demolition)) {
 				number = graph->GetNumberOfGoals(pokebot::node::GoalKind::Bombspot);
 			} else if (bool(map_flag & game::MapFlags::HostageRescue)) {
-				number = game->GetNumberOfLivingHostages();
+				// number = game->GetNumberOfLivingHostages();
 			} else if (bool(map_flag & game::MapFlags::Assassination)) {
 				number = graph->GetNumberOfGoals(pokebot::node::GoalKind::Vip_Safety);
 			} else if (bool(map_flag & game::MapFlags::Escape)) {

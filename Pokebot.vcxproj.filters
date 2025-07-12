@@ -564,6 +564,18 @@
     <ClCompile Include="src\client_manager.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="module\util\hlvector.ixx">
+      <Filter>module\util</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\demolition_manager.cpp">
+      <Filter>src\game</Filter>
+    </ClCompile>
+    <ClCompile Include="module\plugin\plugin_observables.ixx">
+      <Filter>module\plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\scenario\hostage_rescue_manager.ixx">
+      <Filter>module\game\scenario</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE" />

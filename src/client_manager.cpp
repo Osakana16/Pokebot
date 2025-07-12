@@ -7,6 +7,17 @@ import pokebot.game.util;
 import pokebot.util;
 
 namespace pokebot::game::client {
+	ClientManager::ClientManager(plugin::Observables*, engine::Observables* engine_observables) {
+		engine_observables->new_round_observable.AddObserver(
+			std::make_shared<common::NormalObserver<void>>(
+			[&] {
+				for (auto& client : clients) {
+					client.second.is_nvg_on = false;
+				}
+			}
+		));
+	}
+
 	auto& ClientManager::GetAll() const {
 		return clients;
 	}
@@ -27,13 +38,6 @@ namespace pokebot::game::client {
 
 	bool ClientManager::Disconnect(const char* const Name) noexcept {
 		return clients.erase(Name) > 0;
-	}
-
-
-	void ClientManager::OnNewRound() {
-		for (auto& client : clients) {
-			client.second.is_nvg_on = false;
-		}
 	}
 
 	ClientCreationResult ClientManager::Create(std::string_view client_name) {

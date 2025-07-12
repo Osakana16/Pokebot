@@ -3,6 +3,7 @@ export module pokebot.bot: bot_manager;
 import :player_ai;
 import :radio_message;
 import pokebot.common.event_handler;
+import pokebot.plugin.observables;
 
 import pokebot.game;
 import pokebot.game.client;
@@ -39,7 +40,7 @@ export namespace pokebot::bot {
 		Manager(game::Game&,
 				node::Graph&,
 				game::client::ClientManager& ,
-				common::Observable<void>* frame_update_observable,
+				plugin::Observables*,
 				engine::Observables*);
 
 		const decltype(bomber_name)& Bomber_Name = bomber_name;

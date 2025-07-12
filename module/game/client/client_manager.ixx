@@ -4,6 +4,8 @@ module;
 export module pokebot.game.client: client_manager;
 import :client;
 
+import pokebot.plugin.observables;
+import pokebot.engine;
 import pokebot.game.player;
 import pokebot.game.weapon;
 import pokebot.game.util;
@@ -14,12 +16,12 @@ export namespace pokebot::game::client {
 	class ClientManager {
 		std::unordered_map<pokebot::util::PlayerName, Client, pokebot::util::PlayerName::Hash> clients{};
 	public:
+		ClientManager(plugin::Observables*, engine::Observables*);
 		auto& GetAll() const;
 
 		const Client* Get(const char* const Name) const;
 		Client* GetAsMutable(const char* const Name);
 		bool Disconnect(const char* const Name) noexcept;
-		void OnNewRound();
 
 		ClientCreationResult Create(std::string_view client_name);
 		bool Register(edict_t* edict);

@@ -5,6 +5,8 @@ import :graph_base;
 import pokebot.terrain.graph.path;
 import pokebot.terrain.graph.node;
 
+import pokebot.plugin.observables;
+import pokebot.engine;
 import pokebot.common.event_handler;
 import pokebot.game.util;
 import pokebot.util;
@@ -17,7 +19,7 @@ export namespace pokebot::node {
 		game::Array<Danger, 2> danger;
 		bool is_nav_loaded{};
 	public:
-		CZBotGraph(common::Observable<util::fixed_string<256u>>*);
+		CZBotGraph(plugin::Observables*, engine::Observables*);
 
 		navmesh::NavigationMap navigation_map{};
 		std::vector<Route<navmesh::NavArea*>> routes{};

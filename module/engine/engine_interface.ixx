@@ -17,19 +17,39 @@ export namespace pokebot::engine {
 
 	template <typename... T>
 	using EdictParameter = std::tuple<const edict_t* const, T...>;
-
+	
 	struct Observables {
+		common::NormalObservable<void> game_commercing_observable{};
+
 		common::NormalObservable<EdictParameter<TextCache>> show_menu_observable{};
 		common::NormalObservable<EdictParameter<ScoreStatus>> score_attribute_observable{};
 		common::NormalObservable<EdictParameter<game::StatusIcon>> status_icon_observable{};
 		common::NormalObservable<EdictParameter<const edict_t* const, int, int, int>> player_damage_taken_observable{};
-		
 		common::NormalObservable<void> new_round_observable{};
+
+
+		common::NormalObservable<void> bomb_dropped_observable{};
+		common::NormalObservable<void> bomb_pickedup_observable{};
+		common::NormalObservable<void> bomb_planted_observable{};
+
+		common::NormalObservable<void> money_changed_observable{};
+		common::NormalObservable<void> nvg_toggled_observable{};
+		common::NormalObservable<void> public_chat_observable{};
+		common::NormalObservable<void> flashbang_observable{};
+
+		common::NormalObservable<void> join_t_observable{}, join_ct_observable{};
+
+		common::NormalObservable<void> ct_win_observable{}, t_win_observable{};
+		common::NormalObservable<void> ct_lose_observable{}, t_lose_observable{};
+	};
+
+	enum class ShowMenuPhase {
+		Team_Select,
+		Model_Select
 	};
 
 	class EngineInterface {
 	public:
-
 		static void OnDllAttached() noexcept;
 
 		static void OnMessageBegin(int msg_dest, int msg_type, const float* pOrigin, edict_t* edict);

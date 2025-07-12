@@ -18,15 +18,15 @@ namespace pokebot::bot {
 	Manager::Manager(game::Game& game_,
 					 node::Graph& graph_, 
 					 game::client::ClientManager& clients_,
-					 common::Observable<void>* frame_update_observable,
-					 engine::Observables* observables) : game(game_), graph(graph_), clients(clients_)
+					 plugin::Observables* plugin_observables,
+					 engine::Observables* engine_observables) : game(game_), graph(graph_), clients(clients_)
 	{
 		auto update_callback = [&]() { Update(); };
 		auto newround_callback = [&]() { OnNewRoundPreparation(); };
 
-		frame_update_observable->AddObserver(std::make_shared<common::NormalObserver<void>>(update_callback));
-		observables->new_round_observable.AddObserver(std::make_shared<common::NormalObserver<void>>(newround_callback));
-		observables->show_menu_observable.AddObserver(std::make_shared<common::NormalObserver<std::tuple<const edict_t* const, engine::TextCache>>>([&](const std::tuple<const edict_t* const, engine::TextCache>& args) {
+		plugin_observables->frame_update_observable.AddObserver(std::make_shared<common::NormalObserver<void>>(update_callback));
+		engine_observables->new_round_observable.AddObserver(std::make_shared<common::NormalObserver<void>>(newround_callback));
+		engine_observables->show_menu_observable.AddObserver(std::make_shared<common::NormalObserver<std::tuple<const edict_t* const, engine::TextCache>>>([&](const std::tuple<const edict_t* const, engine::TextCache>& args) {
 			auto player_name = STRING(std::get<0>(args)->v.netname);
 			if (auto bot = Get(player_name); bot != nullptr) {
 				static const std::unordered_map<engine::TextCache, pokebot::bot::Message, engine::TextCache::Hash> Menu_Cache{
@@ -46,7 +46,7 @@ namespace pokebot::bot {
 			}
 		}));
 
-		observables->status_icon_observable.AddObserver(std::make_shared<common::NormalObserver<std::tuple<const edict_t* const, game::StatusIcon>>>([&](const std::tuple<const edict_t* const, game::StatusIcon>& args) {
+		engine_observables->status_icon_observable.AddObserver(std::make_shared<common::NormalObserver<std::tuple<const edict_t* const, game::StatusIcon>>>([&](const std::tuple<const edict_t* const, game::StatusIcon>& args) {
 			auto player_name = STRING(std::get<0>(args)->v.netname);
 			if (auto bot = Get(player_name); bot != nullptr) {
 				clients.OnStatusIconShown(player_name, std::get<1>(args));

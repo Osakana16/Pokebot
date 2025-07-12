@@ -206,6 +206,7 @@
     <ClCompile Include="module\game\player\status_icon.ixx" />
     <ClCompile Include="module\game\scenario.ixx" />
     <ClCompile Include="module\game\scenario\demolition_manager.ixx" />
+    <ClCompile Include="module\game\scenario\hostage_rescue_manager.ixx" />
     <ClCompile Include="module\game\scenario\scenario_manager.ixx" />
     <ClCompile Include="module\game\scenario\game_scenario.ixx" />
     <ClCompile Include="module\game\team.ixx" />
@@ -222,6 +223,7 @@
     <ClCompile Include="module\plugin\host\host.ixx" />
     <ClCompile Include="module\plugin\dll.ixx" />
     <ClCompile Include="module\plugin\plugin.ixx" />
+    <ClCompile Include="module\plugin\plugin_observables.ixx" />
     <ClCompile Include="module\plugin\pokebot.ixx" />
     <ClCompile Include="module\pokebot_random.ixx" />
     <ClCompile Include="module\terrain\goal\goal_kind.ixx" />
@@ -245,6 +247,7 @@
     <ClCompile Include="module\util\color.ixx" />
     <ClCompile Include="module\util\fixed_string.ixx" />
     <ClCompile Include="module\util\flag.ixx" />
+    <ClCompile Include="module\util\hlvector.ixx" />
     <ClCompile Include="module\util\timer.ixx" />
     <ClCompile Include="module\util\util.ixx" />
     <ClInclude Include="include\common.hpp" />
@@ -264,6 +267,7 @@
     <ClCompile Include="src\engine_interface.cpp" />
     <ClCompile Include="src\engine_messages.cpp" />
     <ClCompile Include="src\game.cpp" />
+    <ClCompile Include="src\game\demolition_manager.cpp" />
     <ClCompile Include="src\pk_add.cpp" />
     <ClCompile Include="src\pk_kill.cpp" />
     <ClCompile Include="src\pk_menu.cpp" />

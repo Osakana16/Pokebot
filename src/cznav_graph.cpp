@@ -8,7 +8,7 @@ import pokebot.util;
 import pokebot.common.event_handler;
 
 namespace pokebot::node {
-	CZBotGraph::CZBotGraph(common::Observable<util::fixed_string<256u>>* map_loaded_observable) {
+	CZBotGraph::CZBotGraph(plugin::Observables* plugin_observables, engine::Observables* engine_observables) {
 		auto callback = [&](const util::fixed_string<256u>& map_name) {
 			if (!navigation_map.Load(std::format("cstrike/maps/{}.nav", map_name.c_str()))) {
 				if (!navigation_map.Load(std::format("czero/maps/{}.nav", map_name.c_str()))) {
@@ -49,6 +49,6 @@ namespace pokebot::node {
 			addGoal(GoalKind::Escape_Zone, "func_escapezone", returnModelOrigin);
 		};
 
-		map_loaded_observable->AddObserver(std::make_shared<common::NormalObserver<util::fixed_string<256u>>>(callback));
+		plugin_observables->map_loaded_observable.AddObserver(std::make_shared<common::NormalObserver<util::fixed_string<256u>>>(callback));
 	}
 }

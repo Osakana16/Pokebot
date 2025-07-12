@@ -127,7 +127,7 @@ namespace pokebot::bot::behavior {
 
 		template<bool b>
 		bool IsBombPlanted(const Bot* const self, const game::Game* const game, const node::Graph* const graph) {
-			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, game->GetC4Origin().has_value());
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, game->GetDemolitionManager()->GetC4Origin().has_value());
 		}
 
 		template<bool b>
@@ -137,7 +137,7 @@ namespace pokebot::bot::behavior {
 
 		template<bool b>
 		bool IsOnBomb(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
-			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (game::Distance(self->Origin(), *game->GetC4Origin()) <= 50.0f));
+			RETURN_BEHAVIOR_TRUE_OR_FALSE(b, (game::Distance(self->Origin(), *game->GetDemolitionManager()->GetC4Origin()) <= 50.0f));
 		}
 
 		template<bool b>
@@ -325,7 +325,7 @@ export namespace pokebot::bot::behavior {
 		change_c4->Define(BotChangesIfNotSelected<game::weapon::ID::C4>);
 
 		look_c4->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
-			return LookAt(self, game, graph, *game->GetC4Origin() - Vector{ 0, 0, 36 }, 1.0f);
+			return LookAt(self, game, graph, *game->GetDemolitionManager()->GetC4Origin() - Vector{ 0, 0, 36 }, 1.0f);
 		});
 
 		look_hostage->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
@@ -389,9 +389,9 @@ export namespace pokebot::bot::behavior {
 		});
 
 		set_goal_c4_node->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
-			auto area = graph->GetNearest(*game->GetC4Origin());
+			auto area = graph->GetNearest(*game->GetDemolitionManager()->GetC4Origin());
 			for (const auto& Another_Origin : { Vector{}, Vector{50.0f, 0.0f, 0.0f}, Vector{ -50.0f, 0.0f, 0.0f }, Vector{0.0f, 50.0f, 0.0f}, Vector{0.0f, -50.0f, 0.0f} }) {
-				if ((area = graph->GetNearest(*game->GetC4Origin() + Another_Origin)) != nullptr) {
+				if ((area = graph->GetNearest(*game->GetDemolitionManager()->GetC4Origin() + Another_Origin)) != nullptr) {
 					break;
 				}
 			}
@@ -418,10 +418,10 @@ export namespace pokebot::bot::behavior {
 		});
 
 		set_goal_c4_vector->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
-			if (!game->GetC4Origin().has_value() || self->goal_vector.has_value())
+			if (!game->GetDemolitionManager()->GetC4Origin().has_value() || self->goal_vector.has_value())
 				return Status::Failed;
-
-			self->goal_vector = *game->GetC4Origin();
+			
+			self->goal_vector = *game->GetDemolitionManager()->GetC4Origin();
 			return Status::Success;
 		});
 
@@ -430,11 +430,11 @@ export namespace pokebot::bot::behavior {
 		});
 
 		set_goal_backpack_node->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
-			auto area = graph->GetNearest(*game->GetBackpackOrigin());
+			auto area = graph->GetNearest(*game->GetDemolitionManager()->GetBackpackOrigin());
 			if (area == nullptr) {
 				return Status::Failed;
 			}
-			node::NodeID id = graph->GetNearest(*game->GetBackpackOrigin())->m_id;
+			node::NodeID id = graph->GetNearest(*game->GetDemolitionManager()->GetBackpackOrigin())->m_id;
 			if (graph->IsOnNode(self->Origin(), id))
 				return Status::Failed;
 
@@ -445,10 +445,10 @@ export namespace pokebot::bot::behavior {
 		});
 
 		set_goal_backpack_vector->Define([](Bot* const self, const game::Game* const game, const node::Graph* const graph) -> Status {
-			if (!game->GetBackpackOrigin().has_value() || self->goal_vector.has_value())
+			if (!game->GetDemolitionManager()->GetBackpackOrigin().has_value() || self->goal_vector.has_value())
 				return Status::Failed;
 
-			self->goal_vector = *game->GetBackpackOrigin();
+			self->goal_vector = *game->GetDemolitionManager()->GetBackpackOrigin();
 			return Status::Success;
 		});
 
@@ -493,7 +493,7 @@ export namespace pokebot::bot::behavior {
 			auto findCircleLine = [&](const Vector& Origin, const float Distance) POKEBOT_NOEXCEPT -> node::NodeID {
 				node::NodeID id = node::Invalid_NodeID;
 				for (const auto& Line : { Vector(Distance, .0f, .0f), Vector(-Distance, .0f, .0f), Vector(.0f, Distance, .0f), Vector(.0f, -Distance, .0f) }) {
-					auto area = graph->GetNearest(*game->GetC4Origin() + Line, FLT_MAX);
+					auto area = graph->GetNearest(*game->GetDemolitionManager()->GetC4Origin() + Line, FLT_MAX);
 					if (area == nullptr)
 						continue;
 
@@ -702,17 +702,18 @@ export namespace pokebot::bot::behavior {
 	}
 
 	bool CanUseHostage(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
-		return const_cast<game::Game*>(game)->GetClosedHostage(self->Origin(), 83.0f) != nullptr;
+		return false;
+		// return const_cast<game::Game*>(game)->GetClosedHostage(self->Origin(), 83.0f) != nullptr;
 	}
 
 	template<bool b>
 	bool IsFarFromC4(const Bot* const self, const game::Game* const game, const node::Graph* const graph) POKEBOT_NOEXCEPT {
 #if 0
-		assert(bot::game->GetC4Origin().has_value());
+		assert(bot::game->GetDemolitionManager()->GetC4Origin().has_value());
 		if constexpr (b) {
-			return game::Distance(self->Origin(), *bot::game->GetC4Origin()) > 100.0f;
+			return game::Distance(self->Origin(), *bot::game->GetDemolitionManager()->GetC4Origin()) > 100.0f;
 		} else {
-			return game::Distance(self->Origin(), *bot::game->GetC4Origin()) <= 100.0f;
+			return game::Distance(self->Origin(), *bot::game->GetDemolitionManager()->GetC4Origin()) <= 100.0f;
 		}
 #else
 		return false;

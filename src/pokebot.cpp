@@ -14,36 +14,63 @@ import pokebot.plugin.console.variable;
 
 import pokebot.engine;
 
-edict_t* pokebot::plugin::Pokebot::pWorldEntity;
-edict_t* pokebot::plugin::Pokebot::spawned_entity;
-std::vector<pokebot::plugin::console::ConVarReg> pokebot::plugin::Pokebot::convars;
+namespace pokebot {
+    edict_t* plugin::Pokebot::pWorldEntity;
+    edict_t* plugin::Pokebot::spawned_entity;
+    std::vector<plugin::console::ConVarReg> plugin::Pokebot::convars;
 
-std::unique_ptr<pokebot::bot::Manager> pokebot::plugin::Pokebot::bot_manager;
-std::unique_ptr<pokebot::game::Game> pokebot::plugin::Pokebot::game;
-std::unique_ptr<pokebot::node::Graph> pokebot::plugin::Pokebot::czworld;
-std::unique_ptr<pokebot::game::client::ClientManager> pokebot::plugin::Pokebot::clients;
+    std::unique_ptr<bot::Manager> plugin::Pokebot::bot_manager;
+    std::unique_ptr<game::Game> plugin::Pokebot::game;
+    std::unique_ptr<node::Graph> plugin::Pokebot::czworld;
+    std::unique_ptr<game::client::ClientManager> plugin::Pokebot::clients;
+
+    plugin::Observables plugin::Pokebot::observables;
+}
 
 namespace pokebot::plugin {
     void Pokebot::OnDllAttached() noexcept {
         auto callback = [](const event::EdictList& event) {
-            Pokebot::game = std::make_unique<pokebot::game::Game>(&Pokebot::frame_update_observable, &Pokebot::client_connection_observable, &Pokebot::client_disconnection_observable);
+            Pokebot::game = std::make_unique<pokebot::game::Game>(
+                &Pokebot::observables,
+                &engine::EngineInterface::observables
+            );
 
             Pokebot::czworld = std::make_unique<pokebot::node::CZBotGraph>(
-                &map_loaded_observable
+                &Pokebot::observables,
+                &engine::EngineInterface::observables
             );
-			Pokebot::clients = std::make_unique<pokebot::game::client::ClientManager>();
+
+            Pokebot::clients = std::make_unique<pokebot::game::client::ClientManager>(
+                &Pokebot::observables,
+                &engine::EngineInterface::observables
+            );
+
             Pokebot::bot_manager = std::make_unique<pokebot::bot::Manager>(
                 *Pokebot::game,
                 *Pokebot::czworld,
                 *Pokebot::clients,
-                &Pokebot::frame_update_observable,
+                &Pokebot::observables,
                 &engine::EngineInterface::observables
             );
 
-			Pokebot::RegisterConsoleVariables();
+            Pokebot::RegisterConsoleVariables();
+
+
+            for (int i = 0; i < event.client_max; ++i) {
+                auto ent = event.edict_list + i;
+                if (const std::string_view classname = STRING(ent->v.classname); classname == "info_player_start" || classname == "info_vip_start") {
+                    ent->v.rendermode = kRenderTransAlpha; // set its render mode to transparency
+                    ent->v.renderamt = 127; // set its transparency amount
+                    ent->v.effects |= EF_NODRAW;
+                } else if (classname == "info_player_deathmatch") {
+                    ent->v.rendermode = kRenderTransAlpha; // set its render mode to transparency
+                    ent->v.renderamt = 127; // set its transparency amount
+                    ent->v.effects |= EF_NODRAW;
+                }
+            }
         };
 
-        server_activation_observable.AddObserver(std::make_shared<common::NormalObserver<event::EdictList>>(callback));
+        observables.server_activation_observable.AddObserver(std::make_shared<common::NormalObserver<event::EdictList>>(callback));
     }
 
     void Pokebot::RegisterCommand() noexcept {
@@ -51,9 +78,7 @@ namespace pokebot::plugin {
     }
 
     void Pokebot::OnUpdate() noexcept {
-        frame_update_observable.Notifyobservers();
-
-        game->PreUpdate();
+        observables.frame_update_observable.Notifyobservers();
     }
 
     void Pokebot::AddBot(const std::string_view& Bot_Name, const game::Team Selected_Team, const game::Model Selected_Model) noexcept {
@@ -71,26 +96,26 @@ namespace pokebot::plugin {
     }
 
     void Pokebot::OnClientConnect(edict_t* entity, const char* Address) noexcept {
-        client_connection_observable.Notifyobservers({ .entity = entity, .Address = Address });
+        observables.client_connection_observable.Notifyobservers({ .entity = entity, .Address = Address });
     }
 
     void Pokebot::OnClientDisconnect(const edict_t* const disconnected_client) noexcept {
-        client_disconnection_observable.Notifyobservers({ .entity = disconnected_client, .Address = nullptr });
+        observables.client_disconnection_observable.Notifyobservers({ .entity = disconnected_client, .Address = nullptr });
         clients->Disconnect(STRING(disconnected_client->v.netname));
     }
 
     void Pokebot::OnServerActivate(edict_t edict_list[], int edict_count, int client_max) noexcept {
-        server_activation_observable.Notifyobservers({ .edict_list = edict_list, .edict_count = edict_count, .client_max = client_max });
+        observables.server_activation_observable.Notifyobservers({ .edict_list = edict_list, .edict_count = edict_count, .client_max = client_max });
     }
 
 
     void Pokebot::OnMapLoaded() noexcept {
-        map_loaded_observable.Notifyobservers(STRING(gpGlobals->mapname));
+        observables.map_loaded_observable.Notifyobservers(STRING(gpGlobals->mapname));
     }
 
 
     void Pokebot::OnClientPutInServer(edict_t* client) noexcept {
-        client_put_in_server_observable.Notifyobservers(client);
+        observables.client_put_in_server_observable.Notifyobservers(client);
     }
 
     void Pokebot::OnPlayerMenuSelect(edict_t* client) noexcept {
@@ -98,11 +123,11 @@ namespace pokebot::plugin {
     }
 
     void Pokebot::OnGameInit() noexcept {
-        game_init_observable.Notifyobservers();
+        observables.game_init_observable.Notifyobservers();
     }
 
     void Pokebot::OnEntitySpawned(edict_t* entity) noexcept {
-        entity_spawn_obserable.Notifyobservers(entity);
+        observables.entity_spawn_obserable.Notifyobservers(entity);
     }
 
     void Pokebot::AppendSpawnedEntity(edict_t* entity) noexcept { spawned_entity = entity; }
