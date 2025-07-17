@@ -7,7 +7,16 @@ import pokebot.game.util;
 import pokebot.util;
 
 namespace pokebot::game::client {
-	ClientManager::ClientManager(plugin::Observables*, engine::Observables* engine_observables) {
+	ClientManager::ClientManager(plugin::Observables* plugin_observables, engine::Observables* engine_observables) {
+		plugin_observables->frame_update_observable.AddObserver(
+			std::make_shared<common::NormalObserver<void>>(
+			[&] {
+				for (auto& client : clients) {
+					client.second.button = 0;
+				}
+			}
+		));
+
 		engine_observables->new_round_observable.AddObserver(
 			std::make_shared<common::NormalObserver<void>>(
 			[&] {
