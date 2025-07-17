@@ -5,7 +5,10 @@ import :difficult;
 import :personality_item;
 import :mood;
 import :state_machine;
+import :bot_event;
 
+import pokebot.common.event_handler;
+import pokebot.plugin.observables;
 import pokebot.bot.squad;
 import pokebot.game;
 import pokebot.game.client;
@@ -130,7 +133,19 @@ export namespace pokebot::bot {
 		pokebot::game::client::Client& client;
 		squad::Troops* troops{};
 	public:
-		Bot(squad::Troops*, pokebot::game::Game&, pokebot::node::Graph&, pokebot::game::client::ClientManager&, const std::string_view&, const game::Team, const game::Model) noexcept;
+		Bot(BotObservable<void>* new_round_observable,
+			BotObservable<void>* update_observable,
+			BotObservable<void>* radio_sent_observable,
+			BotObservable<void>* bomb_dropped,
+			BotObservable<void>* bomb_pickedup,
+			BotObservable<void>* dead_observable,
+			squad::Troops*,
+			pokebot::game::Game&,
+			pokebot::node::Graph&,
+			pokebot::game::client::ClientManager&,
+			const std::string_view&,
+			const game::Team,
+			const game::Model) noexcept;
 
 		node::NodeID GetTeamGoal() const noexcept { return troops->GetPlatoonGoal(name); }
 
@@ -155,8 +170,7 @@ export namespace pokebot::bot {
 		} look_direction{}, ideal_direction{};
 
 		void OnNewRound(squad::Troops*) POKEBOT_NOEXCEPT;
-		void Run() POKEBOT_NOEXCEPT;
-
+		
 		void SelectWeapon(const game::weapon::ID), SelectPrimaryWeapon(), SelectSecondaryWeapon();
 
 		bool HasEnemy() const POKEBOT_NOEXCEPT;

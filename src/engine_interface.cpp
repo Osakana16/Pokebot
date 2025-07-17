@@ -23,7 +23,7 @@ namespace pokebot::engine {
 
 	void EngineInterface::OnShowMenu() {
 		if (args.size() >= 4) {
-			observables.show_menu_observable.Notifyobservers(std::make_tuple(engine_target_edict, std::get<TextCache>(args[3]).c_str()));
+			observables.show_menu_observable.NotifyObservers(std::make_tuple(engine_target_edict, std::get<TextCache>(args[3]).c_str()));
 		}
 	}
 
@@ -57,7 +57,7 @@ namespace pokebot::engine {
 		const int Armor = std::get<int>(args[0]);
 		const int Bit = std::get<int>(args[2]);
 
-		observables.player_damage_taken_observable.Notifyobservers(std::make_tuple(engine_target_edict, engine_target_edict->v.dmg_inflictor, Health, Armor, Bit));
+		observables.player_damage_taken_observable.NotifyObservers(std::make_tuple(engine_target_edict, engine_target_edict->v.dmg_inflictor, Health, Armor, Bit));
 	}
 
 	void EngineInterface::OnStatusIconShown() {
@@ -75,22 +75,22 @@ namespace pokebot::engine {
 
 		if (auto it = Icon_Cache.find(std::get<TextCache>(args[1]).data()); it != Icon_Cache.end()) {
 			using namespace pokebot;
-			observables.status_icon_observable.Notifyobservers(std::make_tuple(engine_target_edict, it->second));
+			observables.status_icon_observable.NotifyObservers(std::make_tuple(engine_target_edict, it->second));
 		}
 	}
 
 	void EngineInterface::OnTextMessageSent() {
 		auto nothingToDo = [] {};
 		auto failIfBotDoes = [] { assert(!is_bot); };
-		auto ct_win = [] { observables.ct_win_observable.Notifyobservers(); observables.t_lose_observable.Notifyobservers(); };
-		auto t_win = [] { observables.t_win_observable.Notifyobservers(); observables.ct_lose_observable.Notifyobservers(); };
+		auto ct_win = [] { observables.ct_win_observable.NotifyObservers(); observables.t_lose_observable.NotifyObservers(); };
+		auto t_win = [] { observables.t_win_observable.NotifyObservers(); observables.ct_lose_observable.NotifyObservers(); };
 
 		const std::unordered_map<TextCache, std::function<void()>, TextCache::Hash> Text_Message{
 			{ "#Game_connected", nothingToDo },
 			{ "#Game_disconnected", nothingToDo },
 			{ "#Game_scoring", nothingToDo },
-			{ "#Game_join_terrorist", [] { observables.join_t_observable.Notifyobservers(); } },
-			{ "#Game_join_ct", [] { observables.join_ct_observable.Notifyobservers(); }},
+			{ "#Game_join_terrorist", [] { observables.join_t_observable.NotifyObservers(); } },
+			{ "#Game_join_ct", [] { observables.join_ct_observable.NotifyObservers(); }},
 			{ "#Cstrike_Chat_All", nothingToDo },
 			{ "#Cstrike_Chat_CT", nothingToDo },
 			{ "#Cstrike_Chat_T", nothingToDo },
@@ -100,7 +100,7 @@ namespace pokebot::engine {
 			{ "#All_Hostages_Rescued", ct_win },
 			{ "#Target_Saved", ct_win },
 			{ "#Bomb_Defused", ct_win },
-			{ "#Bomb_Planted", [] { observables.bomb_planted_observable.Notifyobservers(); }},
+			{ "#Bomb_Planted", [] { observables.bomb_planted_observable.NotifyObservers(); }},
 			{ "#Hostages_Not_Rescued", t_win,},
 			{ "#VIP_Not_Escaped", t_win },
 			{ "#Terrorist_Escaped", t_win },
@@ -111,7 +111,7 @@ namespace pokebot::engine {
 			{ "#VIP_Escaped", ct_win },
 			{ "#CTs_PreventEscape", ct_win },
 			{ "#Target_Bombed", t_win },
-			{ "#Game_Commencing", [] { observables.game_commercing_observable.Notifyobservers(); }},
+			{ "#Game_Commencing", [] { observables.game_commercing_observable.NotifyObservers(); }},
 			{ "#Game_will_restart_in", nothingToDo },
 			{ "#Switch_To_BurstFire", nothingToDo },
 			{ "#Switch_To_SemiAuto", nothingToDo },
@@ -125,9 +125,9 @@ namespace pokebot::engine {
 			{ "#Too_Many_Terrorists", nothingToDo },
 			{ "#Too_Many_CTs", nothingToDo },
 			{ "#Weapon_Not_Available", nothingToDo },
-			{ "#Game_bomb_pickup", [] { observables.bomb_pickedup_observable.Notifyobservers(); }  },
-			{ "#Got_bomb", [] { observables.bomb_pickedup_observable.Notifyobservers(); }},
-			{ "#Game_bomb_drop", [] { observables.bomb_dropped_observable.Notifyobservers(); }},
+			{ "#Game_bomb_pickup", [] { observables.bomb_pickedup_observable.NotifyObservers(); }  },
+			{ "#Got_bomb", [] { observables.bomb_pickedup_observable.NotifyObservers(); }},
+			{ "#Game_bomb_drop", [] { observables.bomb_dropped_observable.NotifyObservers(); }},
 			// TODO: These below should set failIfBotDoes
 			{ "#Not_Enough_Money", nothingToDo },
 			{ "#Cstrike_Already_Own_Weapon", nothingToDo },
@@ -183,7 +183,7 @@ namespace pokebot::engine {
 		}
 
 		if (std::get<int>(args[0]) == 0 && std::get<int>(args[1]) == 0) {
-			observables.new_round_observable.Notifyobservers();
+			observables.new_round_observable.NotifyObservers();
 		}
 	}
 }

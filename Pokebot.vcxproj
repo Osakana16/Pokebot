@@ -133,6 +133,7 @@
     <ClCompile Include="module\bot\behavior\sequence.ixx" />
     <ClCompile Include="module\bot\behavior\succeeder.ixx" />
     <ClCompile Include="module\bot\bot.ixx" />
+    <ClCompile Include="module\bot\bot_event.ixx" />
     <ClCompile Include="module\bot\bot_id.ixx" />
     <ClCompile Include="module\bot\bot_manager.ixx" />
     <ClCompile Include="module\bot\buy.ixx" />

@@ -21,10 +21,18 @@ namespace pokebot::bot {
 					 plugin::Observables* plugin_observables,
 					 engine::Observables* engine_observables) : game(game_), graph(graph_), clients(clients_)
 	{
-		auto update_callback = [&]() { Update(); };
 		auto newround_callback = [&]() { OnNewRoundPreparation(); };
+		plugin_observables->frame_update_observable.AddObserver(std::make_shared<common::NormalObserver<void>>([&]() {
+			for (auto& bot : bots) {
+				update_observable.NotifyObservers(bot.first);
+			}
+		}));
 
-		plugin_observables->frame_update_observable.AddObserver(std::make_shared<common::NormalObserver<void>>(update_callback));
+		plugin_observables->client_disconnection_observable.AddObserver(std::make_shared<common::NormalObserver<plugin::event::ClientInformation>>([&](const plugin::event::ClientInformation& client_information) {
+			Remove(STRING(client_information.entity->v.netname));
+		}));
+		
+
 		engine_observables->new_round_observable.AddObserver(std::make_shared<common::NormalObserver<void>>(newround_callback));
 		engine_observables->show_menu_observable.AddObserver(std::make_shared<common::NormalObserver<std::tuple<const edict_t* const, engine::TextCache>>>([&](const std::tuple<const edict_t* const, engine::TextCache>& args) {
 			auto player_name = STRING(std::get<0>(args)->v.netname);
@@ -85,14 +93,6 @@ namespace pokebot::bot {
 		}
 	}
 
-	void Manager::OnNewRoundReady() POKEBOT_NOEXCEPT {
-		if (!round_started_timer.IsRunning() && initialization_stage != InitializationStage::Player_Action_Ready) {
-			return;
-		}
-		
-		initialization_stage = InitializationStage::Completed;
-	}
-
 	bool Manager::IsExist(const std::string_view& Bot_Name) const POKEBOT_NOEXCEPT {
 		auto it = bots.find(Bot_Name.data());
 		return (it != bots.end());
@@ -149,7 +149,25 @@ namespace pokebot::bot {
 			}
 
 			bot_name = std::get<pokebot::util::PlayerName>(spawn_result).c_str();
-			auto insert_result = bots.insert({ bot_name.c_str(), Bot((team == game::Team::T ? terrorist_troops : ct_troops).get(), game, graph, clients, bot_name.c_str(), team, model) });
+			auto insert_result = bots.emplace(
+				std::piecewise_construct,
+				std::forward_as_tuple(bot_name.c_str()),
+				std::forward_as_tuple(
+					&new_round_observables,
+					&update_observable, 
+					&radio_sent_observable,
+					&bomb_dropped,
+					&bomb_pickedup,
+					&dead_observable,
+					(team == game::Team::T ? terrorist_troops : ct_troops).get(), 
+					game, 
+					graph,
+					clients,
+					bot_name.c_str(),
+					team,
+					model)
+			);
+
 			if (Is_First_Bot) {
 				auto convert_to_set = [&](const game::Team target_team) {
 					std::unordered_set<util::PlayerName, util::PlayerName::Hash> members{};
@@ -172,17 +190,6 @@ namespace pokebot::bot {
 		}
 	}
 
-	void Manager::Update() POKEBOT_NOEXCEPT {
-		if (bots.empty())
-			return;
-
-		OnNewRoundReady();
-
-		for (auto& bot : bots) {
-			bot.second.Run();
-		}
-	}
-
 	Bot* const Manager::Get(const std::string_view& Bot_Name) noexcept {
 		auto bot_iterator = bots.find(Bot_Name.data());
 		return (bot_iterator != bots.end() ? &bot_iterator->second : nullptr);
@@ -198,7 +205,15 @@ namespace pokebot::bot {
 	}
 
 	void Manager::Remove(const std::string_view& Bot_Name) POKEBOT_NOEXCEPT {
-		if (auto bot_iterator = bots.find(Bot_Name.data()); bot_iterator != bots.end()) {
+		if (auto bot = Get(Bot_Name); bot != nullptr) {
+			new_round_observables.Remove(Bot_Name.data());
+			update_observable.Remove(Bot_Name.data());
+			disconnection_observable.Remove(Bot_Name.data());
+			radio_sent_observable.Remove(Bot_Name.data());
+			bomb_dropped.Remove(Bot_Name.data());
+			bomb_pickedup.Remove(Bot_Name.data());
+			dead_observable.Remove(Bot_Name.data());
+
 			bots.erase(Bot_Name.data());
 		}
 	}

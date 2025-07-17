@@ -12,7 +12,13 @@ import pokebot.util.tracer;
 import pokebot.plugin.console.variable;
 
 namespace pokebot::bot {
-	Bot::Bot(squad::Troops* troops_,
+	Bot::Bot(common::MapObservable<void, util::PlayerName, util::PlayerName::Hash>* new_round_observable,
+			 common::MapObservable<void, util::PlayerName, util::PlayerName::Hash>* update_observable,
+			 common::MapObservable<void, util::PlayerName, util::PlayerName::Hash>* radio_sent_observable,
+			 common::MapObservable<void, util::PlayerName, util::PlayerName::Hash>* bomb_dropped,
+			 common::MapObservable<void, util::PlayerName, util::PlayerName::Hash>* bomb_pickedup,
+			 common::MapObservable<void, util::PlayerName, util::PlayerName::Hash>* dead_observable,
+			 squad::Troops* troops_,
 			 game::Game& game_,
 			 pokebot::node::Graph& graph_,
 			 pokebot::game::client::ClientManager& clients,
@@ -20,31 +26,37 @@ namespace pokebot::bot {
 			 const game::Team Join_Team,
 			 const game::Model Select_Model) noexcept : game(game_), graph(graph_), client(*clients.GetAsMutable(Bot_Name.data())) 
 	{
+		
 		team = Join_Team;
 		model = Select_Model;
 		name = Bot_Name.data();
+		
+		new_round_observable->AddObserver(Name(), std::make_shared<common::NormalObserver<void>>([this]() {
+			OnNewRound(troops);
+		}));
+
+		update_observable->AddObserver(Name(), std::make_shared<common::NormalObserver<void>>([this]() { 
+			(this->*(updateFuncs[static_cast<int>(start_action)]))();
+			frame_interval = gpGlobals->time - last_command_time;
+
+			const std::uint8_t Msec_Value = ComputeMsec();
+			last_command_time = gpGlobals->time;
+
+			client.flags |= pokebot::util::Third_Party_Bot_Flag;
+			g_engfuncs.pfnRunPlayerMove(client.Edict(),
+					movement_angle,
+					move_speed,
+					strafe_speed,
+					0.0f,
+					client.button,
+					client.impulse,
+					Msec_Value);
+
+			move_speed = strafe_speed = 0.0f;
+			UnlockByBomb();
+		}));
+
 		OnNewRound(troops_);
-	}
-
-	void Bot::Run() POKEBOT_NOEXCEPT {
-		(this->*(updateFuncs[static_cast<int>(start_action)]))();
-		frame_interval = gpGlobals->time - last_command_time;
-
-		const std::uint8_t Msec_Value = ComputeMsec();
-		last_command_time = gpGlobals->time;
-
-		client.flags |= pokebot::util::Third_Party_Bot_Flag;
-		g_engfuncs.pfnRunPlayerMove(client.Edict(),
-				movement_angle,
-				move_speed,
-				strafe_speed,
-				0.0f,
-				client.button,
-				client.impulse,
-				Msec_Value);
-
-		move_speed = strafe_speed = 0.0f;
-		UnlockByBomb();
 	}
 
 	void Bot::TurnViewAngle() {

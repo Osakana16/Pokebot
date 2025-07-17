@@ -582,6 +582,9 @@
     <ClCompile Include="src\bot\behavior\objective_definitions.cpp">
       <Filter>src\bot</Filter>
     </ClCompile>
+    <ClCompile Include="module\bot\bot_event.ixx">
+      <Filter>module\bot</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE" />

@@ -2,6 +2,7 @@ module;
 export module pokebot.bot: bot_manager;
 import :player_ai;
 import :radio_message;
+import :bot_event;
 import pokebot.common.event_handler;
 import pokebot.plugin.observables;
 
@@ -21,6 +22,15 @@ export namespace pokebot::bot {
 		std::unique_ptr<pokebot::bot::squad::Troops> terrorist_troops;
 		std::unique_ptr<pokebot::bot::squad::Troops> ct_troops;
 
+		BotObservable<void> new_round_observables;
+		BotObservable<void> update_observable;
+		BotObservable<void> disconnection_observable;
+
+		BotObservable<void> radio_sent_observable;
+		BotObservable<void> bomb_dropped;
+		BotObservable<void> bomb_pickedup;
+		BotObservable<void> dead_observable;
+
 		std::unordered_map<pokebot::util::PlayerName, Bot, pokebot::util::PlayerName::Hash> bots{};
 
 		// The name of the player who has the bomb.
@@ -32,7 +42,7 @@ export namespace pokebot::bot {
 		Bot* const Get(const std::string_view&) noexcept;
 		const Bot* const Get(const std::string_view&) const noexcept;
 		RadioMessage radio_message{};
-
+		
 		game::Game& game;
 		node::Graph& graph;
 		game::client::ClientManager& clients;
@@ -49,17 +59,6 @@ export namespace pokebot::bot {
 		* @brief Called when a new round starts.
 		*/
 		void OnNewRoundPreparation() noexcept;
-
-		/**
-		* @brief Called when a new round starts.
-		*/
-		void OnNewRoundReady() POKEBOT_NOEXCEPT;
-
-
-		/**
-		* @brief Update the state of all bots.
-		*/
-		void Update() POKEBOT_NOEXCEPT;
 
 		/**
 		* @brief Insert a new bot into the game.

@@ -78,7 +78,7 @@ namespace pokebot::plugin {
     }
 
     void Pokebot::OnUpdate() noexcept {
-        observables.frame_update_observable.Notifyobservers();
+        observables.frame_update_observable.NotifyObservers();
     }
 
     void Pokebot::AddBot(const std::string_view& Bot_Name, const game::Team Selected_Team, const game::Model Selected_Model) noexcept {
@@ -96,26 +96,26 @@ namespace pokebot::plugin {
     }
 
     void Pokebot::OnClientConnect(edict_t* entity, const char* Address) noexcept {
-        observables.client_connection_observable.Notifyobservers({ .entity = entity, .Address = Address });
+        observables.client_connection_observable.NotifyObservers({ .entity = entity, .Address = Address });
     }
 
     void Pokebot::OnClientDisconnect(const edict_t* const disconnected_client) noexcept {
-        observables.client_disconnection_observable.Notifyobservers({ .entity = disconnected_client, .Address = nullptr });
+        observables.client_disconnection_observable.NotifyObservers({ .entity = disconnected_client, .Address = nullptr });
         clients->Disconnect(STRING(disconnected_client->v.netname));
     }
 
     void Pokebot::OnServerActivate(edict_t edict_list[], int edict_count, int client_max) noexcept {
-        observables.server_activation_observable.Notifyobservers({ .edict_list = edict_list, .edict_count = edict_count, .client_max = client_max });
+        observables.server_activation_observable.NotifyObservers({ .edict_list = edict_list, .edict_count = edict_count, .client_max = client_max });
     }
 
 
     void Pokebot::OnMapLoaded() noexcept {
-        observables.map_loaded_observable.Notifyobservers(STRING(gpGlobals->mapname));
+        observables.map_loaded_observable.NotifyObservers(STRING(gpGlobals->mapname));
     }
 
 
     void Pokebot::OnClientPutInServer(edict_t* client) noexcept {
-        observables.client_put_in_server_observable.Notifyobservers(client);
+        observables.client_put_in_server_observable.NotifyObservers(client);
     }
 
     void Pokebot::OnPlayerMenuSelect(edict_t* client) noexcept {
@@ -123,11 +123,11 @@ namespace pokebot::plugin {
     }
 
     void Pokebot::OnGameInit() noexcept {
-        observables.game_init_observable.Notifyobservers();
+        observables.game_init_observable.NotifyObservers();
     }
 
     void Pokebot::OnEntitySpawned(edict_t* entity) noexcept {
-        observables.entity_spawn_obserable.Notifyobservers(entity);
+        observables.entity_spawn_obserable.NotifyObservers(entity);
     }
 
     void Pokebot::AppendSpawnedEntity(edict_t* entity) noexcept { spawned_entity = entity; }
