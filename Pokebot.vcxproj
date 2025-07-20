@@ -56,7 +56,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>false</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;GOLDSRC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;GOLDSRC;MSVC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdclatest</LanguageStandard_C>
@@ -223,7 +223,6 @@
     <ClCompile Include="module\plugin\event\plugin_event.ixx" />
     <ClCompile Include="module\plugin\event\server_activation.ixx" />
     <ClCompile Include="module\plugin\host\host.ixx" />
-    <ClCompile Include="module\plugin\dll.ixx" />
     <ClCompile Include="module\plugin\plugin.ixx" />
     <ClCompile Include="module\plugin\plugin_observables.ixx" />
     <ClCompile Include="module\plugin\pokebot.ixx" />

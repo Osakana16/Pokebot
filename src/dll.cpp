@@ -1,16 +1,6 @@
-module;
 #include <vector>
 
-
-module pokebot: dll;
-import :plugin;
-
-import pokebot.bot.behavior;
-import pokebot.game;
-import pokebot.game.util;
-import pokebot.util.tracer;
-import pokebot.util.random;
-import pokebot.terrain.graph;
+import pokebot;
 
 enginefuncs_t g_engfuncs;
 globalvars_t* gpGlobals;
@@ -119,10 +109,8 @@ C_DLLEXPORT int Meta_Attach(PLUG_LOADTIME now, META_FUNCTIONS* pFunctionTable, m
     memcpy(pFunctionTable, &gMetaFunctionTable, sizeof(META_FUNCTIONS));
     gpGamedllFuncs = pGamedllFuncs;
 
-    pokebot::bot::behavior::DefineBehavior();
-
     pokebot::plugin::Pokebot::RegisterCommand();
-
+    
     // print a message to notify about plugin attaching
     LOG_CONSOLE(PLID, "%s: plugin attaching", Plugin_info.name);
     LOG_MESSAGE(PLID, "%s: plugin attaching", Plugin_info.name);
@@ -221,7 +209,7 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
         const auto arg = CMD_ARGV(0);
         char *not_converted;
         int key = strtol(CMD_ARGV(1), &not_converted, 10);
-        pokebot::game::Menu::Instance().OnPress(client, key);
+        // pokebot::game::Menu::Instance().OnPress(client, key);
         RETURN_META(MRES_IGNORED);
     };
 

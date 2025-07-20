@@ -70,6 +70,8 @@ namespace pokebot::plugin {
             }
         };
 
+        pokebot::bot::behavior::DefineBehavior();
+
         observables.server_activation_observable.AddObserver(std::make_shared<common::NormalObserver<event::EdictList>>(callback));
     }
 
