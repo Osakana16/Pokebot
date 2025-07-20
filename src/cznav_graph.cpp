@@ -1,7 +1,7 @@
 module;
 #include "navmesh/navigation_map.h"
 
-module pokebot.terrain.graph: cznav_graph;
+module pokebot.terrain.graph.cznav_graph;
 
 import pokebot.game.util;
 import pokebot.util;

@@ -1,4 +1,4 @@
-export module pokebot.terrain.graph: danger;
+export module pokebot.terrain.graph.danger;
 import pokebot.terrain.graph.node;
 
 export namespace pokebot::node {

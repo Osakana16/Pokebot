@@ -366,9 +366,6 @@
     <ClCompile Include="module\bot\behavior\behavior_definitions.ixx">
       <Filter>module\bot\behavior\definitions</Filter>
     </ClCompile>
-    <ClCompile Include="module\terrain\graph\graph.ixx">
-      <Filter>module\terrain\graph</Filter>
-    </ClCompile>
     <ClCompile Include="module\terrain\graph\cznav_graph.ixx">
       <Filter>module\terrain\graph</Filter>
     </ClCompile>
