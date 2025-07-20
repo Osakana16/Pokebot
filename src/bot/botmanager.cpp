@@ -1,4 +1,4 @@
-module pokebot.bot: bot_manager;
+module pokebot.bot.manager;
 
 import pokebot.bot;
 import pokebot.game;

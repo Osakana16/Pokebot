@@ -1,8 +1,7 @@
 export module pokebot: plugin;
 import pokebot.api.command_executors;
 
-
-import pokebot.bot;
+import pokebot.bot.manager;
 import pokebot.common.event_handler;
 import pokebot.plugin.event;
 import pokebot.plugin.event.server_activation;

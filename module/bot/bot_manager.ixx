@@ -1,16 +1,20 @@
 module;
-export module pokebot.bot: bot_manager;
-import :player_ai;
-import :radio_message;
-import :bot_event;
+export module pokebot.bot.manager;
+
+import pokebot.bot;
+import pokebot.bot.squad;
+import pokebot.bot.event;
+import pokebot.bot.radio_message;
+
 import pokebot.common.event_handler;
 import pokebot.plugin.observables;
 
 import pokebot.game;
+import pokebot.util;
 import pokebot.game.client;
 import pokebot.engine;
+import pokebot.terrain.graph.node;
 import pokebot.terrain.graph.graph_base;
-import pokebot.bot.squad;
 
 export namespace pokebot::bot {
 	using BotPair = std::pair<pokebot::util::PlayerName, Bot>;

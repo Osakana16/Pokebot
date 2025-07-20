@@ -5,7 +5,7 @@ import :difficult;
 import :personality_item;
 import :mood;
 import :state_machine;
-import :bot_event;
+import pokebot.bot.event;
 
 import pokebot.common.event_handler;
 import pokebot.plugin.observables;

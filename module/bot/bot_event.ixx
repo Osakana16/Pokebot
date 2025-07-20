@@ -1,4 +1,4 @@
-export module pokebot.bot: bot_event;
+export module pokebot.bot.event;
 import pokebot.common.event_handler;
 import pokebot.plugin.observables;
 import pokebot.util;
