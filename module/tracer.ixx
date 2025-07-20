@@ -47,7 +47,7 @@ namespace pokebot::util {
 			return *this;
 		}
 
-		bool Tracer::IsHit() const noexcept {
+		bool IsHit() const noexcept {
 			return flFraction < 1.0;
 		}
 	};
