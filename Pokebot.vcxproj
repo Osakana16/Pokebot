@@ -178,6 +178,7 @@
     <ClCompile Include="module\chat\chat.ixx" />
     <ClCompile Include="module\chat\talk.ixx" />
     <ClCompile Include="module\chat\talk.windows.ixx" />
+    <ClCompile Include="module\command_executors.ixx" />
     <ClCompile Include="module\common\event_handler.ixx" />
     <ClCompile Include="module\console\command\console_args.ixx" />
     <ClCompile Include="module\console\command\console_command.ixx" />

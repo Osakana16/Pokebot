@@ -504,9 +504,6 @@
     <ClCompile Include="module\plugin\event\client_information.ixx">
       <Filter>module\plugin\event</Filter>
     </ClCompile>
-    <ClCompile Include="module\plugin\dll.ixx">
-      <Filter>module\plugin</Filter>
-    </ClCompile>
     <ClCompile Include="module\plugin\plugin.ixx">
       <Filter>module\plugin</Filter>
     </ClCompile>
@@ -584,6 +581,9 @@
     </ClCompile>
     <ClCompile Include="module\bot\bot_event.ixx">
       <Filter>module\bot</Filter>
+    </ClCompile>
+    <ClCompile Include="module\command_executors.ixx">
+      <Filter>module\plugin</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

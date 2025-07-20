@@ -3,12 +3,14 @@ module;
 
 module pokebot: plugin;
 
+
+import pokebot.bot.behavior;
 import std;
 import pokebot.bot;
 import pokebot.game;
 import pokebot.util.random;
 import pokebot.game.util;
-import pokebot.terrain.graph;
+import pokebot.terrain.graph.cznav_graph;
 import pokebot.plugin.console.command;
 import pokebot.plugin.console.variable;
 
@@ -29,6 +31,8 @@ namespace pokebot {
 
 namespace pokebot::plugin {
     void Pokebot::OnDllAttached() noexcept {
+        api::command_executor = std::make_unique<Pokebot>();
+
         auto callback = [](const event::EdictList& event) {
             Pokebot::game = std::make_unique<pokebot::game::Game>(
                 &Pokebot::observables,
@@ -69,7 +73,7 @@ namespace pokebot::plugin {
                 }
             }
         };
-
+        
         pokebot::bot::behavior::DefineBehavior();
 
         observables.server_activation_observable.AddObserver(std::make_shared<common::NormalObserver<event::EdictList>>(callback));
@@ -83,7 +87,7 @@ namespace pokebot::plugin {
         observables.frame_update_observable.NotifyObservers();
     }
 
-    void Pokebot::AddBot(const std::string_view& Bot_Name, const game::Team Selected_Team, const game::Model Selected_Model) noexcept {
+    void Pokebot::AddBot_(const std::string_view& Bot_Name, const game::Team Selected_Team, const game::Model Selected_Model) noexcept {
         bot_manager->Insert(Bot_Name.data(), Selected_Team, *clients, Selected_Model);
     }
 
@@ -134,7 +138,7 @@ namespace pokebot::plugin {
 
     void Pokebot::AppendSpawnedEntity(edict_t* entity) noexcept { spawned_entity = entity; }
 
-    bool Pokebot::IsPlayable() noexcept {
+    bool Pokebot::IsPlayable_() noexcept {
         return czworld->IsNavFileLoaded();
     }
 

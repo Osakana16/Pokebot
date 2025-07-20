@@ -1,13 +1,12 @@
 module pokebot.plugin.console.command: pk_bot;
 import :console_args;
 
-import pokebot;
-import pokebot.terrain.graph;
 import pokebot.util.random;
 import pokebot.game.util;
+import pokebot.api.command_executors;
 
 static void pk_add_team_specified(const pokebot::game::Team Default_Team) {
-    if (!pokebot::plugin::Pokebot::IsPlayable()) {
+    if (!pokebot::api::command_executor->IsPlayable()) {
         SERVER_PRINT("[POKEBOT] Error: Cannot add bots because the .nav file is not loaded. Please generate it in CS:CZ.\n");
         return;
     }
@@ -27,11 +26,12 @@ static void pk_add_team_specified(const pokebot::game::Team Default_Team) {
         model = static_cast<decltype(model)>(std::strtol(args[1].data(), nullptr, 0) % 4);
     }
 
-    pokebot::plugin::Pokebot::AddBot(name.data(), team, model);
+    pokebot::api::command_executor->AddBot(name.data(), team, model);
+    // pokebot::plugin::Pokebot::AddBot(name.data(), team, model);
 }
 
 void pk_add() {
-    if (!pokebot::plugin::Pokebot::IsPlayable()) {
+    if (!pokebot::api::command_executor->IsPlayable()) {
         SERVER_PRINT("[POKEBOT] Error: Cannot add bots because the .nav file does not exist. Please generate it in CS:CZ.\n");
         return;
     }
@@ -58,7 +58,8 @@ void pk_add() {
     if (args.size() >= 3) {
         model = static_cast<decltype(model)>(std::strtol(args[2].data(), nullptr, 0) % 4);
     }
-    pokebot::plugin::Pokebot::AddBot(name.data(), team, model);
+    pokebot::api::command_executor->AddBot(name.data(), team, model);
+    // pokebot::plugin::Pokebot::AddBot(name.data(), team, model);
 }
 
 void pk_add_ct() {

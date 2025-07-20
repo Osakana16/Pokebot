@@ -1,9 +1,6 @@
 module pokebot.plugin.console.command: pk_menu;
 import :console_args;
 
-import pokebot;
-import pokebot.game;
-
 void pk_menu() {
     std::vector<std::string_view> args{};
     get_console_args(&args);
