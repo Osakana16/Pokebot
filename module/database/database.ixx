@@ -162,14 +162,14 @@ export namespace pokebot::database {
 			}();
 		}
 
-		const WeaponData* const Database::GetWeaponData(const std::string_view Item_ID) const POKEBOT_NOEXCEPT {
+		const WeaponData* const GetWeaponData(const std::string_view Item_ID) const noexcept {
 			if (auto it = weapons.find(Item_ID.data()); it != weapons.end())
 				return &it->second;
 			else
 				return nullptr;
 		}
 
-		const Cartridge* const Database::GetCartridge(const std::string_view Item_ID) const POKEBOT_NOEXCEPT {
+		const Cartridge* const GetCartridge(const std::string_view Item_ID) const noexcept {
 			if (auto it = cartridges.find(Item_ID.data()); it != cartridges.end())
 				return &it->second;
 			else

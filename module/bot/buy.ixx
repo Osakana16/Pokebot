@@ -374,9 +374,9 @@ namespace pokebot::buy {
 	class BuyAI {
 		BuyPattern pattern;
 	public:
-		BuyAI::BuyAI(const GameMoney Money) : pattern(BuyPattern(Money)) {}
+		BuyAI(const GameMoney Money) : pattern(BuyPattern(Money)) {}
 
-		BuyNode* BuyAI::GetPattern(int round, int win_state) {
+		BuyNode* GetPattern(int round, int win_state) {
 			return pattern.GetPattern(round, win_state);
 		}
 	};
