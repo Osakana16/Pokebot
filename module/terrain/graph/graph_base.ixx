@@ -1,7 +1,7 @@
 module;
 #include "navmesh/navigation_map.h"
 
-export module pokebot.terrain.graph: graph_base;
+export module pokebot.terrain.graph.graph_base;
 import pokebot.terrain.goal;
 import pokebot.terrain.util;
 

@@ -13,7 +13,7 @@ import pokebot.bot.squad;
 import pokebot.game;
 import pokebot.game.client;
 import pokebot.game.util;
-import pokebot.terrain.graph;
+import pokebot.terrain.graph.graph_base;
 import pokebot.terrain.graph.path;
 import pokebot.game.player;
 import pokebot.game.weapon;

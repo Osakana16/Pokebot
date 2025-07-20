@@ -9,7 +9,7 @@ import pokebot.game.player;
 import pokebot.game.util;
 import pokebot.util;
 import pokebot.util.tracer;
-import pokebot.terrain.graph;
+import pokebot.terrain.graph.graph_base;
 
 namespace {
     int current_message{};

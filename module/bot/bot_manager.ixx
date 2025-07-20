@@ -9,7 +9,7 @@ import pokebot.plugin.observables;
 import pokebot.game;
 import pokebot.game.client;
 import pokebot.engine;
-import pokebot.terrain.graph;
+import pokebot.terrain.graph.graph_base;
 import pokebot.bot.squad;
 
 export namespace pokebot::bot {

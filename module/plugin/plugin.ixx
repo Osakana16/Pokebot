@@ -7,7 +7,7 @@ import pokebot.plugin.event.server_activation;
 import pokebot.plugin.observables;
 
 import pokebot.plugin.console.variable;
-import pokebot.terrain.graph;
+import pokebot.terrain.graph.graph_base;
 import pokebot.game;
 import pokebot.game.client;
 import pokebot.game.util;

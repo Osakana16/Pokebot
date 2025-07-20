@@ -1,6 +1,5 @@
 import pokebot.bot.squad.strategy;
-import pokebot.util.random;
-import pokebot.terrain.graph;
+import pokebot.terrain.graph.graph_base;
 import pokebot.terrain.goal;
 
 export module pokebot.bot.squad.goal_decision_strategy:last_goal_picker;

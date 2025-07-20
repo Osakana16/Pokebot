@@ -10,7 +10,7 @@ import pokebot.bot;
 import pokebot.game;
 import pokebot.game.util;
 import pokebot.game.player;
-import pokebot.terrain.graph;
+import pokebot.terrain.graph.graph_base;
 import pokebot.terrain.graph.node;
 import pokebot.terrain.goal;
 import pokebot.util;

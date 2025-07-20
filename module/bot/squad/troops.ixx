@@ -6,7 +6,7 @@ import pokebot.bot.squad.staff;
 import pokebot.bot.squad.strategy;
 import pokebot.bot.squad.goal_decision_strategy;
 import pokebot.bot.squad.util;
-import pokebot.terrain.graph;
+import pokebot.terrain.graph.graph_base;
 import pokebot.terrain.graph.node;
 
 namespace pokebot::bot::squad {

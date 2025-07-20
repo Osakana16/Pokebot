@@ -1,7 +1,7 @@
 #include "navmesh/navigation_map.h"
 export module pokebot.terrain.graph: cznav_graph;
 import :danger;
-import :graph_base;
+import pokebot.terrain.graph.graph_base;
 import pokebot.terrain.graph.path;
 import pokebot.terrain.graph.node;
 
@@ -10,7 +10,6 @@ import pokebot.engine;
 import pokebot.common.event_handler;
 import pokebot.game.util;
 import pokebot.util;
-import pokebot.util.tracer;
 
 export namespace pokebot::node {
 	// Compatibility with ZBot navmesh.

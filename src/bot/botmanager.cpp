@@ -5,7 +5,7 @@ import pokebot.game;
 import pokebot.util.random;
 import pokebot.game.util;
 import pokebot.bot.squad;
-import pokebot.terrain.graph;
+import pokebot.terrain.graph.graph_base;
 import pokebot.common.event_handler;
 
 
