@@ -10,8 +10,10 @@ import pokebot.bot.event;
 import pokebot.common.event_handler;
 import pokebot.plugin.observables;
 import pokebot.bot.squad;
-import pokebot.game;
-import pokebot.game.client;
+import pokebot.game.cs_game_manager;
+import pokebot.common.name_manager;
+import pokebot.game.client.declaration;
+
 import pokebot.game.util;
 import pokebot.terrain.graph.graph_base;
 import pokebot.terrain.graph.path;
@@ -128,7 +130,7 @@ export namespace pokebot::bot {
 			&Bot::OnSelectionCompleted
 		};
 
-		pokebot::game::Game& game;
+		pokebot::game::CSGameBase& game;
 		pokebot::node::Graph& graph;
 		pokebot::game::client::Client& client;
 		squad::Troops* troops{};
@@ -140,9 +142,9 @@ export namespace pokebot::bot {
 			BotObservable<void>* bomb_pickedup,
 			BotObservable<void>* dead_observable,
 			squad::Troops*,
-			pokebot::game::Game&,
+			pokebot::game::CSGameBase&,
 			pokebot::node::Graph&,
-			pokebot::game::client::ClientManager&,
+			common::NameManger<game::client::Client>&,
 			const std::string_view&,
 			const game::Team,
 			const game::Model) noexcept;

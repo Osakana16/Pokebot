@@ -1,4 +1,4 @@
-export module pokebot.game: game_manager_base;
+export module pokebot.game.game_manager_base;
 
 export namespace pokebot::game {
 	class GameBase {

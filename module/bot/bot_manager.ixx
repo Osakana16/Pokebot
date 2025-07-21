@@ -1,17 +1,19 @@
 module;
 export module pokebot.bot.manager;
+import pokebot.common.name_manager;
 
 import pokebot.bot;
 import pokebot.bot.squad;
 import pokebot.bot.event;
 import pokebot.bot.radio_message;
 
+import pokebot.common.name_manager;
 import pokebot.common.event_handler;
 import pokebot.plugin.observables;
 
-import pokebot.game;
+import pokebot.game.cs_game_manager;
 import pokebot.util;
-import pokebot.game.client;
+import pokebot.game.client.declaration;
 import pokebot.engine;
 import pokebot.terrain.graph.node;
 import pokebot.terrain.graph.graph_base;
@@ -22,7 +24,7 @@ export namespace pokebot::bot {
 	/**
 	* @brief Manager class for Bot.
 	*/
-	class Manager final : private game::Singleton<Manager> {
+	class Manager final : public common::NameManger<Bot> {
 		std::unique_ptr<pokebot::bot::squad::Troops> terrorist_troops;
 		std::unique_ptr<pokebot::bot::squad::Troops> ct_troops;
 
@@ -43,22 +45,13 @@ export namespace pokebot::bot {
 		util::Timer round_started_timer{ util::GetRealGlobalTime };
 		enum class InitializationStage { Preparation, Player_Action_Ready, Completed } initialization_stage{};
 
-		Bot* const Get(const std::string_view&) noexcept;
-		const Bot* const Get(const std::string_view&) const noexcept;
+		Bot* const Get(const std::string_view&) noexcept override;
+		const Bot* const Get(const std::string_view&) const noexcept override;
 		RadioMessage radio_message{};
 		
-		game::Game& game;
+		game::CSGameBase& game;
 		node::Graph& graph;
-		game::client::ClientManager& clients;
-	public:
-		Manager(game::Game&,
-				node::Graph&,
-				game::client::ClientManager& ,
-				plugin::Observables*,
-				engine::Observables*);
-
-		const decltype(bomber_name)& Bomber_Name = bomber_name;
-
+		common::NameManger<game::client::Client>& clients;
 		/**
 		* @brief Called when a new round starts.
 		*/
@@ -71,7 +64,7 @@ export namespace pokebot::bot {
 		* @param model The model of the bot.
 		* @param difficulty The difficulty level of the bot.
 		*/
-		void Insert(pokebot::util::PlayerName bot_name, const game::Team team, game::client::ClientManager&, const game::Model model) POKEBOT_NOEXCEPT;
+		void Insert(pokebot::util::PlayerName bot_name, const game::Team team, const game::Model model) POKEBOT_NOEXCEPT;
 
 		/**
 		* @brief Kick a bot from the game.
@@ -160,5 +153,11 @@ export namespace pokebot::bot {
 		void OnMapLoaded();
 
 		node::NodeID GetGoalNode(const std::string_view& Client_Name) const noexcept;
+	public:
+		Manager(game::CSGameBase&,
+				node::Graph&,
+				common::NameManger<game::client::Client>& ,
+				plugin::Observables*,
+				engine::Observables*);
 	};
 }

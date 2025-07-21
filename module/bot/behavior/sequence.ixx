@@ -7,7 +7,7 @@ export namespace pokebot::bot::behavior {
 	public:
 		using BehaviorNode::BehaviorNode;
 
-		Status Evaluate(Bot* const self, game::Game* game, const node::Graph* const graph) override {
+		Status Evaluate(Bot* const self, game::CSGameBase* game, const node::Graph* const graph) override {
 			// SERVER_PRINT(std::format("{}\n", name).c_str());
 			for (auto child : children) {
 				switch (child->Evaluate(self, game, graph)) {

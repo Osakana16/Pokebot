@@ -1,3 +1,5 @@
-export module pokebot.game.client;
-export import :client;
-export import :client_manager;
+export module pokebot.game.client.declaration;
+
+namespace pokebot::game::client {
+	export class Client;
+}

@@ -8,6 +8,7 @@ import pokebot.bot.squad.goal_decision_strategy;
 import pokebot.bot.squad.util;
 import pokebot.terrain.graph.graph_base;
 import pokebot.terrain.graph.node;
+import pokebot.game.cs_game_manager;
 
 namespace pokebot::bot::squad {
 	export class Troops {

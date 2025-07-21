@@ -103,5 +103,5 @@ export namespace pokebot::bot::behavior {
 		extern std::shared_ptr<Sequence> t_take_point;
 	}
 
-	std::shared_ptr<Action> wait(std::uint32_t, float);
+	void DefineBehavior();
 }

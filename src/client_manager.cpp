@@ -1,6 +1,5 @@
-module pokebot.game.client: client_manager;
-import :client;
-import :client_key;
+module pokebot.game.client.manager;
+import pokebot.game.client;
 
 import pokebot.game.weapon;
 import pokebot.game.util;
@@ -31,15 +30,15 @@ namespace pokebot::game::client {
 		return clients;
 	}
 
-	const Client* ClientManager::Get(const char* const Name) const {
-		if (auto it = clients.find(Name); it != clients.end()) {
+	const Client* const ClientManager::Get(const std::string_view& Name) const {
+		if (auto it = clients.find(Name.data()); it != clients.end()) {
 			return &it->second;
 		}
 		return nullptr;
 	}
 
-	Client* ClientManager::GetAsMutable(const char* const Name) {
-		if (auto it = clients.find(Name); it != clients.end()) {
+	Client* const ClientManager::Get(const std::string_view& Name) {
+		if (auto it = clients.find(Name.data()); it != clients.end()) {
 			return &it->second;
 		}
 		return nullptr;
@@ -99,13 +98,13 @@ namespace pokebot::game::client {
 	}
 
 	void ClientManager::OnDeath(const std::string_view Client_Name) {
-		decltype(auto) target = GetAsMutable(Client_Name.data());
+		decltype(auto) target = Get(Client_Name.data());
 		target->status_icon = StatusIcon::Not_Displayed;
 		target->item = Item::None;
 	}
 
 	void ClientManager::OnDamageTaken(const std::string_view Client_Name, const edict_t* Inflictor, const int Health, const int Armor, const int Bit) {
-		if (auto target = GetAsMutable(Client_Name.data()); target != nullptr) {
+		if (auto target = Get(Client_Name.data()); target != nullptr) {
 			if (target->health - Health <= 0) {
 				OnDeath(Client_Name);
 			} else {
@@ -115,7 +114,7 @@ namespace pokebot::game::client {
 	}
 
 	void ClientManager::OnMoneyChanged(const std::string_view Client_Name, const int Money) {
-		GetAsMutable(Client_Name.data())->money = Money;
+		Get(Client_Name.data())->money = Money;
 	}
 
 	void ClientManager::OnScreenFaded(const std::string_view Client_Name) {
@@ -123,41 +122,41 @@ namespace pokebot::game::client {
 	}
 
 	void ClientManager::OnNVGToggled(const std::string_view Client_Name, const bool Toggle) {
-		GetAsMutable(Client_Name.data())->is_nvg_on = Toggle;
+		Get(Client_Name.data())->is_nvg_on = Toggle;
 	}
 
 	void ClientManager::OnWeaponChanged(const std::string_view Client_Name, const game::weapon::ID Weapon_ID) {
-		GetAsMutable(Client_Name.data())->current_weapon = Weapon_ID;
+		Get(Client_Name.data())->current_weapon = Weapon_ID;
 	}
 
 	void ClientManager::OnClipChanged(const std::string_view Client_Name, const game::weapon::ID Weapon_ID, const int Amount) {
-		GetAsMutable(Client_Name.data())->weapon_clip = Amount;
+		Get(Client_Name.data())->weapon_clip = Amount;
 	}
 
 	void ClientManager::OnAmmoPickedup(const std::string_view Client_Name, const game::weapon::ammo::ID Ammo_ID, const int Amount) {
-		GetAsMutable(Client_Name.data())->weapon_ammo[static_cast<int>(Ammo_ID)] = Amount;
+		Get(Client_Name.data())->weapon_ammo[static_cast<int>(Ammo_ID)] = Amount;
 	}
 
 	void ClientManager::OnTeamAssigned(const std::string_view Client_Name, const game::Team Assigned_Team) {
-		auto target = GetAsMutable(Client_Name.data());
+		auto target = Get(Client_Name.data());
 		if (target != nullptr)
 			target->team = Assigned_Team;
 	}
 
 	void ClientManager::OnItemChanged(const std::string_view Client_Name, game::Item item) {
-		GetAsMutable(Client_Name.data())->item |= item;
+		Get(Client_Name.data())->item |= item;
 	}
 
 	void ClientManager::OnStatusIconShown(const std::string_view Client_Name, const StatusIcon Icon) {
-		GetAsMutable(Client_Name.data())->status_icon |= Icon;
+		Get(Client_Name.data())->status_icon |= Icon;
 	}
 
 	void ClientManager::OnVIPChanged(const std::string_view Client_Name) {
-		auto&& candidate = GetAsMutable(Client_Name.data());
+		auto&& candidate = Get(Client_Name.data());
 		candidate->is_vip = true;
 	}
 
 	void ClientManager::OnDefuseKitEquiped(const std::string_view Client_Name) {
-		GetAsMutable(Client_Name.data())->item |= Item::Defuse_Kit;
+		Get(Client_Name.data())->item |= Item::Defuse_Kit;
 	}
 }

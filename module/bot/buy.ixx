@@ -1,6 +1,7 @@
 export module pokebot.bot: buy;
 import :player_ai;
 
+import pokebot.game.client;
 import pokebot.engine;
 import pokebot.database;
 import pokebot.game;

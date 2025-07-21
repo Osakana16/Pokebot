@@ -3,7 +3,7 @@ import pokebot.bot.behavior;
 
 import std;
 import pokebot.engine;
-import pokebot.game;
+import pokebot.game.scenario;
 import pokebot.game.client;
 import pokebot.game.player;
 import pokebot.game.util;
@@ -19,12 +19,12 @@ namespace pokebot::bot {
 			 common::MapObservable<void, util::PlayerName, util::PlayerName::Hash>* bomb_pickedup,
 			 common::MapObservable<void, util::PlayerName, util::PlayerName::Hash>* dead_observable,
 			 squad::Troops* troops_,
-			 game::Game& game_,
+			 pokebot::game::CSGameBase& game_,
 			 pokebot::node::Graph& graph_,
-			 pokebot::game::client::ClientManager& clients,
+			 common::NameManger<game::client::Client>& clients,
 			 const std::string_view& Bot_Name,
 			 const game::Team Join_Team,
-			 const game::Model Select_Model) noexcept : game(game_), graph(graph_), client(*clients.GetAsMutable(Bot_Name.data())) 
+			 const game::Model Select_Model) noexcept : game(game_), graph(graph_), client(*clients.Get(Bot_Name.data())) 
 	{
 		
 		team = Join_Team;
@@ -195,18 +195,18 @@ namespace pokebot::bot {
 			if (bool(press_key & game::player::ActionKey::Run)) {
 				if (bool(press_key & game::player::ActionKey::Shift)) {
 					press_key &= ~game::player::ActionKey::Shift;
-					move_speed = game::Default_Max_Move_Speed / 2.0f;
+					move_speed = Default_Max_Move_Speed / 2.0f;
 				} else {
-					move_speed = game::Default_Max_Move_Speed;
+					move_speed = Default_Max_Move_Speed;
 				}
 			}
 
 			if (bool(press_key & game::player::ActionKey::Move_Right)) {
-				strafe_speed = game::Default_Max_Move_Speed;
+				strafe_speed = Default_Max_Move_Speed;
 			}
 
 			if (bool(press_key & game::player::ActionKey::Move_Left)) {
-				strafe_speed = -game::Default_Max_Move_Speed;
+				strafe_speed = -Default_Max_Move_Speed;
 			}
 
 			if (bool(press_key & game::player::ActionKey::Back)) {
@@ -253,9 +253,10 @@ namespace pokebot::bot {
 	}
 
 	void Bot::OnTerroristDemolition() noexcept {
-		if (game.GetDemolitionManager()->GetC4Origin().has_value()) {
+		auto de_manager = std::static_pointer_cast<game::scenario::DemolitionManager>(game.GetDemolitionManager());
+		if (de_manager->GetC4Origin().has_value()) {
 			behavior::demolition::t_planted_wary->Evaluate(this, &game, &graph);
-		} else if (game.GetDemolitionManager()->GetBackpackOrigin().has_value()) {
+		} else if (de_manager->GetBackpackOrigin().has_value()) {
 			behavior::demolition::t_pick_up_bomb->Evaluate(this, &game, &graph);
 		} else {
 			if (HasWeapon(game::weapon::ID::C4)) {

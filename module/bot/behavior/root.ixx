@@ -4,7 +4,7 @@ import :behavior_node;
 export namespace pokebot::bot::behavior {
 	class Root : public BehaviorNode {
 		std::shared_ptr<BehaviorNode> child{};
-		Status Evaluate(Bot* const self, game::Game* game, const node::Graph* const graph) override {
+		Status Evaluate(Bot* const self, game::CSGameBase* game, const node::Graph* const graph) override {
 			return child->Evaluate(self, game, graph);
 		}
 	public:

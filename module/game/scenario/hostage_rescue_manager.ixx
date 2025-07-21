@@ -1,5 +1,5 @@
 export module pokebot.game.scenario: hostage_rescue_maanger;
-import :scenario_manager;
+import pokebot.game.scenario.manager;
 import pokebot.util;
 import pokebot.game.util;
 

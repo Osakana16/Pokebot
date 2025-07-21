@@ -11,7 +11,10 @@ import :distance_picker;
 import :multiple_goal_strategy;
 import :hostage_rescue;
 
-import pokebot.game;
+import pokebot.game.game_manager_base;
+import pokebot.terrain.graph.graph_base;
+import pokebot.game.util;
+
 import pokebot.bot.squad.strategy;
 import pokebot.bot.squad.util;
 

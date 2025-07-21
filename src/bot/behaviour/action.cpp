@@ -1,7 +1,7 @@
 module pokebot.bot.behavior: action;
 
 namespace pokebot::bot::behavior {
-	Status Action::Evaluate(Bot* const self, game::Game* game, const node::Graph* const graph) noexcept {
+	Status Action::Evaluate(Bot* const self, game::CSGameBase* game, const node::Graph* const graph) noexcept {
 		return action(self, game, graph);
 	}
 

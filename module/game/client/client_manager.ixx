@@ -1,8 +1,9 @@
 module;
 #include <tuple>
 
-export module pokebot.game.client: client_manager;
-import :client;
+export module pokebot.game.client.manager;
+import pokebot.game.client;
+import pokebot.common.name_manager;
 
 import pokebot.plugin.observables;
 import pokebot.engine;
@@ -13,14 +14,14 @@ import pokebot.util;
 
 export namespace pokebot::game::client {
 	using ClientCreationResult = std::tuple<bool, pokebot::util::PlayerName>;
-	class ClientManager {
+	class ClientManager : public common::NameManger<Client> {
 		std::unordered_map<pokebot::util::PlayerName, Client, pokebot::util::PlayerName::Hash> clients{};
 	public:
 		ClientManager(plugin::Observables*, engine::Observables*);
 		auto& GetAll() const;
 
-		const Client* Get(const char* const Name) const;
-		Client* GetAsMutable(const char* const Name);
+		const Client* const Get(const std::string_view&) const override;
+		Client* const Get(const std::string_view&) override;
 		bool Disconnect(const char* const Name) noexcept;
 
 		ClientCreationResult Create(std::string_view client_name);

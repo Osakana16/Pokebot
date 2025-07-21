@@ -1,5 +1,6 @@
 ﻿import std;
 import pokebot.game;
+import pokebot.game.scenario;
 import pokebot.game.util;
 import pokebot.game.client;
 import pokebot.util;
@@ -61,6 +62,9 @@ namespace pokebot {
 				};
 			}));
 		}
+
+		
+		std::shared_ptr<scenario::ScenarioManager> Game::GetDemolitionManager() const { return scenario_managers[0]; }
 
 		bool Host::IsHostValid() const POKEBOT_NOEXCEPT {
 			return host != nullptr;

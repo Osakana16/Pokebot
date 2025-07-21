@@ -1,6 +1,6 @@
 export module pokebot.bot.client;
 
-import pokebot.game;
+import pokebot.game.cs_game_manager;
 
 export namespace pokebot::bot::client {
 	class BotClient {

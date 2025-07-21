@@ -1,9 +1,9 @@
 ﻿export module pokebot.game: game_manager;
-import :cs_game_manager;
+import pokebot.game.cs_game_manager;
 
 import pokebot.database;
 import pokebot.engine;
-import pokebot.game.scenario;
+import pokebot.game.scenario.manager;
 import pokebot.game.util;
 import pokebot.game.player;
 import pokebot.game.entity;
@@ -47,7 +47,7 @@ export namespace pokebot::game {
 		Game(plugin::Observables* plugin_observables,
 			 engine::Observables* engine_observables);
 		
-		std::shared_ptr<scenario::DemolitionManager> GetDemolitionManager() const { return std::static_pointer_cast<scenario::DemolitionManager>(scenario_managers[0]); }
+		std::shared_ptr<scenario::ScenarioManager> GetDemolitionManager() const override;
 
 		Host host{};
 

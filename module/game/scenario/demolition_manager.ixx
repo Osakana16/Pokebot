@@ -1,5 +1,5 @@
 export module pokebot.game.scenario: demolition_manager;
-import :scenario_manager;
+import pokebot.game.scenario.manager;
 
 import pokebot.util;
 

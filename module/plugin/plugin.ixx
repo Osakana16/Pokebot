@@ -1,16 +1,19 @@
 export module pokebot: plugin;
 import pokebot.api.command_executors;
 
-import pokebot.bot.manager;
 import pokebot.common.event_handler;
 import pokebot.plugin.event;
 import pokebot.plugin.event.server_activation;
 import pokebot.plugin.observables;
 
-import pokebot.plugin.console.variable;
+import pokebot.common.name_manager;
 import pokebot.terrain.graph.graph_base;
-import pokebot.game;
-import pokebot.game.client;
+import pokebot.game.game_manager_base;
+
+import pokebot.bot.declaration;
+import pokebot.game.client.declaration;
+
+import pokebot.plugin.console.variable;
 import pokebot.game.util;
 import pokebot.util;
 
@@ -22,10 +25,10 @@ export namespace pokebot::plugin {
 		static std::vector<console::ConVarReg> convars;
 		static Observables observables;
 
-		static std::unique_ptr<pokebot::bot::Manager> bot_manager;
-		static std::unique_ptr<pokebot::game::Game> game;
+		static std::unique_ptr<pokebot::common::NameManger<bot::Bot>> bot_manager;
+		static std::unique_ptr<pokebot::game::GameBase> game;
 		static std::unique_ptr<pokebot::node::Graph> czworld;
-		static std::unique_ptr<pokebot::game::client::ClientManager> clients;
+		static std::unique_ptr<pokebot::common::NameManger<game::client::Client>> clients;
 		
 		static bool IsPlayable_() noexcept;
 		static void AddBot_(const std::string_view& Bot_Name, const game::Team, const game::Model) noexcept;

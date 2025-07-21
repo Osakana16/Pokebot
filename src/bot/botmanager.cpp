@@ -2,6 +2,7 @@ module pokebot.bot.manager;
 
 import pokebot.bot;
 import pokebot.game;
+import pokebot.game.client;
 import pokebot.util.random;
 import pokebot.game.util;
 import pokebot.bot.squad;
@@ -15,9 +16,9 @@ namespace pokebot::bot {
 		bool IsCounterTerrorist(const BotPair& target) noexcept { return target.second.JoinedTeam() == game::Team::CT; }
 	}
 
-	Manager::Manager(game::Game& game_,
+	Manager::Manager(game::CSGameBase& game_,
 					 node::Graph& graph_, 
-					 game::client::ClientManager& clients_,
+					 common::NameManger<game::client::Client>& clients_,
 					 plugin::Observables* plugin_observables,
 					 engine::Observables* engine_observables) : game(game_), graph(graph_), clients(clients_)
 	{
@@ -57,7 +58,7 @@ namespace pokebot::bot {
 		engine_observables->status_icon_observable.AddObserver(std::make_shared<common::NormalObserver<std::tuple<const edict_t* const, game::StatusIcon>>>([&](const std::tuple<const edict_t* const, game::StatusIcon>& args) {
 			auto player_name = STRING(std::get<0>(args)->v.netname);
 			if (auto bot = Get(player_name); bot != nullptr) {
-				clients.OnStatusIconShown(player_name, std::get<1>(args));
+				// clients.OnStatusIconShown(player_name, std::get<1>(args));
 			}
 		}));
 	}
@@ -140,54 +141,51 @@ namespace pokebot::bot {
 		radio_message.message = Radio_Sentence.data();
 	}
 
-	void Manager::Insert(pokebot::util::PlayerName bot_name, const game::Team team, game::client::ClientManager& clients, const game::Model model) POKEBOT_NOEXCEPT {
-		if (auto spawn_result = clients.Create(bot_name.c_str()); std::get<bool>(spawn_result)) {
-			const bool Is_First_Bot = bots.empty();
-			if (Is_First_Bot) {
-				terrorist_troops = std::make_unique<pokebot::bot::squad::Troops>(game::Team::T);
-				ct_troops = std::make_unique<pokebot::bot::squad::Troops>(game::Team::CT);
-			}
-
-			bot_name = std::get<pokebot::util::PlayerName>(spawn_result).c_str();
-			auto insert_result = bots.emplace(
-				std::piecewise_construct,
-				std::forward_as_tuple(bot_name.c_str()),
-				std::forward_as_tuple(
-					&new_round_observables,
-					&update_observable, 
-					&radio_sent_observable,
-					&bomb_dropped,
-					&bomb_pickedup,
-					&dead_observable,
-					(team == game::Team::T ? terrorist_troops : ct_troops).get(), 
-					game, 
-					graph,
-					clients,
-					bot_name.c_str(),
-					team,
-					model)
-			);
-
-			if (Is_First_Bot) {
-				auto convert_to_set = [&](const game::Team target_team) {
-					std::unordered_set<util::PlayerName, util::PlayerName::Hash> members{};
-					for (auto& bot : bots | std::views::filter([target_team](const std::pair<pokebot::util::PlayerName, Bot>& pair) { return pair.second.JoinedTeam() == target_team; })) {
-						members.insert(bot.first);
-					}
-					return members;
-				};
-				std::unordered_set<util::PlayerName, util::PlayerName::Hash> terrorists = convert_to_set(game::Team::T);
-				std::unordered_set<util::PlayerName, util::PlayerName::Hash> cts = convert_to_set(game::Team::CT);
-
-				terrorist_troops->UpdateMember(terrorists);
-				ct_troops->UpdateMember(cts);
-
-				terrorist_troops->Establish(&game, &graph);
-				ct_troops->Establish(&game, &graph);
-
-			}
-			assert(insert_result.second);
+	void Manager::Insert(pokebot::util::PlayerName bot_name, const game::Team team, const game::Model model) POKEBOT_NOEXCEPT {
+		const bool Is_First_Bot = bots.empty();
+		if (Is_First_Bot) {
+			terrorist_troops = std::make_unique<pokebot::bot::squad::Troops>(game::Team::T);
+			ct_troops = std::make_unique<pokebot::bot::squad::Troops>(game::Team::CT);
 		}
+
+		auto insert_result = bots.emplace(
+			std::piecewise_construct,
+			std::forward_as_tuple(bot_name.c_str()),
+			std::forward_as_tuple(
+			&new_round_observables,
+			&update_observable,
+			&radio_sent_observable,
+			&bomb_dropped,
+			&bomb_pickedup,
+			&dead_observable,
+			(team == game::Team::T ? terrorist_troops : ct_troops).get(),
+			game,
+			graph,
+			clients,
+			bot_name.c_str(),
+			team,
+			model)
+		);
+
+		if (Is_First_Bot) {
+			auto convert_to_set = [&](const game::Team target_team) {
+				std::unordered_set<util::PlayerName, util::PlayerName::Hash> members{};
+				for (auto& bot : bots | std::views::filter([target_team](const std::pair<pokebot::util::PlayerName, Bot>& pair) { return pair.second.JoinedTeam() == target_team; })) {
+					members.insert(bot.first);
+				}
+				return members;
+			};
+			std::unordered_set<util::PlayerName, util::PlayerName::Hash> terrorists = convert_to_set(game::Team::T);
+			std::unordered_set<util::PlayerName, util::PlayerName::Hash> cts = convert_to_set(game::Team::CT);
+
+			terrorist_troops->UpdateMember(terrorists);
+			ct_troops->UpdateMember(cts);
+
+			terrorist_troops->Establish(&game, &graph);
+			ct_troops->Establish(&game, &graph);
+
+		}
+		assert(insert_result.second);
 	}
 
 	Bot* const Manager::Get(const std::string_view& Bot_Name) noexcept {
