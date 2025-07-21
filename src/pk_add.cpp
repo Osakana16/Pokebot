@@ -4,6 +4,7 @@ import :console_args;
 import pokebot.util.random;
 import pokebot.game.util;
 import pokebot.api.command_executors;
+import pokebot.game.cs.team;
 
 static void pk_add_team_specified(const pokebot::game::Team Default_Team) {
     if (!pokebot::api::command_executor->IsPlayable()) {
@@ -27,7 +28,6 @@ static void pk_add_team_specified(const pokebot::game::Team Default_Team) {
     }
 
     pokebot::api::command_executor->AddBot(name.data(), team, model);
-    // pokebot::plugin::Pokebot::AddBot(name.data(), team, model);
 }
 
 void pk_add() {
@@ -59,7 +59,6 @@ void pk_add() {
         model = static_cast<decltype(model)>(std::strtol(args[2].data(), nullptr, 0) % 4);
     }
     pokebot::api::command_executor->AddBot(name.data(), team, model);
-    // pokebot::plugin::Pokebot::AddBot(name.data(), team, model);
 }
 
 void pk_add_ct() {

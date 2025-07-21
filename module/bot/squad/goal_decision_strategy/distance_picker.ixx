@@ -2,6 +2,7 @@ import pokebot.bot.squad.strategy;
 import pokebot.game.util;
 import pokebot.terrain.goal;
 import pokebot.terrain.graph.graph_base;
+import pokebot.game.cs.team;
 
 export module pokebot.bot.squad.goal_decision_strategy:distance_picker;
 import :decision_strategy;

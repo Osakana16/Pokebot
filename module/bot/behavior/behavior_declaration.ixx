@@ -1,7 +1,5 @@
 export module pokebot.bot.behavior: behavior_declaration;
-import :sequence;
-import :selector;
-import :action;
+import pokebot.bot.behavior.node;
 
 #define BEHAVIOR_PRIVATE namespace
 #define BEHAVIOR_IF(A) [](const Bot* const self, game::Game* game, const node::Graph* const graph) POKEBOT_NOEXCEPT { return A; }

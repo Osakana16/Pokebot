@@ -4,26 +4,49 @@ import pokebot.game.client;
 import pokebot.game.weapon;
 import pokebot.game.util;
 import pokebot.util;
+import pokebot.game.player;
+import pokebot.game.cs.team;
+import pokebot.game.cs.model;
 
 namespace pokebot::game::client {
 	ClientManager::ClientManager(plugin::Observables* plugin_observables, engine::Observables* engine_observables) {
-		plugin_observables->frame_update_observable.AddObserver(
-			std::make_shared<common::NormalObserver<void>>(
-			[&] {
-				for (auto& client : clients) {
-					client.second.button = 0;
-				}
+		plugin_observables->frame_update_observable.AddObserver(std::make_shared<common::NormalObserver<void>>([&] {
+			for (auto& client : clients) {
+				client.second.button = 0;
 			}
-		));
+		}));
 
-		engine_observables->new_round_observable.AddObserver(
-			std::make_shared<common::NormalObserver<void>>(
-			[&] {
-				for (auto& client : clients) {
-					client.second.is_nvg_on = false;
-				}
+		plugin_observables->client_connection_observable.AddObserver(std::make_shared<common::NormalObserver<plugin::event::ClientInformation>>([&](const plugin::event::ClientInformation&) {
+
+		}));
+
+		plugin_observables->client_disconnection_observable.AddObserver(std::make_shared<common::NormalObserver<plugin::event::ClientInformation>>([&](const plugin::event::ClientInformation&) {
+
+		}));
+
+		plugin_observables->on_add_bot_command_fired_observable.AddObserver(std::make_shared<common::NormalObserver<std::tuple<util::PlayerName, game::Team, game::Model>>>([&](const std::tuple<util::PlayerName, game::Team, game::Model>& sender) {
+			Create(std::get<util::PlayerName>(sender).c_str());
+		}));
+
+		engine_observables->new_round_observable.AddObserver(std::make_shared<common::NormalObserver<void>>([&] {
+			for (auto& client : clients) {
+				client.second.is_nvg_on = false;
 			}
-		));
+		}));
+#if 0		
+		engine_observables->item_get.AddObserver(std::make_shared<common::NormalObserver<std::tuple<const edict_t* const, game::StatusIcon>>>([&](const std::tuple<const edict_t* const, game::StatusIcon>& args) {
+			auto player_name = STRING(std::get<0>(args)->v.netname);
+			if (auto entity = Get(player_name); entity != nullptr) {
+				entity->item  |= std::get<1>(args);
+			}
+		}));
+#endif
+		engine_observables->status_icon_observable.AddObserver(std::make_shared<common::NormalObserver<std::tuple<const edict_t* const, game::StatusIcon>>>([&](const std::tuple<const edict_t* const, game::StatusIcon>& args) {
+			auto player_name = STRING(std::get<0>(args)->v.netname);
+			if (auto entity = Get(player_name); entity != nullptr) {
+				entity->status_icon |= std::get<1>(args);
+			}
+		}));
 	}
 
 	auto& ClientManager::GetAll() const {
@@ -141,14 +164,6 @@ namespace pokebot::game::client {
 		auto target = Get(Client_Name.data());
 		if (target != nullptr)
 			target->team = Assigned_Team;
-	}
-
-	void ClientManager::OnItemChanged(const std::string_view Client_Name, game::Item item) {
-		Get(Client_Name.data())->item |= item;
-	}
-
-	void ClientManager::OnStatusIconShown(const std::string_view Client_Name, const StatusIcon Icon) {
-		Get(Client_Name.data())->status_icon |= Icon;
 	}
 
 	void ClientManager::OnVIPChanged(const std::string_view Client_Name) {

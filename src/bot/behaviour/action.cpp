@@ -1,4 +1,4 @@
-module pokebot.bot.behavior: action;
+module pokebot.bot.behavior.node: action;
 
 namespace pokebot::bot::behavior {
 	Status Action::Evaluate(Bot* const self, game::CSGameBase* game, const node::Graph* const graph) noexcept {

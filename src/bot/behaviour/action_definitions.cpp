@@ -1,10 +1,5 @@
 module pokebot.bot.behavior: behavior_definitions;
-import :action;
-import :selector;
-import :sequence;
-import :condition;
-import :succeeder;
-import :behavior_declaration;
+import pokebot.bot.behavior.node;
 
 import std;
 import pokebot.bot;

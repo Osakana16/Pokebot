@@ -1,6 +1,7 @@
-export module pokebot.bot.behavior: action;
+export module pokebot.bot.behavior.node: action;
 import :behavior_node;
-namespace pokebot::bot::behavior {
+
+export namespace pokebot::bot::behavior {
 	class Action : public BehaviorNode {
 		BehaviorFunc action;
 	public:

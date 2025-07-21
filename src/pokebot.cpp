@@ -90,6 +90,18 @@ namespace pokebot::plugin {
         // bot_manager->Insert(Bot_Name.data(), Selected_Team, *clients, Selected_Model);
     }
 
+    void Pokebot::AddBot(const std::string_view& name, pokebot::game::Team team, pokebot::game::Model model) {
+        util::PlayerName n = name.data();
+        auto value = std::make_tuple(n, team, model);
+        observables.on_add_bot_command_fired_observable.NotifyObservers(value);
+
+        observables.client_connection_observable.NotifyObservers({ .entity = clients->Get(n.c_str())->client, .Address = "127.0.0.1" });
+    }
+    
+    bool Pokebot::IsPlayable() {
+        return Pokebot::IsPlayable_();
+    }
+
     void Pokebot::OnEntitySpawned() noexcept {
         if (spawned_entity->v.rendermode == kRenderTransTexture) {
             spawned_entity->v.flags &= ~FL_WORLDBRUSH; // clear the FL_WORLDBRUSH flag out of transparent ents

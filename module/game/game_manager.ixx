@@ -11,6 +11,7 @@ import pokebot.util;
 import pokebot.plugin.event;
 import pokebot.plugin.event.server_activation;
 import pokebot.plugin.observables;
+import pokebot.game.cs.team;
 
 import pokebot.common.event_handler;
 

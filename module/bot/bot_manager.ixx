@@ -17,6 +17,8 @@ import pokebot.game.client.declaration;
 import pokebot.engine;
 import pokebot.terrain.graph.node;
 import pokebot.terrain.graph.graph_base;
+import pokebot.game.cs.team;
+import pokebot.game.cs.model;
 
 export namespace pokebot::bot {
 	using BotPair = std::pair<pokebot::util::PlayerName, Bot>;
@@ -37,7 +39,8 @@ export namespace pokebot::bot {
 		BotObservable<void> bomb_pickedup;
 		BotObservable<void> dead_observable;
 
-		std::unordered_map<pokebot::util::PlayerName, Bot, pokebot::util::PlayerName::Hash> bots{};
+		std::queue<std::tuple<util::PlayerName, game::Team, game::Model>> bot_queue{};
+		std::unordered_map<util::PlayerName, Bot, pokebot::util::PlayerName::Hash> bots{};
 
 		// The name of the player who has the bomb.
 		pokebot::util::PlayerName bomber_name{};

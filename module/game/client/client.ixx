@@ -5,6 +5,7 @@ import pokebot.game.weapon;
 import pokebot.game.player;
 import pokebot.game.util;
 import pokebot.util;
+import pokebot.game.cs.team;
 
 export namespace pokebot::game::client {
 	class Client {

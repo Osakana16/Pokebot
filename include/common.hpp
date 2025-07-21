@@ -24,19 +24,6 @@ namespace pokebot{
 #endif
 
 		using Dec = float;
-		enum class Model {
-			Phoenix_Connexion = 1,
-			Elite_Crew,
-			Artic_Avengers,
-			Guerilla_Warface,
-			Midwest_Militia,
-			SEAL = 1,
-			GSG9,
-			SAS,
-			GIGN,
-			Spetsnaz,
-			Random = 6
-		};
 
 		class VecElem {
 			float value{};

@@ -9,6 +9,7 @@ import pokebot.bot.squad.util;
 import pokebot.terrain.graph.graph_base;
 import pokebot.terrain.graph.node;
 import pokebot.game.cs_game_manager;
+import pokebot.game.cs.team;
 
 namespace pokebot::bot::squad {
 	export class Troops {

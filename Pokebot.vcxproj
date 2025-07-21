@@ -121,17 +121,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="include\bit_operator_for_enum.hpp" />
-    <ClCompile Include="module\bot\behavior\action.ixx" />
     <ClCompile Include="module\bot\behavior\behavior.ixx" />
     <ClCompile Include="module\bot\behavior\behavior_declaration.ixx" />
     <ClCompile Include="module\bot\behavior\behavior_definitions.ixx" />
-    <ClCompile Include="module\bot\behavior\behavior_node.ixx" />
-    <ClCompile Include="module\bot\behavior\behavior_node_status.ixx" />
-    <ClCompile Include="module\bot\behavior\condition.ixx" />
-    <ClCompile Include="module\bot\behavior\selector.ixx" />
-    <ClCompile Include="module\bot\behavior\root.ixx" />
-    <ClCompile Include="module\bot\behavior\sequence.ixx" />
-    <ClCompile Include="module\bot\behavior\succeeder.ixx" />
+    <ClCompile Include="module\bot\behavior\node\action.ixx" />
+    <ClCompile Include="module\bot\behavior\node\behavior_node.ixx" />
+    <ClCompile Include="module\bot\behavior\node\behavior_node_status.ixx" />
+    <ClCompile Include="module\bot\behavior\node\bot_behavior_node.ixx" />
+    <ClCompile Include="module\bot\behavior\node\condition.ixx" />
+    <ClCompile Include="module\bot\behavior\node\root.ixx" />
+    <ClCompile Include="module\bot\behavior\node\selector.ixx" />
+    <ClCompile Include="module\bot\behavior\node\sequence.ixx" />
+    <ClCompile Include="module\bot\behavior\node\succeeder.ixx" />
     <ClCompile Include="module\bot\bot.declaration.ixx" />
     <ClCompile Include="module\bot\bot.ixx" />
     <ClCompile Include="module\bot\bot_event.ixx" />
@@ -206,6 +207,7 @@
     <ClCompile Include="module\game\game_manager.ixx" />
     <ClCompile Include="module\game\game_manager_base.ixx" />
     <ClCompile Include="module\game\menu.ixx" />
+    <ClCompile Include="module\game\model.ixx" />
     <ClCompile Include="module\game\player\action_key.ixx" />
     <ClCompile Include="module\game\player\item.ixx" />
     <ClCompile Include="module\game\player\player.ixx" />

@@ -21,6 +21,8 @@ import pokebot.game.player;
 import pokebot.game.weapon;
 import pokebot.game.entity;
 import pokebot.util;
+import pokebot.game.cs.team;
+import pokebot.game.cs.model;
 
 export namespace pokebot::bot {
 	class Bot {

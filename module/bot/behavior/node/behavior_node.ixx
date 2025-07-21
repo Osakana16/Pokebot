@@ -1,4 +1,4 @@
-export module pokebot.bot.behavior: behavior_node;
+export module pokebot.bot.behavior.node: behavior_node;
 import :behavior_node_status;
 
 import pokebot.terrain.graph.graph_base;

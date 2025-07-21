@@ -1,6 +1,7 @@
-export module pokebot.bot.behavior: succeeder;
+export module pokebot.bot.behavior.node: succeeder;
 import :behavior_node;
-namespace pokebot::bot::behavior {
+
+export namespace pokebot::bot::behavior {
 	class Succeeder : public BehaviorNode {
 		std::shared_ptr<BehaviorNode> child{};
 	public:

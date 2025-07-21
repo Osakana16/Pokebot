@@ -1,4 +1,4 @@
-export module pokebot.bot.behavior: behavior_node_status;
+export module pokebot.bot.behavior.node: behavior_node_status;
 
 namespace pokebot::bot::behavior {
 	export enum class Status {

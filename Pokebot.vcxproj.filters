@@ -118,6 +118,9 @@
     <Filter Include="module\engine">
       <UniqueIdentifier>{1c151d07-5eaf-4427-998c-9e753b3444df}</UniqueIdentifier>
     </Filter>
+    <Filter Include="module\bot\behavior\node">
+      <UniqueIdentifier>{f3820267-81d9-43b8-a90a-4c0010f4d232}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -339,28 +342,7 @@
     <ClCompile Include="module\bot\behavior\behavior.ixx">
       <Filter>module\bot\behavior</Filter>
     </ClCompile>
-    <ClCompile Include="module\bot\behavior\behavior_node.ixx">
-      <Filter>module\bot\behavior</Filter>
-    </ClCompile>
-    <ClCompile Include="module\bot\behavior\behavior_node_status.ixx">
-      <Filter>module\bot\behavior</Filter>
-    </ClCompile>
-    <ClCompile Include="module\bot\behavior\sequence.ixx">
-      <Filter>module\bot\behavior</Filter>
-    </ClCompile>
-    <ClCompile Include="module\bot\behavior\selector.ixx">
-      <Filter>module\bot\behavior</Filter>
-    </ClCompile>
-    <ClCompile Include="module\bot\behavior\action.ixx">
-      <Filter>module\bot\behavior</Filter>
-    </ClCompile>
     <ClCompile Include="module\bot\behavior\behavior_declaration.ixx">
-      <Filter>module\bot\behavior</Filter>
-    </ClCompile>
-    <ClCompile Include="module\bot\behavior\root.ixx">
-      <Filter>module\bot\behavior</Filter>
-    </ClCompile>
-    <ClCompile Include="module\bot\behavior\condition.ixx">
       <Filter>module\bot\behavior</Filter>
     </ClCompile>
     <ClCompile Include="module\bot\behavior\behavior_definitions.ixx">
@@ -570,9 +552,6 @@
     <ClCompile Include="src\bot\behaviour\action_definitions.cpp">
       <Filter>src\bot</Filter>
     </ClCompile>
-    <ClCompile Include="module\bot\behavior\succeeder.ixx">
-      <Filter>module\bot\behavior</Filter>
-    </ClCompile>
     <ClCompile Include="module\bot\bot_event.ixx">
       <Filter>module\bot</Filter>
     </ClCompile>
@@ -587,6 +566,36 @@
     </ClCompile>
     <ClCompile Include="module\game\client\game_client.ixx">
       <Filter>module\game\client</Filter>
+    </ClCompile>
+    <ClCompile Include="module\game\model.ixx">
+      <Filter>module\game</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\behavior\node\bot_behavior_node.ixx">
+      <Filter>module\bot\behavior\node</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\behavior\node\action.ixx">
+      <Filter>module\bot\behavior\node</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\behavior\node\succeeder.ixx">
+      <Filter>module\bot\behavior\node</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\behavior\node\condition.ixx">
+      <Filter>module\bot\behavior\node</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\behavior\node\root.ixx">
+      <Filter>module\bot\behavior\node</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\behavior\node\selector.ixx">
+      <Filter>module\bot\behavior\node</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\behavior\node\sequence.ixx">
+      <Filter>module\bot\behavior\node</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\behavior\node\behavior_node.ixx">
+      <Filter>module\bot\behavior\node</Filter>
+    </ClCompile>
+    <ClCompile Include="module\bot\behavior\node\behavior_node_status.ixx">
+      <Filter>module\bot\behavior\node</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

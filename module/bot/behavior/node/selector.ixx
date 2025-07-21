@@ -1,8 +1,8 @@
-export module pokebot.bot.behavior: sequence;
+export module pokebot.bot.behavior.node: selector;
 import :behavior_node;
 
 export namespace pokebot::bot::behavior {
-	class Sequence : public BehaviorNode {
+	class Selector : public BehaviorNode {
 		std::vector<std::shared_ptr<BehaviorNode>> children;
 	public:
 		using BehaviorNode::BehaviorNode;
@@ -13,11 +13,11 @@ export namespace pokebot::bot::behavior {
 				switch (child->Evaluate(self, game, graph)) {
 					case Status::Running:
 						return Status::Running;
-					case Status::Failed:
-						return Status::Failed;
+					case Status::Success:
+						return Status::Success;
 				}
 			}
-			return Status::Success;
+			return Status::Failed;
 		}
 
 		void Define(std::initializer_list<std::shared_ptr<BehaviorNode>> behaviors) {
@@ -25,16 +25,15 @@ export namespace pokebot::bot::behavior {
 			children = behaviors;
 		}
 
-		static std::shared_ptr<Sequence> Create(const char* const Name) {
-			auto node = std::make_shared<Sequence>(Name);
+		static std::shared_ptr<Selector> Create(const char* const Name) {
+			auto node = std::make_shared<Selector>(Name);
 			return node;
 		}
 
-		static std::shared_ptr<Sequence> Create(std::initializer_list<std::shared_ptr<BehaviorNode>> behaviors) {
-			auto result = Create("Sequence");
+		static std::shared_ptr<Selector> Create(std::initializer_list<std::shared_ptr<BehaviorNode>> behaviors) {
+			auto result = Create("Selector");
 			result->Define(behaviors);
 			return result;
 		}
 	};
-
 }

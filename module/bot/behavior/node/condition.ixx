@@ -1,6 +1,7 @@
-export module pokebot.bot.behavior: condition;
+export module pokebot.bot.behavior.node: condition;
 import :behavior_node;
-namespace pokebot::bot::behavior {
+
+export namespace pokebot::bot::behavior {
 	class Condition : public BehaviorNode {
 		std::shared_ptr<BehaviorNode> true_child{};
 		std::shared_ptr<BehaviorNode> false_child{};

@@ -3,6 +3,7 @@ module;
 
 export module pokebot.bot.squad.util:role;
 import pokebot.game.util;
+import pokebot.game.cs.team;
 
 namespace pokebot::bot::squad::util {
 	export enum class Role {

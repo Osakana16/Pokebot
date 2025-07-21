@@ -28,11 +28,25 @@ namespace pokebot::bot {
 				update_observable.NotifyObservers(bot.first);
 			}
 		}));
+		
+		plugin_observables->client_connection_observable.AddObserver(std::make_shared<common::NormalObserver<plugin::event::ClientInformation>>([&](const plugin::event::ClientInformation& client_information) {
+			if (bot_queue.empty()) 
+				return;
+
+			decltype(auto) candidate = bot_queue.front();
+			decltype(auto) player_name = STRING(client_information.entity->v.netname);
+			assert(std::get<0>(candidate) == player_name && "The bot queue is not in sync with the client connection.");
+			Insert(std::get<0>(candidate), std::get<1>(candidate), std::get<2>(candidate));
+			bot_queue.pop();
+		}));
 
 		plugin_observables->client_disconnection_observable.AddObserver(std::make_shared<common::NormalObserver<plugin::event::ClientInformation>>([&](const plugin::event::ClientInformation& client_information) {
 			Remove(STRING(client_information.entity->v.netname));
 		}));
 		
+		plugin_observables->on_add_bot_command_fired_observable.AddObserver(std::make_shared<common::NormalObserver<std::tuple<util::PlayerName, game::Team, game::Model>>>([&](const std::tuple<util::PlayerName, game::Team, game::Model>& sender) {
+			bot_queue.push(sender);
+		}));
 
 		engine_observables->new_round_observable.AddObserver(std::make_shared<common::NormalObserver<void>>(newround_callback));
 		engine_observables->show_menu_observable.AddObserver(std::make_shared<common::NormalObserver<std::tuple<const edict_t* const, engine::TextCache>>>([&](const std::tuple<const edict_t* const, engine::TextCache>& args) {
@@ -52,13 +66,6 @@ namespace pokebot::bot {
 				if (auto it = Menu_Cache.find(std::get<1>(args).c_str()); it != Menu_Cache.end()) {
 					Assign(player_name, it->second);
 				}
-			}
-		}));
-
-		engine_observables->status_icon_observable.AddObserver(std::make_shared<common::NormalObserver<std::tuple<const edict_t* const, game::StatusIcon>>>([&](const std::tuple<const edict_t* const, game::StatusIcon>& args) {
-			auto player_name = STRING(std::get<0>(args)->v.netname);
-			if (auto bot = Get(player_name); bot != nullptr) {
-				// clients.OnStatusIconShown(player_name, std::get<1>(args));
 			}
 		}));
 	}

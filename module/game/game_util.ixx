@@ -1,7 +1,7 @@
 export module pokebot.game.util;
-export import :team;
 export import :scenario;
 
+import pokebot.game.cs.team;
 import pokebot.util;
 
 export namespace pokebot::game {

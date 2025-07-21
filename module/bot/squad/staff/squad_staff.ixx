@@ -1,7 +1,6 @@
-module;
-
-import pokebot.game.util;
 export module pokebot.bot.squad.staff:squad_staff;
+import pokebot.game.util;
+import pokebot.game.cs.team;
 
 namespace pokebot::bot::squad::staff {
 	export class SquadStaff {

@@ -1,4 +1,4 @@
-export module pokebot.bot.behavior: root;
+export module pokebot.bot.behavior.node: root;
 import :behavior_node;
 
 export namespace pokebot::bot::behavior {

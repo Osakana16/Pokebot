@@ -1,4 +1,4 @@
-export module pokebot.game.util: team;
+export module pokebot.game.cs.team;
 export namespace pokebot::game {
 	enum class Team {
 		Spector,

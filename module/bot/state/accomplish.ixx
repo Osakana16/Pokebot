@@ -5,6 +5,7 @@ import pokebot.bot.behavior;
 import pokebot.game;
 import pokebot.game.weapon;
 import pokebot.game.util;
+import pokebot.game.cs.team;
 
 export namespace pokebot::bot::state {
 	template<pokebot::game::Team team>

@@ -33,13 +33,8 @@ export namespace pokebot::plugin {
 		static bool IsPlayable_() noexcept;
 		static void AddBot_(const std::string_view& Bot_Name, const game::Team, const game::Model) noexcept;
 	public:
-        void AddBot(const std::string_view& botName, pokebot::game::Team team, pokebot::game::Model model) override {
-            Pokebot::AddBot_(botName, team, model);
-        }
-
-		bool IsPlayable() override {
-            return Pokebot::IsPlayable_();
-        }
+		void AddBot(const std::string_view& name, pokebot::game::Team team, pokebot::game::Model model) override;
+		bool IsPlayable() override;
 
 		static void AddConsoleVariable(const char* name, const char* value, const char* info, bool bounded, float min, float max, console::Var varType, bool missingAction, const char* regval, console::ConVar* self);
 		static void RegisterConsoleVariables() noexcept;
