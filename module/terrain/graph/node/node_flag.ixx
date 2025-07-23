@@ -1,5 +1,5 @@
 #include "navmesh/navigation_map.h"
-export module pokebot.terrain.graph.node: node_flag;
+export module pokebot.terrain.graph.node.flag;
 
 export namespace pokebot::node {
 	enum class NavmeshFlag {

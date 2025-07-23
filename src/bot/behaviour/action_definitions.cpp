@@ -8,7 +8,7 @@ import pokebot.game.scenario;
 import pokebot.game.util;
 import pokebot.game.player;
 import pokebot.terrain.graph.graph_base;
-import pokebot.terrain.graph.node;
+import pokebot.terrain.graph.node.id;
 import pokebot.terrain.goal;
 import pokebot.util;
 

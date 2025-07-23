@@ -1,4 +1,4 @@
-export module pokebot.terrain.graph.node: node_id;
+export module pokebot.terrain.graph.node.id;
 
 export namespace pokebot::node {
 	using NodeID = std::int64_t;

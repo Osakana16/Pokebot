@@ -1,7 +1,7 @@
 export module pokebot.bot.squad.strategy:strategy_element;
 
 import pokebot.util;
-import pokebot.terrain.graph.node;
+import pokebot.terrain.graph.node.id;
 
 export namespace pokebot::bot::squad::strategy {
 	using LeaderName = util::PlayerName;

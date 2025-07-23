@@ -3,7 +3,8 @@ export module pokebot.terrain.graph.cznav_graph;
 import pokebot.terrain.graph.danger;
 import pokebot.terrain.graph.graph_base;
 import pokebot.terrain.graph.path;
-import pokebot.terrain.graph.node;
+import pokebot.terrain.graph.node.id;
+import pokebot.terrain.graph.node.flag;
 
 import pokebot.plugin.observables;
 import pokebot.engine;

@@ -15,7 +15,7 @@ import pokebot.game.cs_game_manager;
 import pokebot.util;
 import pokebot.game.client.declaration;
 import pokebot.engine;
-import pokebot.terrain.graph.node;
+import pokebot.terrain.graph.node.id;
 import pokebot.terrain.graph.graph_base;
 import pokebot.game.cs.team;
 import pokebot.game.cs.model;

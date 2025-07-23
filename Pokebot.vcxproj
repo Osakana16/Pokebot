@@ -238,7 +238,6 @@
     <ClCompile Include="module\terrain\graph\cznav_graph.ixx" />
     <ClCompile Include="module\terrain\graph\danger.ixx" />
     <ClCompile Include="module\terrain\graph\graph_base.ixx" />
-    <ClCompile Include="module\terrain\graph\node\node.ixx" />
     <ClCompile Include="module\terrain\graph\node\node_flag.ixx" />
     <ClCompile Include="module\terrain\graph\node\node_id.ixx" />
     <ClCompile Include="module\terrain\graph\node\point.ixx" />

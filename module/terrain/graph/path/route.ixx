@@ -1,7 +1,7 @@
 #include "navmesh/navigation_map.h"
 export module pokebot.terrain.graph.path: route;
 import :route_state;
-import pokebot.terrain.graph.node;
+import pokebot.terrain.graph.node.id;
 import std;
 
 export namespace pokebot::node {

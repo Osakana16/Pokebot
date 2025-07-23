@@ -1,6 +1,7 @@
+#if 0
 #include <fstream>
 import std;
-export module pokebot.terrain.graph.node: point;
+export module pokebot.terrain.graph.node.point;
 import :node_id;
 import :node_flag;
 
@@ -67,3 +68,4 @@ export namespace pokebot::node {
 		}
 	};
 }
+#endif

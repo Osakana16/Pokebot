@@ -7,7 +7,8 @@ import pokebot.terrain.util;
 
 import pokebot.game.util;
 import pokebot.terrain.graph.path;
-import pokebot.terrain.graph.node;
+import pokebot.terrain.graph.node.id;
+import pokebot.terrain.graph.node.flag;
 import pokebot.game.cs.team;
 
 export namespace pokebot::node {

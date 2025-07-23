@@ -5,6 +5,8 @@ import :difficult;
 import :personality_item;
 import :mood;
 import :state_machine;
+
+import pokebot.bot.path_ai;
 import pokebot.bot.event;
 
 import pokebot.common.event_handler;
@@ -136,6 +138,15 @@ export namespace pokebot::bot {
 		pokebot::node::Graph& graph;
 		pokebot::game::client::Client& client;
 		squad::Troops* troops{};
+		
+		class NavigationAI;
+		class ObjectiveAI;
+		class CombatAI;
+		class FollowAI;
+		class PathAI;
+		class BuyAI;
+
+		std::shared_ptr<bot::PathAI> path_ai;
 	public:
 		Bot(BotObservable<void>* new_round_observable,
 			BotObservable<void>* update_observable,

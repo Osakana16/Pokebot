@@ -1,5 +1,5 @@
 export module pokebot.terrain.graph.danger;
-import pokebot.terrain.graph.node;
+import pokebot.terrain.graph.node.id;
 
 export namespace pokebot::node {
 	struct Danger final {
