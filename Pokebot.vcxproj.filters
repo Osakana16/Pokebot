@@ -372,9 +372,6 @@
     <ClCompile Include="module\terrain\graph\node\node_flag.ixx">
       <Filter>module\terrain\graph\node</Filter>
     </ClCompile>
-    <ClCompile Include="module\terrain\graph\path\path.ixx">
-      <Filter>module\terrain\graph\path</Filter>
-    </ClCompile>
     <ClCompile Include="module\terrain\graph\path\route.ixx">
       <Filter>module\terrain\graph\path</Filter>
     </ClCompile>

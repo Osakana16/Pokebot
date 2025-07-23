@@ -1,4 +1,4 @@
-export module pokebot.terrain.graph.path: path_walk;
+export module pokebot.terrain.graph.path.path_walk;
 
 export namespace pokebot::node {
 	template<typename NodeIdentity>

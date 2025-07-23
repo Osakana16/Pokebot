@@ -6,7 +6,7 @@ import pokebot.terrain.goal;
 import pokebot.terrain.util;
 
 import pokebot.game.util;
-import pokebot.terrain.graph.path;
+import pokebot.terrain.graph.path.path_walk;
 import pokebot.terrain.graph.node.id;
 import pokebot.terrain.graph.node.flag;
 import pokebot.game.cs.team;

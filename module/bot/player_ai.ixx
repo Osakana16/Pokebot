@@ -18,7 +18,7 @@ import pokebot.game.client.declaration;
 
 import pokebot.game.util;
 import pokebot.terrain.graph.graph_base;
-import pokebot.terrain.graph.path;
+import pokebot.terrain.graph.path.path_walk;
 import pokebot.game.player;
 import pokebot.game.weapon;
 import pokebot.game.entity;
