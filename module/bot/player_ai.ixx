@@ -17,6 +17,8 @@ import pokebot.game.cs_game_manager;
 import pokebot.common.name_manager;
 import pokebot.game.client.declaration;
 
+import pokebot.engine.hlvector;
+
 import pokebot.game.util;
 import pokebot.terrain.graph.graph_base;
 import pokebot.terrain.graph.path.path_walk;
@@ -49,7 +51,7 @@ export namespace pokebot::bot {
 		// - Stuck Checker -
 		// 
 		util::Timer stuck_check_interval_timer{ util::GetRealGlobalTime };
-		Vector stuck_check_origin{};
+		engine::HLVector stuck_check_origin{};
 
 		// - Lock -
 		bool is_locked_by_bomb{};
@@ -61,7 +63,7 @@ export namespace pokebot::bot {
 
 		game::weapon::ID current_weapon = game::weapon::ID::Knife;
 
-		Vector movement_angle{};
+		engine::HLVector movement_angle{};
 		float move_speed{}, strafe_speed{};
 
 		std::uint8_t ComputeMsec() POKEBOT_NOEXCEPT;
@@ -172,14 +174,14 @@ export namespace pokebot::bot {
 
 		GoalQueue goal_queue{};
 		node::PathWalk<std::uint32_t> routes{};
-		std::optional<Vector> goal_vector{};
+		std::optional<engine::HLVector> goal_vector{};
 		pokebot::node::NodeID goal_node{};
 		pokebot::node::NodeID next_dest_node{};
 
 		bool IsHelpingMate() const POKEBOT_NOEXCEPT { return false; }
 
 		struct {
-			std::optional<Vector> view{}, movement{};
+			std::optional<engine::HLVector> view{}, movement{};
 			void Clear() POKEBOT_NOEXCEPT { view = movement = std::nullopt; }
 		} look_direction{}, ideal_direction{};
 
@@ -212,7 +214,7 @@ export namespace pokebot::bot {
 		// -- Getters --
 
 		const pokebot::util::PlayerName& Name() const POKEBOT_NOEXCEPT;
-		Vector Origin() const POKEBOT_NOEXCEPT;
+		const engine::HLVector& Origin() const noexcept;
 		float Health() const POKEBOT_NOEXCEPT;
 
 		bool IsLookingAt(const Vector& Dest, const float Range) const POKEBOT_NOEXCEPT;

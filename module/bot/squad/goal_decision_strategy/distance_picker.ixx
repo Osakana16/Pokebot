@@ -38,7 +38,7 @@ namespace pokebot::bot::squad::goal_decision_strategy {
 			for (auto it = goal.first; it != goal.second; it++) {
 				auto goal_origin = graph->GetOrigin(it->second);
 
-				float new_distance = pokebot::game::Distance(*reinterpret_cast<Vector*>(&*goal_origin), *reinterpret_cast<Vector*>(&*spawn_origin));
+				float new_distance = pokebot::game::Distance(*goal_origin, *spawn_origin);
 				if (new_distance < min_distance) {
 					min_distance = new_distance;
 					result = it->second;
@@ -76,8 +76,8 @@ namespace pokebot::bot::squad::goal_decision_strategy {
 			auto goal = graph->GetNodeByKind(goal_kind);
 			for (auto it = goal.first; it != goal.second; it++) {
 				auto goal_origin = graph->GetOrigin(it->second);
-
-				float new_distance = pokebot::game::Distance(*reinterpret_cast<Vector*>(&*goal_origin), *reinterpret_cast<Vector*>(&*spawn_origin));
+				
+				float new_distance = pokebot::game::Distance(*goal_origin, *spawn_origin);
 				if (new_distance > max_distance) {
 					max_distance = new_distance;
 					result = it->second;

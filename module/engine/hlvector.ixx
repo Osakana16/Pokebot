@@ -1,6 +1,4 @@
 export module pokebot.engine.hlvector;
-import std;
-
 export namespace pokebot::engine {
 	struct HLVector2D {
 		float x, y;
@@ -10,9 +8,7 @@ export namespace pokebot::engine {
 		float x, y, z;
 	};
 
-	using CalculatableHLVector = std::valarray<float>;
-	CalculatableHLVector ToCalculatable(HLVector2D vector);
-	CalculatableHLVector ToCalculatable(HLVector vector);
-	HLVector2D ToHLVector2D(const CalculatableHLVector& vector);
-	HLVector ToHLVector(const CalculatableHLVector& vector);
+	HLVector operator+(const HLVector& lhs, const HLVector& rhs) noexcept;
+	HLVector operator-(const HLVector& lhs, const HLVector& rhs) noexcept;
+	HLVector operator*(const HLVector& lhs, const float f) noexcept;
 }

@@ -382,7 +382,7 @@ namespace pokebot::bot::behavior {
 #if 0
 		auto id = Manager::Instance().GetGoalNode(self->Name().c_str());
 		auto origin = graph->GetOrigin(id);
-		auto source = self->Origin();
+		auto source = reinterpret_cast<const Vector&>(self->Origin());
 		if constexpr (b) {
 			return game::Distance(source, *reinterpret_cast<Vector*>(&origin)) > 200.0f;
 		} else {
@@ -662,9 +662,9 @@ namespace pokebot::bot::behavior {
 	}
 
 	void DefineAction() {
-		auto LookAt = [](Bot* const self, const game::CSGameBase* const game, const node::Graph* const graph, const Vector& Dest, const float Range) POKEBOT_NOEXCEPT->Status{
-			self->look_direction.view = Dest;
-			self->look_direction.movement = Dest;
+		auto LookAt = [](Bot* const self, const game::CSGameBase* const game, const node::Graph* const graph, const engine::HLVector& Dest, const float Range) POKEBOT_NOEXCEPT->Status{
+			*self->look_direction.view = Dest;
+			*self->look_direction.movement = Dest;
 			return Status::Success;
 		};
 
@@ -704,7 +704,7 @@ namespace pokebot::bot::behavior {
 
 		look_c4->Define([LookAt](Bot* const self, const game::CSGameBase* const game, const node::Graph* const graph) -> Status {
 			auto de_manager = std::static_pointer_cast<game::scenario::DemolitionManager>(game->GetDemolitionManager());
-			return LookAt(self, game, graph, *de_manager->GetC4Origin() - Vector{ 0, 0, 36 }, 1.0f);
+			return LookAt(self, game, graph, *de_manager->GetC4Origin() - engine::HLVector{ 0, 0, 36 }, 1.0f);
 		});
 
 		look_hostage->Define([](Bot* const self, const game::CSGameBase* const game, const node::Graph* const graph) -> Status {
@@ -769,7 +769,7 @@ namespace pokebot::bot::behavior {
 		set_goal_c4_node->Define([](Bot* const self, const game::CSGameBase* const game, const node::Graph* const graph) -> Status {
 			auto de_manager = std::static_pointer_cast<game::scenario::DemolitionManager>(game->GetDemolitionManager());
 			auto area = graph->GetNearest(*de_manager->GetC4Origin());
-			for (const auto& Another_Origin : { Vector{}, Vector{50.0f, 0.0f, 0.0f}, Vector{ -50.0f, 0.0f, 0.0f }, Vector{0.0f, 50.0f, 0.0f}, Vector{0.0f, -50.0f, 0.0f} }) {
+			for (const auto& Another_Origin : { engine::HLVector{}, engine::HLVector{50.0f, 0.0f, 0.0f}, engine::HLVector{ -50.0f, 0.0f, 0.0f }, engine::HLVector{0.0f, 50.0f, 0.0f}, engine::HLVector{0.0f, -50.0f, 0.0f} }) {
 				if ((area = graph->GetNearest(*de_manager->GetC4Origin() + Another_Origin)) != nullptr) {
 					break;
 				}
@@ -788,7 +788,7 @@ namespace pokebot::bot::behavior {
 			if (!self->goal_vector.has_value())
 				return Status::Failed;
 
-			if (game::Distance(self->Origin(), *self->goal_vector) >= 5.0f) {
+			if (game::Distance(reinterpret_cast<const Vector&>(self->Origin()), *self->goal_vector) >= 5.0f) {
 				self->look_direction.view = *self->goal_vector;
 				self->look_direction.movement = *self->goal_vector;
 				self->PressKey(game::player::ActionKey::Run);
@@ -835,9 +835,9 @@ namespace pokebot::bot::behavior {
 		});
 
 		set_goal_from_team_objective_within_range->Define([](Bot* const self, const game::CSGameBase* const game, const node::Graph* const graph) -> Status {
-			auto findCircleLine = [self, graph](const Vector& Origin, const float Distance) POKEBOT_NOEXCEPT->node::NodeID{
+			auto findCircleLine = [self, graph](const engine::HLVector& Origin, const float Distance) POKEBOT_NOEXCEPT->node::NodeID{
 				node::NodeID id = node::Invalid_NodeID;
-				for (const auto& Line : { Vector(Distance, .0f, .0f), Vector(-Distance, .0f, .0f), Vector(.0f, Distance, .0f), Vector(.0f, -Distance, .0f) }) {
+				for (const auto& Line : { engine::HLVector(Distance, .0f, .0f), engine::HLVector(-Distance, .0f, .0f), engine::HLVector(.0f, Distance, .0f), engine::HLVector(.0f, -Distance, .0f) }) {
 					// auto area = graph->GetNearest(*reinterpret_cast<Vector*>(&graph->GetOrigin(bot::Manager::Instance().GetGoalNode(self->Name().c_str()))) + Line, FLT_MAX);
 					auto area = graph->GetNearest({});
 					if (area == nullptr)
@@ -872,10 +872,10 @@ namespace pokebot::bot::behavior {
 		});
 
 		set_goal_from_c4_within_range->Define([](Bot* const self, const game::CSGameBase* const game, const node::Graph* const graph) -> Status {
-			auto findCircleLine = [&](const Vector& Origin, const float Distance) POKEBOT_NOEXCEPT->node::NodeID{
+			auto findCircleLine = [&](const engine::HLVector& Origin, const float Distance) POKEBOT_NOEXCEPT->node::NodeID{
 				node::NodeID id = node::Invalid_NodeID;
 				auto de_manager = std::static_pointer_cast<game::scenario::DemolitionManager>(game->GetDemolitionManager());
-				for (const auto& Line : { Vector(Distance, .0f, .0f), Vector(-Distance, .0f, .0f), Vector(.0f, Distance, .0f), Vector(.0f, -Distance, .0f) }) {
+				for (const auto& Line : { engine::HLVector(Distance, .0f, .0f), engine::HLVector(-Distance, .0f, .0f), engine::HLVector(.0f, Distance, .0f), engine::HLVector(.0f, -Distance, .0f) }) {
 					auto area = graph->GetNearest(*de_manager->GetC4Origin() + Line, FLT_MAX);
 					if (area == nullptr)
 						continue;
@@ -932,8 +932,7 @@ namespace pokebot::bot::behavior {
 				// Find path.
 				if (const auto Goal_Node_ID = self->goal_node; Goal_Node_ID != node::Invalid_NodeID) {
 					auto hlorigin = *graph->GetOrigin(Goal_Node_ID);
-					Vector origin = *reinterpret_cast<Vector*>(&hlorigin);
-					const_cast<node::Graph*>(graph)->FindPath(&self->routes, self->Origin(), origin, self->JoinedTeam());
+					const_cast<node::Graph*>(graph)->FindPath(&self->routes, self->Origin(), hlorigin, self->JoinedTeam());
 					if (self->routes.Empty() || self->routes.Destination() != self->goal_node) {
 						return Status::Failed;
 					} else {

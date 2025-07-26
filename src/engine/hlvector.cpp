@@ -13,19 +13,16 @@ namespace pokebot::engine {
 	// HLVector should be same data alignment.
 	static_assert(alignof(HLVector) == alignof(::Vector));
 
-	CalculatableHLVector ToCalculatable(HLVector2D vector) {
-		return CalculatableHLVector{ vector.x, vector.y };
+
+	HLVector operator+(const HLVector& lhs, const HLVector& rhs) noexcept {
+		return { lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z };
 	}
 
-	CalculatableHLVector ToCalculatable(HLVector vector) {
-		return CalculatableHLVector{ vector.x, vector.y, vector.z };
+	HLVector operator-(const HLVector& lhs, const HLVector& rhs) noexcept {
+		return { lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z };
 	}
 
-	HLVector2D ToHLVector2D(const CalculatableHLVector& vector) {
-		return HLVector2D{ vector[0], vector[1] };
-	}
-
-	HLVector ToHLVector(const CalculatableHLVector& vector) {
-		return HLVector{ vector[0], vector[1], vector[2] };
+	HLVector operator*(const HLVector& lhs, const float f) noexcept {
+		return { lhs.x * f, lhs.y * f, lhs.z * f };
 	}
 }

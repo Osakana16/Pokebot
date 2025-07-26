@@ -40,14 +40,14 @@ namespace pokebot::bot {
 
 		update_observable->AddObserver(Name(), std::make_shared<common::NormalObserver<void>>([this]() { 
 			(this->*(updateFuncs[static_cast<int>(start_action)]))();
-			frame_interval = gpGlobals->time - last_command_time;
+			frame_interval = util::GetRealGlobalTime() - last_command_time;
 
 			const std::uint8_t Msec_Value = ComputeMsec();
-			last_command_time = gpGlobals->time;
-
+			last_command_time = util::GetRealGlobalTime();
+			
 			client.flags |= pokebot::util::Third_Party_Bot_Flag;
 			g_engfuncs.pfnRunPlayerMove(client.Edict(),
-					movement_angle,
+					reinterpret_cast<Vector&>(movement_angle),
 					move_speed,
 					strafe_speed,
 					0.0f,
@@ -63,9 +63,12 @@ namespace pokebot::bot {
 	}
 
 	void Bot::TurnViewAngle() {
+		if (!look_direction.view.has_value())
+			return;
+
 		assert(client != nullptr);
-		Vector destination{};
-		game::OriginToAngle(&destination, *look_direction.view, Origin());
+		engine::HLVector destination{};
+		game::OriginToAngle(reinterpret_cast<Vector*>(&destination), reinterpret_cast<::Vector&>(*look_direction.view), reinterpret_cast<const Vector&>(Origin()));
 		if (destination.x > 180.0f) {
 			destination.x -= 360.0f;
 		}
@@ -119,7 +122,9 @@ namespace pokebot::bot {
 	}
 
 	void Bot::TurnMovementAngle() {
-		game::OriginToAngle(&movement_angle, *look_direction.movement, Origin());
+	if (!look_direction.view.has_value())
+			return;
+		game::OriginToAngle(reinterpret_cast<Vector*>(&movement_angle), reinterpret_cast<::Vector&>(*look_direction.view), reinterpret_cast<const Vector&>(Origin()));
 	}
 
 	void Bot::OnNewRound(squad::Troops* troops_) POKEBOT_NOEXCEPT {
@@ -243,7 +248,7 @@ namespace pokebot::bot {
 			press_key = game::player::ActionKey::None;
 		} else {
 			// While freezing.
-			stopping_time = gpGlobals->time + 5.0f;
+			stopping_time = util::GetRealGlobalTime() + 5.0f;
 		}
 	}
 
@@ -446,7 +451,7 @@ namespace pokebot::bot {
 		goal_vector = std::nullopt;
 		goal_node = node::Invalid_NodeID;
 
-		stopping_time = gpGlobals->time + 5.0f;
+		stopping_time = util::GetRealGlobalTime() + 5.0f;
 #endif
 		state = State::Accomplishment;
 	}
@@ -462,13 +467,13 @@ namespace pokebot::bot {
 
 	void Bot::CheckAround() {
 		auto next_origin = graph.GetOrigin(next_dest_node);
-		if (!look_direction.view.has_value()) {
-			look_direction.view = *reinterpret_cast<Vector*>(&next_origin);
+		if (!look_direction.view.has_value() && next_origin.has_value()) {
+			look_direction.view = *next_origin;
 			look_direction.view->z = Origin().z;
 		}
 
-		if (!look_direction.movement.has_value()) {
-			look_direction.movement = *reinterpret_cast<Vector*>(&next_origin);
+		if (!look_direction.movement.has_value() && next_origin.has_value()) {
+			look_direction.movement = *next_origin;
 			look_direction.movement->z = Origin().z;
 		}
 
@@ -507,7 +512,7 @@ namespace pokebot::bot {
 			return;
 
 		// Check if the player is blocking and avoid it.
-		for (edict_t* entity{}; (entity = game::FindEntityInSphere(entity, Origin(), 90.0f)) != nullptr;) {
+		for (edict_t* entity{}; (entity = game::FindEntityInSphere(entity, reinterpret_cast<const Vector&>(Origin()), 90.0f)) != nullptr;) {
 			if (std::string_view(STRING(entity->v.classname)) == "player") {
 				if (CanSeeEntity(entity)) {
 					PressKey(game::player::ActionKey::Move_Left);
@@ -517,25 +522,28 @@ namespace pokebot::bot {
 		}
 
 		// Check if the worldspawn is blocking:
-		const auto Foot = Origin();
-		const auto Knee = Origin() + Vector(.0f, .0f, 36.0f);
-		const auto Head = Foot + client.view_ofs;
+		const auto& Foot = Origin();
+		const auto& Knee = Foot + engine::HLVector(.0f, .0f, 36.0f);
+		const auto& Head = Foot + reinterpret_cast<engine::HLVector&>(client.view_ofs);
+
+		const auto& V_Right = util::GetRealRight();
+		const auto& V_Forward = util::GetRealForward();
 
 		auto CheckHead = [&] () -> bool {
 			util::Tracer tracer{};
-			const bool Is_Head_Forward_Center_Hit = tracer.MoveStart(Head).MoveDest(Head + gpGlobals->v_forward * 90.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
-			const bool Is_Head_Forward_Left_Hit = tracer.MoveDest(Head + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * -45.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
-			const bool Is_Head_Forward_Right_Hit = tracer.MoveDest(Head + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * 45.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
+			const bool Is_Head_Forward_Center_Hit = tracer.MoveStart(reinterpret_cast<const Vector&>(Head)).MoveDest(reinterpret_cast<const Vector&>(Head + V_Forward * 90.0f)).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
+			const bool Is_Head_Forward_Left_Hit = tracer.MoveDest(reinterpret_cast<const Vector&>(Head + V_Forward * 90.0f + V_Right * -45.0f)).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
+			const bool Is_Head_Forward_Right_Hit = tracer.MoveDest(reinterpret_cast<const Vector&>(Head + V_Forward * 90.0f + V_Right * 45.0f)).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
 			const bool Is_Head_Forward_Hit = Is_Head_Forward_Center_Hit || Is_Head_Forward_Left_Hit || Is_Head_Forward_Right_Hit;
 
 			if (Is_Head_Forward_Hit) {
 				// Check left
-				tracer.MoveDest(Head + gpGlobals->v_right * -90.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr);
+				tracer.MoveDest(reinterpret_cast<const Vector&>(Head + V_Right * -90.0f)).TraceLine(util::Tracer::Monsters::Ignore, nullptr);
 				if (tracer.IsHit()) {
 					PressKey(game::player::ActionKey::Move_Right);
 				} else {
 					// Check right
-					tracer.MoveDest(Head + gpGlobals->v_right * 90.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr);
+					tracer.MoveDest(reinterpret_cast<const Vector&>(Head + V_Right * 90.0f)).TraceLine(util::Tracer::Monsters::Ignore, nullptr);
 					if (tracer.IsHit()) {
 						PressKey(game::player::ActionKey::Move_Left);
 					}
@@ -548,16 +556,16 @@ namespace pokebot::bot {
 		auto CheckBody = [&] () {
 			util::Tracer tracer{};
 
-			const bool Is_Knee_Forward_Center_Hit = tracer.MoveStart(Foot).MoveDest(Knee + gpGlobals->v_forward * 90.0f).TraceHull(util::Tracer::Monsters::Ignore, util::Tracer::HullType::Head, nullptr).IsHit();
-			const bool Is_Foot_Forward_Center_Hit = tracer.MoveStart(Foot).MoveDest(Foot + gpGlobals->v_forward * 90.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
-			const bool Is_Foot_Forward_Left_Hit = tracer.MoveDest(Foot + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * -45.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
-			const bool Is_Foot_Forward_Right_Hit = tracer.MoveDest(Foot + gpGlobals->v_forward * 90.0f + gpGlobals->v_right * 45.0f).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
+			const bool Is_Knee_Forward_Center_Hit = tracer.MoveStart(reinterpret_cast<const Vector&>(Foot)).MoveDest(reinterpret_cast<const Vector&>(Knee + V_Forward * 90.0f)).TraceHull(util::Tracer::Monsters::Ignore, util::Tracer::HullType::Head, nullptr).IsHit();
+			const bool Is_Foot_Forward_Center_Hit = tracer.MoveStart(reinterpret_cast<const Vector&>(Foot)).MoveDest(reinterpret_cast<const Vector&>(Foot + V_Forward * 90.0f)).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
+			const bool Is_Foot_Forward_Left_Hit = tracer.MoveDest(reinterpret_cast<const Vector&>(Foot + V_Forward * 90.0f + V_Right * -45.0f)).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
+			const bool Is_Foot_Forward_Right_Hit = tracer.MoveDest(reinterpret_cast<const Vector&>(Foot + V_Forward * 90.0f + V_Right * 45.0f)).TraceLine(util::Tracer::Monsters::Ignore, nullptr).IsHit();
 			const bool Is_Foot_Forward_Hit = Is_Foot_Forward_Center_Hit || Is_Foot_Forward_Left_Hit || Is_Foot_Forward_Right_Hit;
 			if (Is_Knee_Forward_Center_Hit) {
 				PressKey(game::player::ActionKey::Jump);
 			} else {
 				// Check the forward navarea
-				for (auto& vector : { Origin(), Origin() + gpGlobals->v_forward * 90.0f }) {
+				for (auto& vector : { Foot, Foot + V_Forward * 90.0f }) {
 					// 
 					if (auto area = graph.GetNearest(vector); area != nullptr) {
 						// Jump if it is specified.
@@ -578,10 +586,10 @@ namespace pokebot::bot {
 		}
 
 		if (!client.IsStopping()) {
-			stopping_time = gpGlobals->time + 1.0f;
+			stopping_time = util::GetRealGlobalTime() + 1.0f;
 		}
 
-		if (stopping_time < gpGlobals->time) {
+		if (stopping_time < util::GetRealGlobalTime()) {
 			state = State::Stuck;
 		}
 	}
@@ -678,7 +686,7 @@ namespace pokebot::bot {
 
 	bool Bot::IsLookingAt(const Vector& Dest, const float Range) const POKEBOT_NOEXCEPT {
 		float vecout[3]{};
-		Vector angle = Dest - Origin();
+		Vector angle = Dest - reinterpret_cast<const Vector&>(Origin());
 		VEC_TO_ANGLES(angle, vecout);
 		if (vecout[0] > 180.0f)
 			vecout[0] -= 360.0f;
@@ -696,8 +704,8 @@ namespace pokebot::bot {
 
 	const pokebot::util::PlayerName& Bot::Name() const POKEBOT_NOEXCEPT { return name; }
 
-	Vector Bot::Origin() const POKEBOT_NOEXCEPT {
-		return client.origin;
+	const engine::HLVector& Bot::Origin() const noexcept {
+		return reinterpret_cast<const engine::HLVector&>(client.origin);
 	}
 
 	float Bot::Health() const POKEBOT_NOEXCEPT {
@@ -727,7 +735,7 @@ namespace pokebot::bot {
 	bool Bot::IsEnabledNightvision() const POKEBOT_NOEXCEPT { return false; }
 
 	uint8_t Bot::ComputeMsec() POKEBOT_NOEXCEPT {
-		return static_cast<std::uint8_t>(std::min({ static_cast<int>(std::roundf((gpGlobals->time - last_command_time) * 1000.0f)), 255 }));
+		return static_cast<std::uint8_t>(std::min({ static_cast<int>(std::roundf((util::GetRealGlobalTime() - last_command_time) * 1000.0f)), 255 }));
 	}
 
 	void Bot::OnRadioRecieved(const std::string_view& Sender_Name, const std::string_view& Radio_Sentence) POKEBOT_NOEXCEPT {

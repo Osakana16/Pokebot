@@ -1,6 +1,7 @@
 module;
 #include "goldsrc.hpp"
 export module pokebot.util: timer;
+import pokebot.engine.hlvector;
 
 export namespace pokebot::util {
 
@@ -24,5 +25,17 @@ export namespace pokebot::util {
 
 	util::Time GetRealGlobalTime() noexcept {
 		return gpGlobals->time;
+	}
+
+	engine::HLVector& GetRealRight() noexcept {
+		return reinterpret_cast<engine::HLVector&>(gpGlobals->v_right);
+	}
+
+	engine::HLVector& GetRealForward() noexcept {
+		return reinterpret_cast<engine::HLVector&>(gpGlobals->v_forward);
+	}
+
+	engine::HLVector& GetRealUp() noexcept {
+		return reinterpret_cast<engine::HLVector&>(gpGlobals->v_up);
 	}
 }

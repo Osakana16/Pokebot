@@ -247,7 +247,6 @@
     <ClCompile Include="module\terrain\graph\path\route_state.ixx" />
     <ClCompile Include="module\terrain\graph\waypoint_graph.ixx" />
     <ClCompile Include="module\terrain\terrain.ixx" />
-    <ClCompile Include="module\terrain\terrain_util.ixx" />
     <ClCompile Include="module\tracer.ixx" />
     <ClCompile Include="module\util\color.ixx" />
     <ClCompile Include="module\util\fixed_string.ixx" />

@@ -26,7 +26,7 @@ namespace pokebot::node {
 			auto addGoal = [this](const GoalKind kind, const char* class_name, Vector(*originFunction)(edict_t*)) {
 				edict_t* entity = nullptr;
 				while ((entity = game::FindEntityByClassname(entity, class_name)) != nullptr) {
-					Vector origin = originFunction(entity);
+					engine::HLVector origin = reinterpret_cast<engine::HLVector&>(originFunction(entity));
 					auto area = GetNearest(origin);
 					if (area != nullptr) {
 						goals.insert({ kind, area->m_id });

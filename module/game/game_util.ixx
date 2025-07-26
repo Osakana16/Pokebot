@@ -7,7 +7,9 @@ import pokebot.game.cs.team;
 import pokebot.util;
 
 export namespace pokebot::game {
-    float Distance(const Vector& S1, const Vector& S2) POKEBOT_NOEXCEPT { return (S1 - S2).Length(); }
+    template<typename T1, typename T2>
+    float Distance(const T1& V1, const T2& V2) noexcept { return std::sqrt(std::pow(V1.x - V2.x, 2) + std::pow(V1.y - V2.y, 2) + std::pow(V1.z - V2.z, 2)); }
+
     float Distance2D(const Vector& S1, const Vector& S2) POKEBOT_NOEXCEPT { return (S1 - S2).Length2D(); }
 
     edict_t* FindEntityInSphere(edict_t* pentStart, const Vector& vecCenter, float flRadius) {
@@ -63,7 +65,6 @@ export namespace pokebot::game {
     }
 
     void OriginToAngle(Vector* destination, const Vector& Target, const Vector& Origin) {
-        // float vecout[3]{};
         Vector angle = Target - Origin;
         VEC_TO_ANGLES(angle, *destination);
     }

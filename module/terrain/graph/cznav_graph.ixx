@@ -28,22 +28,22 @@ export namespace pokebot::node {
 		navmesh::NavigationMap navigation_map{};
 		std::vector<Route<navmesh::NavArea*>> routes{};
 
-		navmesh::NavArea* GetNearest(const Vector& Destination, const float Beneath_Limit = 120.0f) const POKEBOT_NOEXCEPT {
-			return navigation_map.GetNavArea(&Destination, Beneath_Limit);
+		navmesh::NavArea* GetNearest(const engine::HLVector& Destination, const float Beneath_Limit = 120.0f) const noexcept override {
+			return navigation_map.GetNavArea(reinterpret_cast<const ::Vector*>(&Destination), Beneath_Limit);
 		}
 
-		void FindPath(PathWalk<std::uint32_t>* const walk_routes, const Vector& Source, const Vector& Destination, const game::Team Joined_Team) override {
+		void FindPath(PathWalk<std::uint32_t>* const walk_routes, const engine::HLVector& Source, const engine::HLVector& Destination, const game::Team Joined_Team) override {
 			static CZBotGraph *self;
 			self = this;
 
 			const int Joined_Team_Index = static_cast<int>(Joined_Team) - 1;
 			assert(Joined_Team_Index >= 0 && Joined_Team_Index <= 1);
-			auto source = navigation_map.GetNavArea(&Source);
+			auto source = navigation_map.GetNavArea(reinterpret_cast<const ::Vector*>(&Source));
 			if (source == nullptr) {
 				return;
 			}
 
-			auto destination = navigation_map.GetNavArea(&Destination);
+			auto destination = navigation_map.GetNavArea(reinterpret_cast<const ::Vector*>(&Destination));
 			if (destination == nullptr) {
 				return;
 			}
@@ -166,7 +166,7 @@ export namespace pokebot::node {
 			return false;
 		}
 
-		bool IsOnNode(const Vector& Position, const NodeID Target_Node_ID) const POKEBOT_NOEXCEPT {
+		bool IsOnNode(const engine::HLVector& Position, const NodeID Target_Node_ID) const POKEBOT_NOEXCEPT {
 			auto area = GetNearest(Position);
 			return (area != nullptr && area->m_id == Target_Node_ID);
 		}
@@ -177,9 +177,9 @@ export namespace pokebot::node {
 		}
 
 
-		std::optional<HLVector> GetOrigin(const NodeID Node_ID) const POKEBOT_NOEXCEPT {
+		std::optional<engine::HLVector> GetOrigin(const NodeID Node_ID) const POKEBOT_NOEXCEPT {
 			if (auto area = navigation_map.GetNavAreaByID(Node_ID); area != nullptr) {
-				return HLVector{ .x = area->m_center.x, .y = area->m_center.y, .z = area->m_center.z };
+				return engine::HLVector{ .x = area->m_center.x, .y = area->m_center.y, .z = area->m_center.z };
 			} else {
 				return std::nullopt;
 			}
