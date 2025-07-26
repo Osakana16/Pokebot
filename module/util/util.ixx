@@ -3,4 +3,3 @@ export import :color;
 export import :flag;
 export import :timer;
 export import :fixed_string;
-export import :hlvector;

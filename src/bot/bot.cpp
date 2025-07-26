@@ -96,6 +96,7 @@ namespace pokebot::bot {
 			v_angle.y = AngleClamp(v_angle.y, destination.y);
 		}
 		v_angle.z = 0.0f;
+
 		client.v_angle = v_angle;
 		client.angles.x = client.v_angle.x / 3;
 		client.angles.y = client.v_angle.y;
