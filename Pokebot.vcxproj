@@ -255,6 +255,7 @@
     <ClCompile Include="module\util\timer.ixx" />
     <ClCompile Include="module\util\util.ixx" />
     <ClInclude Include="include\common.hpp" />
+    <ClInclude Include="include\goldsrc.hpp" />
     <ClInclude Include="include\stdafx.h" />
     <ClCompile Include="src\bot\behaviour\action.cpp" />
     <ClCompile Include="src\bot\behaviour\action_definitions.cpp" />
@@ -265,6 +266,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\client_manager.cpp" />
+    <ClCompile Include="src\command_register.cpp" />
     <ClCompile Include="src\console_variable.cpp" />
     <ClCompile Include="src\cznav_graph.cpp" />
     <ClCompile Include="src\dll.cpp" />

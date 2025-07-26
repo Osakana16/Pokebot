@@ -1,4 +1,7 @@
-﻿import std;
+﻿module;
+#include "goldsrc.hpp"
+module pokebot.game: game_manager;
+import std;
 import pokebot.game;
 import pokebot.game.scenario;
 import pokebot.game.util;

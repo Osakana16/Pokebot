@@ -1,4 +1,6 @@
-﻿export module pokebot.plugin.console.variable;
+﻿module;
+#include "goldsrc.hpp"
+export module pokebot.plugin.console.variable;
 
 import pokebot.util;
 

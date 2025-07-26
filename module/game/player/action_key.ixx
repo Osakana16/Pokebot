@@ -1,3 +1,6 @@
+module;
+#include "common.hpp"
+#include "goldsrc.hpp"
 export module pokebot.game.player: action_key;
 
 export namespace pokebot::game::player {

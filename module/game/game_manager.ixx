@@ -1,4 +1,6 @@
-﻿export module pokebot.game: game_manager;
+﻿module;
+#include "goldsrc.hpp"
+export module pokebot.game: game_manager;
 import pokebot.game.cs_game_manager;
 
 import pokebot.database;

@@ -1,3 +1,5 @@
+module;
+#include "goldsrc.hpp"
 export module pokebot.plugin.console.command: console_args;
 
 void get_console_args(std::vector<std::string_view>* args) {

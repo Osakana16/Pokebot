@@ -1,3 +1,5 @@
+module;
+#include "goldsrc.hpp"
 export module pokebot.plugin.event: client_information;
 import pokebot.common.event_handler;
 

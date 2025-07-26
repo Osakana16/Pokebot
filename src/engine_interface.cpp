@@ -1,5 +1,6 @@
+module;
+#include "goldsrc.hpp"
 module pokebot.engine;
-
 
 namespace pokebot::engine {
 	const edict_t* EngineInterface::engine_target_edict;

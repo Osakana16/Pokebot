@@ -1,6 +1,6 @@
 module;
+#include "goldsrc.hpp"
 #include <tuple>
-
 export module pokebot.plugin.observables;
 import pokebot.common.event_handler;
 import pokebot.plugin.event;

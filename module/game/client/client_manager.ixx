@@ -1,4 +1,5 @@
 module;
+#include "goldsrc.hpp"
 #include <tuple>
 
 export module pokebot.game.client.manager;

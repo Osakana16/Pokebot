@@ -1,3 +1,6 @@
+module;
+#include "goldsrc.hpp"
+#include <ranges>
 module pokebot.bot.manager;
 
 import pokebot.bot;

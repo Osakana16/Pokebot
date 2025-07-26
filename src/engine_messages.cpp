@@ -1,3 +1,5 @@
+module;
+#include "goldsrc.hpp"
 module pokebot.engine;
 
 namespace pokebot::engine {

@@ -1,3 +1,5 @@
+module;
+#include "goldsrc.hpp"
 export module pokebot.util: timer;
 
 export namespace pokebot::util {

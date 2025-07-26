@@ -1,3 +1,5 @@
+module;
+#include "goldsrc.hpp"
 export module pokebot.engine;
 
 import pokebot.game.player;

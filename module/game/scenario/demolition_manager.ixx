@@ -1,3 +1,5 @@
+module;
+#include "goldsrc.hpp"
 export module pokebot.game.scenario: demolition_manager;
 import pokebot.game.scenario.manager;
 

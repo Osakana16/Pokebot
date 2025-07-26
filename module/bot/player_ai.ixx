@@ -1,3 +1,5 @@
+module;
+#include "goldsrc.hpp"
 export module pokebot.bot: player_ai;
 import :goal_queue;
 import :message;

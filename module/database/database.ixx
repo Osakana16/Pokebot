@@ -1,6 +1,7 @@
 module;
-#include <functional>
-
+#include "goldsrc.hpp"
+#undef snprintf
+#include "nlohmann/json.hpp"
 export module pokebot.database;
 import std;
 import pokebot.util;

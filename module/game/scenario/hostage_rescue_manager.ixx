@@ -1,3 +1,6 @@
+module;
+#include "goldsrc.hpp"
+#include <ranges>
 export module pokebot.game.scenario: hostage_rescue_maanger;
 import pokebot.game.scenario.manager;
 import pokebot.util;

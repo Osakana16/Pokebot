@@ -1,3 +1,5 @@
+module;
+#include "goldsrc.hpp"
 module pokebot.plugin.console.command: pk_bot;
 import :console_args;
 

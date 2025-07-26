@@ -1,3 +1,6 @@
+module;
+#include "goldsrc.hpp"
+#include <forward_list>
 export module pokebot.common.event_handler;
 
 export namespace pokebot::common {

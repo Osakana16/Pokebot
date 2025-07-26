@@ -1,3 +1,5 @@
+module;
+#include "goldsrc.hpp"
 module pokebot.game.client.manager;
 import pokebot.game.client;
 

@@ -1,4 +1,6 @@
-﻿export module pokebot.game.client: client;
+﻿module;
+#include "goldsrc.hpp"
+export module pokebot.game.client: client;
 
 import pokebot.game;
 import pokebot.game.weapon;

@@ -1,5 +1,6 @@
 module;
 #include "common.hpp"
+#include "goldsrc.hpp"
 
 module pokebot: plugin;
 import pokebot.engine;

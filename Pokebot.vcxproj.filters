@@ -130,6 +130,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="include\goldsrc.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">
@@ -590,6 +593,9 @@
     </ClCompile>
     <ClCompile Include="module\bot\behavior\node\behavior_node_status.ixx">
       <Filter>module\bot\behavior\node</Filter>
+    </ClCompile>
+    <ClCompile Include="src\command_register.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

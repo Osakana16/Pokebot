@@ -1,3 +1,10 @@
+module;
+#define _WIN32 1
+#include <extdll.h>
+#include <dllapi.h>
+#include <meta_api.h>
+#include <entity_state.h>
+
 export module pokebot.game.client:client_key;
 
 export namespace pokebot::game::client {

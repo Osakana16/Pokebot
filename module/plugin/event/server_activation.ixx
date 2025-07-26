@@ -1,3 +1,5 @@
+module;
+#include "goldsrc.hpp"
 export module pokebot.plugin.event.server_activation;
 import pokebot.plugin.event;
 

@@ -1,5 +1,6 @@
+module;
+#include "goldsrc.hpp"
 export module pokebot.util.tracer;
-#include "vector.h"
 
 namespace pokebot::util {
 	export class Tracer final : public TraceResult {

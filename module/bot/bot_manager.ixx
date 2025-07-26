@@ -1,4 +1,5 @@
 module;
+#include "goldsrc.hpp"
 export module pokebot.bot.manager;
 import pokebot.common.name_manager;
 

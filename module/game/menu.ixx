@@ -1,3 +1,5 @@
+module;
+#include "goldsrc.hpp"
 export module pokebot.game: menu;
 import :game_manager;
 

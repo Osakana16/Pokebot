@@ -1,3 +1,5 @@
+module;
+#include "goldsrc.hpp"
 export module pokebot.game.util;
 export import :scenario;
 

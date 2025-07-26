@@ -1,3 +1,5 @@
+module;
+#include "goldsrc.hpp"
 export module pokebot.plugin.host;
 
 namespace pokebot::plugin {
