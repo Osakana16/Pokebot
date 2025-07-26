@@ -5,3 +5,6 @@
 #include <dllapi.h>
 #include <meta_api.h>
 #include <entity_state.h>
+
+#undef max
+#undef min

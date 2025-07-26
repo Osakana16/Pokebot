@@ -1,3 +1,6 @@
+module;
+#include <set>
+#include <unordered_set>
 export module pokebot.bot: goal_queue;
 import pokebot.terrain.graph.node.id;
 

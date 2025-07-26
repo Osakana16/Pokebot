@@ -1,5 +1,7 @@
 module;
 #include "navmesh/navigation_map.h"
+#include <set>
+#include <unordered_set>
 
 export module pokebot.terrain.graph.cznav_graph;
 import pokebot.terrain.graph.danger;

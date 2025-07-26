@@ -1,6 +1,8 @@
 module;
 #include "goldsrc.hpp"
 #include <ranges>
+#include <set>
+#include <unordered_set>
 module pokebot.bot.manager;
 
 import pokebot.bot;

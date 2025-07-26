@@ -1,3 +1,6 @@
+module;
+#include <set>
+#include <unordered_set>
 export module pokebot.bot.squad.staff:assigner;
 import pokebot.util;
 

@@ -1,5 +1,7 @@
 export module pokebot.bot.squad.staff:member_staff;
 import :squad_staff;
+#include <set>
+#include <unordered_set>
 
 import pokebot.util;
 import pokebot.bot.squad.strategy;

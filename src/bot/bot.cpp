@@ -13,8 +13,6 @@ import pokebot.util;
 import pokebot.util.tracer;
 import pokebot.plugin.console.variable;
 
-#undef max
-#undef min
 
 namespace pokebot::bot {
 	Bot::Bot(common::MapObservable<void, util::PlayerName, util::PlayerName::Hash>* new_round_observable,
