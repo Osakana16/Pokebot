@@ -217,7 +217,7 @@ export namespace pokebot::bot {
 		const engine::HLVector& Origin() const noexcept;
 		float Health() const POKEBOT_NOEXCEPT;
 
-		bool IsLookingAt(const Vector& Dest, const float Range) const POKEBOT_NOEXCEPT;
+		bool IsLookingAt(const engine::HLVector& Dest, const float Range) const POKEBOT_NOEXCEPT;
 
 		bool HasPrimaryWeapon() const POKEBOT_NOEXCEPT;
 		bool HasSecondaryWeapon() const POKEBOT_NOEXCEPT;

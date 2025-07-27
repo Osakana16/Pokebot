@@ -1,6 +1,7 @@
 module;
 #include "goldsrc.hpp"
 export module pokebot.util.tracer;
+import pokebot.engine.hlvector;
 
 namespace pokebot::util {
 	export class Tracer final : public TraceResult {
@@ -28,13 +29,15 @@ namespace pokebot::util {
 	public:
 		Tracer() = default;
 
-		Tracer& MoveStart(const Vector& Start) {
-			start_position = Start;
+		template<engine::VectorConvertible T>
+		Tracer& MoveStart(const T& Start) noexcept {
+			start_position = reinterpret_cast<const Vector&>(Start);
 			return *this;
 		}
-
-		Tracer& MoveDest(const Vector& Dest) {
-			dest_position = Dest;
+				
+		template<engine::VectorConvertible T>
+		Tracer& MoveDest(const T& Start) noexcept {
+			dest_position = reinterpret_cast<const Vector&>(Start);
 			return *this;
 		}
 
